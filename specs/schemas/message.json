@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "message.json",
+  "title": "Message",
+  "description": "A message in the conversation. Uses the industry-standard role + content format (D16: use the prevailing standard, not a custom protocol). Messages flow through the Gateway API, the Gateway-Engine contract, and the Provider API — the same shape everywhere.",
+  "type": "object",
+  "required": ["role", "content"],
+  "properties": {
+    "role": {
+      "type": "string",
+      "enum": ["system", "user", "assistant", "tool"],
+      "description": "The role of the message sender. system: Bootstrap prompt from configuration. user: Human or external client message. assistant: Previous model response (may include tool_calls). tool: Tool execution result returned to the model."
+    },
+    "content": {
+      "type": "string",
+      "description": "The textual content of the message. The system is content-agnostic — text, images, audio, video, files are all valid content types (D59)."
+    },
+    "tool_calls": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "arguments"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for this tool call"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the tool to call"
+          },
+          "arguments": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Arguments for the tool call, matching the tool's parameter schema"
+          }
+        }
+      },
+      "description": "Tool calls made by the assistant. Present only when role is 'assistant' and the model decided to call tools. The Engine executes these and returns results as tool-role messages."
+    },
+    "tool_call_id": {
+      "type": "string",
+      "description": "When role is 'tool', identifies which tool call this result corresponds to. Matches the id from a previous assistant tool_calls entry."
+    }
+  },
+  "examples": [
+    {
+      "role": "system",
+      "content": "Read /AGENT.md for your instructions."
+    },
+    {
+      "role": "user",
+      "content": "Help me plan my finances"
+    },
+    {
+      "role": "assistant",
+      "content": "I'll read your finance page...",
+      "tool_calls": [
+        {
+          "id": "tc_1",
+          "name": "read_file",
+          "arguments": { "path": "/finances/AGENT.md" }
+        }
+      ]
+    },
+    {
+      "role": "tool",
+      "content": "# Finances\nBudget goal: ...",
+      "tool_call_id": "tc_1"
+    }
+  ]
+}

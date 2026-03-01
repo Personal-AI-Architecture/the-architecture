@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "identity.json",
+  "title": "Actor Identity",
+  "description": "An identity record in the auth system. The product owns the data format — the auth provider stores data in this format, not its own. This ensures migration between providers, platform-level swaps, export with Your Memory, and owner inspection. The type field is extensible — new actor types are new values, not schema changes. Source: auth-spec.md (D22, D27, D60).",
+  "type": "object",
+  "required": ["id", "type", "display_name", "status", "created"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for this actor. Stable across sessions and exports. Used in X-Actor-ID headers, audit logs, and policy subjects."
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "owner",
+        "collaborator",
+        "system_agent",
+        "background_agent",
+        "external_agent",
+        "service",
+        "economic",
+        "federated"
+      ],
+      "description": "The type of actor. This enum is extensible — new actor types are new values, not schema changes. V1 implements only 'owner' and 'system_agent'. The identity schema supports all types from day one so that adding new actor types is a data change, not a schema change. Types: owner (the person whose system this is, exactly one per instance), collaborator (human invited by owner with scoped access, V2), system_agent (interactive AI agent acting on owner's behalf, V1), background_agent (scheduled tasks like digest and gardener, V1.1), external_agent (another AI connecting from outside, V3), service (integration like calendar sync or webhook, V3), economic (can spend money, V3), federated (another system instance, V4)."
+    },
+    "display_name": {
+      "type": "string",
+      "description": "Human-readable name for this actor. Shown in conversation history, audit logs, and permission management. E.g., 'Dave W', 'Daily Digest Agent', 'Calendar Sync Service'."
+    },
+    "status": {
+      "type": "string",
+      "enum": ["active", "suspended", "revoked"],
+      "description": "Current status of this identity. active: can authenticate and act. suspended: temporarily disabled, can be reactivated. revoked: permanently disabled, access revoked. Revoking an active actor terminates any in-progress operations immediately."
+    },
+    "created": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this identity was created (ISO 8601 timestamp). Included in exports for provenance."
+    }
+  },
+  "examples": [
+    {
+      "id": "owner_abc123",
+      "type": "owner",
+      "display_name": "Dave W",
+      "status": "active",
+      "created": "2026-01-15T10:30:00Z"
+    },
+    {
+      "id": "agent_system_001",
+      "type": "system_agent",
+      "display_name": "System Agent",
+      "status": "active",
+      "created": "2026-01-15T10:30:00Z"
+    },
+    {
+      "id": "agent_bg_digest",
+      "type": "background_agent",
+      "display_name": "Daily Digest Agent",
+      "status": "active",
+      "created": "2026-02-01T08:00:00Z"
+    },
+    {
+      "id": "collab_davej",
+      "type": "collaborator",
+      "display_name": "Dave J",
+      "status": "active",
+      "created": "2026-03-15T14:00:00Z"
+    }
+  ]
+}

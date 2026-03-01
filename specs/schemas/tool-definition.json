@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "tool-definition.json",
+  "title": "Tool Definition",
+  "description": "How a tool describes itself. Tools self-describe (D146) — definitions come from the tools themselves, not from manual configuration. MCP tools describe themselves via protocol, CLI tools provide manifest files, native functions are defined in code. Nobody writes tool definitions manually. Tool definitions are sent through the Provider API alongside system instructions and conversation history so the model knows what tools are available.",
+  "type": "object",
+  "required": ["name", "description", "parameters"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "The tool's name. Tools identify themselves by source and name — an MCP server exposes a namespace, a CLI tool has a command name, a native function has a function name. Two tools named 'search' from different sources are distinguishable without a central naming authority."
+    },
+    "description": {
+      "type": "string",
+      "description": "Human-readable description of what the tool does. Used by the model to decide when to call this tool. Provided by the tool itself, not written by the user."
+    },
+    "parameters": {
+      "type": "object",
+      "description": "JSON Schema describing the tool's input parameters. The model uses this to construct valid arguments when calling the tool. Follows standard JSON Schema conventions.",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "object",
+          "description": "Tool parameters are always an object"
+        },
+        "properties": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "description": "Individual parameter definition (JSON Schema)"
+          },
+          "description": "Map of parameter names to their JSON Schema definitions"
+        },
+        "required": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of required parameter names"
+        }
+      },
+      "additionalProperties": true
+    },
+    "source": {
+      "type": "string",
+      "description": "Where this tool comes from — the tool source that provided it. Preserves provenance so the model and the owner can see where each tool originated. E.g., 'mcp:filesystem', 'cli:git', 'native:approval-gate'."
+    },
+    "category": {
+      "type": "string",
+      "enum": ["always-send", "discoverable"],
+      "description": "Whether this tool is in the always-send set (sent with every prompt, D109) or the discoverable set (available on demand through the discovery tool). The owner controls this classification — it reflects how they work, not a product decision."
+    }
+  },
+  "examples": [
+    {
+      "name": "read_file",
+      "description": "Read a file from the user's library. Returns the file content as text.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Path to the file to read, relative to the library root"
+          }
+        },
+        "required": ["path"]
+      },
+      "source": "mcp:filesystem",
+      "category": "always-send"
+    },
+    {
+      "name": "write_file",
+      "description": "Write content to a file in the user's library. Creates the file if it does not exist, overwrites if it does.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Path to the file to write"
+          },
+          "content": {
+            "type": "string",
+            "description": "Content to write to the file"
+          }
+        },
+        "required": ["path", "content"]
+      },
+      "source": "mcp:filesystem",
+      "category": "always-send"
+    },
+    {
+      "name": "git_commit",
+      "description": "Commit staged changes to the git repository with a commit message.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "The commit message"
+          }
+        },
+        "required": ["message"]
+      },
+      "source": "cli:git",
+      "category": "always-send"
+    }
+  ]
+}

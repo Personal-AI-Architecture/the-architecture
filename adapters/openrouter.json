@@ -1,0 +1,8 @@
+{
+  "name": "openrouter",
+  "description": "OpenRouter — access multiple model providers through one API. OpenAI-compatible format.",
+  "base_url": "https://openrouter.ai/api/v1",
+  "api_key_ref": "OPENROUTER_API_KEY",
+  "format": "openai-compatible",
+  "default_model": "anthropic/claude-sonnet-4"
+}
