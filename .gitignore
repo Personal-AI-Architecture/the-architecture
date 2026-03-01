@@ -6,3 +6,9 @@ dist/
 !.env.example
 coverage/
 src/types/generated.ts
+
+# Phase 1A tests — kept local until implementation is verified
+test/unit/memory-tools.test.ts
+test/unit/tool-registry.test.ts
+test/integration/memory-git.test.ts
+test/conformance/arch-1.test.ts
