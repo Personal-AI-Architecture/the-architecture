@@ -12,3 +12,15 @@ test/unit/memory-tools.test.ts
 test/unit/tool-registry.test.ts
 test/integration/memory-git.test.ts
 test/conformance/arch-1.test.ts
+
+# Phase 1B tests — kept local until implementation is verified
+test/unit/auth-provider.test.ts
+test/unit/auth-middleware.test.ts
+test/unit/auth-boundary.test.ts
+test/integration/auth-standalone.test.ts
+test/integration/auth-bootstrap.test.ts
+
+# Phase 1C tests — kept local until implementation is verified
+test/unit/provider-adapter.test.ts
+test/unit/mock-provider.test.ts
+test/unit/provider-boundary.test.ts
