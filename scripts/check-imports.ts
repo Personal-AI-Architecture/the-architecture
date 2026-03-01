@@ -38,6 +38,11 @@ const RULES: Array<{
     description: "Auth must not import Gateway or Engine",
   },
   {
+    sourceDir: "gateway",
+    forbiddenDirs: ["engine", "auth"],
+    description: "Gateway must not import Engine or Auth internals",
+  },
+  {
     sourceDir: "memory",
     forbiddenDirs: ["engine", "gateway", "auth", "adapters"],
     description: "Memory must not import any other component",

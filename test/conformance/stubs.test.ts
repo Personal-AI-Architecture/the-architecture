@@ -75,10 +75,18 @@ describe("FS Tests (foundation user stories)", () => {
   );
 
   it.todo(
+    "FS-4: Swap provider — alias of SWAP-1 (tested there)",
+  );
+
+  it.todo(
+    "FS-5: Swap client — alias of ARCH-3 (tested there)",
+  );
+
+  it.todo(
+    "FS-7: Swap engine — alias of ARCH-2 (tested there)",
+  );
+
+  it.todo(
     "FS-8: Expand scope via tools — add filesystem tool, works without architecture changes",
   );
 });
-
-// FS-4 (Swap provider) = alias of SWAP-1
-// FS-5 (Swap client) = alias of ARCH-3
-// FS-7 (Swap engine) = alias of ARCH-2

@@ -17,12 +17,13 @@
   "scripts": {
     "generate:types": "tsx scripts/generate-types.ts",
     "build": "npm run generate:types && tsc",
+    "pretest": "npm run generate:types",
     "test": "vitest run --reporter=verbose",
     "test:conformance": "vitest run test/conformance/ --reporter=verbose",
     "lint": "eslint src/",
     "check:imports": "tsx scripts/check-imports.ts",
     "check:lockin": "tsx scripts/check-lockin.ts",
-    "baseline": "npm run generate:types && npm run build && vitest run --reporter=verbose && eslint src/ && npm run check:imports && npm run check:lockin"
+    "baseline": "npm run build && vitest run --reporter=verbose && eslint src/ && npm run check:imports && npm run check:lockin"
   },
   "dependencies": {
     "ajv": "^8.17.0",
