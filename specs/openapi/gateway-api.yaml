@@ -1,0 +1,521 @@
+openapi: '3.1.0'
+info:
+  title: Gateway API — External Client Contract
+  version: '1.0.0'
+  description: |
+    The Gateway API is how external clients interact with the Personal AI system.
+    Web apps, CLIs, mobile apps, bots, voice assistants, other AI agents — any client
+    that can send messages and receive streamed responses is valid.
+
+    The Gateway manages conversations and routes interactions to the Engine. It is
+    content-agnostic (text, images, audio, video, files — all just data) and
+    interface-agnostic (serves all clients identically).
+
+    Auth is cross-cutting — not the Gateway's concern. Requests must be authenticated
+    before reaching the Gateway, but how (middleware, proxy, sidecar) is an
+    implementation decision.
+
+    Conversations live in the system, not in any client. Start on web, continue on
+    mobile, pick up on CLI. The conversation persists regardless of which client connects.
+
+    Source: gateway-spec.md (D57, D58, D59, D61)
+
+servers:
+  - url: '{protocol}://{host}:{port}'
+    description: Gateway server (deployment-specific)
+    variables:
+      protocol:
+        default: https
+        enum:
+          - http
+          - https
+      host:
+        default: localhost
+      port:
+        default: '3000'
+
+security:
+  - bearerAuth: []
+  - apiKeyAuth: []
+
+paths:
+  /conversations/messages:
+    post:
+      operationId: sendMessage
+      summary: Send a message — creates a new conversation
+      description: |
+        Send a message without a conversation ID to start a new conversation.
+        The Gateway creates the conversation, routes the message to the Engine,
+        and streams the response back.
+
+        The Gateway assembles the messages array for the Engine:
+        1. System message from configuration
+        2. The current message from this request
+        3. Metadata passed through
+
+        Returns an SSE stream of the Engine's response, plus the new conversation ID
+        in the response headers.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendMessageRequest'
+            examples:
+              newConversation:
+                summary: Start a new conversation
+                value:
+                  content: 'Help me plan my finances'
+                  metadata:
+                    path: '/finances'
+      responses:
+        '200':
+          description: |
+            SSE stream of the Engine's response. The new conversation ID is returned
+            in the X-Conversation-ID response header.
+          headers:
+            X-Conversation-ID:
+              description: The ID of the newly created conversation
+              schema:
+                type: string
+          content:
+            text/event-stream:
+              schema:
+                $ref: '#/components/schemas/ClientSSEStream'
+        '400':
+          description: Invalid request — missing content, bad format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Authentication required or failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: Engine unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /conversations:
+    get:
+      operationId: listConversations
+      summary: List conversations
+      description: |
+        List conversations with optional filtering. Returns conversation summaries,
+        not full message history. Conversations are stored in Your Memory, managed
+        by the Gateway.
+      parameters:
+        - name: limit
+          in: query
+          description: Maximum number of conversations to return
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+        - name: offset
+          in: query
+          description: Number of conversations to skip (for pagination)
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+        - name: search
+          in: query
+          description: Search conversations by content or title
+          schema:
+            type: string
+        - name: from
+          in: query
+          description: Filter conversations created after this timestamp (ISO 8601)
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          description: Filter conversations created before this timestamp (ISO 8601)
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: List of conversation summaries
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConversationList'
+        '401':
+          description: Authentication required or failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /conversations/{id}:
+    get:
+      operationId: getConversation
+      summary: Get conversation history
+      description: |
+        Retrieve the full message history for a conversation. Any client can request
+        any conversation — conversations live in the system, not in clients.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The conversation ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Conversation with full message history
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Conversation'
+        '401':
+          description: Authentication required or failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Conversation not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /conversations/{id}/messages:
+    post:
+      operationId: sendMessageToConversation
+      summary: Send a message to an existing conversation
+      description: |
+        Resume an existing conversation by sending a new message. The Gateway retrieves
+        the conversation history from Your Memory, assembles the full messages array
+        (system prompt + history + current message), and routes to the Engine.
+
+        This is what enables seamless client switching — start on web, continue on
+        mobile, pick up on CLI. The conversation persists.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The conversation ID to resume
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SendMessageRequest'
+            examples:
+              resumeConversation:
+                summary: Continue a budgeting conversation
+                value:
+                  content: 'Focus on budgeting'
+                  metadata:
+                    path: '/finances'
+      responses:
+        '200':
+          description: |
+            SSE stream of the Engine's response. The conversation ID is confirmed
+            in the X-Conversation-ID response header.
+          headers:
+            X-Conversation-ID:
+              description: The conversation ID (confirms the conversation being resumed)
+              schema:
+                type: string
+          content:
+            text/event-stream:
+              schema:
+                $ref: '#/components/schemas/ClientSSEStream'
+        '400':
+          description: Invalid request — missing content, bad format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Authentication required or failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Conversation not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: Engine unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      description: |
+        Bearer token authentication. Token obtained through the auth system.
+        Auth is cross-cutting (D60) — independent of the Gateway.
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: |
+        API key authentication for programmatic access. API keys are generated
+        by the owner. V1 API keys are full-access (owner-level).
+
+  schemas:
+    SendMessageRequest:
+      type: object
+      required:
+        - content
+      properties:
+        content:
+          type: string
+          description: |
+            The message content. The Gateway is content-agnostic — text, images,
+            audio, video, files are all just data passed through without interpretation.
+        metadata:
+          type: object
+          additionalProperties: true
+          description: |
+            Client-provided metadata. The Gateway passes this through — it does not
+            add, modify, or interpret content. Making the Gateway context-aware would
+            make it product-specific.
+
+            Common metadata fields include path (current scope), folder, or any other
+            context the client wants the model to see.
+          examples:
+            - path: '/finances'
+              folder: 'life/finances'
+
+    ConversationList:
+      type: object
+      required:
+        - conversations
+        - total
+      properties:
+        conversations:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConversationSummary'
+        total:
+          type: integer
+          description: Total number of conversations matching the query
+        limit:
+          type: integer
+          description: The limit that was applied
+        offset:
+          type: integer
+          description: The offset that was applied
+
+    ConversationSummary:
+      type: object
+      required:
+        - id
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          description: Unique conversation identifier
+        title:
+          type: string
+          description: Conversation title (derived from first message or set by user)
+        created_at:
+          type: string
+          format: date-time
+          description: When the conversation was created
+        updated_at:
+          type: string
+          format: date-time
+          description: When the last message was added
+        message_count:
+          type: integer
+          description: Number of messages in the conversation
+
+    Conversation:
+      type: object
+      required:
+        - id
+        - messages
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          description: Unique conversation identifier
+        title:
+          type: string
+          description: Conversation title
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConversationMessage'
+          description: Full message history for this conversation
+        created_at:
+          type: string
+          format: date-time
+          description: When the conversation was created
+        updated_at:
+          type: string
+          format: date-time
+          description: When the last message was added
+
+    ConversationMessage:
+      type: object
+      required:
+        - id
+        - role
+        - content
+        - created_at
+      properties:
+        id:
+          type: string
+          description: Unique message identifier within the conversation
+        role:
+          type: string
+          enum:
+            - user
+            - assistant
+          description: |
+            Who sent this message:
+            - user: The human or external client
+            - assistant: The AI model's response
+        content:
+          type: string
+          description: The message content
+        created_at:
+          type: string
+          format: date-time
+          description: When this message was created
+        metadata:
+          type: object
+          additionalProperties: true
+          description: Client-provided metadata that was sent with this message
+
+    # --- Client SSE Stream ---
+
+    ClientSSEStream:
+      description: |
+        Server-Sent Events stream delivered to the client. The Gateway forwards
+        the Engine's stream to the calling client, adding conversation context.
+
+        Events mirror the Engine's SSE events (see gateway-engine.yaml) with the
+        same event types: text-delta, tool-call, tool-result, done, error.
+      oneOf:
+        - $ref: '#/components/schemas/TextDeltaEvent'
+        - $ref: '#/components/schemas/ToolCallEvent'
+        - $ref: '#/components/schemas/ToolResultEvent'
+        - $ref: '#/components/schemas/DoneEvent'
+        - $ref: '#/components/schemas/ErrorEvent'
+
+    TextDeltaEvent:
+      type: object
+      description: Model generates text — streamed incrementally
+      required:
+        - content
+      properties:
+        content:
+          type: string
+          description: A chunk of generated text
+
+    ToolCallEvent:
+      type: object
+      description: |
+        Model initiates a tool call. Clients use these for status display
+        ("Reading file...", "Searching library...") and approval gates.
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: string
+          description: Tool call identifier
+        name:
+          type: string
+          description: Name of the tool being called
+        arguments:
+          type: object
+          additionalProperties: true
+          description: Arguments passed to the tool
+
+    ToolResultEvent:
+      type: object
+      description: Tool execution completes
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          description: Matches the corresponding tool-call id
+        output:
+          type: string
+          description: Successful tool output
+        error:
+          type: string
+          description: Tool execution error
+
+    DoneEvent:
+      type: object
+      description: |
+        Response complete. The Gateway has stored the message and response in the
+        conversation. The message_id confirms the stored record.
+      required:
+        - finish_reason
+      properties:
+        finish_reason:
+          type: string
+          description: Why the response ended
+        message_id:
+          type: string
+          description: ID of the stored assistant message in the conversation
+        usage:
+          type: object
+          properties:
+            prompt_tokens:
+              type: integer
+            completion_tokens:
+              type: integer
+
+    ErrorEvent:
+      type: object
+      description: |
+        Failure during processing. The Gateway translates Engine errors into
+        client-appropriate messages.
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          description: Error category
+        message:
+          type: string
+          description: Human-readable error description
+
+    Error:
+      type: object
+      description: Pre-stream or non-streaming error response
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          description: Machine-readable error code
+        message:
+          type: string
+          description: Human-readable error description

@@ -81,6 +81,15 @@ Adapter configs live in `adapters/`. Two are included:
 
 Both use the OpenAI-compatible format, so any compatible endpoint works.
 
+## Documentation
+
+Full architecture documentation lives in [`docs/`](docs/):
+
+- **[AGENT.md](AGENT.md)** — AI-friendly entry point: architecture overview, lock-in checks, conformance criteria
+- **[docs/foundation-spec.md](docs/foundation-spec.md)** — Core architecture: components, contracts, principles, responsibility matrix
+- **[docs/guides/implementers-reference.md](docs/guides/implementers-reference.md)** — Distilled implementation contract (what to build, no rationale)
+- **[docs/guides/conformance/](docs/guides/conformance/)** — Architectural invariant test suite
+
 ## Architecture
 
 ```

@@ -1,0 +1,354 @@
+openapi: '3.1.0'
+info:
+  title: Gateway ↔ Engine Internal Contract
+  version: '1.0.0'
+  description: |
+    Internal contract between Gateway and Engine. Not a third connector — an internal
+    interface between two components in the same deployment. POST /engine/chat, SSE stream
+    response, auth middleware on path.
+
+    This contract fills the one gap identified by the protocol evaluation (D136). The
+    Gateway API and Provider API are the swappability boundaries — external things plug
+    into them. This is an internal contract between two components we control, inside the
+    same deployment.
+
+    Source: gateway-engine-contract.md (D137)
+paths:
+  /engine/chat:
+    post:
+      operationId: engineChat
+      summary: Send messages to the Engine for processing
+      description: |
+        Gateway POSTs a request containing the messages array (system prompt + conversation
+        history + current message) and metadata. Engine returns an SSE stream of events.
+
+        The Gateway assembles the messages array from three sources:
+        1. System message — from configuration (the bootstrap prompt)
+        2. Conversation history — from the Gateway's conversation store
+        3. Current message — from the client request
+
+        Auth middleware validates the request before it reaches the Engine. The Engine
+        receives pre-authenticated requests — it never validates identity.
+
+        The Engine is pre-configured with tool definitions and provider configuration at
+        startup. These are not per-request data.
+      parameters:
+        - name: X-Actor-ID
+          in: header
+          required: true
+          description: |
+            Identity of the authenticated actor, set by auth middleware. The Engine
+            receives pre-authenticated requests — it never validates identity itself.
+          schema:
+            type: string
+            examples:
+              - 'owner_abc123'
+        - name: X-Actor-Permissions
+          in: header
+          required: true
+          description: |
+            Permissions of the authenticated actor, set by auth middleware. The Engine
+            can read these headers if tool permissions depend on the actor, but it does
+            not enforce authentication.
+          schema:
+            type: string
+            examples:
+              - 'memory:*,tools:*'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EngineRequest'
+            examples:
+              budgetConversation:
+                summary: A budgeting conversation with history
+                value:
+                  messages:
+                    - role: system
+                      content: 'Read /AGENT.md for your instructions.'
+                    - role: user
+                      content: 'Help me plan my finances'
+                    - role: assistant
+                      content: "I'll read your finance page..."
+                    - role: user
+                      content: 'Focus on budgeting'
+                  metadata:
+                    conversation_id: 'conv_abc123'
+                    correlation_id: 'req_xyz789'
+                    trigger: message
+                    client_context:
+                      path: '/finances'
+      responses:
+        '200':
+          description: |
+            SSE stream of engine events. Always streaming — no non-streaming mode.
+            Callers who want the complete response collect the stream.
+
+            The Engine may call the model multiple times in one stream (model calls tools,
+            Engine executes them, sends results back to model, model continues). This
+            multi-turn loop is internal to the Engine — the stream captures everything.
+          content:
+            text/event-stream:
+              schema:
+                $ref: '#/components/schemas/SSEStream'
+        '400':
+          description: |
+            Invalid request — missing messages, bad format. Pre-stream error: the request
+            never started processing. No SSE stream opened.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                missingMessages:
+                  summary: Missing required messages array
+                  value:
+                    code: 'invalid_request'
+                    message: 'Request body must include a messages array'
+        '401':
+          description: |
+            Auth middleware rejected the request. Pre-stream error: no SSE stream opened.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                unauthorized:
+                  summary: Invalid or missing authentication
+                  value:
+                    code: 'unauthorized'
+                    message: 'Auth middleware rejected the request — invalid token'
+        '503':
+          description: |
+            Engine unavailable. Pre-stream error: no SSE stream opened.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                unavailable:
+                  summary: Engine is not ready
+                  value:
+                    code: 'engine_unavailable'
+                    message: 'Engine is not accepting requests'
+
+components:
+  schemas:
+    EngineRequest:
+      type: object
+      required:
+        - messages
+      properties:
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/Message'
+          description: |
+            System prompt + conversation history + current message. Follows the
+            industry-standard role + content format (D16: use the prevailing standard,
+            not a custom protocol).
+          minItems: 1
+        metadata:
+          $ref: '#/components/schemas/RequestMetadata'
+
+    Message:
+      type: object
+      required:
+        - role
+        - content
+      properties:
+        role:
+          type: string
+          enum:
+            - system
+            - user
+            - assistant
+            - tool
+          description: |
+            The role of the message sender:
+            - system: Bootstrap prompt from configuration
+            - user: Human or external client message
+            - assistant: Previous model response
+            - tool: Tool execution result returned to the model
+        content:
+          type: string
+          description: The content of the message — any content type passed as text
+
+    RequestMetadata:
+      type: object
+      required:
+        - correlation_id
+      properties:
+        conversation_id:
+          type: string
+          description: |
+            Which conversation this belongs to. The Engine does not need this — the
+            Gateway tracks conversations. Included as pass-through context.
+        correlation_id:
+          type: string
+          description: |
+            Request trace ID, generated by Gateway. Flows through Engine, tool calls,
+            and logs. Enables end-to-end tracing.
+        trigger:
+          type: string
+          enum:
+            - message
+            - webhook
+            - schedule
+          default: message
+          description: |
+            How this request was triggered. The Engine gets the same messages array
+            regardless of trigger source — it genuinely does not know the difference.
+            - message: Client sent a message through the Gateway API
+            - webhook: External service triggered via Gateway API
+            - schedule: Cron tool triggered via Gateway
+        client_context:
+          type: object
+          additionalProperties: true
+          description: |
+            Client-provided context (path, folder, etc.). The Gateway passes this
+            through — it does not add or interpret it. The Engine can use it or ignore it.
+
+    # --- SSE Event Types ---
+
+    SSEStream:
+      description: |
+        Server-Sent Events stream. The response is always streaming — no non-streaming mode.
+
+        Events appear in the stream as SSE with `event:` and `data:` fields:
+          event: text-delta
+          data: {"content":"Hello"}
+
+        Tool calls are visible in the stream for status display, approval gates,
+        and observability.
+      oneOf:
+        - $ref: '#/components/schemas/TextDeltaEvent'
+        - $ref: '#/components/schemas/ToolCallEvent'
+        - $ref: '#/components/schemas/ToolResultEvent'
+        - $ref: '#/components/schemas/DoneEvent'
+        - $ref: '#/components/schemas/ErrorEvent'
+      discriminator:
+        propertyName: _event_type
+        mapping:
+          text-delta: '#/components/schemas/TextDeltaEvent'
+          tool-call: '#/components/schemas/ToolCallEvent'
+          tool-result: '#/components/schemas/ToolResultEvent'
+          done: '#/components/schemas/DoneEvent'
+          error: '#/components/schemas/ErrorEvent'
+
+    TextDeltaEvent:
+      type: object
+      description: Model generates text — streamed incrementally as it is produced
+      required:
+        - content
+      properties:
+        content:
+          type: string
+          description: A chunk of generated text
+
+    ToolCallEvent:
+      type: object
+      description: |
+        Model initiates a tool call. Visible in the stream so clients can display
+        status ("Reading file...", "Searching library...") and approval gates can
+        intercept write operations.
+      required:
+        - id
+        - name
+        - arguments
+      properties:
+        id:
+          type: string
+          description: Unique identifier for this tool call within the stream
+        name:
+          type: string
+          description: Name of the tool being called
+        arguments:
+          type: object
+          additionalProperties: true
+          description: Arguments passed to the tool
+
+    ToolResultEvent:
+      type: object
+      description: |
+        Tool execution completes. Contains either output (success) or error (failure).
+        The Engine passes results back to the model for the next iteration of the
+        agent loop.
+      required:
+        - id
+      properties:
+        id:
+          type: string
+          description: Matches the id from the corresponding tool-call event
+        output:
+          type: string
+          description: Successful tool output
+        error:
+          type: string
+          description: Tool execution error message
+
+    DoneEvent:
+      type: object
+      description: |
+        Agent loop complete. After this event, the stream closes. The Gateway stores
+        the response in the conversation and returns it to the client.
+      required:
+        - finish_reason
+      properties:
+        finish_reason:
+          type: string
+          description: Why the agent loop ended (e.g., "stop", "max_tokens")
+        usage:
+          $ref: '#/components/schemas/Usage'
+
+    Usage:
+      type: object
+      description: Token usage for this interaction
+      properties:
+        prompt_tokens:
+          type: integer
+          description: Number of tokens in the prompt sent to the model
+        completion_tokens:
+          type: integer
+          description: Number of tokens in the model's completion
+
+    ErrorEvent:
+      type: object
+      description: |
+        Unrecoverable failure mid-stream. After an error event, the stream closes.
+        The Gateway decides how to communicate the failure to the client.
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          enum:
+            - provider_error
+            - tool_error
+            - context_overflow
+          description: |
+            Error category:
+            - provider_error: Model unreachable or timeout
+            - tool_error: Tool failed and model cannot recover
+            - context_overflow: Messages exceed model context window
+        message:
+          type: string
+          description: Human-readable error description
+
+    Error:
+      type: object
+      description: |
+        Pre-stream error response. Consistent format across HTTP errors and SSE
+        error events (convention, not protocol).
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          description: Machine-readable error code
+        message:
+          type: string
+          description: Human-readable error description
