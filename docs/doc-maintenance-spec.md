@@ -25,7 +25,11 @@ Now that the repo is public and AI agents are first-class contributors, document
 
 The doc registry is the canonical map of which documents cover which parts of the system. It lives at `docs/doc-registry.json` and is machine-readable so AI agents and CI scripts can consume it.
 
-Every documentation file in the repo must have an entry in the registry. If a file isn't in the registry, it's invisible to the maintenance system.
+Every markdown file in the following locations must have an entry in the registry:
+- `docs/**/*.md` — all spec, guide, conformance, and research docs
+- `*.md` at the repo root — README.md, AGENT.md
+
+Files outside these locations (e.g., `tasks/*.md`, `node_modules/`) are excluded. If a file isn't in the registry, it's invisible to the maintenance system.
 
 ### Registry Structure
 
@@ -46,9 +50,9 @@ Every documentation file in the repo must have an entry in the registry. If a fi
 | Field | Type | Description |
 |-------|------|-------------|
 | `path` | string | Path to the doc file, relative to repo root |
-| `covers` | string[] | Code paths, spec paths, or concept tags this doc is responsible for. Glob patterns allowed. |
+| `covers` | string[] | File or directory paths this doc is responsible for, relative to repo root. Glob patterns allowed. Every entry must resolve to an existing file or directory. |
 | `tier` | 1 \| 2 \| 3 | Doc priority tier (see below) |
-| `update_trigger` | `"code"` \| `"spec"` \| `"manual"` | What kind of change triggers an update |
+| `update_trigger` | `"code"` \| `"spec"` \| `"manual"` | What kind of change triggers an update. `"code"`: changes to files in `covers` trigger staleness. `"spec"`: changes to docs in `depends_on` trigger staleness. `"manual"`: doc is never flagged stale by CI — maintained by humans only (used for research docs, philosophical analysis, and other documents where automated freshness detection is not meaningful). |
 | `depends_on` | string[] | Other docs this one references or derives from — changes cascade |
 
 ### Tiers
@@ -84,7 +88,8 @@ A documentation update is required when a change touches code or specs that a do
 A document is stale when:
 1. Code paths it covers were modified in a PR, but the document was not
 2. A document it `depends_on` was modified, but it was not
-3. Its content contradicts the current code behavior (detected by AI review)
+
+These two conditions are deterministic and enforced by CI. Additionally, AI agents may detect that a document's content contradicts current code behavior even when the above conditions are not triggered. This is a best-effort advisory — the AI agent should flag the contradiction as a PR comment for human review, but it is not a CI gate criterion.
 
 ---
 
@@ -146,11 +151,16 @@ Added to `package.json` scripts:
 "check:docs": "tsx scripts/check-docs.ts"
 ```
 
-Added to the `baseline` pipeline:
+Added to the `baseline` pipeline. The `check:docs` script uses exit code 1 for Tier 3 warnings (non-blocking) and exit code 2 for Tier 1/2 failures (blocking). The baseline pipeline treats only exit code 2 as a failure:
 
 ```
-"baseline": "npm run build && vitest run --reporter=verbose && eslint src/ && npm run check:imports && npm run check:lockin && npm run check:docs"
+"check:docs": "tsx scripts/check-docs.ts",
+"check:docs:strict": "tsx scripts/check-docs.ts --strict",
+"baseline": "npm run build && vitest run --reporter=verbose && eslint src/ && npm run check:imports && npm run check:lockin && npm run check:docs:strict"
 ```
+
+- `check:docs` — exits 0 if no Tier 1/2 staleness (Tier 3 warnings print but don't fail)
+- `check:docs:strict` — exits non-zero on any staleness including Tier 3 (useful for full audits)
 
 ### Output
 
@@ -176,19 +186,19 @@ check:docs — documentation freshness check
 
 ### Exit codes
 
-| Code | Meaning |
-|------|---------|
-| 0 | All docs fresh |
-| 1 | Tier 3 docs stale (warning — AI agent should update, but non-blocking) |
-| 2 | Tier 1 or 2 docs stale (blocking — PR cannot merge) |
+| Code | Meaning | Blocks merge? |
+|------|---------|---------------|
+| 0 | All docs fresh | No |
+| 1 | Tier 3 docs stale (warning — AI agent should update) | No — `check:docs` treats as success, `check:docs:strict` treats as failure |
+| 2 | Tier 1 or 2 docs stale | Yes — always blocks |
+
+The `check:docs` script (default mode) remaps exit code 1 to 0 so Tier 3 warnings don't break CI. The `--strict` flag preserves exit code 1 for full audits.
 
 ---
 
 ## CI Integration (GitHub Actions)
 
-### Doc freshness gate
-
-Runs on every PR. Blocks merge if Tier 1 or 2 docs are stale.
+A single workflow handles both detection and AI auto-update as sequential jobs. This avoids the GitHub Actions limitation where two separate workflows triggered by the same event have no guaranteed ordering.
 
 ```yaml
 # .github/workflows/docs.yml
@@ -197,60 +207,53 @@ on:
   pull_request:
     branches: [main]
 
-jobs:
-  check-docs:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # full history for diff
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - run: npm ci
-      - run: npm run check:docs
-```
-
-### AI doc update (on every PR)
-
-Claude Code Action runs in automation mode on every PR. It reads the doc registry, identifies stale docs from the PR diff, and commits updates directly to the PR branch.
-
-```yaml
-# .github/workflows/doc-update.yml
-name: AI Doc Update
-on:
-  pull_request:
-    types: [opened, synchronize]
-    branches: [main]
-
 permissions:
   contents: write
   pull-requests: write
 
 jobs:
-  update-docs:
+  # Job 1: Detect stale docs
+  check-docs:
+    runs-on: ubuntu-latest
+    outputs:
+      exit_code: ${{ steps.check.outputs.exit_code }}
+      check_output: ${{ steps.check.outputs.check_output }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.ref }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - name: Check doc freshness
+        id: check
+        run: |
+          set +e
+          output=$(npm run check:docs:strict 2>&1)
+          code=$?
+          echo "exit_code=$code" >> "$GITHUB_OUTPUT"
+          echo "check_output<<CHECKEOF" >> "$GITHUB_OUTPUT"
+          echo "$output" >> "$GITHUB_OUTPUT"
+          echo "CHECKEOF" >> "$GITHUB_OUTPUT"
+          exit 0
+
+  # Job 2: AI auto-update (only if stale docs detected)
+  ai-update:
+    needs: check-docs
+    if: needs.check-docs.outputs.exit_code != '0'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
           ref: ${{ github.event.pull_request.head.ref }}
-
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-
       - run: npm ci
-
-      # Run check:docs first to identify stale docs
-      - name: Check doc freshness
-        id: check-docs
-        run: npm run check:docs 2>&1 | tee /tmp/check-docs-output.txt || true
-        continue-on-error: true
-
-      # If stale docs detected, run Claude Code Action to update them
       - uses: anthropics/claude-code-action@v1
-        if: steps.check-docs.outcome == 'failure'
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           prompt: |
@@ -261,7 +264,7 @@ jobs:
 
             The `check:docs` script detected stale documentation in this PR.
             Here is its output:
-            $(cat /tmp/check-docs-output.txt)
+            ${{ needs.check-docs.outputs.check_output }}
 
             For each stale doc:
             1. Read the PR diff to understand what changed in the code
@@ -278,16 +281,31 @@ jobs:
           claude_args: |
             --model claude-opus-4-6
             --max-turns 20
+
+  # Job 3: Final gate (runs after AI update, or directly if no staleness)
+  gate:
+    needs: [check-docs, ai-update]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.ref }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - name: Final doc freshness gate
+        run: npm run check:docs
 ```
 
-### Workflow ordering
+### Workflow mechanics
 
-The doc freshness gate and AI doc update workflows both run on PRs. The intended flow:
-
-1. **AI Doc Update** runs first — Claude reads the diff, updates stale docs, commits to the branch
-2. The commit triggers a re-run of the **Documentation Freshness** gate
-3. If Claude's updates resolved all staleness, the gate passes
-4. If Tier 1/2 docs are still stale (e.g., architectural changes needing human input), the gate blocks merge and Claude leaves a PR comment explaining what needs human attention
+1. **check-docs** job captures the exit code and output without failing the workflow
+2. **ai-update** job runs only if staleness was detected (exit code != 0) — Claude reads the diff, updates stale docs, commits to the branch
+3. **gate** job always runs last — pulls the latest branch state (including Claude's commits) and runs `check:docs` (which only fails on Tier 1/2 staleness)
+4. If Tier 1/2 docs are still stale after the AI update (e.g., architectural changes needing human input), the gate blocks merge
 
 ---
 
@@ -314,9 +332,9 @@ The doc registry itself must be maintained. Rules:
 4. **New code directory** → verify existing docs cover it, or create a new doc + registry entry
 
 The `check:docs` script validates registry integrity:
-- Every file in `docs/` and root `*.md` files must have a registry entry
-- Every `covers` path must resolve to an existing file or directory
-- Every `depends_on` path must resolve to a registered doc
+- Every markdown file in `docs/**/*.md` and `*.md` at the repo root must have a registry entry
+- Every `covers` entry must resolve to an existing file or directory (glob patterns are expanded and validated)
+- Every `depends_on` entry must resolve to a registered doc
 - No circular dependencies in `depends_on`
 
 ---
@@ -340,5 +358,5 @@ The doc maintenance system is working correctly when:
 1. `npm run check:docs` exits 0 on a clean main branch
 2. A PR that modifies `src/engine/` without modifying `docs/engine-spec.md` causes `check:docs` to exit 2
 3. A PR that modifies a Tier 1 doc triggers cascade detection on dependent Tier 2/3 docs
-4. The doc registry has an entry for every markdown file in the repo
+4. The doc registry has an entry for every markdown file in `docs/**/*.md` and `*.md` at the repo root
 5. The AI agent can read the registry, identify stale docs, and produce valid updates
