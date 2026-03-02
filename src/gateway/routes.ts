@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import type { ConversationStore, Message } from "../types/index.js";
+import type { ConversationStore, EngineEvent, Message } from "../types/index.js";
 import {
   ConversationNotFoundError,
   createGateway,
@@ -102,34 +102,42 @@ async function parseMessageRequest(
   };
 }
 
-async function streamSse(
-  stream: AsyncIterable<
-    import("../types/index.js").EngineEvent & { conversation_id?: string }
-  >,
-): Promise<Response> {
-  let body = "";
+type GatewaySseEvent = EngineEvent & { conversation_id?: string };
 
-  const writeEvent = (event: unknown) => {
-    body += `event: ${(event as { type: string }).type}\ndata: ${JSON.stringify(event)}\n\n`;
-  };
+function streamSse(
+  stream: AsyncIterable<GatewaySseEvent>,
+): Response {
+  const encoder = new TextEncoder();
 
-  try {
-    for await (const event of stream) {
-      writeEvent(event);
-    }
-  } catch (error) {
-    writeEvent({
-      type: "error",
-      code: "provider_error",
-      message: getErrorMessage(error),
-    });
-  }
+  const body = new ReadableStream<Uint8Array>({
+    async start(controller) {
+      const writeEvent = (event: GatewaySseEvent) => {
+        const line = `event: ${event.type}\ndata: ${JSON.stringify(event)}\n\n`;
+        controller.enqueue(encoder.encode(line));
+      };
+
+      try {
+        for await (const event of stream) {
+          writeEvent(event);
+        }
+      } catch (error) {
+        writeEvent({
+          type: "error",
+          code: "provider_error",
+          message: getErrorMessage(error),
+        });
+      } finally {
+        controller.close();
+      }
+    },
+  });
 
   return new Response(body, {
     headers: {
       "Content-Type": "text/event-stream",
       "Cache-Control": "no-cache",
       Connection: "keep-alive",
+      "X-Accel-Buffering": "no",
     },
   });
 }
@@ -159,7 +167,7 @@ export function createGatewayRoutes(deps: {
       return parsed.error;
     }
 
-    return await streamSse(
+    return streamSse(
       deps.gateway.sendMessage({
         message: parsed.message,
         metadata: parsed.metadata,
@@ -186,7 +194,7 @@ export function createGatewayRoutes(deps: {
     }
 
     try {
-      return await streamSse(
+      return streamSse(
         deps.gateway.sendMessage({
           conversation_id: conversationId,
           message: parsed.message,

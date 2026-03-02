@@ -1,6 +1,5 @@
-import { randomUUID } from "node:crypto";
-import { chmod, mkdir, readFile, writeFile } from "node:fs/promises";
 import { boot } from "../config/boot.js";
+import { resolveAuthToken } from "../config/auth-token.js";
 import { createMockProvider } from "../adapters/mock.js";
 import { createOpenAICompatibleAdapter } from "../adapters/openai-compatible.js";
 import type { AdapterConfig } from "../adapters/openai-compatible.js";
@@ -14,6 +13,7 @@ import { Hono } from "hono";
 import { createServer as createHttpServer } from "node:http";
 import { join } from "node:path";
 import { Readable } from "node:stream";
+import type { ReadableStream as WebReadableStream } from "node:stream/web";
 import type { ProviderAdapter, RuntimeConfig } from "../types/index.js";
 
 function methodHasBody(method: string | undefined): boolean {
@@ -58,7 +58,7 @@ function writeFetchResponse(
   }
 
   const responseBody = Readable.fromWeb(
-    response.body as any,
+    response.body as unknown as WebReadableStream,
   );
   responseBody.pipe(res);
 }
@@ -120,42 +120,6 @@ export async function createServer(options: {
   return app;
 }
 
-/**
- * Resolve auth token: env var > existing file > generate + write to file.
- *
- * Per 1B.3: if PAI_AUTH_TOKEN is not set, generate a random token at first
- * boot, write to {memory_root}/.data/auth-token with 0600 permissions,
- * and print the file path to stdout (never the token itself).
- */
-async function resolveAuthToken(memoryRoot: string): Promise<string> {
-  if (process.env.PAI_AUTH_TOKEN) {
-    return process.env.PAI_AUTH_TOKEN;
-  }
-
-  const dataDir = join(memoryRoot, ".data");
-  const tokenPath = join(dataDir, "auth-token");
-
-  // Try reading existing token file
-  try {
-    const existing = await readFile(tokenPath, "utf-8");
-    const trimmed = existing.trim();
-    if (trimmed.length > 0) {
-      return trimmed;
-    }
-  } catch {
-    // File doesn't exist yet — generate below
-  }
-
-  // Generate new token and persist
-  const token = randomUUID();
-  await mkdir(dataDir, { recursive: true });
-  await writeFile(tokenPath, token, { mode: 0o600 });
-  await chmod(tokenPath, 0o600);
-  console.log(`Auth token written to: ${tokenPath}`);
-
-  return token;
-}
-
 export async function startServer(options?: {
   port?: number;
   configPath?: string;
@@ -163,7 +127,9 @@ export async function startServer(options?: {
   const port = options?.port ?? 3000;
   const bootResult = await boot(options?.configPath);
 
-  const authToken = await resolveAuthToken(bootResult.config.memory_root);
+  const authToken = await resolveAuthToken(
+    join(bootResult.config.memory_root, ".data"),
+  );
   const app = await createServer({
     config: bootResult.config,
     authToken,

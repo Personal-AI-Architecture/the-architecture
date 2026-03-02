@@ -1,6 +1,32 @@
 import type { Context, Next } from "hono";
 import type { AuthProvider } from "../types/index.js";
 
+function parseCookies(cookieHeader: string): Map<string, string> {
+  const cookies = new Map<string, string>();
+
+  for (const cookiePart of cookieHeader.split(";")) {
+    const trimmed = cookiePart.trim();
+    if (trimmed.length === 0) {
+      continue;
+    }
+
+    const separatorIndex = trimmed.indexOf("=");
+    if (separatorIndex <= 0) {
+      continue;
+    }
+
+    const name = trimmed.slice(0, separatorIndex).trim();
+    const rawValue = trimmed.slice(separatorIndex + 1).trim();
+    if (name.length === 0 || rawValue.length === 0) {
+      continue;
+    }
+
+    cookies.set(name, decodeURIComponent(rawValue));
+  }
+
+  return cookies;
+}
+
 function extractCredential(context: Context): string | null {
   const authorization = context.req.header("Authorization");
   if (authorization) {
@@ -13,6 +39,26 @@ function extractCredential(context: Context): string | null {
   const apiKey = context.req.header("X-API-Key");
   if (apiKey) {
     return apiKey.trim();
+  }
+
+  const cookieHeader = context.req.header("Cookie");
+  if (cookieHeader) {
+    const cookies = parseCookies(cookieHeader);
+    const candidateNames = ["pai_auth_token", "auth_token", "token", "api_key"];
+
+    for (const name of candidateNames) {
+      const value = cookies.get(name);
+      if (value && value.length > 0) {
+        return value;
+      }
+    }
+
+    if (cookies.size === 1) {
+      const onlyCookie = cookies.values().next().value;
+      if (onlyCookie && onlyCookie.length > 0) {
+        return onlyCookie;
+      }
+    }
   }
 
   return null;

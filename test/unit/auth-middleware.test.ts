@@ -54,6 +54,16 @@ describe("Credential extraction", () => {
     const body = await res.json();
     expect(body.actorId).toBe("owner");
   });
+
+  it("extracts token from cookie header", async () => {
+    const res = await app.request("/test", {
+      headers: { Cookie: `session=abc123; pai_auth_token=${OWNER_TOKEN}` },
+    });
+
+    expect(res.status).toBe(200);
+    const body = await res.json();
+    expect(body.actorId).toBe("owner");
+  });
 });
 
 describe("Success behavior", () => {

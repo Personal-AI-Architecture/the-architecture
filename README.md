@@ -58,6 +58,8 @@ Set your API key and start:
 
 ```bash
 export OPENROUTER_API_KEY=sk-or-v1-...
+npx personal-ai
+# optional sanity check:
 npx personal-ai boot-check
 ```
 

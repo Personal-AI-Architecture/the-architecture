@@ -260,6 +260,7 @@ describe("Conversation resumption", () => {
     );
 
     expect(res2.status).toBe(200);
+    await parseSSE(res2);
 
     // Verify conversation has full history
     const historyRes = await app.request(
