@@ -1,5 +1,33 @@
 # Phase 2: Engine — Codex Task
 
+## Project Location
+
+**Repo root:** `/Users/davidwaring/personal-ai-architecture`
+
+All paths in this file are relative to the repo root unless stated otherwise.
+
+**Key files you need to read before starting:**
+- `src/types/index.ts` — all type definitions (EngineRequest, EngineEvent, ProviderAdapter, ToolExecutor, etc.)
+- `src/types/generated.ts` — generated types from JSON schemas (Message, ToolDefinition)
+- `src/memory/registry.ts` — existing MemoryToolExecutor (implements ToolExecutor interface — this is what gets passed as `builtInExecutor`)
+- `src/memory/tools.ts` — existing memory tool implementations (for understanding, not for importing)
+- `package.json` — build scripts and dependencies
+
+**Files you will create:**
+- `src/engine/index.ts` — Engine core
+- `src/engine/tool-executor.ts` — combined tool executor with discovery
+
+**Verification commands (run from repo root):**
+```bash
+cd /Users/davidwaring/personal-ai-architecture
+npm run build
+npm run check:imports
+npm run check:lockin
+npm run lint
+```
+
+---
+
 ## What You're Building
 
 The Engine — a generic agent loop that connects a model to tools and streams results back. Message → model → tools → response → repeat. The Engine is intentionally generic — it has no product-specific logic. What makes any product unique lives in Memory, not the Engine.
