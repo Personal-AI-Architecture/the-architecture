@@ -26,7 +26,7 @@ function isToolDefinition(value: unknown): value is ToolDefinition {
   return true;
 }
 
-async function discoverExternalTools(toolSources: string[]): Promise<ToolDefinition[]> {
+export async function discoverExternalTools(toolSources: string[]): Promise<ToolDefinition[]> {
   const discoveredTools: ToolDefinition[] = [];
 
   for (const sourcePath of toolSources) {

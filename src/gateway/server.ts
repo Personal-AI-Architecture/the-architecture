@@ -1,9 +1,12 @@
 import { randomUUID } from "node:crypto";
+import { chmod, mkdir, readFile, writeFile } from "node:fs/promises";
 import { boot } from "../config/boot.js";
 import { createMockProvider } from "../adapters/mock.js";
+import { createOpenAICompatibleAdapter } from "../adapters/openai-compatible.js";
+import type { AdapterConfig } from "../adapters/openai-compatible.js";
 import { createMemoryToolExecutor } from "../memory/registry.js";
 import { createMemoryTools } from "../memory/tools.js";
-import { createAuthStack, createEngineClient } from "../runtime/component-factories.js";
+import { createAuthStack, createEngineClient, createFullToolExecutor } from "../runtime/component-factories.js";
 import { createConversationStore } from "./conversation-store.js";
 import { createGateway } from "./index.js";
 import { createGatewayRoutes } from "./routes.js";
@@ -11,7 +14,7 @@ import { Hono } from "hono";
 import { createServer as createHttpServer } from "node:http";
 import { join } from "node:path";
 import { Readable } from "node:stream";
-import type { RuntimeConfig } from "../types/index.js";
+import type { ProviderAdapter, RuntimeConfig } from "../types/index.js";
 
 function methodHasBody(method: string | undefined): boolean {
   const normalized = (method ?? "GET").toUpperCase();
@@ -64,21 +67,34 @@ export async function createServer(options: {
   config: RuntimeConfig;
   authToken: string;
   systemPrompt?: string;
+  provider?: ProviderAdapter;
+  adapterConfig?: AdapterConfig;
 }): Promise<Hono> {
   const memoryTools = createMemoryTools(options.config.memory_root);
   const memoryExecutor = createMemoryToolExecutor(memoryTools);
 
-  const mockProvider = createMockProvider({
-    events: [
-      { type: "text-delta", content: "Mock response." },
-      {
-        type: "finish",
-        finish_reason: "stop",
-      },
-    ],
-  });
+  // Full tool executor: built-in memory tools + discovered external tools
+  const toolExecutor = await createFullToolExecutor(
+    memoryExecutor,
+    options.config.tool_sources,
+  );
 
-  const engine = createEngineClient(mockProvider, memoryExecutor);
+  // Provider: explicit > adapter config > mock fallback
+  const provider =
+    options.provider ??
+    (options.adapterConfig
+      ? createOpenAICompatibleAdapter(options.adapterConfig)
+      : createMockProvider({
+          events: [
+            { type: "text-delta", content: "Mock response." },
+            {
+              type: "finish",
+              finish_reason: "stop",
+            },
+          ],
+        }));
+
+  const engine = createEngineClient(provider, toolExecutor);
   const conversationStore = createConversationStore(
     join(options.config.memory_root, ".data", "conversations.db"),
   );
@@ -104,6 +120,42 @@ export async function createServer(options: {
   return app;
 }
 
+/**
+ * Resolve auth token: env var > existing file > generate + write to file.
+ *
+ * Per 1B.3: if PAI_AUTH_TOKEN is not set, generate a random token at first
+ * boot, write to {memory_root}/.data/auth-token with 0600 permissions,
+ * and print the file path to stdout (never the token itself).
+ */
+async function resolveAuthToken(memoryRoot: string): Promise<string> {
+  if (process.env.PAI_AUTH_TOKEN) {
+    return process.env.PAI_AUTH_TOKEN;
+  }
+
+  const dataDir = join(memoryRoot, ".data");
+  const tokenPath = join(dataDir, "auth-token");
+
+  // Try reading existing token file
+  try {
+    const existing = await readFile(tokenPath, "utf-8");
+    const trimmed = existing.trim();
+    if (trimmed.length > 0) {
+      return trimmed;
+    }
+  } catch {
+    // File doesn't exist yet — generate below
+  }
+
+  // Generate new token and persist
+  const token = randomUUID();
+  await mkdir(dataDir, { recursive: true });
+  await writeFile(tokenPath, token, { mode: 0o600 });
+  await chmod(tokenPath, 0o600);
+  console.log(`Auth token written to: ${tokenPath}`);
+
+  return token;
+}
+
 export async function startServer(options?: {
   port?: number;
   configPath?: string;
@@ -111,10 +163,11 @@ export async function startServer(options?: {
   const port = options?.port ?? 3000;
   const bootResult = await boot(options?.configPath);
 
-  const authToken = process.env.PAI_AUTH_TOKEN ?? randomUUID();
+  const authToken = await resolveAuthToken(bootResult.config.memory_root);
   const app = await createServer({
     config: bootResult.config,
     authToken,
+    adapterConfig: bootResult.adapterConfig ?? undefined,
   });
 
   const server = createHttpServer(async (req, res) => {
@@ -141,7 +194,16 @@ export async function startServer(options?: {
   });
 
   console.log(`Gateway server listening on http://127.0.0.1:${port}`);
-  if (!process.env.PAI_AUTH_TOKEN) {
-    console.log(`Generated PAI_AUTH_TOKEN: ${authToken}`);
-  }
+
+  // Graceful shutdown
+  const shutdown = () => {
+    console.log("Shutting down...");
+    server.close(() => {
+      process.exit(0);
+    });
+    // Force exit after 5s if connections don't drain
+    setTimeout(() => process.exit(1), 5000).unref();
+  };
+  process.on("SIGTERM", shutdown);
+  process.on("SIGINT", shutdown);
 }
