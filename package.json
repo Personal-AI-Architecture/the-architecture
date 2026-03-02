@@ -28,7 +28,9 @@
     "lint": "eslint src/",
     "check:imports": "tsx scripts/check-imports.ts",
     "check:lockin": "tsx scripts/check-lockin.ts",
-    "baseline": "npm run build && vitest run --reporter=verbose && eslint src/ && npm run check:imports && npm run check:lockin"
+    "check:docs": "tsx scripts/check-docs.ts",
+    "check:docs:strict": "tsx scripts/check-docs.ts --strict",
+    "baseline": "npm run build && vitest run --reporter=verbose && eslint src/ && npm run check:imports && npm run check:lockin && npm run check:docs:strict"
   },
   "repository": {
     "type": "git",

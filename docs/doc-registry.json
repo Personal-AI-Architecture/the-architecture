@@ -1,0 +1,230 @@
+{
+  "docs": [
+    {
+      "path": "docs/foundation-spec.md",
+      "covers": [],
+      "tier": 1,
+      "update_trigger": "manual",
+      "depends_on": []
+    },
+    {
+      "path": "docs/gateway-engine-contract.md",
+      "covers": ["src/gateway/", "src/engine/"],
+      "tier": 1,
+      "update_trigger": "code",
+      "depends_on": ["docs/foundation-spec.md", "docs/gateway-spec.md", "docs/engine-spec.md"]
+    },
+
+    {
+      "path": "docs/engine-spec.md",
+      "covers": ["src/engine/"],
+      "tier": 2,
+      "update_trigger": "code",
+      "depends_on": ["docs/foundation-spec.md"]
+    },
+    {
+      "path": "docs/memory-spec.md",
+      "covers": ["src/memory/"],
+      "tier": 2,
+      "update_trigger": "code",
+      "depends_on": ["docs/foundation-spec.md"]
+    },
+    {
+      "path": "docs/gateway-spec.md",
+      "covers": ["src/gateway/"],
+      "tier": 2,
+      "update_trigger": "code",
+      "depends_on": ["docs/foundation-spec.md"]
+    },
+    {
+      "path": "docs/auth-spec.md",
+      "covers": ["src/auth/"],
+      "tier": 2,
+      "update_trigger": "code",
+      "depends_on": ["docs/foundation-spec.md", "docs/security-spec.md"]
+    },
+    {
+      "path": "docs/tools-spec.md",
+      "covers": ["src/engine/tool-executor.ts", "src/memory/tools.ts"],
+      "tier": 2,
+      "update_trigger": "code",
+      "depends_on": ["docs/foundation-spec.md"]
+    },
+    {
+      "path": "docs/models-spec.md",
+      "covers": ["src/adapters/"],
+      "tier": 2,
+      "update_trigger": "code",
+      "depends_on": ["docs/foundation-spec.md"]
+    },
+    {
+      "path": "docs/security-spec.md",
+      "covers": ["src/auth/", "src/engine/tool-executor.ts"],
+      "tier": 2,
+      "update_trigger": "code",
+      "depends_on": ["docs/foundation-spec.md"]
+    },
+    {
+      "path": "docs/adapter-spec.md",
+      "covers": ["src/adapters/", "adapters/"],
+      "tier": 2,
+      "update_trigger": "code",
+      "depends_on": ["docs/foundation-spec.md", "docs/models-spec.md"]
+    },
+    {
+      "path": "docs/configuration-spec.md",
+      "covers": ["src/config/", "specs/schemas/configuration.json"],
+      "tier": 2,
+      "update_trigger": "code",
+      "depends_on": ["docs/foundation-spec.md"]
+    },
+    {
+      "path": "docs/deployment-spec.md",
+      "covers": [],
+      "tier": 2,
+      "update_trigger": "spec",
+      "depends_on": ["docs/foundation-spec.md"]
+    },
+    {
+      "path": "docs/customization-spec.md",
+      "covers": [],
+      "tier": 2,
+      "update_trigger": "spec",
+      "depends_on": ["docs/foundation-spec.md"]
+    },
+
+    {
+      "path": "docs/foundation-verification.md",
+      "covers": [],
+      "tier": 3,
+      "update_trigger": "spec",
+      "depends_on": ["docs/foundation-spec.md"]
+    },
+    {
+      "path": "docs/lockin-gate.md",
+      "covers": [],
+      "tier": 3,
+      "update_trigger": "spec",
+      "depends_on": ["docs/foundation-spec.md", "docs/foundation-verification.md"]
+    },
+    {
+      "path": "docs/lockin-audit.md",
+      "covers": [],
+      "tier": 3,
+      "update_trigger": "spec",
+      "depends_on": ["docs/foundation-spec.md", "docs/foundation-verification.md", "docs/lockin-gate.md"]
+    },
+    {
+      "path": "docs/zero-lockin-checklist.md",
+      "covers": [],
+      "tier": 3,
+      "update_trigger": "spec",
+      "depends_on": ["docs/lockin-gate.md", "docs/lockin-audit.md", "docs/foundation-verification.md"]
+    },
+    {
+      "path": "docs/memory-as-platform.md",
+      "covers": [],
+      "tier": 3,
+      "update_trigger": "manual",
+      "depends_on": ["docs/foundation-spec.md", "docs/memory-spec.md"]
+    },
+    {
+      "path": "docs/doc-maintenance-spec.md",
+      "covers": [],
+      "tier": 3,
+      "update_trigger": "manual",
+      "depends_on": ["docs/foundation-spec.md"]
+    },
+    {
+      "path": "docs/guides/implementers-reference.md",
+      "covers": [],
+      "tier": 3,
+      "update_trigger": "spec",
+      "depends_on": ["docs/foundation-spec.md"]
+    },
+    {
+      "path": "docs/guides/guides-spec.md",
+      "covers": [],
+      "tier": 3,
+      "update_trigger": "manual",
+      "depends_on": ["docs/foundation-spec.md"]
+    },
+    {
+      "path": "docs/guides/conformance/README.md",
+      "covers": [],
+      "tier": 3,
+      "update_trigger": "spec",
+      "depends_on": ["docs/foundation-spec.md"]
+    },
+    {
+      "path": "docs/guides/conformance/swap-tests.md",
+      "covers": [],
+      "tier": 3,
+      "update_trigger": "spec",
+      "depends_on": ["docs/adapter-spec.md", "docs/models-spec.md", "docs/tools-spec.md"]
+    },
+    {
+      "path": "docs/guides/conformance/deploy-tests.md",
+      "covers": [],
+      "tier": 3,
+      "update_trigger": "spec",
+      "depends_on": ["docs/deployment-spec.md"]
+    },
+    {
+      "path": "docs/guides/conformance/fs-tests.md",
+      "covers": [],
+      "tier": 3,
+      "update_trigger": "spec",
+      "depends_on": ["docs/foundation-spec.md"]
+    },
+    {
+      "path": "docs/guides/conformance/arch-tests.md",
+      "covers": [],
+      "tier": 3,
+      "update_trigger": "spec",
+      "depends_on": ["docs/foundation-spec.md"]
+    },
+    {
+      "path": "docs/research/ecosystem-concept.md",
+      "covers": [],
+      "tier": 3,
+      "update_trigger": "manual",
+      "depends_on": ["docs/foundation-spec.md", "docs/customization-spec.md"]
+    },
+    {
+      "path": "docs/research/human-equivalents.md",
+      "covers": [],
+      "tier": 3,
+      "update_trigger": "manual",
+      "depends_on": ["docs/foundation-spec.md"]
+    },
+    {
+      "path": "docs/research/memory-tool-completeness.md",
+      "covers": [],
+      "tier": 3,
+      "update_trigger": "manual",
+      "depends_on": ["docs/memory-spec.md", "docs/tools-spec.md"]
+    },
+    {
+      "path": "docs/research/lock-in-analysis.md",
+      "covers": [],
+      "tier": 3,
+      "update_trigger": "manual",
+      "depends_on": ["docs/foundation-spec.md", "docs/adapter-spec.md"]
+    },
+    {
+      "path": "README.md",
+      "covers": [],
+      "tier": 3,
+      "update_trigger": "spec",
+      "depends_on": ["docs/foundation-spec.md"]
+    },
+    {
+      "path": "AGENT.md",
+      "covers": [],
+      "tier": 3,
+      "update_trigger": "spec",
+      "depends_on": ["docs/foundation-spec.md"]
+    }
+  ]
+}
