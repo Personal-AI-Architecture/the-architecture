@@ -9,20 +9,20 @@
 
 The foundation spec ([foundation-spec.md](../foundation-spec.md)) makes a specific architectural argument: every component communicates through defined interfaces, so any component can be replaced without touching anything else. You can take everything with you, and you can swap anything out.
 
-This document explains how the architecture achieves zero lock-in and what disciplines maintain it. The audience is implementers building on the Foundation and evaluators assessing the architecture's portability claims. The architecture is designed for zero lock-in at every layer. The only risk is letting the implementation drift from the design — and that's what the recommendations guard against.
+This document explains how the architecture achieves zero lock-in and what disciplines maintain it. The audience is implementers building on the Foundation and evaluators assessing the architecture's portability claims. The architecture is designed for zero lock-in at every layer — including no lock-in to the architecture itself. It's your AI system. Implementation drift from the design isn't inherently wrong — it may be intentional and that's your freedom. The risk is *unintentional* drift, where lock-in creeps in without you realizing it. That's what the recommendations guard against: not preventing change, but making sure you know when you're making a trade-off.
 
 ---
 
 ## The Core Argument
 
-The architecture achieves zero lock-in through one principle: **everything is either a standard, a file, or behind a contract you own.** And the contracts themselves are swappable via adapters (D139) — thin translation layers between each contract and the components on either side.
+The architecture achieves zero lock-in through one principle: **everything is either an open standard, a file, or behind a contract you own.** And the contracts themselves are swappable via adapters (D139) — thin translation layers between each contract and the components on either side.
 
 The D147 anti-lock-in CI test makes this concrete: three normal swaps (provider, model, tool) must succeed with config-only changes, zero code edits. CI-testable on every release.
 
 | Layer | What It Is | Why There's No Lock-In |
 |-------|-----------|----------------------|
-| **Your Memory** | Files on disk | Your files. Copy the folder. Everything — data AND organization — is portable. |
-| **Tools** | MCP servers | Open standard. Any MCP server works with any MCP client. Swap individually. |
+| **Your Memory** | Unopinionated substrate accessed through tools | Zero outward dependencies. The contract is the tools, not the storage. Storage can evolve without anything else changing. Exportable in open formats. |
+| **Tools** | Capabilities in the environment | Tool protocol is internal to the Engine — not an architectural boundary. Swap the protocol without changing anything else. A tool is a tool (D54) regardless of mechanism. |
 | **Intelligence** | Models via provider interface | Config change swaps the model. Config change swaps the router. |
 | **Interface** | Web app behind a contract | Talks to the Gateway API, not the Engine. Replace or multiply freely. |
 | **Engine** | Generic agent loop | A commodity component — intentionally thin, intentionally generic. Swap the whole thing. |
@@ -36,7 +36,7 @@ The rest of this document walks through each component to confirm this holds and
 
 ## Component Analysis
 
-### 1. Your Memory (Filesystem + Git)
+### 1. Your Memory (The Platform)
 
 **Spec claim:** Most portable component. Tools guarantee no lock-in. Storage format is an implementation detail.
 
@@ -44,33 +44,31 @@ The rest of this document walks through each component to confirm this holds and
 
 | Dimension | Risk Level | Detail |
 |-----------|-----------|--------|
-| **Data format** | None | Markdown files in folders. `cp -r` moves everything. No proprietary format, no binary blobs, no database export. |
-| **Organization & conventions** | None | AGENT.md, folder hierarchy, skill format, task files — these ARE files. They're human-readable markdown in plain folders. Any system that reads files can read them. |
-| **Version history** | Low | V1 uses Git. Git is the most portable version control system in existence. If memory evolves beyond Git, define the abstract version history contract first. |
+| **Data format** | None | Open formats only (D48). Everything exportable. No proprietary formats, no binary blobs. Storage mechanisms (files, databases, indexes) are all behind the tool interface — swap storage without changing anything else. |
+| **Organization & conventions** | None | Level 2 conventions (entry-point files, folder structure, skill format) live *in* Your Memory as content, not enforced *by* it. Any system that can read the storage can read them. |
+| **Version history** | Low | Level 1 requires version history capability. The specific mechanism is a Level 2 choice. If the mechanism evolves, define the abstract version history contract first. |
 | **Tool semantics** | Low | If `search` means "grep" today and "semantic search" tomorrow, the tools are stable but behavior changes. Skills may need adjustment — hours, not days. |
 
 #### Why This Is Fully Portable
 
-The Notion analogy doesn't apply here. In Notion, your organization lives in Notion's proprietary database — when you export, you lose it. In this architecture, the conventions *are* the files. AGENT.md is a markdown file. Skills are markdown files. Folder structure is just folders. There's no proprietary layer between the convention and the filesystem.
+Your Memory has zero outward dependencies. Every other component depends on it — it depends on none of them. Remove any component, and Your Memory still works. Still readable. Still portable. Still yours.
 
-If someone built a competing system that understood these conventions, they could use everything the system wrote — because there's nothing to "export." It's already there.
+The contract is the tools, not the storage. Everything accesses Your Memory through tools — the model through the Engine's tool loop, infrastructure through dedicated internal tools. Storage mechanisms can evolve (files → databases → vector indexes → cloud storage) without changing any other component. Each evolution is additive — new tool implementations behind the same interface.
 
-**You own your files AND the organization, because the organization is also files.** The only thing that doesn't travel is the agent that *acts on* those conventions — and that's the Engine, not Memory.
-
-The memory-spec reinforces this with the "robot test" (D43): bring your memory to a future robot without rebuilding. Zero outward dependencies — remove any component, and Your Memory still works. Still readable. Still portable. Still yours.
+The memory-spec reinforces this with the "robot test" (D43): bring your memory to a future robot without rebuilding. Your Memory is independently inspectable with standard tools (text editor, file browser, database viewer) even when the system is not running.
 
 #### Exit Cost
 
-- **Moving everything:** Minutes. Copy the folder. Organization comes with it.
-- **Migrating version history:** Minutes if staying Git-based. Hours if converting to another system.
+- **Moving everything:** Minutes to hours depending on storage size. Export in open formats — all storage mechanisms support it.
+- **Migrating version history:** Depends on the Level 2 mechanism. Hours if the mechanism is portable (e.g., Git). Longer if converting between systems — define the abstract contract first.
 
 #### Verdict
 
-**Zero lock-in.** The spec's claim fully holds. Memory is the architecture's strongest portability story. Convention structure is portable because it's files, not metadata locked in a database.
+**Zero lock-in.** The spec's claim fully holds. Memory is the architecture's strongest portability story — zero outward dependencies, accessed through tools, exportable in open formats.
 
 #### Discipline Required
 
-- **Define the abstract version history contract before evolving past Git.** As long as history lives in Git, it's perfectly portable. If memory evolves to cloud-native storage, the migration path needs to be defined before the change, not after.
+- **Define the abstract version history contract before evolving the mechanism.** The Level 2 version history choice is portable today. If storage evolves, the migration path needs to be defined before the change, not after.
 
 ---
 
@@ -80,7 +78,7 @@ The memory-spec reinforces this with the "robot test" (D43): bring your memory t
 
 #### Lock-In Assessment
 
-**The architecture has zero Engine lock-in.** The interface talks to the Gateway API contract, not the Engine. Memory doesn't know what Engine reads it. MCP tools are independent servers. Auth sits at the edge. Swapping the Engine is invisible to everything else.
+**The architecture has zero Engine lock-in.** The interface talks to the Gateway API contract, not the Engine. Memory doesn't know what Engine reads it. Tools are external to the Engine — the tool protocol is an Engine implementation detail, not an architectural boundary. Auth sits at the edge. Swapping the Engine is invisible to everything else.
 
 Because the Engine is generic — zero product-specific logic — a swap means replacing one commodity implementation with another.
 
@@ -91,7 +89,7 @@ Because the Engine is generic — zero product-specific logic — a swap means r
 | **Gateway routing** | Gateway routes to new Engine the same way | Gateway coupled to Engine-specific internals |
 | **System prompts** | Live in Memory — Engine reads them through tools | Embedded in Engine code — must be extracted |
 | **Skill execution** | Skills are markdown in Memory — model reads and follows them (D40) | Coupled to engine-specific multi-turn behavior |
-| **Tool execution** | MCP standard — any Engine that's an MCP client works | Custom tool-calling quirks built into Engine code |
+| **Tool execution** | Tool protocol is internal to Engine — swappable implementation detail | Custom tool-calling quirks built into Engine code |
 | **Provider interface** | Adapter pattern — any Engine using it gets multiple providers | Coupled to specific provider handling |
 
 **With discipline (generic Engine):** Days — drop in a new Engine behind the Gateway.
@@ -103,7 +101,7 @@ The contract provides real, structural protection:
 
 - **The interface doesn't rebuild.** It speaks the Gateway API, not the Engine.
 - **Memory is untouched.** Files don't move, don't change, don't care which Engine reads them.
-- **MCP tools keep working.** They're independent servers — the new Engine just needs to be an MCP client.
+- **Tools keep working.** They're external to the Engine — the tool protocol is an implementation detail, not an architectural boundary.
 - **Auth stays put.** It's a cross-cutting layer, independent of the Engine.
 
 An Engine swap is replacing one commodity agent loop with another while everything it connects stays in place.
@@ -213,7 +211,7 @@ This is ongoing maintenance, not lock-in. Every AI system has this characteristi
 
 ---
 
-### 5. Tools (MCP Protocol)
+### 5. Tools (Capabilities in the Environment)
 
 **Spec claim:** "We're not even locked into MCP itself. MCP is an open protocol with a permissive license — but more importantly, it describes a pattern (tool discovery + tool execution) that's more fundamental than any specific implementation."
 
@@ -221,13 +219,15 @@ This is ongoing maintenance, not lock-in. Every AI system has this characteristi
 
 **Individual tool lock-in — zero:**
 
-Each MCP server is independent. Replace one without touching others. Add without modifying anything. This is the architecture's best feature.
+Each tool is independent. Replace one without touching others. Add without modifying anything. This is the architecture's best feature. The tool protocol is internal to the Engine (D53) — not an architectural boundary — so the protocol itself is swappable without affecting anything else.
 
 **Caught and corrected lock-in risk:** The original D141 would have made tool preferences part of deployment configuration — coupling personal tool choices to the environment. D141-refined corrected this with a three-way split: definitions are self-describing (D146), plumbing lives in environment config, preferences stay in Your Memory (D145). This keeps tool preferences portable with the owner, not locked to a deployment.
 
 **Owner-controlled tool availability (D109):** The owner controls which tools are sent with every prompt via an always-send set, with a discovery tool for the rest. This is a fine-grained portability mechanism — the owner's tool preferences travel with their memory, not with the deployment.
 
-**MCP protocol lock-in — effectively zero:**
+**Level 2 default protocol (MCP) lock-in — effectively zero:**
+
+The Level 1 protection is structural: tool protocol is internal to the Engine, swappable without affecting other components. But the Level 2 default choice also matters practically:
 
 | Mitigating Factor | Why It Matters |
 |-------------------|---------------|
@@ -375,12 +375,12 @@ The probability of needing to replace MCP is near zero. MCP is the default but n
 | **Adapter detail** | The Gateway API adapter is a thin, stateless translation layer between the external client protocol and the internal message interface. Swap the standard → swap the adapter → nothing else changes. This is a rare swap — only when industry standards shift. |
 | **Discipline** | Design it from product needs, not shaped by the current Engine's patterns. This ensures the contract survives any Engine swap. |
 
-### MCP Protocol (Linux Foundation / AAIF)
+### Tool Protocol (Engine Implementation Detail)
 
 | Dimension | Assessment |
 |-----------|-----------|
-| **Lock-in** | Zero practical lock-in. Open governance, massive adoption, permissive license. |
-| **Discipline** | Track versions. Budget for periodic updates. Don't build abstraction layers on top. |
+| **Lock-in** | Zero. Tool protocol is internal to the Engine (D53) — not a connector, not an architectural boundary. How the Engine communicates with tools is an implementation detail, swappable without affecting any other component. The Level 2 default (currently MCP) has open governance and massive adoption, but the Level 1 protection is structural: the protocol is contained within the Engine. |
+| **Discipline** | Track the chosen protocol's versions. Budget for periodic updates. Don't build abstraction layers on top. |
 
 ### Provider API (Adapter → Provider)
 
@@ -484,7 +484,7 @@ The full path from user to capability:
 ```
 User → Interface → Gateway API → Engine → Provider API Adapter → Model Provider
                                     ↓
-                               MCP Client → MCP Server → Tool → Your Memory
+                               Tool Protocol → Tool → Your Memory
 ```
 
 Each link is swappable. With 8+ components in the chain, version management matters — not because of lock-in, but because of standard dependency hygiene. This requires:
@@ -495,15 +495,15 @@ Each link is swappable. With 8+ components in the chain, version management matt
 
 This is normal open-source dependency management, not an architectural concern.
 
-### 2. Convention Portability
+### 2. Convention Portability (Level 2)
 
-The documentation conventions stored in Your Memory — AGENT.md, skill format, folder structure, and methodology — create a structured ecosystem. This is sometimes confused with lock-in, but it's the opposite:
+Level 2 products build conventions on top of the Foundation — entry-point files, skill formats, folder structures, methodology. This is sometimes confused with lock-in, but the Level 1 architecture prevents it:
 
-- **The conventions are files.** AGENT.md is markdown. Skills are markdown. Folder structure is folders. Everything is human-readable and machine-readable.
-- **A competitor could read everything.** If another system understood these conventions, it could use everything the system wrote — because there's nothing to "export." It's already there.
+- **Conventions live *in* Your Memory, not enforced *by* it.** They're content, not infrastructure. Your Memory is an unopinionated substrate (D43) — it stores them without depending on them.
+- **Open formats make them readable by anything.** A competing system could read everything a Level 2 product wrote — because conventions are stored in open formats behind the tool interface. There's nothing to "export." It's already accessible.
 - **What doesn't travel is the agent.** The Engine that *acts on* the conventions is a generic commodity component — and that's swappable behind the Gateway API contract.
 
-The honest framing: **you own your files AND the organization, because the organization is also files.**
+The honest framing: **conventions are portable because Memory is portable — and Memory is portable because it has zero outward dependencies.**
 
 ### 3. Expertise Considerations
 
@@ -515,11 +515,11 @@ The Engine's language becomes a team working language. The Engine is TypeScript/
 
 | Component | Architectural Lock-In | Discipline Required | If Discipline Lapses |
 |-----------|----------------------|--------------------|--------------------|
-| **Your Memory** | Zero | Define version history contract before evolving past Git | Version history migration gets messy |
+| **Your Memory** | Zero | Define abstract version history contract before evolving the mechanism | Version history migration gets messy |
 | **Engine** | Zero | Keep generic (D39) — zero product-specific logic | Swap cost grows from days to weeks |
 | **Interface** | Zero | Maintain thin client — no cached state or business logic | Interface becomes harder to replace or multiply |
 | **Intelligence** | Zero | Fallback path, test against 2+ models, pin versions | Single point of failure if provider goes down |
-| **Tools** | Zero | Track MCP versions, keep preferences in Memory (D145) | Tool config couples to deployment |
+| **Tools** | Zero | Track tool protocol versions, keep preferences in Memory (D145) | Tool config couples to deployment |
 | **Auth** | Zero | Maintain open-standard adherence (OAuth 2.1, OIDC) | Auth drifts to proprietary protocols |
 | **Security** | Zero | No proprietary security mechanisms | Security becomes a lock-in vector |
 | **Gateway** | Zero | Keep conversations in Memory via tools (D152) | Conversation data locked in Gateway |
@@ -557,8 +557,8 @@ The Engine's language becomes a team working language. The Engine is TypeScript/
 | # | Discipline | What It Protects | Component |
 |---|-----------|-----------------|-----------|
 | 10 | **Version the Gateway API metadata schema** | Multiple clients can negotiate capabilities | Gateway |
-| 11 | **Define abstract version history contract** | Clean migration path if memory evolves past Git | Memory |
-| 12 | **Monitor MCP spec changes** | Smooth version updates, no surprises | Tools |
+| 11 | **Define abstract version history contract** | Clean migration path if version history mechanism evolves | Memory |
+| 12 | **Monitor tool protocol spec changes** | Smooth version updates, no surprises | Tools |
 | 13 | **Document the Engine integration surface** | Swap checklist — every point where Gateway and tools connect to Engine | Engine |
 | 14 | **Test auth export/import across deployments** | Validates auth portability claim | Auth |
 | 15 | **Keep memory export functional regardless of security level** | Non-negotiable portability invariant | Security |
@@ -569,8 +569,8 @@ The Engine's language becomes a team working language. The Engine is TypeScript/
 
 The foundation architecture is designed for zero lock-in at every layer. This analysis confirms that claim holds:
 
-- **Your Memory** is fully portable — files AND organization, because the organization is also files.
-- **Tools** use an open standard (MCP) with Linux Foundation governance and massive adoption. Tool preferences stay in Memory (D145), not the deployment.
+- **Your Memory** is fully portable — zero outward dependencies, accessed through tools, exportable in open formats. The contract is the tools, not the storage. Storage evolves without anything else changing.
+- **Tools** are capabilities in the environment — the tool protocol is internal to the Engine, not an architectural boundary. Swap the protocol without changing anything else. Tool preferences stay in Memory (D145), not the deployment.
 - **Intelligence** is a config change — models, routers, and providers are all swappable via adapters. Same-provider swap = 1 change. Cross-provider swap = 2 changes.
 - **Interface** talks to a contract, not an implementation. Replace or multiply freely.
 - **Engine** is a generic commodity component. Swap the whole thing.
