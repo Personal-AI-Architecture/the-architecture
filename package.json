@@ -1,7 +1,7 @@
 {
   "name": "personal-ai-architecture",
   "version": "0.1.0",
-  "description": "Level 1 Foundation — Personal AI Architecture. Generic, user-owned AI runtime.",
+  "description": "Level 1 Foundation — Personal AI Architecture. Generic, user-owned AI runtime with zero lock-in.",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -14,6 +14,11 @@
   "bin": {
     "personal-ai": "./dist/cli.js"
   },
+  "files": [
+    "dist",
+    "adapters",
+    "specs/schemas"
+  ],
   "scripts": {
     "generate:types": "tsx scripts/generate-types.ts",
     "build": "npm run generate:types && tsc",
@@ -25,6 +30,25 @@
     "check:lockin": "tsx scripts/check-lockin.ts",
     "baseline": "npm run build && vitest run --reporter=verbose && eslint src/ && npm run check:imports && npm run check:lockin"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BrainDriveAI/personal-ai-architecture.git"
+  },
+  "homepage": "https://github.com/BrainDriveAI/personal-ai-architecture#readme",
+  "bugs": {
+    "url": "https://github.com/BrainDriveAI/personal-ai-architecture/issues"
+  },
+  "keywords": [
+    "personal-ai",
+    "ai-architecture",
+    "user-owned",
+    "zero-lockin",
+    "agent-loop",
+    "memory",
+    "openai-compatible",
+    "local-first"
+  ],
+  "author": "BrainDrive AI",
   "dependencies": {
     "ajv": "^8.17.0",
     "better-sqlite3": "^11.7.0",
