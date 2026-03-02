@@ -1,20 +1,15 @@
 # Lock-In Risk Analysis: Foundation Architecture
 
-> **Project:** Pivot
-> **Date:** 2026-02-21 (updated 2026-03-02)
-> **Purpose:** Confirm that the foundation architecture delivers on its zero-lock-in design, and identify the implementation disciplines required to keep it that way.
-> **Source:** foundation-spec.md component definitions, decisions D1-D159, all 12 architecture specs
-> **Status:** Level 1 Foundation is published (`personal-ai-architecture@0.1.0`, 243 tests, 13 CI checks)
+> **Purpose:** Explain how the architecture achieves zero lock-in at every layer, and identify the implementation disciplines required to keep it that way.
+> **Architecture:** [Foundation Spec](../foundation-spec.md) — component definitions, 12 architecture specs, decisions D1-D159
 
 ---
 
 ## Why This Document Exists
 
-The foundation spec (foundation-spec.md) makes a specific architectural argument: every component communicates through defined interfaces, so any component can be replaced without touching anything else. You can take everything with you, and you can swap anything out.
+The foundation spec ([foundation-spec.md](../foundation-spec.md)) makes a specific architectural argument: every component communicates through defined interfaces, so any component can be replaced without touching anything else. You can take everything with you, and you can swap anything out.
 
-This document confirms that claim is correct, then identifies the implementation disciplines that keep it true. The architecture is designed for zero lock-in at every layer. The only risk is letting the implementation drift from the design — and that's what the recommendations guard against.
-
-The foundation is now built and published as an npm package with 243 tests validating these claims. This is no longer a design analysis — it's a verification of shipped architecture.
+This document explains how the architecture achieves zero lock-in and what disciplines maintain it. The audience is implementers building on the Foundation and evaluators assessing the architecture's portability claims. The architecture is designed for zero lock-in at every layer. The only risk is letting the implementation drift from the design — and that's what the recommendations guard against.
 
 ---
 
@@ -30,7 +25,7 @@ The D147 anti-lock-in CI test makes this concrete: three normal swaps (provider,
 | **Tools** | MCP servers | Open standard. Any MCP server works with any MCP client. Swap individually. |
 | **Intelligence** | Models via provider interface | Config change swaps the model. Config change swaps the router. |
 | **Interface** | Web app behind a contract | Talks to the Gateway API, not the Engine. Replace or multiply freely. |
-| **Engine** | Generic agent loop | A commodity component — intentionally thin, intentionally generic. Published and tested. Swap the whole thing. |
+| **Engine** | Generic agent loop | A commodity component — intentionally thin, intentionally generic. Swap the whole thing. |
 | **Auth** | Cross-cutting identity layer | Open standards (OAuth 2.1, OIDC). Exportable state. Independent of every other component. |
 | **Security** | Foundation mechanisms | Standard containers, open formats. No proprietary security protocols. |
 | **Gateway** | Conversation manager | Interface-agnostic. Conversations stored in Your Memory via tools. Clients swappable. |
@@ -50,15 +45,15 @@ The rest of this document walks through each component to confirm this holds and
 | Dimension | Risk Level | Detail |
 |-----------|-----------|--------|
 | **Data format** | None | Markdown files in folders. `cp -r` moves everything. No proprietary format, no binary blobs, no database export. |
-| **Organization & conventions** | None | AGENT.md, folder hierarchy, skill format, pulse tasks — these ARE files. They're human-readable markdown in plain folders. Any system that reads files can read them. |
+| **Organization & conventions** | None | AGENT.md, folder hierarchy, skill format, task files — these ARE files. They're human-readable markdown in plain folders. Any system that reads files can read them. |
 | **Version history** | Low | V1 uses Git. Git is the most portable version control system in existence. If memory evolves beyond Git, define the abstract version history contract first. |
 | **Tool semantics** | Low | If `search` means "grep" today and "semantic search" tomorrow, the tools are stable but behavior changes. Skills may need adjustment — hours, not days. |
 
 #### Why This Is Fully Portable
 
-The Notion analogy doesn't apply here. In Notion, your organization lives in Notion's proprietary database — when you export, you lose it. In BrainDrive, the conventions *are* the files. AGENT.md is a markdown file. Skills are markdown files. Folder structure is just folders. There's no proprietary layer between the convention and the filesystem.
+The Notion analogy doesn't apply here. In Notion, your organization lives in Notion's proprietary database — when you export, you lose it. In this architecture, the conventions *are* the files. AGENT.md is a markdown file. Skills are markdown files. Folder structure is just folders. There's no proprietary layer between the convention and the filesystem.
 
-If someone built a competing system that understood AGENT.md files, they could read everything BrainDrive wrote — because there's nothing to "export." It's already there.
+If someone built a competing system that understood these conventions, they could use everything the system wrote — because there's nothing to "export." It's already there.
 
 **You own your files AND the organization, because the organization is also files.** The only thing that doesn't travel is the agent that *acts on* those conventions — and that's the Engine, not Memory.
 
@@ -87,7 +82,7 @@ The memory-spec reinforces this with the "robot test" (D43): bring your memory t
 
 **The architecture has zero Engine lock-in.** The interface talks to the Gateway API contract, not the Engine. Memory doesn't know what Engine reads it. MCP tools are independent servers. Auth sits at the edge. Swapping the Engine is invisible to everything else.
 
-The Engine is now built, published as `personal-ai-architecture@0.1.0`, and validated by 243 tests. Because the Engine is generic — zero product-specific logic — a swap means replacing one commodity implementation with another.
+Because the Engine is generic — zero product-specific logic — a swap means replacing one commodity implementation with another.
 
 #### What an Engine Swap Actually Involves
 
@@ -121,7 +116,7 @@ An Engine swap is replacing one commodity agent loop with another while everythi
 
 #### Verdict
 
-**Zero architectural lock-in.** The Gateway API contract ensures the swap is contained — nothing outside the Engine is affected. The Engine being generic (D39) and having zero product-specific logic means the swap cost is inherently low. This is reinforced by implementation discipline, not dependent on it. The published package with 243 tests validates these claims.
+**Zero architectural lock-in.** The Gateway API contract ensures the swap is contained — nothing outside the Engine is affected. The Engine being generic (D39) and having zero product-specific logic means the swap cost is inherently low. This is reinforced by implementation discipline, not dependent on it.
 
 #### Disciplines Required
 
@@ -139,7 +134,7 @@ An Engine swap is replacing one commodity agent loop with another while everythi
 
 | Dimension | Risk Level | Detail |
 |-----------|-----------|--------|
-| **External dependency** | None | BrainDrive owns the interface entirely. |
+| **External dependency** | None | The product owns the interface entirely. |
 | **Framework choice** | None (architectural) | React vs. Svelte vs. Vue is a developer preference, not lock-in. The architecture doesn't care. |
 | **API contract** | None | Interface speaks the Gateway API. Any client that implements the contract works. Multiple clients can coexist (web + mobile + Discord). |
 
@@ -182,7 +177,7 @@ D135 elevated models to an external dependency with a clean swappable boundary: 
 #### The Dependency Chain
 
 ```
-BrainDrive Interface
+Client
   → Gateway API
     → Engine
       → Provider API Adapter
@@ -212,8 +207,8 @@ This is ongoing maintenance, not lock-in. Every AI system has this characteristi
 
 #### Disciplines Required
 
-1. **Add a provider fallback path.** Config-level ability to route to at least one alternate provider. Test before production. This is reliability, not lock-in mitigation.
-2. **Test skills against two models before launch.** Validates the "config change" claim for BrainDrive's specific prompts.
+1. **Add a provider fallback path.** Config-level ability to route to at least one alternate provider. Test before production.  This is reliability, not lock-in mitigation.
+2. **Test skills against two models before launch.** Validates the "config change" claim for your specific prompts.
 3. **Pin dependency versions in a manifest.** AI SDK, provider APIs. Monitor for breaking changes.
 
 ---
@@ -371,14 +366,14 @@ The probability of needing to replace MCP is near zero. MCP is the default but n
 
 ## Connector Analysis
 
-### Gateway API (BrainDrive-Defined)
+### Gateway API (Product-Defined)
 
 | Dimension | Assessment |
 |-----------|-----------|
-| **Lock-in** | Zero. BrainDrive owns this entirely. Built on the prevailing industry standard (D16), currently OpenAI Chat Completions format, swappable via adapter (D139). |
+| **Lock-in** | Zero. The product owns this entirely. Built on the prevailing industry standard (D16), currently OpenAI Chat Completions format, swappable via adapter (D139). |
 | **Contract lock-in** | Zero. If the industry standard shifts away from Chat Completions, a Gateway API adapter absorbs the change — components on either side stay untouched (D139). |
 | **Adapter detail** | The Gateway API adapter is a thin, stateless translation layer between the external client protocol and the internal message interface. Swap the standard → swap the adapter → nothing else changes. This is a rare swap — only when industry standards shift. |
-| **Discipline** | Design it from BrainDrive's needs, not shaped by the current Engine's patterns. This ensures the contract survives any Engine swap. |
+| **Discipline** | Design it from product needs, not shaped by the current Engine's patterns. This ensures the contract survives any Engine swap. |
 
 ### MCP Protocol (Linux Foundation / AAIF)
 
@@ -406,7 +401,7 @@ The probability of needing to replace MCP is near zero. MCP is the default but n
 
 ### Contract Swappability (D139)
 
-The contracts themselves could be a lock-in vector — if the Gateway API binds tightly to OpenAI Chat Completions and that standard shifts, both sides must change. Adapters solve this: components speak an internal interface, and a thin adapter translates to/from the current external standard. Swap the standard → swap the adapter → nothing else changes. This completes the swappability chain: Memory via tools, components via contracts, contracts via adapters. See `adapter-spec.md`.
+The contracts themselves could be a lock-in vector — if the Gateway API binds tightly to OpenAI Chat Completions and that standard shifts, both sides must change. Adapters solve this: components speak an internal interface, and a thin adapter translates to/from the current external standard. Swap the standard → swap the adapter → nothing else changes. This completes the swappability chain: Memory via tools, components via contracts, contracts via adapters. See [adapter-spec.md](../adapter-spec.md).
 
 ---
 
@@ -502,10 +497,10 @@ This is normal open-source dependency management, not an architectural concern.
 
 ### 2. Convention Portability
 
-BrainDrive's AGENT.md pattern, skill format, folder structure, and methodology create a structured ecosystem. This is sometimes confused with lock-in, but it's the opposite:
+The documentation conventions stored in Your Memory — AGENT.md, skill format, folder structure, and methodology — create a structured ecosystem. This is sometimes confused with lock-in, but it's the opposite:
 
 - **The conventions are files.** AGENT.md is markdown. Skills are markdown. Folder structure is folders. Everything is human-readable and machine-readable.
-- **A competitor could read everything.** If another system understood AGENT.md files, it could use everything BrainDrive wrote — because there's nothing to "export." It's already there.
+- **A competitor could read everything.** If another system understood these conventions, it could use everything the system wrote — because there's nothing to "export." It's already there.
 - **What doesn't travel is the agent.** The Engine that *acts on* the conventions is a generic commodity component — and that's swappable behind the Gateway API contract.
 
 The honest framing: **you own your files AND the organization, because the organization is also files.**
@@ -551,7 +546,7 @@ The Engine's language becomes a team working language. The Engine is TypeScript/
 | 2 | **Keep the Engine generic (D39)** | Zero product-specific logic — keeps swap cost at days | Engine |
 | 3 | **Add a provider fallback path** | Reliability — config-level routing to at least one alternate provider | Intelligence |
 | 4 | **Maintain open-standard adherence in Auth** | OAuth 2.1/OIDC compliance — prevents proprietary protocol drift | Auth |
-| 5 | **Test skills against two models before launch** | Validates that model swapping actually works for BrainDrive's prompts | Intelligence |
+| 5 | **Test skills against two models before launch** | Validates that model swapping actually works for your specific prompts | Intelligence |
 | 6 | **Pin all external dependency versions** | Dependency manifest — AI SDK, MCP spec, provider APIs | Cross-cutting |
 | 7 | **Enforce "thin client" as an architectural rule** | Interface stays portable and multipliable | Interface |
 | 8 | **Run D147 anti-lock-in CI test on every release** | Three swaps (provider, model, tool) succeed with config-only changes | Cross-cutting |
@@ -572,13 +567,13 @@ The Engine's language becomes a team working language. The Engine is TypeScript/
 
 ## Conclusion
 
-The foundation architecture is designed for zero lock-in at every layer. This analysis confirms that claim holds — and the foundation is now built, published, and tested:
+The foundation architecture is designed for zero lock-in at every layer. This analysis confirms that claim holds:
 
 - **Your Memory** is fully portable — files AND organization, because the organization is also files.
 - **Tools** use an open standard (MCP) with Linux Foundation governance and massive adoption. Tool preferences stay in Memory (D145), not the deployment.
 - **Intelligence** is a config change — models, routers, and providers are all swappable via adapters. Same-provider swap = 1 change. Cross-provider swap = 2 changes.
 - **Interface** talks to a contract, not an implementation. Replace or multiply freely.
-- **Engine** is a generic commodity component, now published and validated by 243 tests. Swap the whole thing.
+- **Engine** is a generic commodity component. Swap the whole thing.
 - **Auth** is a cross-cutting layer with open standards (OAuth 2.1, OIDC), exportable state, and an implementation-agnostic contract.
 - **Security** uses standard containers and open formats. No proprietary security mechanisms.
 - **Gateway** stores conversations in Your Memory via tools. Clients are swappable. Auth is independent.
@@ -588,9 +583,9 @@ The foundation architecture is designed for zero lock-in at every layer. This an
 
 There is no vendor lock-in, no data lock-in, no protocol lock-in, no convention lock-in, and no contract lock-in. Even the contracts themselves are swappable — adapters (D139) sit between each contract and the components on either side, absorbing standard changes. The full swappability chain: Memory via tools, components via contracts, contracts via adapters.
 
-The D147 anti-lock-in CI test is the concrete enforcement mechanism: three swaps (provider, model, tool) must succeed with config-only changes, zero code edits. 243 tests and 13 CI checks validate these claims on every release. The only risk is implementation drift — and D147 catches it automatically.
+The D147 anti-lock-in CI test is the concrete enforcement mechanism: three swaps (provider, model, tool) must succeed with config-only changes, zero code edits. The only risk is implementation drift — and D147 catches it automatically.
 
-**Bottom line:** The architecture delivers what it promises. It's built, published as `personal-ai-architecture@0.1.0`, and tested. Maintain the disciplines, run the CI test, and every component stays swappable at every point in the future. Decisions D1 through D159 got us here. The enforcement mechanisms keep us here.
+**Bottom line:** The architecture delivers what it promises. Maintain the disciplines, run the CI test, and every component stays swappable at every point in the future. Decisions D1 through D159 got us here. The enforcement mechanisms keep us here.
 
 ---
 
@@ -598,33 +593,18 @@ The D147 anti-lock-in CI test is the concrete enforcement mechanism: three swaps
 
 | Document | Relationship |
 |----------|-------------|
-| `foundation-spec.md` | The architecture being analyzed |
-| `engine-spec.md` | Engine component spec — generic agent loop |
-| `memory-spec.md` | Your Memory component spec — portable substrate |
-| `gateway-spec.md` | Gateway component spec — conversation management |
-| `auth-spec.md` | Auth component spec — identity, access, permissions |
-| `security-spec.md` | Security spec — Foundation mechanisms |
-| `tools-spec.md` | Tools spec — capabilities in the environment |
-| `models-spec.md` | Models spec — external intelligence |
-| `configuration-spec.md` | Configuration spec — runtime config and preferences |
-| `deployment-spec.md` | Deployment spec — local-first guarantees |
-| `customization-spec.md` | Customization spec — Level 1/2/3 ecosystem |
-| `adapter-spec.md` | How contracts are made swappable via adapters (D139) |
-| `gateway-engine-contract.md` | Gateway ↔ Engine internal contract (D137) |
-| `engine-evaluation.md` | Engine candidates and their specific characteristics |
-| `pivot-spec.md` | Pivot rationale — why this architecture was chosen |
-| `lockin-gate.md` | PR-level lock-in checklist — fast gate for every non-trivial PR |
-| `lockin-audit.md` | Deep architecture audit — milestone/release gate |
-| `decisions.md` | D1-D159 — decisions that shaped the architecture |
-
----
-
-## Changelog
-
-| Date | Change | Source |
-|------|--------|--------|
-| 2026-03-02 | Major update: expanded from 6 to 8 components (added Security §7, Gateway §8). Added Foundation-Level Protections section (Configuration, Deployment, Customization). Rewrote Auth section (no longer TBD — full contract with open standards). Updated Engine to reflect published reality (npm package, 243 tests). Updated Intelligence to add D135 and genericize provider references. Updated Tools with D141-refined correction, D109, D146. Added Gateway ↔ Engine internal contract to connectors. Expanded summary matrix to 14 rows. Updated disciplines to 15 items including D147 CI test. Updated conclusion to reflect shipped state. Added all 12 specs + lockin-gate + lockin-audit to related documents. Decision range now D1-D159. | Architecture completion review (Dave W + Claude) |
-| 2026-02-27 | D139 propagated — adapter pattern closes contract lock-in gap. Added contract swappability subsection to Connector Analysis, updated core argument, conclusion, related documents | D139 propagation (Dave W + Claude) |
-| 2026-02-23 | Terminology alignment — Harness→Engine, Harness API→Gateway API, OpenCode→Build Our Own, updated disciplines to reference D39/D40 | Cross-doc alignment audit (Dave W + Claude) |
-| 2026-02-21 | Reframed: zero lock-in by design, risks are implementation discipline not architectural | Dave W review — conventions are files, not metadata |
-| 2026-02-21 | Initial lock-in analysis created | Foundation spec review + harness evaluation findings |
+| [foundation-spec.md](../foundation-spec.md) | The architecture being analyzed |
+| [engine-spec.md](../engine-spec.md) | Engine component spec — generic agent loop |
+| [memory-spec.md](../memory-spec.md) | Your Memory component spec — portable substrate |
+| [gateway-spec.md](../gateway-spec.md) | Gateway component spec — conversation management |
+| [auth-spec.md](../auth-spec.md) | Auth component spec — identity, access, permissions |
+| [security-spec.md](../security-spec.md) | Security spec — Foundation mechanisms |
+| [tools-spec.md](../tools-spec.md) | Tools spec — capabilities in the environment |
+| [models-spec.md](../models-spec.md) | Models spec — external intelligence |
+| [configuration-spec.md](../configuration-spec.md) | Configuration spec — runtime config and preferences |
+| [deployment-spec.md](../deployment-spec.md) | Deployment spec — local-first guarantees |
+| [customization-spec.md](../customization-spec.md) | Customization spec — Level 1/2/3 ecosystem |
+| [adapter-spec.md](../adapter-spec.md) | How contracts are made swappable via adapters (D139) |
+| [gateway-engine-contract.md](../gateway-engine-contract.md) | Gateway ↔ Engine internal contract (D137) |
+| [lockin-gate.md](../lockin-gate.md) | PR-level lock-in checklist — fast gate for every non-trivial PR |
+| [lockin-audit.md](../lockin-audit.md) | Deep architecture audit — milestone/release gate |
