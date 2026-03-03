@@ -30,7 +30,7 @@
     "check:lockin": "tsx scripts/check-lockin.ts",
     "check:docs": "tsx scripts/check-docs.ts",
     "check:docs:strict": "tsx scripts/check-docs.ts --strict",
-    "baseline": "npm run build && vitest run --reporter=verbose && eslint src/ && npm run check:imports && npm run check:lockin && npm run check:docs:strict"
+    "baseline": "npm run build && vitest run --reporter=verbose && eslint src/ && npm run check:imports && npm run check:lockin && npm run check:docs"
   },
   "repository": {
     "type": "git",

@@ -50,9 +50,9 @@ Files outside these locations (e.g., `tasks/*.md`, `node_modules/`) are excluded
 | Field | Type | Description |
 |-------|------|-------------|
 | `path` | string | Path to the doc file, relative to repo root |
-| `covers` | string[] | File or directory paths this doc is responsible for, relative to repo root. Glob patterns allowed. Every entry must resolve to an existing file or directory. |
+| `covers` | string[] | File or directory paths this doc is responsible for, relative to repo root. Directory prefixes must end with `/`. Every entry must resolve to an existing file or directory. |
 | `tier` | 1 \| 2 \| 3 | Doc priority tier (see below) |
-| `update_trigger` | `"code"` \| `"spec"` \| `"manual"` | What kind of change triggers an update. `"code"`: changes to files in `covers` trigger staleness. `"spec"`: changes to docs in `depends_on` trigger staleness. `"manual"`: doc is never flagged stale by CI — maintained by humans only (used for research docs, philosophical analysis, and other documents where automated freshness detection is not meaningful). |
+| `update_trigger` | `"code"` \| `"spec"` \| `"manual"` | Describes the *primary* reason this doc changes. `"code"`: primarily maintained because code it covers changes. `"spec"`: primarily maintained because upstream specs it depends on change. `"manual"`: doc is never flagged stale by CI — maintained by humans only (used for research docs, philosophical analysis, and other documents where automated freshness detection is not meaningful). Note: regardless of trigger type, the freshness check always evaluates both `covers` and `depends_on` — a doc is stale if *either* condition is met. The trigger field is metadata for human/AI understanding, not a filter on which conditions are checked. |
 | `depends_on` | string[] | Other docs this one references or derives from — changes cascade |
 
 ### Tiers
@@ -151,12 +151,12 @@ Added to `package.json` scripts:
 "check:docs": "tsx scripts/check-docs.ts"
 ```
 
-Added to the `baseline` pipeline. The `check:docs` script uses exit code 1 for Tier 3 warnings (non-blocking) and exit code 2 for Tier 1/2 failures (blocking). The baseline pipeline treats only exit code 2 as a failure:
+Added to the `baseline` pipeline. The `check:docs` script uses exit code 1 for Tier 3 warnings (non-blocking) and exit code 2 for Tier 1/2 failures (blocking). The baseline pipeline uses `check:docs` (default mode), which remaps exit code 1 to 0 so Tier 3 warnings don't break CI. Use `check:docs:strict` for full audits where Tier 3 staleness should also fail:
 
 ```
 "check:docs": "tsx scripts/check-docs.ts",
 "check:docs:strict": "tsx scripts/check-docs.ts --strict",
-"baseline": "npm run build && vitest run --reporter=verbose && eslint src/ && npm run check:imports && npm run check:lockin && npm run check:docs:strict"
+"baseline": "npm run build && vitest run --reporter=verbose && eslint src/ && npm run check:imports && npm run check:lockin && npm run check:docs"
 ```
 
 - `check:docs` — exits 0 if no Tier 1/2 staleness (Tier 3 warnings print but don't fail)
@@ -333,7 +333,7 @@ The doc registry itself must be maintained. Rules:
 
 The `check:docs` script validates registry integrity:
 - Every markdown file in `docs/**/*.md` and `*.md` at the repo root must have a registry entry
-- Every `covers` entry must resolve to an existing file or directory (glob patterns are expanded and validated)
+- Every `covers` entry must resolve to an existing file or directory
 - Every `depends_on` entry must resolve to a registered doc
 - No circular dependencies in `depends_on`
 

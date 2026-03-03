@@ -22,6 +22,7 @@
 - [ ] **No secrets in source or owner memory files:** secrets remain in env/secret infrastructure.
 - [ ] **Update safety preserved:** change does not introduce data-loss or irreversible-upgrade risk.
 - [ ] **Level boundary respected:** no Level 2 product opinion is being baked into Level 1 foundation behavior.
+- [ ] **Documentation freshness verified:** `npm run check:docs` passes — all stale docs are updated in this PR.
 
 ---
 
