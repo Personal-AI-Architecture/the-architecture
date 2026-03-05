@@ -267,7 +267,7 @@ Who does what — and who doesn't. Use this to verify that component specs don't
 | `configuration-spec.md` | Configuration — preferences, runtime, tool self-description |
 | `deployment-spec.md` | Deployment — local-first contract |
 | `customization-spec.md` | How Level 2 products build on the Foundation |
-| Decisions log (BrainDrive Library) | All pivot decisions (D1-D152 + D141-refined) |
+| Decisions log (BrainDrive Library) | All pivot decisions (D1-D168 + D141-refined) |
 | `research/memory-tool-completeness.md` | D135 completeness proof — memory/tool binary |
 | `guides/` | Developer guides, contracts, conformance tests, stubs |
 | `research/` | Evaluations, analysis, and supporting research |
@@ -289,9 +289,5 @@ Who does what — and who doesn't. Use this to verify that component specs don't
 ---
 
 *This document defines the architecture — the four components, the two connectors, the three external dependencies, and why this system can evolve as fast as AI does. Product specs define what's built on this foundation. The pivot spec defines why we chose this direction.*
-
-
-
-
 
 
