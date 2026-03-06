@@ -3,13 +3,15 @@ displayed_sidebar: null
 hide_table_of_contents: true
 ---
 
-# The Personal AI Architecture has one goal: avoid lock-in.
+# The Architecture
 
-Lock-in to a vendor. Lock-in to a specific technology choice. And even lock-in to the Personal AI Architecture itself.
+The Personal AI Architecture has one goal: avoid lock-in.
+
+Lock-in to a vendor. Lock-in to a specific technology choice. And even lock-in to The Architecture itself.
 
 It does this by making the one thing you *do* want to be locked into the foundation of the entire system: **Your Memory**.
 
-### Memory is the Platform
+### Your Memory is the Platform
 
 Everything else — the AI models you use, the engine that calls the tools, auth, the gateway, even the internal communication layer — is decoupled and swappable.
 
@@ -290,5 +292,6 @@ Who does what — and who doesn't. Use this to verify that component specs don't
 ---
 
 *This document defines the architecture — the four components, the two connectors, the three external dependencies, and why this system can evolve as fast as AI does. Product specs define what's built on this foundation. The pivot spec defines why we chose this direction.*
+
 
 
