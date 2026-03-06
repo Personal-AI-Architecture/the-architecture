@@ -5,7 +5,9 @@ hide_table_of_contents: true
 
 # The Architecture
 
-The Personal AI Architecture has one goal: avoid lock-in.
+The Personal AI Architecture is an MIT Licsensed foundation for building AI systems that belong to you — not a platform. 
+
+It has one goal: avoid lock-in.
 
 Lock-in to a vendor. Lock-in to a specific technology choice. And even lock-in to The Architecture itself.
 
@@ -17,13 +19,14 @@ Everything else — the AI models you use, the engine that calls the tools, auth
 
 This matters for two reasons:
 
-**Platform lock-in has captured the internet.** Our personal data and knowledge is locked inside Big Tech platforms. Your conversations, your preferences, your context — trapped inside products you don't control. Cancel your subscription and everything that made the AI useful disappears. Switch providers and you start from zero. This isn't a bug. It's the business model.
+**1. It puts you back in control** Your conversations, our preferences, our context are currently trapped inside software you don't control. Cancel your subscription and everything that made the software useful disappears. Switch providers and you start from zero. This isn't a bug. Trapping you in their systems is Big Tech's business model. 
 
-**Technology is changing so fast that betting it will look the same tomorrow is already wrong.** New models, new protocols, new paradigms — every month. An architecture that bets on today's stack is an architecture with an expiration date.
+**2. It allows you to adapt at the speed of AI** Technology is changing so fast that betting it will look the same tomorrow is already wrong.** New models, new protocols, new paradigms — every month. An architecture that bets on today's stack is an architecture with an expiration date.
 
-New paradigms require new technical architectures.
+The Architecture is MIT liscensed open source and designed to ensure that the power of AI belongs not to a few Big Tech companies, but to the people. 
 
-Hopefully this time we can learn from the mistakes of the past — and build on an architecture where your data, your knowledge, and your AI work for you, not for a platform.
+Here's how it works:
+
 
 ```
                               ┌───────────────────────────────────────────────┐
@@ -292,6 +295,7 @@ Who does what — and who doesn't. Use this to verify that component specs don't
 ---
 
 *This document defines the architecture — the four components, the two connectors, the three external dependencies, and why this system can evolve as fast as AI does. Product specs define what's built on this foundation. The pivot spec defines why we chose this direction.*
+
 
 
 
