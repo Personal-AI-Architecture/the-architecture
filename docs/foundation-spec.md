@@ -21,13 +21,13 @@ This matters for two reasons:
 
 ### 1. It puts you back in control 
 
-Your conversations, our preferences, our context are currently trapped inside software you don't control. Cancel your subscription and everything that made the software useful disappears. Switch providers and you start from zero. This isn't a bug. Trapping you in their systems is Big Tech's business model. 
+Yur conversations, your preferences, your context are currently trapped inside software you don't control. Cancel your subscription and everything that made the software useful disappears. Switch providers and you start from zero. This isn't a bug. Locking you inside their systems is Big Tech's business model. 
 
 ### 2. It allows you to adapt at the speed of AI 
 
 Technology is changing so fast that betting it will look the same tomorrow is already wrong.** New models, new protocols, new paradigms — every month. An architecture that bets on today's stack is an architecture with an expiration date.
 
-The Architecture is MIT liscensed open source and designed to ensure that the power of AI belongs not to a few Big Tech companies, but to the people. 
+The Architecture is designed to ensure that the power of AI belongs not to a few Big Tech companies, but to the people. 
 
 Here's how it works:
 
@@ -299,6 +299,7 @@ Who does what — and who doesn't. Use this to verify that component specs don't
 ---
 
 *This document defines the architecture — the four components, the two connectors, the three external dependencies, and why this system can evolve as fast as AI does. Product specs define what's built on this foundation. The pivot spec defines why we chose this direction.*
+
 
 
 
