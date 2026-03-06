@@ -1,8 +1,9 @@
-# The Personal AI Architecture has one goal: avoid lock-in.
+---
+displayed_sidebar: null
+hide_table_of_contents: true
+---
 
-> **Status:** Final — ready for implementation
-> **Scope:** Level 1 — Foundation. This document defines the generic architecture that any product can build on. Product-specific decisions (what ships when, UX, pricing) belong in product specs.
-> **Architecture specs:** `engine-spec.md`, `memory-spec.md`, `auth-spec.md`, `gateway-spec.md`, `tools-spec.md`, `models-spec.md`, `security-spec.md`, `adapter-spec.md`, `gateway-engine-contract.md`, `customization-spec.md`, `configuration-spec.md`, `deployment-spec.md`
+# The Personal AI Architecture has one goal: avoid lock-in.
 
 Lock-in to a vendor. Lock-in to a specific technology choice. And even lock-in to the Personal AI Architecture itself.
 
