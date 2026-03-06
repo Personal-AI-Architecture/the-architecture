@@ -48,6 +48,12 @@ const config: Config = {
   ],
 
   themeConfig: {
+    announcementBar: {
+      id: 'draft_notice',
+      content:
+        '<b>This architecture is a living draft.</b> Some questions are still open — <a href="https://github.com/Personal-AI-Architecture/the-architecture/discussions">join the discussion</a>.',
+      isCloseable: true,
+    },
     colorMode: {
       defaultMode: 'dark',
       respectPrefersColorScheme: true,
