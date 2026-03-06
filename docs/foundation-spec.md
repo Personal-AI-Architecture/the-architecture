@@ -21,11 +21,9 @@ This matters for two reasons:
 
 ### 1. It puts you back in control 
 
-Your conversations, your preferences, your context are currently trapped inside software you don't control. Locking you inside their systems is Big Tech's business model. Your their user, and often times you are also the product.
+Your conversations, your preferences, your context are currently trapped inside software you don't control. Locking you inside their systems is Big Tech's business model. Your their user, and often times you are also their product.
 
 The Architecture is desigend so there are no users. Only owners. 
-
-Big Tech's goal is to lock you in. The Architecture's goal is to give you the key.
 
 ### 2. It allows you to adapt at the speed of AI 
 
@@ -303,6 +301,7 @@ Who does what — and who doesn't. Use this to verify that component specs don't
 ---
 
 *This document defines the architecture — the four components, the two connectors, the three external dependencies, and why this system can evolve as fast as AI does. Product specs define what's built on this foundation. The pivot spec defines why we chose this direction.*
+
 
 
 
