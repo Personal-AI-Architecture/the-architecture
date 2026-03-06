@@ -5,7 +5,7 @@ hide_table_of_contents: true
 
 # The Architecture
 
-The Personal AI Architecture is an MIT Licensed foundation for building AI systems that belong to you — not a platform. 
+The Personal AI Architecture is MIT Liscensed, and designed to ensure that the power of AI belongs not to a few Big Tech companies, but to the people. 
 
 It has one goal: avoid lock-in.
 
@@ -21,13 +21,17 @@ This matters for two reasons:
 
 ### 1. It puts you back in control 
 
-Your conversations, your preferences, your context are currently trapped inside software you don't control. Cancel your subscription and everything that made the software useful disappears. Switch providers and you start from zero. This isn't a bug. Locking you inside their systems is Big Tech's business model. 
+Your conversations, your preferences, your context are currently trapped inside software you don't control. Locking you inside their systems is Big Tech's business model. Your their user, and often times you are also the product.
+
+The Architecture is desigend so there are no users. Only owners. 
+
+Big Tech's goal is to lock you in. The Architecture's goal is to give you the key.
 
 ### 2. It allows you to adapt at the speed of AI 
 
 Technology is changing so fast that betting it will look the same tomorrow is already wrong.** New models, new protocols, new paradigms — every month. An architecture that bets on today's stack is an architecture with an expiration date.
 
-The Architecture is designed to ensure that the power of AI belongs not to a few Big Tech companies, but to the people. 
+If you want to keep your AI system yours, you need to be able to adapt at the speed of AI.
 
 Here's how it works:
 
@@ -299,6 +303,7 @@ Who does what — and who doesn't. Use this to verify that component specs don't
 ---
 
 *This document defines the architecture — the four components, the two connectors, the three external dependencies, and why this system can evolve as fast as AI does. Product specs define what's built on this foundation. The pivot spec defines why we chose this direction.*
+
 
 
 
