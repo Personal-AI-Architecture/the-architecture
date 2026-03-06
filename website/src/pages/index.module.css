@@ -1,0 +1,132 @@
+.heroBanner {
+  padding: 6rem 0;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--ifm-color-primary-darkest), var(--ifm-color-primary-dark));
+  color: white;
+}
+
+.heroTitle {
+  font-size: 3rem;
+  font-weight: 800;
+  color: white;
+}
+
+.heroSubtitle {
+  font-size: 1.3rem;
+  max-width: 700px;
+  margin: 1rem auto 2rem;
+  opacity: 0.9;
+  line-height: 1.6;
+}
+
+.buttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.manifesto {
+  padding: 4rem 0;
+}
+
+.manifestoContent {
+  max-width: 800px;
+  margin: 0 auto;
+  font-size: 1.1rem;
+  line-height: 1.8;
+}
+
+.manifestoContent h2 {
+  margin-top: 3rem;
+  margin-bottom: 1rem;
+}
+
+.manifestoContent p {
+  margin-bottom: 1.2rem;
+}
+
+.architectureDiagram {
+  margin: 2rem 0;
+  padding: 1.5rem;
+  border-radius: 8px;
+  overflow-x: auto;
+  font-size: 0.85rem;
+  background: var(--ifm-code-background);
+}
+
+.architectureDiagram pre {
+  margin: 0;
+  background: none;
+}
+
+.principles {
+  padding: 4rem 0;
+  background: var(--ifm-background-surface-color);
+}
+
+.sectionTitle {
+  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.sectionSubtitle {
+  text-align: center;
+  max-width: 700px;
+  margin: 0 auto 2rem;
+  opacity: 0.8;
+  font-style: italic;
+}
+
+.principlesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.principleCard {
+  padding: 1.5rem;
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: 8px;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.principleCard:hover {
+  border-color: var(--ifm-color-primary);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  text-decoration: none;
+  color: inherit;
+}
+
+.principleCard h3 {
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+.principleCard p {
+  font-size: 0.95rem;
+  opacity: 0.85;
+  margin: 0;
+}
+
+@media screen and (max-width: 996px) {
+  .heroBanner {
+    padding: 3rem 1rem;
+  }
+
+  .heroTitle {
+    font-size: 2rem;
+  }
+
+  .heroSubtitle {
+    font-size: 1.1rem;
+  }
+}

@@ -1,0 +1,26 @@
+/**
+ * Personal AI Architecture — site theme
+ */
+
+:root {
+  --ifm-color-primary: #3b5998;
+  --ifm-color-primary-dark: #344f88;
+  --ifm-color-primary-darker: #314b80;
+  --ifm-color-primary-darkest: #283d6a;
+  --ifm-color-primary-light: #4263a8;
+  --ifm-color-primary-lighter: #4567b0;
+  --ifm-color-primary-lightest: #5478c0;
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme='dark'] {
+  --ifm-color-primary: #6b8fd4;
+  --ifm-color-primary-dark: #5580cd;
+  --ifm-color-primary-darker: #4a78c9;
+  --ifm-color-primary-darkest: #305fba;
+  --ifm-color-primary-light: #819edb;
+  --ifm-color-primary-lighter: #8ca6df;
+  --ifm-color-primary-lightest: #b2c4eb;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
+}
