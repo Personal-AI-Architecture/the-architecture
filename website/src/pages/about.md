@@ -49,8 +49,8 @@ BrainDrive is building a Level 2 product on top of this architecture — a perso
 The architecture is not finished — and it shouldn't be finished by one team. We're inviting the developer and architect community to participate.
 
 - **Read the specs** — start with the [Foundation Spec](/docs/foundation-spec)
-- **Discuss** — [GitHub Discussions](https://github.com/PersonalAIArchitecture/personal-ai-architecture/discussions)
-- **Report issues** — [GitHub Issues](https://github.com/PersonalAIArchitecture/personal-ai-architecture/issues)
+- **Discuss** — Discourse forum (coming soon)
+- **Report issues** — [GitHub Issues](https://github.com/Personal-AI-Architecture/the-architecture/issues)
 - **Build on it** — the architecture is MIT-licensed, build whatever you want
 
 We're not accepting code contributions yet — we're defining the governance model first. But your ideas, questions, and challenges are welcome now.

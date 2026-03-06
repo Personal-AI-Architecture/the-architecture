@@ -56,11 +56,6 @@ const config: Config = {
       title: 'Personal AI Architecture',
       items: [
         {
-          to: '/manifesto',
-          label: 'Manifesto',
-          position: 'left',
-        },
-        {
           type: 'docSidebar',
           sidebarId: 'principlesSidebar',
           position: 'left',
@@ -97,8 +92,8 @@ const config: Config = {
           title: 'Architecture',
           items: [
             {
-              label: 'Manifesto',
-              to: '/manifesto',
+              label: 'The Architecture',
+              to: '/docs/foundation-spec',
             },
             {
               label: 'Principles',

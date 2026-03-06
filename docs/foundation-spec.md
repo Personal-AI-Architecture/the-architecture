@@ -1,26 +1,26 @@
-# Foundation Spec: Platform Architecture
+# The Personal AI Architecture has one goal: avoid lock-in.
 
-> **Project:** Pivot
-> **Generated from:** Foundation discussions (Dave W + Claude) on 2026-02-21
 > **Status:** Final — ready for implementation
 > **Scope:** Level 1 — Foundation. This document defines the generic architecture that any product can build on. Product-specific decisions (what ships when, UX, pricing) belong in product specs.
-> **Purpose:** Define the architecture — what the components are, why they exist, how they connect, and why this architecture can absorb rapid change without being rewritten.
 > **Architecture specs:** `engine-spec.md`, `memory-spec.md`, `auth-spec.md`, `gateway-spec.md`, `tools-spec.md`, `models-spec.md`, `security-spec.md`, `adapter-spec.md`, `gateway-engine-contract.md`, `customization-spec.md`, `configuration-spec.md`, `deployment-spec.md`
 
----
+Lock-in to a vendor. Lock-in to a specific technology choice. And even lock-in to the Personal AI Architecture itself.
 
-**This document defines the foundation for a superior, user-owned alternative to Big Tech AI systems.**
+It does this by making the one thing you *do* want to be locked into the foundation of the entire system: **Your Memory**.
 
-A foundation built on the 4 pillars of BrainDrive:
+### Memory is the Platform
 
-1. **Empowerment:** AI that works for you
-2. **Ownership:** You own it
-3. **Freedom:** No lockin. You're free to use it however you please
-4. **Sustainability:** Succeeds with you, not off you
+Everything else — the AI models you use, the engine that calls the tools, auth, the gateway, even the internal communication layer — is decoupled and swappable.
 
-And a foundation built not just for today, but to adapt at the speed of AI.
+This matters for two reasons:
 
-We call this foundation the **Personal AI Architecture**.
+**Platform lock-in has captured the internet.** Our personal data and knowledge is locked inside Big Tech platforms. Your conversations, your preferences, your context — trapped inside products you don't control. Cancel your subscription and everything that made the AI useful disappears. Switch providers and you start from zero. This isn't a bug. It's the business model.
+
+**Technology is changing so fast that betting it will look the same tomorrow is already wrong.** New models, new protocols, new paradigms — every month. An architecture that bets on today's stack is an architecture with an expiration date.
+
+New paradigms require new technical architectures.
+
+Hopefully this time we can learn from the mistakes of the past — and build on an architecture where your data, your knowledge, and your AI work for you, not for a platform.
 
 ```
                               ┌───────────────────────────────────────────────┐
