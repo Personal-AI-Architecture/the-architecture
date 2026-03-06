@@ -171,11 +171,10 @@ The Engine receives pre-authenticated requests. It never validates identity — 
 
 ## Conventions
 
-Not part of the contract — adoptable incrementally. Agreed formats, not a communication standard.
+Agreed formats that are not contractually required — adoptable incrementally. Correlation ID is **not** listed here because it is a required contract field (`metadata.correlation_id`, see request table above) and a security requirement (end-to-end traceability).
 
 | Convention | Implementation |
 |------------|---------------|
-| **Correlation ID** | Gateway generates `metadata.correlation_id` per request. Flows through Engine, tool calls, and logs. Enables end-to-end tracing. |
 | **Error format** | `{ code: string, message: string }` — consistent across HTTP errors and SSE error events. |
 | **Logging** | Structured JSON to stdout: `{ timestamp, correlation_id, component, level, message }`. Not a protocol — a convention components follow. |
 
