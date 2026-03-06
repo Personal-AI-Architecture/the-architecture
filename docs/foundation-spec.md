@@ -33,25 +33,6 @@ Keeping all components decoupled and easily swapable allows your AI system to ad
 
 Here's how it works:
 
-
-```
-                              ┌───────────────────────────────────────────────┐
-                              │                  YOUR MEMORY                  │
-                              │                 (the platform)                │
-                              └───────────────────────▲───────────────────────┘
-                                                      │
-                                             tools (read/write)
-                                                      │
-      Clients  ──→  Gateway API  ──→  Gateway  ──→  Engine  ──→  Provider API  ──→  Models
-    (external)      (connector)     (component)  (component)     (connector)      (external)
-                                                      │
-                        ─── Auth ───                  └──→ Tools (verbs)  ──→  External Memory (nouns)
-                        (cross-cutting                     ├── MCP servers      ├── Salesforce data
-                         component,                        ├── CLI tools        ├── Weather services
-                         applies to all                    └── Native functions └── The internet
-                         requests)
-```
-
 ### Your Memory — the platform
 
 The defining property of this architecture: Your Memory has zero outward dependencies. Every other component depends on it. It depends on none of them.
