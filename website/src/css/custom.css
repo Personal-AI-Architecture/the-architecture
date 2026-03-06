@@ -20,6 +20,16 @@
   margin: 0 auto;
 }
 
+[data-theme='dark'] div[class*='announcementBar'] {
+  background-color: #1e2a3a;
+  color: #c8d6e5;
+  border-bottom-color: #2d3f54;
+}
+
+[data-theme='dark'] div[class*='announcementBar'] a {
+  color: #81a0d4;
+}
+
 [data-theme='dark'] {
   --ifm-color-primary: #6b8fd4;
   --ifm-color-primary-dark: #5580cd;
