@@ -14,8 +14,8 @@ const config: Config = {
   url: 'https://personalaiarchitecture.org',
   baseUrl: '/',
 
-  organizationName: 'PersonalAIArchitecture',
-  projectName: 'personal-ai-architecture',
+  organizationName: 'Personal-AI-Architecture',
+  projectName: 'the-architecture',
 
   onBrokenLinks: 'throw',
 
@@ -37,7 +37,7 @@ const config: Config = {
           sidebarPath: './sidebars.ts',
           exclude: ['**/doc-registry.json'],
           editUrl:
-            'https://github.com/PersonalAIArchitecture/personal-ai-architecture/tree/main/docs/',
+            'https://github.com/Personal-AI-Architecture/the-architecture/tree/main/docs/',
         },
         blog: false,
         theme: {
@@ -84,7 +84,7 @@ const config: Config = {
           position: 'left',
         },
         {
-          href: 'https://github.com/PersonalAIArchitecture/personal-ai-architecture',
+          href: 'https://github.com/Personal-AI-Architecture/the-architecture',
           label: 'GitHub',
           position: 'right',
         },
@@ -115,11 +115,11 @@ const config: Config = {
           items: [
             {
               label: 'GitHub Discussions',
-              href: 'https://github.com/PersonalAIArchitecture/personal-ai-architecture/discussions',
+              href: 'https://github.com/Personal-AI-Architecture/the-architecture/discussions',
             },
             {
               label: 'GitHub Issues',
-              href: 'https://github.com/PersonalAIArchitecture/personal-ai-architecture/issues',
+              href: 'https://github.com/Personal-AI-Architecture/the-architecture/issues',
             },
           ],
         },
@@ -128,7 +128,7 @@ const config: Config = {
           items: [
             {
               label: 'GitHub',
-              href: 'https://github.com/PersonalAIArchitecture/personal-ai-architecture',
+              href: 'https://github.com/Personal-AI-Architecture/the-architecture',
             },
             {
               label: 'npm',
