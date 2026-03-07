@@ -4,8 +4,6 @@ hide_table_of_contents: true
 
 # Models: External Intelligence
 
-## How we define models
-
 Every AI system uses a model — ChatGPT runs GPT, Copilot runs its own models, agent frameworks wire up whatever LLM the developer chooses. So what's different here?
 
 Nothing about how the model is used. What's different is where it sits in the architecture. **Models are not a component of the system — they are external intelligence accessed through the Provider API.** The system doesn't contain a model. It calls one. The system has four components (Your Memory, Engine, Auth, Gateway). Models aren't one of them.

@@ -4,8 +4,6 @@ hide_table_of_contents: true
 
 # Deployment Spec: Where the System Lives
 
-## How we define deployment
-
 Every AI system runs somewhere — a cloud server, a laptop, a container, a managed platform. Most AI systems choose for you. Your data lives on their servers, your AI runs on their infrastructure, your options are limited to what they offer. Want to run it yourself? Too bad — the architecture assumes their cloud, their database, their network. Moving means rebuilding.
 
 Here, the system **can always run on hardware you physically control.** Your laptop, your desktop, your home server. The architecture assumes nothing about what's beyond your machine — no cloud services required, no third-party accounts needed, no internet connection assumed. Everything the system needs to function can exist on a single computer you own. You might choose managed hosting, cloud models, or remote access — but those are choices, not requirements. The local path always exists, and that's what makes every other choice a real choice. You can leave anytime because the system runs without them.

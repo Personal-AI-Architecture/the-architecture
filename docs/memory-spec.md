@@ -4,8 +4,6 @@ hide_table_of_contents: true
 
 # Your Memory Spec: The Persistent Substrate
 
-## How we define memory
-
 Everything this system processes is either a noun or a verb. **Memory is the nouns — tools are the verbs.** If it's data, it's memory. If it's not data, it's a tool. There is no third category. This is the foundational concept that shapes the entire architecture.
 
 All data, everywhere, is memory — the only question is whose. Your local files are your memory. Your Salesforce data is memory hosted by Salesforce. Weather data is the weather service's memory. The internet is public memory. The storage mechanism, the location, the format — all implementation details. Memory is the concept; the component called "Your Memory" is specifically the subset you own: your local, persistent storage in open formats. Your Memory is the platform. Everything else exists to support it. External data — Salesforce records, weather feeds, the internet — lives outside the platform, and is accessed via tools.

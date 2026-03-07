@@ -4,8 +4,6 @@ hide_table_of_contents: true
 
 # Security Spec: Threats, Data Protection, and Enforcement
 
-## How we define security
-
 Every AI system has security concerns — data protection, access control, threat mitigation, audit trails. So what's different here?
 
 Here, security is **a cross-cutting property of the whole system, not a bolt-on layer.** There is no security component. Security is enforced by existing components through configuration and contracts — Auth provides scope enforcement, tools provide container isolation, the Engine enforces timeouts, Your Memory provides version history. The Foundation provides the *mechanisms*; Level 2 products provide the *defaults*.

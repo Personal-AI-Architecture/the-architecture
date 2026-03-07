@@ -4,8 +4,6 @@ hide_table_of_contents: true
 
 # Tools: Capabilities in the Environment
 
-## Tools
-
 The system reduces to two things: memory and tools. 
 
 If it's not data (memory), it's a tool.

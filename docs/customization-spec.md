@@ -4,8 +4,6 @@ hide_table_of_contents: true
 
 # Customization: How Products Build on the Foundation
 
-## How we define customization
-
 Every AI system has an extension model — plugins, hooks, middleware, SDKs, custom code. So what's different here?
 
 Here, customization is **content, not code.** The Foundation is a runtime — you don't extend it with code, you write programs that run on it. Your "program" is Your Memory content + tools + configuration + client. The runtime executes it. Components (Your Memory, Engine, Auth, Gateway) stay generic and unmodified. Prompts are the code now — the behavior of the system emerges from what's in Your Memory and what tools are available, not from custom code in the Engine, Gateway, or Auth.
