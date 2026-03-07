@@ -14,10 +14,9 @@
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.1);
 }
 
-/* Constrain doc content width only when both sidebars are hidden (e.g., foundation-spec homepage) */
-[class*='docMainContainerEnhanced'] .theme-doc-markdown {
-  max-width: 768px;
-  margin: 0 auto;
+/* Constrain doc content width — readable line length on all pages */
+.theme-doc-markdown {
+  max-width: 860px;
 }
 
 [data-theme='dark'] div[class*='announcementBar'] {
