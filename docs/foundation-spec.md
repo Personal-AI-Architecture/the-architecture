@@ -1,37 +1,44 @@
+# Foundation Spec: Platform Architecture
+
+> **Project:** Pivot
+> **Generated from:** Foundation discussions (Dave W + Claude) on 2026-02-21
+> **Status:** Final — ready for implementation
+> **Scope:** Level 1 — Foundation. This document defines the generic architecture that any product can build on. Product-specific decisions (what ships when, UX, pricing) belong in product specs.
+> **Purpose:** Define the architecture — what the components are, why they exist, how they connect, and why this architecture can absorb rapid change without being rewritten.
+> **Architecture specs:** `engine-spec.md`, `memory-spec.md`, `auth-spec.md`, `gateway-spec.md`, `tools-spec.md`, `models-spec.md`, `security-spec.md`, `adapter-spec.md`, `gateway-engine-contract.md`, `communication-principles.md`, `customization-spec.md`, `configuration-spec.md`, `deployment-spec.md`
+
 ---
-displayed_sidebar: null
-hide_table_of_contents: true
----
 
-# The Architecture
+**This document defines the foundation for a superior, user-owned alternative to Big Tech AI systems.**
 
-The Personal AI Architecture is MIT Licensed, and designed to ensure that the power of AI belongs not to a few Big Tech companies, but to the people. 
+A foundation built on the 4 pillars of BrainDrive:
 
-It has one goal: avoid lock-in.
+1. **Empowerment:** AI that works for you
+2. **Ownership:** You own it
+3. **Freedom:** No lockin. You're free to use it however you please
+4. **Sustainability:** Succeeds with you, not off you
 
-Lock-in to a vendor. Lock-in to a specific technology choice. And even lock-in to The Architecture itself.
+And a foundation built not just for today, but to adapt at the speed of AI.
 
-It does this by making the one thing you *do* want to be locked into the foundation of the entire system: **Your Memory**.
+We call this foundation the **Personal AI Architecture**.
 
-### Your Memory is the Platform
-
-Everything else — the AI models you use, the engine that calls the tools, auth, the gateway, even the internal communication layer — is decoupled and swappable.
-
-This matters for two reasons:
-
-### 1. It puts you back in control 
-
-Your conversations, your preferences, your context are currently trapped inside software you don't control. Locking you inside their systems is Big Tech's business model. Your their user, and often times you are also their product.
-
-The Architecture is designed so there are no users. Only owners. 
-
-### 2. It allows you to adapt at the speed of AI 
-
-An architecture that bets on today's stack is an architecture with an expiration date.
-
-Keeping all components decoupled and easily swapable allows your AI system to adapt at the speed of AI. 
-
-Here's how it works:
+```
+                              ┌───────────────────────────────────────────────┐
+                              │                  YOUR MEMORY                  │
+                              │                 (the platform)                │
+                              └───────────────────────▲───────────────────────┘
+                                                      │
+                                             tools (read/write)
+                                                      │
+      Clients  ──→  Gateway API  ──→  Gateway  ──→  Engine  ──→  Provider API  ──→  Models
+    (external)      (connector)     (component)  (component)     (connector)      (external)
+                                                      │
+                        ─── Auth ───                  └──→ Tools (verbs)  ──→  External Memory (nouns)
+                        (cross-cutting                     ├── MCP servers      ├── Salesforce data
+                         component,                        ├── CLI tools        ├── Weather services
+                         applies to all                    └── Native functions └── The internet
+                         requests)
+```
 
 ### Your Memory — the platform
 
@@ -81,15 +88,34 @@ Conversations live in the system, not in any client — start on web, continue o
 
 See `gateway-spec.md`.
 
-### Two Contracts
+### Communication
 
-The architecture is designed to avoid lock-in — and that includes lock-in to itself.
+The architecture is designed to avoid lock-in — and that includes lock-in to the communication layer. Like everything else in this system besides Your Memory, it must remain swappable.
 
-All components communicate through two connectors: the Gateway API (how clients connect) and the Provider API (how the Engine connects to models). Between each contract and the external world sits an adapter — a thin translation layer you own. Your components speak a stable internal interface. The adapter translates to whatever external standard is current. Standard changes? Swap the adapter. Your components never knew the difference. The internal interface isn't sacred either — you own it, you can change it too.
+A communication layer that's accumulated other components' responsibilities is one you're stuck with. A communication layer that stays thin, stateless, and dumb is one you can swap without consequences.
+
+Two kinds of communication, two kinds of lock-in protection:
+
+#### External — Two Contracts
+
+Components connect to the outside world through two connectors:
+
+1. The Gateway API - how clients connect
+2. The Provider API - how the Engine connects to models.
+
+Between each contract and the external world sits an adapter — a thin translation layer you own. Your components speak a stable internal interface. The adapter translates to whatever external standard is current. Standard changes? Swap the adapter. Your components never knew the difference. The internal interface isn't sacred either — you own it, you can change it too.
 
 New model? Config change. Better engine? Swap it. New client? Point it at the same API. New standard? Swap the adapter. The cost of adopting anything new is one swap, not a rebuild.
 
 See `gateway-spec.md`, `models-spec.md`, `adapter-spec.md`.
+
+#### Internal
+
+Components also communicate internally — Gateway to Engine, Auth middleware on the request path, Engine to tools. These aren't connectors. They're internal interfaces between components in the same deployment.
+
+To avoid lockin, the communication layer must only carry, and not interpret signals. Memory holds state, the model makes semantic decisions, Auth controls access. Communication does none of those things. When a responsibility leaks from its owner into the communication layer, it recouples the system — swapping communication now means dealing with work that doesn't belong to it.
+
+See `communication-principles.md`.
 
 ---
 
@@ -257,6 +283,7 @@ Who does what — and who doesn't. Use this to verify that component specs don't
 | `security-spec.md` | Security — threat model, enforcement, data protection |
 | `adapter-spec.md` | Adapters — swappable contracts |
 | `gateway-engine-contract.md` | Gateway ↔ Engine internal contract |
+| `communication-principles.md` | Communication — six principles for lock-in-free internal communication |
 | `configuration-spec.md` | Configuration — preferences, runtime, tool self-description |
 | `deployment-spec.md` | Deployment — local-first contract |
 | `customization-spec.md` | How Level 2 products build on the Foundation |
@@ -271,6 +298,7 @@ Who does what — and who doesn't. Use this to verify that component specs don't
 
 | Date | Change | Source |
 |------|--------|--------|
+| 2026-03-07 | Added Communication section (External — Two Contracts + Internal) replacing standalone Two Contracts section. Added communication-principles.md to architecture specs list and Related Documents. | D169 promotion (Dave W + Dave J + Claude) |
 | 2026-03-01 | Codex cross-reference audit fix: Deployment Model wording — "no external dependencies required" → "no cloud service required" + "dependencies exist but none are inescapable." Aligns with deployment-spec which explicitly names model provider and container runtime as dependencies with escape paths. | Codex audit (Dave W + Claude) |
 | 2026-03-01 | "No users, only owners" language pass: user -> owner in responsibility matrix | Ownership model alignment (Dave W + Claude) |
 | 2026-03-01 | Cross-doc consistency review: added Developer Guides subsection to Related Documents (implementers-reference, contracts, conformance suite, guides-spec). | Cross-doc review (Dave W + Claude) |
@@ -282,14 +310,3 @@ Who does what — and who doesn't. Use this to verify that component specs don't
 ---
 
 *This document defines the architecture — the four components, the two connectors, the three external dependencies, and why this system can evolve as fast as AI does. Product specs define what's built on this foundation. The pivot spec defines why we chose this direction.*
-
-
-
-
-
-
-
-
-
-
-

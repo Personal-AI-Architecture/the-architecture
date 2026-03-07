@@ -79,6 +79,13 @@
       "depends_on": ["docs/foundation-spec.md"]
     },
     {
+      "path": "docs/communication-principles.md",
+      "covers": [],
+      "tier": 2,
+      "update_trigger": "spec",
+      "depends_on": ["docs/foundation-spec.md"]
+    },
+    {
       "path": "docs/deployment-spec.md",
       "covers": [],
       "tier": 2,
