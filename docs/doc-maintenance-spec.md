@@ -1,12 +1,8 @@
-# Documentation Maintenance Spec
-
-> **Project:** Pivot
-> **Generated from:** Documentation maintenance discussion (Dave W + Claude) on 2026-03-02
-> **Status:** Final — ready for implementation
-> **Architecture:** See `foundation-spec.md` for platform architecture
-> **Peer documents:** See `lockin-gate.md` (PR gate), `AGENT.md` (AI entry point)
-
 ---
+hide_table_of_contents: true
+---
+
+# Documentation Maintenance Spec
 
 ## Why this spec exists
 

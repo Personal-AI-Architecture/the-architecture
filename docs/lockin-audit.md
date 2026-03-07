@@ -1,11 +1,8 @@
-# Zero Lock-In Audit (Milestone / Release)
-
-> **Project:** Pivot
-> **Purpose:** Deep architecture audit used at milestones and before release.
-> **Use:** Run this in addition to `lockin-gate.md` for broad or high-risk changes.
-> **Primary question:** If we swap this piece tomorrow, what outside it must change?
-
 ---
+hide_table_of_contents: true
+---
+
+# Zero Lock-In Audit (Milestone / Release)
 
 ## 1. Universal Architecture Checks
 

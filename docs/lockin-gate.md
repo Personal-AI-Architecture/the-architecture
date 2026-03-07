@@ -1,11 +1,8 @@
-# Lock-In Gate (PR Checklist)
-
-> **Project:** Pivot
-> **Purpose:** Fast, mandatory gate for every non-trivial change.
-> **Use:** Run on every PR that touches architecture, component boundaries, adapters, configuration, deployment, auth, memory tooling, or model/tool integration.
-> **Pass rule:** If any required item is unchecked, the PR is blocked unless an explicit architecture exception is documented.
-
 ---
+hide_table_of_contents: true
+---
+
+# Lock-In Gate (PR Checklist)
 
 ## Required Checks
 

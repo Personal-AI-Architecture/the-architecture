@@ -1,10 +1,8 @@
-# Human Equivalents — How the Architecture Maps to Human Experience
-
-> **Project:** Pivot — Personal AI Architecture
-> **Purpose:** Map architectural concepts to human equivalents, making abstract design decisions intuitive
-> **Status:** Active — expand as new mappings emerge
-
 ---
+hide_table_of_contents: true
+---
+
+# Human Equivalents — How the Architecture Maps to Human Experience
 
 ## Why This Document Exists
 

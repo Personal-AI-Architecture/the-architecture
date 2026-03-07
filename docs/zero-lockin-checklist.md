@@ -1,10 +1,8 @@
-# Zero Lock-In Checklist (Index)
-
-> **Project:** Pivot
-> **Status:** Canonical checklist split into gate + audit.
-> **Parent:** `foundation-spec.md`
-
 ---
+hide_table_of_contents: true
+---
+
+# Zero Lock-In Checklist (Index)
 
 Use these documents:
 

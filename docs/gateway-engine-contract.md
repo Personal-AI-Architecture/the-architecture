@@ -1,13 +1,8 @@
-# Gateway ↔ Engine API Contract
-
-> **Project:** Pivot
-> **Date:** 2026-02-26
-> **Author:** Dave W
-> **Status:** Final — ready for implementation
-> **Architecture:** See `foundation-spec.md` for platform architecture (components, contracts, connectors)
-> **Source:** Protocol evaluation (D136) narrowed 29+ communication gaps to 1: this interface.
-
 ---
+hide_table_of_contents: true
+---
+
+# Gateway ↔ Engine API Contract
 
 ## How we define this contract
 

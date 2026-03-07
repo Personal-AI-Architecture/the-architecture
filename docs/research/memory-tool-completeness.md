@@ -1,13 +1,8 @@
-# Memory/Tool Completeness: Why the Architecture Needs No New Components
-
-> **Project:** Pivot
-> **Date:** 2026-02-26
-> **Author:** Dave W
-> **Generated from:** D135 discussion (Dave W + Claude), post-call analysis of D122
-> **Purpose:** Prove the architecture is complete by showing everything the system processes decomposes into memory (nouns/data) or tools (verbs/operations). Two exceptions — the Model and Auth — both flow from the same root: swappable intelligence.
-> **Related documents:** `tools-spec.md` (Memory/Tool Binary, What Is a Tool?, Why Tools Are Not a Component), `memory-spec.md` (unopinionated substrate), `auth-spec.md` (cross-cutting identity and access control), `foundation-spec.md` (architecture overview). Decisions D43, D51-D53, D57-D58, D60, D62-D63, D122, D135 are tracked in the BrainDrive Library.
-
 ---
+hide_table_of_contents: true
+---
+
+# Memory/Tool Completeness: Why the Architecture Needs No New Components
 
 ## 1. The Binary
 

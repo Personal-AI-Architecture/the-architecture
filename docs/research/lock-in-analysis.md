@@ -1,3 +1,7 @@
+---
+hide_table_of_contents: true
+---
+
 # Lock-In Risk Analysis: Foundation Architecture
 
 > **Purpose:** Explain how the architecture achieves zero lock-in at every layer, and identify the implementation disciplines required to keep it that way.

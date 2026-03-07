@@ -1,6 +1,7 @@
 ---
 sidebar_position: 4
 title: "Principle 4: Start Constrained, Expand Deliberately"
+hide_table_of_contents: true
 ---
 
 # Start Constrained, Expand Deliberately

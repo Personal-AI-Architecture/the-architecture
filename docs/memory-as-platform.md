@@ -1,10 +1,8 @@
-# Memory as the Platform
-
-> **Project:** Pivot
-> **Purpose:** The complete argument for why memory is the platform in personal AI — and how BrainDrive implements it
-> **Status:** Active — standalone concept document
-
 ---
+hide_table_of_contents: true
+---
+
+# Memory as the Platform
 
 # Part 1: Memory Is the Platform
 

@@ -1,11 +1,8 @@
-# Engine Spec: The Generic Agent Loop
-
-> **Project:** Pivot
-> **Generated from:** Engine interview session (Dave W + Claude) on 2026-02-23
-> **Status:** Final — ready for implementation
-> **Architecture:** See `foundation-spec.md` for platform architecture (components, contracts, connectors)
-
 ---
+hide_table_of_contents: true
+---
+
+# Engine Spec: The Generic Agent Loop
 
 ## How we define the Engine
 

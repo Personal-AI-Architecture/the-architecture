@@ -1,6 +1,7 @@
 ---
 sidebar_position: 2
 title: "Principle 2: Memory Is the Platform"
+hide_table_of_contents: true
 ---
 
 # Memory Is the Platform

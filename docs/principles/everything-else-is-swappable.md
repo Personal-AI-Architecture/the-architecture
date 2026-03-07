@@ -1,6 +1,7 @@
 ---
 sidebar_position: 3
 title: "Principle 3: Everything Else Is Swappable"
+hide_table_of_contents: true
 ---
 
 # Everything Else Is Swappable

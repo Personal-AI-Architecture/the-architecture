@@ -1,3 +1,7 @@
+---
+hide_table_of_contents: true
+---
+
 # Conformance Suite
 
 > Validates any implementation of the Personal AI Architecture against its architectural invariants.

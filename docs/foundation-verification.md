@@ -1,11 +1,8 @@
-# Foundation Verification Spec
-
-> **Project:** Pivot
-> **Parent:** `foundation-spec.md`
-> **Purpose:** Make every architectural assertion in the foundation spec verifiable. Any implementation — regardless of language, framework, or team — can be checked against these criteria. A system that fails verification is violating the architecture, whether or not the code "works."
-> **Relationship to lockin docs:** `lockin-gate.md` and `lockin-audit.md` are operational subsets of this document, optimized for PR review and milestone audits. This is the comprehensive source. Those are the daily tools.
-
 ---
+hide_table_of_contents: true
+---
+
+# Foundation Verification Spec
 
 ## How to Use This Document
 

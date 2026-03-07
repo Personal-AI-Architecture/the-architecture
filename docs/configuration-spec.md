@@ -1,11 +1,8 @@
-# Configuration: The Thin Bootstrap
-
-> **Project:** Pivot
-> **Generated from:** Configuration interview session (Dave W + Claude) on 2026-02-27
-> **Status:** Final — ready for implementation
-> **Architecture:** See `foundation-spec.md` for platform architecture (components, contracts, connectors)
-
 ---
+hide_table_of_contents: true
+---
+
+# Configuration: The Thin Bootstrap
 
 ## How we define configuration
 

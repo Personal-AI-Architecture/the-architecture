@@ -1,10 +1,8 @@
-# Ecosystem Concept
-
-> **Project:** Pivot
-> **Source:** Working session (Dave W + Claude) on 2026-02-26
-> **Status:** Concept — captures the ecosystem thinking before naming is finalized
-
 ---
+hide_table_of_contents: true
+---
+
+# Ecosystem Concept
 
 ## The Three Levels
 

@@ -1,3 +1,7 @@
+---
+hide_table_of_contents: true
+---
+
 # Communication Principles: Avoiding Lockin
 
 This architecture says everything except Your Memory is swappable (Foundation Principle 3). Communication is no different.

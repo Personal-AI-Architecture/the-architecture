@@ -1,11 +1,8 @@
-# Tools: Capabilities in the Environment
-
-> **Project:** Pivot
-> **Generated from:** Tools interview session (Dave W + Claude) on 2026-02-23
-> **Status:** Final — ready for implementation
-> **Architecture:** See `foundation-spec.md` for platform architecture (components, contracts, connectors)
-
 ---
+hide_table_of_contents: true
+---
+
+# Tools: Capabilities in the Environment
 
 ## Tools
 

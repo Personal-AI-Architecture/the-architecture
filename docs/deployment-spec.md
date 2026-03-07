@@ -1,13 +1,8 @@
-# Deployment Spec: Where the System Lives
-
-> **Project:** Pivot
-> **Generated from:** Deployment interview session (Dave W + Claude) on 2026-02-27
-> **Status:** Final — ready for implementation
-> **Scope:** Level 1 — Foundation. This document defines the deployment contract for the generic architecture. Managed hosting, VPS/cloud hosting, and deployment mechanics are Level 2 product concerns.
-> **Audience:** Architects and builders creating products on the Personal AI Architecture.
-> **Architecture:** See `foundation-spec.md` for platform architecture (components, contracts, connectors)
-
 ---
+hide_table_of_contents: true
+---
+
+# Deployment Spec: Where the System Lives
 
 ## How we define deployment
 

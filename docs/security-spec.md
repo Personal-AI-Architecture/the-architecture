@@ -1,12 +1,8 @@
-# Security Spec: Threats, Data Protection, and Enforcement
-
-> **Project:** Pivot
-> **Generated from:** Security interview session (Dave W + Claude) on 2026-02-26
-> **Status:** Final — ready for implementation
-> **Architecture:** See `foundation-spec.md` for platform architecture (components, contracts, connectors)
-> **Peer document:** See `auth-spec.md` for identity, access, and permissions (who can do what)
-
 ---
+hide_table_of_contents: true
+---
+
+# Security Spec: Threats, Data Protection, and Enforcement
 
 ## How we define security
 

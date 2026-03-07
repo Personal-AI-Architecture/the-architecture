@@ -1,11 +1,8 @@
-# Auth Spec: Identity, Access, and Permissions
-
-> **Project:** Pivot
-> **Generated from:** Auth interview session (Dave W + Claude) on 2026-02-23
-> **Status:** Final — ready for implementation
-> **Architecture:** See `foundation-spec.md` for platform architecture (components, contracts, connectors)
-
 ---
+hide_table_of_contents: true
+---
+
+# Auth Spec: Identity, Access, and Permissions
 
 ## How we define auth
 

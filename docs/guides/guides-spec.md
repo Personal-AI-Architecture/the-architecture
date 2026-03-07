@@ -1,10 +1,8 @@
-# Developer Guides Spec
-
-> **Project:** Pivot — Personal AI Architecture
-> **Status:** Draft
-> **Purpose:** Define what developer-facing documentation the architecture needs so both humans and AI coding agents can understand and build on it with minimal friction.
-
 ---
+hide_table_of_contents: true
+---
+
+# Developer Guides Spec
 
 ## Problem
 

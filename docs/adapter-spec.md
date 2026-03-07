@@ -1,12 +1,8 @@
-# Adapter Spec: Making Contracts Swappable
-
-> **Project:** Pivot
-> **Generated from:** Architecture discussion (Dave W + Claude) on 2026-02-27
-> **Status:** Final — ready for implementation
-> **Purpose:** Define how adapters make the two contracts (Gateway API, Provider API) swappable — completing the architecture's zero-lock-in promise.
-> **Parent:** `foundation-spec.md`
-
 ---
+hide_table_of_contents: true
+---
+
+# Adapter Spec: Making Contracts Swappable
 
 ## How we define adapters
 
