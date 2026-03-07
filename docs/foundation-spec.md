@@ -7,7 +7,9 @@ hide_table_of_contents: true
 
 The Personal AI Architecture is MIT Licensed, and designed to ensure that the power of AI belongs not to a few Big Tech companies, but to the people.
 
-It is not a personal AI system — it is the architecture you build one on top of. An architecture with one goal: avoid lock-in.
+It is not a personal AI system — it is the architecture you build one on top of. 
+
+An architecture with one goal: avoid lock-in.
 
 Lock-in to a vendor. Lock-in to a specific technology choice. And even lock-in to The Architecture itself.
 
@@ -367,3 +369,4 @@ Who does what — and who doesn't. Use this to verify that component specs don't
 ---
 
 *This document defines the architecture — the four components, the two connectors, the three external dependencies, and why this system can evolve as fast as AI does. Product specs define what's built on this foundation. The pivot spec defines why we chose this direction.*
+
