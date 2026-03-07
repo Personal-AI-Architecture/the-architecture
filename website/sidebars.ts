@@ -47,6 +47,7 @@ const sidebars: SidebarsConfig = {
       items: [
         'tools-spec',
         'security-spec',
+        'communication-principles',
         'configuration-spec',
         'customization-spec',
         'deployment-spec',
@@ -60,7 +61,6 @@ const sidebars: SidebarsConfig = {
       label: 'Core Specs',
       collapsed: false,
       items: [
-        'foundation-spec',
         'memory-spec',
         'engine-spec',
         'auth-spec',
@@ -70,6 +70,7 @@ const sidebars: SidebarsConfig = {
         'security-spec',
         'adapter-spec',
         'gateway-engine-contract',
+        'communication-principles',
         'configuration-spec',
         'customization-spec',
         'deployment-spec',
