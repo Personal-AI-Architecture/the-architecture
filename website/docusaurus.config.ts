@@ -51,7 +51,7 @@ const config: Config = {
     announcementBar: {
       id: 'draft_notice',
       content:
-        '<b>This architecture is a living draft.</b> Some questions are still open — <a href="https://discuss.personalaiarchitecture.com">join the discussion</a>.',
+        '<b>This architecture is a living draft.</b> Some questions are still open — <a href="https://discuss.personalaiarchitecture.org">join the discussion</a>.',
       isCloseable: true,
     },
     colorMode: {
@@ -116,7 +116,7 @@ const config: Config = {
           items: [
             {
               label: 'GitHub Discussions',
-              href: 'https://discuss.personalaiarchitecture.com',
+              href: 'https://discuss.personalaiarchitecture.org',
             },
             {
               label: 'GitHub Issues',
