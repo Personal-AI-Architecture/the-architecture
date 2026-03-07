@@ -1,44 +1,37 @@
-# Foundation Spec: Platform Architecture
-
-> **Project:** Pivot
-> **Generated from:** Foundation discussions (Dave W + Claude) on 2026-02-21
-> **Status:** Final — ready for implementation
-> **Scope:** Level 1 — Foundation. This document defines the generic architecture that any product can build on. Product-specific decisions (what ships when, UX, pricing) belong in product specs.
-> **Purpose:** Define the architecture — what the components are, why they exist, how they connect, and why this architecture can absorb rapid change without being rewritten.
-> **Architecture specs:** `engine-spec.md`, `memory-spec.md`, `auth-spec.md`, `gateway-spec.md`, `tools-spec.md`, `models-spec.md`, `security-spec.md`, `adapter-spec.md`, `gateway-engine-contract.md`, `communication-principles.md`, `customization-spec.md`, `configuration-spec.md`, `deployment-spec.md`
-
+---
+displayed_sidebar: null
+hide_table_of_contents: true
 ---
 
-**This document defines the foundation for a superior, user-owned alternative to Big Tech AI systems.**
+# The Architecture
 
-A foundation built on the 4 pillars of BrainDrive:
+The Personal AI Architecture is MIT Licensed, and designed to ensure that the power of AI belongs not to a few Big Tech companies, but to the people.
 
-1. **Empowerment:** AI that works for you
-2. **Ownership:** You own it
-3. **Freedom:** No lockin. You're free to use it however you please
-4. **Sustainability:** Succeeds with you, not off you
+It has one goal: avoid lock-in.
 
-And a foundation built not just for today, but to adapt at the speed of AI.
+Lock-in to a vendor. Lock-in to a specific technology choice. And even lock-in to The Architecture itself.
 
-We call this foundation the **Personal AI Architecture**.
+It does this by making the one thing you *do* want to be locked into the foundation of the entire system: **Your Memory**.
 
-```
-                              ┌───────────────────────────────────────────────┐
-                              │                  YOUR MEMORY                  │
-                              │                 (the platform)                │
-                              └───────────────────────▲───────────────────────┘
-                                                      │
-                                             tools (read/write)
-                                                      │
-      Clients  ──→  Gateway API  ──→  Gateway  ──→  Engine  ──→  Provider API  ──→  Models
-    (external)      (connector)     (component)  (component)     (connector)      (external)
-                                                      │
-                        ─── Auth ───                  └──→ Tools (verbs)  ──→  External Memory (nouns)
-                        (cross-cutting                     ├── MCP servers      ├── Salesforce data
-                         component,                        ├── CLI tools        ├── Weather services
-                         applies to all                    └── Native functions └── The internet
-                         requests)
-```
+### Your Memory is the Platform
+
+Everything else — the AI models you use, the engine that calls the tools, auth, the gateway, even the internal communication layer — is decoupled and swappable.
+
+This matters for two reasons:
+
+### 1. It puts you back in control
+
+Your conversations, your preferences, your context are currently trapped inside software you don't control. Locking you inside their systems is Big Tech's business model. Your their user, and often times you are also their product.
+
+The Architecture is designed so there are no users. Only owners.
+
+### 2. It allows you to adapt at the speed of AI
+
+An architecture that bets on today's stack is an architecture with an expiration date.
+
+Keeping all components decoupled and easily swapable allows your AI system to adapt at the speed of AI.
+
+Here's how it works:
 
 ### Your Memory — the platform
 
