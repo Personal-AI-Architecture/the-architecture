@@ -53,4 +53,4 @@ The architecture is not finished — and it shouldn't be finished by one team. W
 - **Report issues** — [GitHub Issues](https://github.com/Personal-AI-Architecture/the-architecture/issues)
 - **Build on it** — the architecture is MIT-licensed, build whatever you want
 
-We're not accepting code contributions yet — we're defining the governance model first. But your ideas, questions, and challenges are welcome now.
+We welcome contributions — whether it's ideas, feedback, bug reports, or code. See our [Contributing Guide](https://github.com/Personal-AI-Architecture/the-architecture/blob/main/CONTRIBUTING.md) to get started.

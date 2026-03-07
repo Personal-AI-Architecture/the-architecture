@@ -2,22 +2,30 @@
 
 Thank you for your interest in the Personal AI Architecture.
 
-## Current Policy: Discussion Only
+## How to Contribute
 
-We are not accepting pull requests at this time. We're defining the governance model first — how decisions get made, how contributions are reviewed, and how the architecture evolves without introducing the complexity that creates lock-in.
+### Discussion and Feedback
 
-## What You Can Do Now
-
-**Discuss the architecture.** Read the specs, challenge the principles, propose changes, ask questions. The best contributions right now are ideas, not code.
+The easiest way to contribute is to engage with the architecture — read the specs, challenge the principles, propose changes, ask questions.
 
 - **Issues** — Report problems, ask questions, or propose changes via [GitHub Issues](https://github.com/Personal-AI-Architecture/the-architecture/issues)
 - **Forum** — Join the discussion on our [Discourse forum](https://discuss.personalaiarchitecture.org)
 
-**Build on it.** The architecture is MIT-licensed. You can use it, extend it, and build products on it without waiting for permission.
+### Code and Documentation
 
-## When Will Code Contributions Open?
+We welcome pull requests for bug fixes, test improvements, documentation clarifications, and spec enhancements.
 
-When the governance model is ready. We'll update this file and announce it on the forum.
+1. Fork the repository
+2. Create a branch from `main`
+3. Make your changes
+4. Run the test suite: `npm test`
+5. Submit a pull request with a clear description of what you changed and why
+
+For larger changes (new specs, architectural modifications, principle changes), please open an issue first to discuss the approach.
+
+### Build on It
+
+The architecture is MIT-licensed. You can use it, extend it, and build products on it without waiting for permission.
 
 ## License
 
