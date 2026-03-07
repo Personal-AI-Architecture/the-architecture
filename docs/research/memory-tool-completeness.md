@@ -191,7 +191,7 @@ Each time, the question was the same: is there a gap? Each time, the answer was 
 
 The systematic decomposition in Section 3 covers fifteen distinct concepts people might propose as subsystems. Every one decomposes into memory (data) + tools (operations) + existing infrastructure concerns. No remainder. No orphaned responsibility.
 
-New capabilities arrive by adding tools and memory content, not by adding components. This is the architecture's Principle 4: the system expands via tools (D55). Each expansion is more data entering the environment. Each contraction is data being removed. The components don't change.
+New capabilities arrive by adding tools and memory content, not by adding components. This is the architecture's Principle 5: the system expands via tools (D55). Each expansion is more data entering the environment. Each contraction is data being removed. The components don't change.
 
 - Want RAG? Add a vector store (memory) and a semantic search tool. No new component.
 - Want scheduling? Add schedule definitions (memory) and a cron tool. No new component.

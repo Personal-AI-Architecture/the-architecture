@@ -6,7 +6,7 @@
 
 ## SWAP-1: Provider Swap
 
-**Validates:** Provider API contract, Principle 3 (everything else is swappable)
+**Validates:** Provider API contract, Principle 2 (everything else is swappable)
 
 **Setup:**
 1. System running with Provider A (e.g., OpenRouter adapter)
@@ -60,7 +60,7 @@
 
 ## SWAP-3: Tool Swap
 
-**Validates:** D51 (tools are data in the environment), Principle 1 (interfaces over implementations)
+**Validates:** D51 (tools are data in the environment), Principle 3 (interfaces over implementations)
 
 ### SWAP-3a: Add a Tool
 

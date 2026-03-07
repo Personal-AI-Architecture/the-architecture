@@ -1,6 +1,6 @@
 ---
-sidebar_position: 1
-title: "Principle 1: Interfaces Over Implementations"
+sidebar_position: 3
+title: "Principle 3: Interfaces Over Implementations"
 hide_table_of_contents: true
 ---
 

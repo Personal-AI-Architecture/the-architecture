@@ -4,7 +4,7 @@ hide_table_of_contents: true
 
 # Communication Principles: Avoiding Lockin
 
-This architecture says everything except Your Memory is swappable (Foundation Principle 3). Communication is no different.
+This architecture says everything except Your Memory is swappable (Foundation Principle 2). Communication is no different.
 
 The communication layer is just another replaceable piece — like the Engine, like the Gateway, like the contracts and their adapters.
 
@@ -49,7 +49,7 @@ This document covers communication **between internal components** — Gateway, 
 
 Communication is a layer between components, not inside them. If the Gateway has serialization logic baked into its code, or the Engine hard-codes a message envelope format, swapping the communication approach means rewriting the components. That's coupling, not swappability.
 
-Components speak to an interface. The communication layer implements that interface. Swap the implementation, components don't know the difference. This is Foundation Principle 1 (Interfaces Over Implementations) applied to communication. Same principle that makes the Engine swappable — it's defined by what it does, not how it talks.
+Components speak to an interface. The communication layer implements that interface. Swap the implementation, components don't know the difference. This is Foundation Principle 3 (Interfaces Over Implementations) applied to communication. Same principle that makes the Engine swappable — it's defined by what it does, not how it talks.
 
 Can you change how components communicate without changing the component code? If no, you've embedded communication and created lock-in.
 
@@ -146,7 +146,7 @@ Can one component add new fields to its messages without breaking any other comp
 | Date | Change | Source |
 |------|--------|--------|
 | 2026-03-05 | Voice alignment: rewrote to match finalized spec style — "How we define" opener, conversational tone, analogies woven through, scope folded into opener, Decisions Made restored, test language woven into prose instead of bold-formatted subsections. | Style alignment (Dave W + Claude) |
-| 2026-03-05 | Complete rewrite: reframed from "debate position" to "properties for lock-in-free communication." 8 principles reduced to 6, each derived from "what makes communication swappable." Old P1 (Standards First) removed — covered by Foundation Principle 5. Old P5 (Structured Errors) folded into P2 (Consistency). Old P7 (Memory Stays Central) reframed as P3 (No State) + P1 (Not Embedded). Old P8 (Transport Independence) removed — scope statement, not principle. | Architecture review (Dave W + Claude) |
+| 2026-03-05 | Complete rewrite: reframed from "debate position" to "properties for lock-in-free communication." 8 principles reduced to 6, each derived from "what makes communication swappable." Old P1 (Standards First) removed — covered by Foundation Principle 4. Old P5 (Structured Errors) folded into P2 (Consistency). Old P7 (Memory Stays Central) reframed as P3 (No State) + P1 (Not Embedded). Old P8 (Transport Independence) removed — scope statement, not principle. | Architecture review (Dave W + Claude) |
 | 2026-03-05 | Initial draft — 8 principles, success criteria, open questions | Architecture review of BDP (Dave W + Claude) |
 
 ---

@@ -114,18 +114,18 @@ A runnable test suite that validates *any* implementation against the architectu
 
 | Test ID | Test | Pass Criteria | Validates |
 |---------|------|---------------|-----------|
-| SWAP-1 | Provider swap | Change provider config → next message uses new provider → no code changes | Provider API contract, Principle 3 |
+| SWAP-1 | Provider swap | Change provider config → next message uses new provider → no code changes | Provider API contract, Principle 2 |
 | SWAP-2 | Model swap | Change model config → next message uses new model → no code changes | Provider API contract |
-| SWAP-3 | Tool swap | Add/remove a tool → system functions → no code changes to Engine/Gateway/Auth | D51, Principle 1 |
+| SWAP-3 | Tool swap | Add/remove a tool → system functions → no code changes to Engine/Gateway/Auth | D51, Principle 3 |
 
 **Architectural invariant tests:**
 
 | Test ID | Test | Pass Criteria | Validates |
 |---------|------|---------------|-----------|
-| ARCH-1 | Memory zero dependencies | Stop all components except Memory storage → Memory is still readable with standard tools (text editor, file browser, DB viewer) | Principle 2, foundation-spec §Your Memory |
+| ARCH-1 | Memory zero dependencies | Stop all components except Memory storage → Memory is still readable with standard tools (text editor, file browser, DB viewer) | Principle 1, foundation-spec §Your Memory |
 | ARCH-2 | Engine swap | Replace Engine implementation → Gateway/Memory/Auth/tools unaffected → system functions | D39, FS-7 |
 | ARCH-3 | Client swap | New client speaks Gateway API → system serves it identically | D57, FS-5 |
-| ARCH-4 | Schema conformance | All connector payloads validate against canonical schemas in `specs/` | D16, Principle 1 |
+| ARCH-4 | Schema conformance | All connector payloads validate against canonical schemas in `specs/` | D16, Principle 3 |
 
 **Deployment invariant tests (from deployment-spec + security-spec):**
 
@@ -140,14 +140,14 @@ A runnable test suite that validates *any* implementation against the architectu
 
 | Test ID | Story | Pass Criteria | Validates |
 |---------|-------|---------------|-----------|
-| FS-1 | Move Your Memory | Export memory → import on fresh deployment → preferences honored, gaps reported, nothing lost | Principle 2, memory portability |
-| FS-2 | Add capability | Add a tool/skill/client/provider → Memory gains no outward dependencies → four-component structure holds | Principle 1, Principle 2, D64 |
+| FS-1 | Move Your Memory | Export memory → import on fresh deployment → preferences honored, gaps reported, nothing lost | Principle 1, memory portability |
+| FS-2 | Add capability | Add a tool/skill/client/provider → Memory gains no outward dependencies → four-component structure holds | Principle 3, Principle 1, D64 |
 | FS-3 | Run on own hardware | Install on laptop/desktop/server → no external service required → full offline capability | D148, Pillars 2+3 |
 | FS-4 | Swap provider | = SWAP-1 | Provider API |
 | FS-5 | Swap client | = ARCH-3 | Gateway API |
-| FS-6 | Evolve Memory | Add search capability → no other component changes | Principle 2 |
-| FS-7 | Swap Engine | = ARCH-2 | D39, Principle 3 |
-| FS-8 | Expand scope via tools | Add tools → broader capability → no architectural changes | D55, Principle 4 |
+| FS-6 | Evolve Memory | Add search capability → no other component changes | Principle 1 |
+| FS-7 | Swap Engine | = ARCH-2 | D39, Principle 2 |
+| FS-8 | Expand scope via tools | Add tools → broader capability → no architectural changes | D55, Principle 5 |
 
 Some FS tests overlap with SWAP/ARCH/DEPLOY tests — noted with `=` references above. Fixtures and evidence format (CI output, artifacts) to be defined when the reference implementation exists.
 

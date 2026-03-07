@@ -16,8 +16,8 @@ hide_table_of_contents: true
 ### Boundaries and Contracts
 
 - [ ] Component boundaries remain contract-driven — Gateway API, Provider API, Gateway-Engine contract (D64, D137).
-- [ ] No new dependency on another component's internals has been introduced (Principle 1).
-- [ ] Framework/library choices remain internal implementation details (Principle 3).
+- [ ] No new dependency on another component's internals has been introduced (Principle 3).
+- [ ] Framework/library choices remain internal implementation details (Principle 2).
 
 ### Configuration and Swappability
 

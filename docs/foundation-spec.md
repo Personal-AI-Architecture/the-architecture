@@ -124,11 +124,11 @@ Managed hosting, VPS, and remote access are Level 2 product extensions — same 
 
 Five principles enforce the architecture:
 
-1. **Interfaces Over Implementations** — Every component is defined by what it does, not how it works. The Engine calls tools — it doesn't know if Memory is files or a database. This is what makes one-component swaps possible.
-2. **Memory Is the Platform** — Everything else exists to serve Memory. The most portable, most independent, most durable part of the system. No other component should create dependencies that make Memory hard to move.
-3. **Everything Else Is Swappable** — Engine, Auth, Gateway, clients, models, tools, contracts, hosting — all replaceable. Memory via tools, components via contracts, contracts via adapters. Every piece is a drop-down menu, not a permanent choice.
-4. **Start Constrained, Expand Deliberately** — Products built on this don't have to use all capabilities at once. Each expansion — broader scope, more tools, external integrations — is a deliberate step.
-5. **Complexity Is Lock-In** — If the system requires a team of developers, you're locked in to that team. That's a dependency as real as any vendor. The entire system must be understandable and maintainable by one developer + AI coding agents. Four components and two connectors isn't minimalism — every additional component is a potential expertise dependency.
+1. **Memory Is the Platform** — Everything else exists to serve Memory. The most portable, most independent, most durable part of the system. No other component should create dependencies that make Memory hard to move.
+2. **Everything Else Is Swappable** — Engine, Auth, Gateway, clients, models, tools, contracts, hosting — all replaceable. Memory via tools, components via contracts, contracts via adapters. Every piece is a drop-down menu, not a permanent choice.
+3. **Interfaces Over Implementations** — Every component is defined by what it does, not how it works. The Engine calls tools — it doesn't know if Memory is files or a database. This is what makes one-component swaps possible.
+4. **Complexity Is Lock-In** — If the system requires a team of developers, you're locked in to that team. That's a dependency as real as any vendor. The entire system must be understandable and maintainable by one developer + AI coding agents. Four components and two connectors isn't minimalism — every additional component is a potential expertise dependency.
+5. **Start Constrained, Expand Deliberately** — Products built on this don't have to use all capabilities at once. Each expansion — broader scope, more tools, external integrations — is a deliberate step.
 
 **Nothing enforces these principles.** You can bypass adapters, hardcode a provider, or couple components directly — the system still works. But every violation is a lock-in you've chosen to accept. The architecture makes the zero-lock-in path the easiest path, not the only path.
 

@@ -6,7 +6,7 @@
 
 ## ARCH-1: Memory Zero Dependencies
 
-**Validates:** Principle 2 (Memory is the platform), foundation-spec §Your Memory
+**Validates:** Principle 1 (Memory is the platform), foundation-spec §Your Memory
 
 **Setup:**
 1. System running with data in Your Memory (files, conversations, preferences)

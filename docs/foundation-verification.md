@@ -135,7 +135,31 @@ The four pillars are values, not code — but they produce observable properties
 
 ## 3. Principle Verification
 
-### PR-1. Interfaces Over Implementations (Principle 1)
+### PR-1. Memory Is the Platform (Principle 1)
+
+**Claim:** Your Memory has zero outward dependencies. Every other component depends on it. It depends on none of them.
+
+**Verification:**
+- (a) **Zero outward dependencies:** Remove Engine, Auth, Gateway, all clients, all models. Your Memory is still intact, readable, and complete. No data is lost or orphaned.
+- (b) **Inward dependency direction:** Engine, Auth, and Gateway all depend on Memory (via tools or configuration). Memory does not import, call, or reference any of them.
+- (c) **Persistence across swaps:** Swap the Engine, swap the Gateway, swap Auth. Memory is unchanged.
+- (d) **Independent inspectability:** Memory can be browsed, searched, and read with standard tools (text editor, file browser, database viewer) while the system is not running.
+
+**Fail condition:** Memory contains references to specific component implementations. Or Memory requires a running component to be readable. Or removing a component makes Memory data inaccessible or corrupt. Or Memory has an import/dependency on Engine, Auth, or Gateway code.
+
+### PR-2. Everything Else Is Swappable (Principle 2)
+
+**Claim:** Engine, Auth, Gateway, clients, models, tools, contracts, hosting — all replaceable. The swappability chain is complete: Memory via tools, components via contracts, contracts via adapters.
+
+**Verification:**
+- (a) **Component swap:** Replace the Engine with a different implementation. Gateway, Auth, Memory, clients, models — nothing else changes. (Repeat for Auth, Gateway.)
+- (b) **Contract swap:** Change the Gateway API protocol (e.g., REST to GraphQL). Only the adapter changes. Components stay the same.
+- (c) **Memory swap:** Change the storage backend (e.g., files to database). Only the tool implementations change. Engine, Auth, Gateway — nothing else changes.
+- (d) **Swappability chain completeness:** For every element in the system, identify the intermediary that absorbs change (tools, contracts, or adapters). If none exists, the element is a lock-in point.
+
+**Fail condition:** Swapping any element requires changes to more than one component. Or an element exists with no identifiable intermediary protecting it from change propagation.
+
+### PR-3. Interfaces Over Implementations (Principle 3)
 
 **Claim:** Every component is defined by what it does, not how it works. Components interact only through defined interfaces.
 
@@ -148,43 +172,7 @@ The four pillars are values, not code — but they produce observable properties
 
 **Fail condition:** Any component directly accesses another component's internals (imports, shared state, format assumptions). Or swapping an implementation requires changes in a component that shouldn't know about it.
 
-### PR-2. Memory Is the Platform (Principle 2)
-
-**Claim:** Your Memory has zero outward dependencies. Every other component depends on it. It depends on none of them.
-
-**Verification:**
-- (a) **Zero outward dependencies:** Remove Engine, Auth, Gateway, all clients, all models. Your Memory is still intact, readable, and complete. No data is lost or orphaned.
-- (b) **Inward dependency direction:** Engine, Auth, and Gateway all depend on Memory (via tools or configuration). Memory does not import, call, or reference any of them.
-- (c) **Persistence across swaps:** Swap the Engine, swap the Gateway, swap Auth. Memory is unchanged.
-- (d) **Independent inspectability:** Memory can be browsed, searched, and read with standard tools (text editor, file browser, database viewer) while the system is not running.
-
-**Fail condition:** Memory contains references to specific component implementations. Or Memory requires a running component to be readable. Or removing a component makes Memory data inaccessible or corrupt. Or Memory has an import/dependency on Engine, Auth, or Gateway code.
-
-### PR-3. Everything Else Is Swappable (Principle 3)
-
-**Claim:** Engine, Auth, Gateway, clients, models, tools, contracts, hosting — all replaceable. The swappability chain is complete: Memory via tools, components via contracts, contracts via adapters.
-
-**Verification:**
-- (a) **Component swap:** Replace the Engine with a different implementation. Gateway, Auth, Memory, clients, models — nothing else changes. (Repeat for Auth, Gateway.)
-- (b) **Contract swap:** Change the Gateway API protocol (e.g., REST to GraphQL). Only the adapter changes. Components stay the same.
-- (c) **Memory swap:** Change the storage backend (e.g., files to database). Only the tool implementations change. Engine, Auth, Gateway — nothing else changes.
-- (d) **Swappability chain completeness:** For every element in the system, identify the intermediary that absorbs change (tools, contracts, or adapters). If none exists, the element is a lock-in point.
-
-**Fail condition:** Swapping any element requires changes to more than one component. Or an element exists with no identifiable intermediary protecting it from change propagation.
-
-### PR-4. Start Constrained, Expand Deliberately (Principle 4)
-
-**Claim:** Products don't use all capabilities at once. Each expansion is a deliberate step. Scope is a tool configuration decision, not an architecture decision.
-
-**Verification:**
-- (a) The system can run with minimal tool scope (e.g., library folder only) and function correctly.
-- (b) Adding broader tool scope (filesystem, APIs, services) does not require architecture changes — only tool configuration.
-- (c) Each scope expansion is independently reversible — removing tools reduces capability without breaking the system.
-- (d) The evolution table holds: V1 → V2 → V3 → V4 each changes only tool configuration, not architecture.
-
-**Fail condition:** Expanding scope requires architectural changes (new components, new connectors, new contracts). Or reducing scope breaks the system. Or a capability expansion is irreversible.
-
-### PR-5. Complexity Is Lock-In (Principle 5)
+### PR-4. Complexity Is Lock-In (Principle 4)
 
 **Claim:** The entire system must be understandable and maintainable by one developer + AI coding agents. Every additional component is a potential expertise dependency.
 
@@ -195,6 +183,18 @@ The four pillars are values, not code — but they produce observable properties
 - (d) **No operational overhead:** The system does not require monitoring dashboards, log aggregation, container orchestration, or other operational infrastructure to function at Level 1.
 
 **Fail condition:** The system requires infrastructure not described in the four-component architecture. Or a competent developer cannot understand the architecture from the specs. Or routine operations require a team.
+
+### PR-5. Start Constrained, Expand Deliberately (Principle 5)
+
+**Claim:** Products don't use all capabilities at once. Each expansion is a deliberate step. Scope is a tool configuration decision, not an architecture decision.
+
+**Verification:**
+- (a) The system can run with minimal tool scope (e.g., library folder only) and function correctly.
+- (b) Adding broader tool scope (filesystem, APIs, services) does not require architecture changes — only tool configuration.
+- (c) Each scope expansion is independently reversible — removing tools reduces capability without breaking the system.
+- (d) The evolution table holds: V1 → V2 → V3 → V4 each changes only tool configuration, not architecture.
+
+**Fail condition:** Expanding scope requires architectural changes (new components, new connectors, new contracts). Or reducing scope breaks the system. Or a capability expansion is irreversible.
 
 ---
 

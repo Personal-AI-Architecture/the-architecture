@@ -7,7 +7,7 @@
 
 ## FS-1: Move Your Memory
 
-**Validates:** Principle 2 (Memory is the platform), memory portability, zero outward dependencies
+**Validates:** Principle 1 (Memory is the platform), memory portability, zero outward dependencies
 
 **Setup:**
 1. System A running with populated Your Memory:
@@ -43,7 +43,7 @@
 
 ## FS-2: Add Capability Without Violating the Architecture
 
-**Validates:** Principle 1 (interfaces over implementations), Principle 2 (Memory has zero outward dependencies), D64
+**Validates:** Principle 3 (interfaces over implementations), Principle 1 (Memory has zero outward dependencies), D64
 
 **Setup:**
 1. System running with base configuration
@@ -122,7 +122,7 @@
 
 ## FS-6: Evolve Memory
 
-**Validates:** Principle 2, Memory independence
+**Validates:** Principle 1, Memory independence
 
 **Setup:**
 1. System running with file-based search only
@@ -161,7 +161,7 @@
 
 ## FS-8: Expand Scope via Tools
 
-**Validates:** D55 (scope = available tools + permissions), Principle 4 (start constrained, expand deliberately)
+**Validates:** D55 (scope = available tools + permissions), Principle 5 (start constrained, expand deliberately)
 
 **Setup:**
 1. System running with library-scoped tools only (V1 scope — reads/writes within library folder)

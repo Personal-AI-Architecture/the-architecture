@@ -1,6 +1,6 @@
 ---
-sidebar_position: 5
-title: "Principle 5: Complexity Is Lock-In"
+sidebar_position: 4
+title: "Principle 4: Complexity Is Lock-In"
 hide_table_of_contents: true
 ---
 

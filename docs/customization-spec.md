@@ -32,7 +32,7 @@ The only fixed contracts are the two connectors:
 | **Provider API** | Yes | This is how the Engine talks to models. Without a stable contract, model swapping breaks. |
 | **Everything else** | Defaults | Bootstrap mechanism, tool discovery, configuration — all overridable. |
 
-This is the same "drop-down menu" principle from the foundation spec (Principle 3) applied to the Foundation's own internals. Bootstrap via minimal Engine config? That's the default. Tool discovery via configured sources + self-description? That's the default. Change either if your product needs something different.
+This is the same "drop-down menu" principle from the foundation spec (Principle 2) applied to the Foundation's own internals. Bootstrap via minimal Engine config? That's the default. Tool discovery via configured sources + self-description? That's the default. Change either if your product needs something different.
 
 ### What the Levels Mean (Working Model)
 

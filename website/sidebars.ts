@@ -7,11 +7,11 @@ const sidebars: SidebarsConfig = {
       label: 'Architecture Principles',
       collapsed: true,
       items: [
-        'principles/interfaces-over-implementations',
         'principles/memory-is-the-platform',
         'principles/everything-else-is-swappable',
-        'principles/start-constrained-expand-deliberately',
+        'principles/interfaces-over-implementations',
         'principles/complexity-is-lockin',
+        'principles/start-constrained-expand-deliberately',
       ],
     },
   ],
