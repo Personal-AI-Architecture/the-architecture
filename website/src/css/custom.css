@@ -34,6 +34,12 @@
   color: #81a0d4;
 }
 
+/* Lighten sidebar font weight */
+.menu__link,
+.menu__caret {
+  font-weight: 400;
+}
+
 [data-theme='dark'] {
   --ifm-color-primary: #6b8fd4;
   --ifm-color-primary-dark: #5580cd;
