@@ -11,7 +11,7 @@ We are not accepting pull requests at this time. We're defining the governance m
 **Discuss the architecture.** Read the specs, challenge the principles, propose changes, ask questions. The best contributions right now are ideas, not code.
 
 - **Issues** — Report problems, ask questions, or propose changes via [GitHub Issues](https://github.com/Personal-AI-Architecture/the-architecture/issues)
-- **Forum** — Join the discussion on our [Discourse forum](https://discourse.personalaiarchitecture.org) (coming soon)
+- **Forum** — Join the discussion on our [Discourse forum](https://discuss.personalaiarchitecture.org)
 
 **Build on it.** The architecture is MIT-licensed. You can use it, extend it, and build products on it without waiting for permission.
 
