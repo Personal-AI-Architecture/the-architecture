@@ -5,7 +5,7 @@ const sidebars: SidebarsConfig = {
     {
       type: 'category',
       label: 'Architecture Principles',
-      collapsed: false,
+      collapsed: true,
       items: [
         'principles/interfaces-over-implementations',
         'principles/memory-is-the-platform',
@@ -22,7 +22,7 @@ const sidebars: SidebarsConfig = {
     {
       type: 'category',
       label: 'Components',
-      collapsed: false,
+      collapsed: true,
       items: [
         'memory-spec',
         'engine-spec',
@@ -33,7 +33,7 @@ const sidebars: SidebarsConfig = {
     {
       type: 'category',
       label: 'Connectors & Contracts',
-      collapsed: false,
+      collapsed: true,
       items: [
         'models-spec',
         'adapter-spec',
@@ -43,7 +43,7 @@ const sidebars: SidebarsConfig = {
     {
       type: 'category',
       label: 'Cross-Cutting',
-      collapsed: false,
+      collapsed: true,
       items: [
         'tools-spec',
         'security-spec',
@@ -59,7 +59,7 @@ const sidebars: SidebarsConfig = {
     {
       type: 'category',
       label: 'Core Specs',
-      collapsed: false,
+      collapsed: true,
       items: [
         'memory-spec',
         'engine-spec',
