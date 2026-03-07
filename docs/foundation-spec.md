@@ -7,6 +7,8 @@ hide_table_of_contents: true
 
 The Personal AI Architecture is MIT Licensed, and designed to ensure that the power of AI belongs not to a few Big Tech companies, but to the people.
 
+It is not a personal AI system — it is the architecture you build one on top of. A different way to think about who AI software should serve.
+
 It has one goal: avoid lock-in.
 
 Lock-in to a vendor. Lock-in to a specific technology choice. And even lock-in to The Architecture itself.
@@ -31,7 +33,7 @@ An architecture that bets on today's stack is an architecture with an expiration
 
 Keeping all components decoupled and easily swapable allows your AI system to adapt at the speed of AI.
 
-Here's how it works:
+Here's how it works. Four components, two connectors, three external dependencies:
 
 ```mermaid
 flowchart LR
