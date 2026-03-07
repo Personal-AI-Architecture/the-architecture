@@ -33,6 +33,23 @@ Keeping all components decoupled and easily swapable allows your AI system to ad
 
 Here's how it works:
 
+```mermaid
+flowchart LR
+    C[Clients external] -->|Gateway API connector| G[Gateway component]
+    G -->|Auth middleware check| A[Auth component]
+    A -->|POST engine chat and SSE stream internal contract D137| E[Engine component]
+    E -->|Provider API connector| M[Models external]
+
+    G -->|Conversation store tool D152| CST[Conversation Store Tool internal]
+    CST -->|Read and write conversations| YM[Your Memory platform]
+
+    E -->|Model-driven tool calls| TR[Tool Runtime MCP CLI Native]
+    TR -->|Memory tools read write edit delete search list history| YM
+    TR -->|External tools| EX[External services and external memory]
+
+    A -.->|Authorizes tool actions by actor policy| TR
+```
+
 ### Your Memory — the platform
 
 The defining property of this architecture: Your Memory has zero outward dependencies. Every other component depends on it. It depends on none of them.
@@ -166,6 +183,52 @@ The Gateway ↔ Engine handoff is the one internal interface that needed definit
 
 Gateway POSTs a request (messages + metadata) to the Engine, Engine returns an SSE stream (text, tool calls, results, completion). Auth middleware sits on the path. See `gateway-engine-contract.md` for the full contract.
 
+```mermaid
+sequenceDiagram
+    participant Client
+    participant GatewayAPI as Gateway API
+    participant Gateway
+    participant Auth
+    participant ConvTool as Conversation Store Tool
+    participant Memory as Your Memory
+    participant Engine
+    participant Provider as Provider API
+    participant Model
+    participant ToolRuntime as Tool Runtime
+    participant External as External Services/Memory
+
+    Client->>GatewayAPI: Message + optional conversation_id + metadata
+    GatewayAPI->>Gateway: Normalized request
+    Gateway->>Auth: Authenticate/authorize request
+    Auth-->>Gateway: Allow + actor context
+
+    Gateway->>ConvTool: Load/create conversation (D152)
+    ConvTool->>Memory: Read/write conversation data
+    Memory-->>ConvTool: History/context
+    ConvTool-->>Gateway: Conversation history
+
+    Gateway->>Engine: POST /engine/chat (messages + metadata)
+    Engine->>Provider: Prompt + tool definitions
+    Provider->>Model: Inference request
+
+    loop Agent loop
+        Model-->>Provider: text and/or tool calls
+        Provider-->>Engine: Stream events
+        opt Tool calls requested
+            Engine->>ToolRuntime: Execute tool call(s)
+            ToolRuntime->>Memory: Memory tool operations
+            ToolRuntime->>External: External tool operations
+            ToolRuntime-->>Engine: Tool results
+            Engine->>Provider: Continue with tool results
+        end
+    end
+
+    Engine-->>Gateway: SSE stream (text-delta/tool-call/tool-result/done/error)
+    Gateway->>ConvTool: Append assistant response
+    ConvTool->>Memory: Persist conversation
+    Gateway-->>Client: Streamed response + conversation_id
+```
+
 ---
 
 ## Foundation User Stories
@@ -291,6 +354,7 @@ Who does what — and who doesn't. Use this to verify that component specs don't
 
 | Date | Change | Source |
 |------|--------|--------|
+| 2026-03-07 | Added architecture diagrams: flowchart (system topology) and sequence diagram (request lifecycle). Mermaid rendering enabled. | Dave J (diagrams) + Dave W + Claude |
 | 2026-03-07 | Added Communication section (External — Two Contracts + Internal) replacing standalone Two Contracts section. Added communication-principles.md to architecture specs list and Related Documents. | D169 promotion (Dave W + Dave J + Claude) |
 | 2026-03-01 | Codex cross-reference audit fix: Deployment Model wording — "no external dependencies required" → "no cloud service required" + "dependencies exist but none are inescapable." Aligns with deployment-spec which explicitly names model provider and container runtime as dependencies with escape paths. | Codex audit (Dave W + Claude) |
 | 2026-03-01 | "No users, only owners" language pass: user -> owner in responsibility matrix | Ownership model alignment (Dave W + Claude) |
