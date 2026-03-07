@@ -4,6 +4,15 @@ A generic, user-owned AI runtime. Zero lock-in by design.
 
 Four components (Your Memory, Engine, Auth, Gateway), two connectors (Gateway API, Provider API), three externals (Clients, Models, Tools). Every piece is swappable. Your data stays on your machine.
 
+## What This Repository Is
+
+This repository is both:
+
+- A reference implementation of the Level 1 foundation architecture
+- A validation suite that proves architectural promises (swappability, local-first operation, zero lock-in, clear boundaries)
+
+It is not intended to be a full product application. The default validation path is mock-first and can run without external model services.
+
 ## Install
 
 ```bash
@@ -61,6 +70,35 @@ export OPENROUTER_API_KEY=sk-or-v1-...
 npx personal-ai
 # optional sanity check:
 npx personal-ai boot-check
+```
+
+## Validate Architecture (Mock-First, No API Key)
+
+From this repository root:
+
+```bash
+npm install
+npx tsx scripts/acceptance-check.ts
+npm run test:conformance
+npm test
+```
+
+What these validate:
+
+- `acceptance-check.ts`: owner outcomes (swap provider, move memory, add tool) with mock providers
+- `test:conformance`: architecture invariants and lock-in gate tests
+- `npm test`: full suite (unit + integration + conformance)
+
+The runtime boot path is intentionally lenient. If adapter config or API key is unavailable, the system falls back to mock/degraded mode so local validation still works.
+
+## Validate With Real Providers (Optional)
+
+Use this when you want to validate network model connectivity in addition to architecture behavior:
+
+```bash
+export OPENROUTER_API_KEY=sk-or-v1-...
+npx tsx scripts/provider-check.ts
+npx tsx scripts/server-check.ts
 ```
 
 ## Configuration
@@ -160,6 +198,7 @@ cp -r ~/old-memory ~/new-memory
 ```bash
 npx tsx scripts/server-check.ts      # Full server test with real model
 npx tsx scripts/acceptance-check.ts  # 3 acceptance tests (no API key needed)
+npx tsx scripts/engine-check.ts      # Engine loop verification
 npx tsx scripts/memory-check.ts      # Memory tools verification
 npx tsx scripts/auth-check.ts        # Auth verification
 npx tsx scripts/provider-check.ts    # Provider connectivity test
@@ -168,11 +207,37 @@ npx tsx scripts/provider-check.ts    # Provider connectivity test
 ## Testing
 
 ```bash
-npm test                    # All 211 tests
-npm run test:conformance    # 50 conformance tests + 13 lock-in checks
+npm test                    # Full test suite (unit + integration + conformance)
+npm run test:conformance    # Conformance suite + lock-in gate checks
 npm run check:imports       # Import boundary verification
 npm run check:lockin        # Zero lock-in grep check
-npm run baseline            # Build + test + lint + all checks
+npm run baseline            # Build + tests + lint + imports + lock-in + docs checks
+```
+
+## Writing Your Own Tests
+
+Add tests under:
+
+- `test/unit/` for component-level behavior
+- `test/integration/` for end-to-end stack behavior
+- `test/conformance/` for architecture contract/invariant checks
+
+Run only your test file during development:
+
+```bash
+npx vitest run test/integration/my-feature.test.ts --reporter=verbose
+```
+
+Run a folder while iterating:
+
+```bash
+npx vitest run test/unit/ --reporter=verbose
+```
+
+When done, run:
+
+```bash
+npm test
 ```
 
 ## License
