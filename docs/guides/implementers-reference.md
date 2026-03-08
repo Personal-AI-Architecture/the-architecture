@@ -21,7 +21,7 @@ hide_table_of_contents: true
                                                       |
                                              tools (read/write)
                                                       |
-      Clients  -->  Gateway API  -->  Gateway  -->  Engine  -->  Provider API  -->  Models
+      Clients  -->  Gateway API  -->  Gateway  -->  Engine  -->  Model API  -->  Models
     (external)        (API)        (component)  (component)       (API)          (external)
                                                       |
                         --- Auth ---                  +--> Tools (verbs)  -->  External Memory (nouns)
@@ -34,7 +34,7 @@ hide_table_of_contents: true
 | Layer | Elements |
 |-------|----------|
 | Components | Your Memory, Engine, Auth, Gateway |
-| APIs | Gateway API (clients <-> Gateway), Provider API (Engine <-> Models) |
+| APIs | Gateway API (clients <-> Gateway), Model API (Engine <-> Models) |
 | Externals | Clients, Models, Tools |
 
 ---
@@ -149,7 +149,7 @@ How the world interacts with the system.
 
 Built on prevailing industry standard. Swappable via adapter.
 
-### Provider API (Engine <-> Models)
+### Model API (Engine <-> Models)
 
 How the system thinks.
 
@@ -234,7 +234,7 @@ One HTTP endpoint. Not a third API.
 | Protect access / permissions | Auth | Your Memory, Gateway |
 | Manage conversations | Gateway | Engine, Your Memory |
 | Route requests to Engine | Gateway | Auth |
-| Connect to AI models | Provider API | Engine internals |
+| Connect to AI models | Model API | Engine internals |
 | Accept client connections | Gateway API | Engine |
 | Provide intelligence | Models (external) | Engine, Your Memory |
 | Display content to owners | Clients (external) | Gateway |

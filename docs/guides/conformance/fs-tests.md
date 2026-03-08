@@ -73,7 +73,7 @@
 
 **Pass criteria (all capability types):**
 - [ ] Your Memory gains no outward dependencies from the addition
-- [ ] No component bypasses the APIs (Gateway API, Provider API)
+- [ ] No component bypasses the APIs (Gateway API, Model API)
 - [ ] The four-component structure holds — no new components were needed
 - [ ] Zero code changes to existing components
 - [ ] The addition is purely data/configuration entering the system

@@ -7,21 +7,21 @@ hide_table_of_contents: true
 
 Every AI system uses a model — ChatGPT runs GPT, Copilot runs its own models, agent frameworks wire up whatever LLM the developer chooses. So what's different here?
 
-Nothing about how the model is used. What's different is where it sits in the architecture. **Models are not a component of the system — they are external intelligence accessed through the Provider API.** The system doesn't contain a model. It calls one. The system has four components (Your Memory, Engine, Auth, Gateway). Models aren't one of them.
+Nothing about how the model is used. What's different is where it sits in the architecture. **Models are not a component of the system — they are external intelligence accessed through the Model API.** The system doesn't contain a model. It calls one. The system has four components (Your Memory, Engine, Auth, Gateway). Models aren't one of them.
 
 In the human analogy that runs through this architecture: Memory is the persistent half of the brain. The model is the other half — the intelligence, the reasoning, the processing. Memory + Model = the brain (D44). Neither is complete alone. Memory without the model is a filing cabinet nobody's reading. The model without memory is a genius with amnesia.
 
-But unlike a human brain, a digital brain can separate memory from intelligence — and that changes everything. In a biological brain, your memory and your intelligence are fused to the same hardware. You can't upgrade your neurons. You can't swap in better reasoning. You're stuck with both. A digital brain doesn't have that constraint. Your Memory persists as the platform. Intelligence arrives fresh through the Provider API — a clean boundary that makes the model pluggable. Different models for different tasks, from any provider, swapped with a config change. The brain reconstitutes from the same Memory with upgraded intelligence every time a better model ships.
+But unlike a human brain, a digital brain can separate memory from intelligence — and that changes everything. In a biological brain, your memory and your intelligence are fused to the same hardware. You can't upgrade your neurons. You can't swap in better reasoning. You're stuck with both. A digital brain doesn't have that constraint. Your Memory persists as the platform. Intelligence arrives fresh through the Model API — a clean boundary that makes the model pluggable. Different models for different tasks, from any provider, swapped with a config change. The brain reconstitutes from the same Memory with upgraded intelligence every time a better model ships.
 
-This is the superpower a digital brain has over a biological one, and it's why the architecture treats models as external intelligence rather than a component. The Provider API is the mechanism that makes it real. Models are the most volatile part of AI — new capabilities, new providers, new paradigms arrive constantly. The fastest-changing part of AI is the cheapest thing to change in this system.
+This is the superpower a digital brain has over a biological one, and it's why the architecture treats models as external intelligence rather than a component. The Model API is the mechanism that makes it real. Models are the most volatile part of AI — new capabilities, new providers, new paradigms arrive constantly. The fastest-changing part of AI is the cheapest thing to change in this system.
 
 Models are external regardless of where they run:
 
 | Model location | How the system calls it | External? |
 |---------------|------------------------|-----------|
-| Cloud API (OpenRouter, Anthropic, OpenAI) | HTTPS request through Provider API | Yes — someone else's servers |
-| Local (Ollama on your machine) | HTTP request through Provider API | Yes — same interface, different endpoint. The model is third-party weights running locally. |
-| Future (on-device, embedded) | Through Provider API | Yes — the calling pattern is the same |
+| Cloud API (OpenRouter, Anthropic, OpenAI) | HTTPS request through Model API | Yes — someone else's servers |
+| Local (Ollama on your machine) | HTTP request through Model API | Yes — same interface, different endpoint. The model is third-party weights running locally. |
+| Future (on-device, embedded) | Through Model API | Yes — the calling pattern is the same |
 
 This is a **Level 1 (Foundation) spec** — it defines what models are at the generic, unopinionated level. Product-specific model choices (OpenRouter default, single-model V1, pricing/allowances) are Level 2 (Product) opinions.
 
@@ -29,9 +29,9 @@ This is a **Level 1 (Foundation) spec** — it defines what models are at the ge
 
 ---
 
-## The Provider API
+## The Model API
 
-The Provider API is one of the system's two APIs. It defines how the Engine calls models:
+The Model API is one of the system's two APIs. It defines how the Engine calls models:
 
 | Direction | What flows |
 |-----------|-----------|
@@ -40,7 +40,7 @@ The Provider API is one of the system's two APIs. It defines how the Engine call
 
 Prompts in, completions out. The pattern is the same regardless of which model, which provider, or what capabilities the model has. Provider-specific API formats are abstracted behind the adapter — a thin translation layer between the Engine's internal interface and whatever format the provider expects. Switching models is a config change; switching providers is a config change plus an adapter swap. See [adapter-spec.md](./adapter-spec.md) §How Model Configuration Works in Practice for the concrete walkthrough.
 
-The Provider API is a pass-through — it doesn't decide what goes into the prompt (Your Memory provides instructions and context), which tools to use (the model decides), or where responses are stored (Gateway manages conversations). It connects the Engine to whatever model is configured.
+The Model API is a pass-through — it doesn't decide what goes into the prompt (Your Memory provides instructions and context), which tools to use (the model decides), or where responses are stored (Gateway manages conversations). It connects the Engine to whatever model is configured.
 
 ---
 
@@ -53,11 +53,11 @@ Every model-related concern maps to an existing component or configuration:
 | Which model to call (including per-task selection) | Configuration | A config value, not a component |
 | Provider routing (OpenRouter vs Anthropic vs Ollama) | Engine implementation or SDK | How the Engine calls models is an implementation detail |
 | Fallback if a provider is down | Engine implementation | Error handling is the Engine's job |
-| Context window awareness | Engine or Provider API | The Engine knows the limits of what it's calling |
+| Context window awareness | Engine or Model API | The Engine knows the limits of what it's calling |
 
 Nothing is left over. There is no gap that requires a dedicated component.
 
-This follows the same pattern as Tools (D51) and Client (D57). Tools dissolved into Memory + Engine + Auth. Client dissolved into Gateway + external clients. Models dissolves into the Provider API + Engine implementation + configuration. No operational concern requires a dedicated component.
+This follows the same pattern as Tools (D51) and Client (D57). Tools dissolved into Memory + Engine + Auth. Client dissolved into Gateway + external clients. Models dissolves into the Model API + Engine implementation + configuration. No operational concern requires a dedicated component.
 
 But there's a harder question the architecture needs to answer.
 
@@ -73,7 +73,7 @@ But the architecture elevates it to an external dependency with its own API anyw
 
 ### Swappable intelligence needs its own boundary
 
-If models dissolved into memory + tools, model access would flow through whatever internal mechanism the Engine uses for tool execution — coupling it to Engine implementation details. The Provider API exists as a clean, swappable boundary separate from tool execution. That's what makes "swap your intelligence" a config change instead of a rebuild.
+If models dissolved into memory + tools, model access would flow through whatever internal mechanism the Engine uses for tool execution — coupling it to Engine implementation details. The Model API exists as a clean, swappable boundary separate from tool execution. That's what makes "swap your intelligence" a config change instead of a rebuild.
 
 ### Storage is not computation
 
@@ -89,7 +89,7 @@ Both exceptions trace to the same root: making intelligence swappable. The Model
 
 ---
 
-## Why the Provider API Is a Contract, Not a Tool
+## Why the Model API Is a Contract, Not a Tool
 
 The primary model can't be a tool — it *is* the intelligence making tool decisions. Tools are things the model decides to use. If "call the model" were itself a tool, you'd have a bootstrap problem: who decides to call it? You need intelligence to make tool decisions. You can't use a tool to call the thing that decides which tools to use.
 
@@ -111,16 +111,16 @@ The primary model can't be a tool — it *is* the intelligence making tool decis
 
 ## Open Questions
 
-None. Models is the thinnest spec because models are the most external thing in the system. The Provider API handles the connection. Configuration handles the choices. The Engine handles the calling. There's nothing else to define.
+None. Models is the thinnest spec because models are the most external thing in the system. The Model API handles the connection. Configuration handles the choices. The Engine handles the calling. There's nothing else to define.
 
 ---
 
 ## Success Criteria
 
-- [ ] Models are accessed exclusively through the Provider API — no component depends on a specific model
+- [ ] Models are accessed exclusively through the Model API — no component depends on a specific model
 - [ ] Switching models requires only a configuration change — no code changes to Engine, Your Memory, Auth, Gateway, or any client
 - [ ] The system works with any model that accepts prompts and returns completions — cloud, local, future
-- [ ] The Provider API absorbs model evolution — new capabilities, new providers, new paradigms are configuration changes
+- [ ] The Model API absorbs model evolution — new capabilities, new providers, new paradigms are configuration changes
 - [ ] Local models (Ollama) and cloud models (OpenRouter) are interchangeable from the Engine's perspective
 
 ---

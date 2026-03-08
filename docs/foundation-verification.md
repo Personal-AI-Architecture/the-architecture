@@ -33,11 +33,11 @@ These criteria verify that the implementation matches the architectural topology
 
 ### S-2. Two APIs (D64)
 
-**Claim:** Components communicate through exactly two APIs: the Gateway API (clients ↔ Gateway) and the Provider API (Engine ↔ models).
+**Claim:** Components communicate through exactly two APIs: the Gateway API (clients ↔ Gateway) and the Model API (Engine ↔ models).
 
 **Verification:** Trace every external integration point. Each must route through one of the two APIs, be internal (Gateway ↔ Engine contract), or be internal to the Engine (Engine ↔ Tools execution, which is not an architectural boundary — see [tools-spec.md](./tools-spec.md)).
 
-**Fail condition:** A third API exists — an external-facing protocol boundary that is neither the Gateway API nor the Provider API. (The Gateway ↔ Engine internal contract is explicitly not an API per D137. Engine ↔ Tool communication is internal to the Engine, not an API.)
+**Fail condition:** A third API exists — an external-facing protocol boundary that is neither the Gateway API nor the Model API. (The Gateway ↔ Engine internal contract is explicitly not an API per D137. Engine ↔ Tool communication is internal to the Engine, not an API.)
 
 ### S-3. Three external dependencies (D64)
 
@@ -65,11 +65,11 @@ These criteria verify that the implementation matches the architectural topology
 
 ### S-6. Models are not a component (D63)
 
-**Claim:** Models are external intelligence accessed through the Provider API. The system does not contain a model.
+**Claim:** Models are external intelligence accessed through the Model API. The system does not contain a model.
 
-**Verification:** Confirm the system does not bundle, embed, or require a specific model to function. Confirm model access is exclusively through the Provider API.
+**Verification:** Confirm the system does not bundle, embed, or require a specific model to function. Confirm model access is exclusively through the Model API.
 
-**Fail condition:** A model is embedded in the system as a required internal component, or model access bypasses the Provider API.
+**Fail condition:** A model is embedded in the system as a required internal component, or model access bypasses the Model API.
 
 ### S-7. Clients are not a component (D57)
 
@@ -208,13 +208,13 @@ The four pillars are values, not code — but they produce observable properties
 
 **Fail condition:** The Gateway API carries data not specified in the contract. Or internal implementation details are exposed to clients.
 
-### C-2. Provider API carries only what it claims
+### C-2. Model API carries only what it claims
 
 **Claim:** In: prompt (system instructions + conversation + tool definitions + context). Out: streamed completion (text + tool calls).
 
-**Verification:** Inspect the Provider API boundary. Confirm the Engine sends only what the spec defines. Confirm provider-specific details are in the adapter, not in the Engine.
+**Verification:** Inspect the Model API boundary. Confirm the Engine sends only what the spec defines. Confirm provider-specific details are in the adapter, not in the Engine.
 
-**Fail condition:** The Engine contains provider-specific logic outside the adapter. Or the Provider API payload includes implementation-specific fields not in the contract.
+**Fail condition:** The Engine contains provider-specific logic outside the adapter. Or the Model API payload includes implementation-specific fields not in the contract.
 
 ### C-3. APIs are hollow
 
@@ -318,7 +318,7 @@ For each row in the matrix, verify:
 | Protect access / control permissions | Auth | Confirm Auth is the sole permission enforcer | Gateway or Engine contains access control logic independent of Auth |
 | Manage conversations | Gateway | Confirm conversation lifecycle (create, list, retrieve, store) lives in Gateway | Engine or Memory manages conversation state |
 | Route requests to Engine | Gateway | Confirm Gateway routes, Auth doesn't route | Auth contains routing logic |
-| Connect to AI models | Provider API | Confirm model access goes through Provider API | Engine calls models directly, bypassing the API |
+| Connect to AI models | Model API | Confirm model access goes through Model API | Engine calls models directly, bypassing the API |
 | Accept client connections | Gateway API | Confirm clients connect through Gateway API | Clients connect directly to Engine or other components |
 | Display content to owners | Clients (external) | Confirm no component contains display/rendering logic | Gateway or Engine contains client-specific UI logic |
 | Bootstrap the system | Runtime config | Confirm bootstrap is thin (4 fields per configuration-spec) | Bootstrap requires Memory content or complex configuration |

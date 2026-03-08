@@ -47,7 +47,7 @@ This is where the real tool analogy kicks in. Humans make tools, use tools made 
 |-------|-------------|
 | Tools you own (your hammer, your screwdriver) | Tools in your environment — installed locally, you control them |
 | Tools you pay to use (renting equipment, gym membership) | External tool services — third-party APIs, hosted MCP servers |
-| Paying someone to use tools for you (hiring a contractor) | Engine + Model — intelligence you pay for (Provider API) that uses tools on your behalf |
+| Paying someone to use tools for you (hiring a contractor) | Engine + Model — intelligence you pay for (Model API) that uses tools on your behalf |
 | Your workshop / toolshed | The tool environment — what's installed and available |
 | Buying a new tool | Installing a new tool in the environment |
 | Learning a new skill (how to use a tool) | A skill file in Your Memory — instructions that reference tools |
@@ -158,7 +158,7 @@ You bring the context — your files, your history, your preferences. The model 
 
 | Human | Architecture |
 |-------|-------------|
-| Hiring an expert — you bring your documents, they bring their expertise | The model — you bring Your Memory, it brings intelligence through the Provider API |
+| Hiring an expert — you bring your documents, they bring their expertise | The model — you bring Your Memory, it brings intelligence through the Model API |
 | You can switch experts (new lawyer, new accountant) without losing your files | Swap models with a config change — Your Memory stays, intelligence upgrades |
 | Different experts for different tasks — a surgeon for surgery, an accountant for taxes | Different models for different tasks, from any provider, swapped per-request if needed |
 | The expert works with what you give them — your records, your context | The model works with what it reads from Your Memory — your files, your instructions, your history |
@@ -178,7 +178,7 @@ You speak English. The person across the table speaks French. An interpreter sit
 | Swap the adapter when you travel to a different country | Swap the adapter when the external standard changes — components never knew the difference |
 | You don't rewire your device for each country | Components don't change when external standards shift — only the adapter changes |
 | The interpreter is replaceable — the conversation isn't | The adapter is replaceable — the contract it translates isn't |
-| You can have multiple interpreters for multiple languages | Multiple adapters for multiple external standards — Gateway API adapter, Provider API adapter |
+| You can have multiple interpreters for multiple languages | Multiple adapters for multiple external standards — Gateway API adapter, Model API adapter |
 
 This maps directly to D139: components communicate via contracts, contracts connect to the outside world via adapters. The swappability chain is complete: Memory via tools, components via contracts, contracts via adapters.
 

@@ -108,7 +108,7 @@
 
 **Procedure:**
 1. Capture all Gateway API requests and responses
-2. Capture all Provider API requests and responses
+2. Capture all Model API requests and responses
 3. Capture all Gateway ↔ Engine requests and SSE events
 4. Validate each payload against the corresponding canonical schema
 
@@ -117,8 +117,8 @@
 - [ ] Every Gateway API response validates against `gateway-api.yaml`
 - [ ] Every Engine request validates against `gateway-engine.yaml`
 - [ ] Every SSE event validates against the event schemas in `gateway-engine.yaml`
-- [ ] Every Provider API request validates against `provider-api.yaml`
-- [ ] Every Provider API response validates against `provider-api.yaml`
+- [ ] Every Model API request validates against `model-api.yaml`
+- [ ] Every Model API response validates against `model-api.yaml`
 - [ ] No payload contains fields not defined in the schemas (no undocumented extensions)
 
 **Failure indicators:**

@@ -156,7 +156,7 @@ An Engine swap is replacing one commodity agent loop with another while everythi
 
 ---
 
-### 4. Intelligence (Models via Provider API)
+### 4. Intelligence (Models via Model API)
 
 **Spec claim:** "Provider choice is configuration, not code. The thing that changes fastest in AI — which model to use — is the cheapest thing to change in this architecture."
 
@@ -182,7 +182,7 @@ D135 elevated models to an external dependency with a clean swappable boundary: 
 Client
   → Gateway API
     → Engine
-      → Provider API Adapter
+      → Model API Adapter
         → Model Provider (Anthropic / OpenAI / Google / Ollama)
 ```
 
@@ -386,11 +386,11 @@ The probability of needing to replace MCP is near zero. MCP is the default but n
 | **Lock-in** | Zero. Tool protocol is internal to the Engine (D53) — not an API, not an architectural boundary. How the Engine communicates with tools is an implementation detail, swappable without affecting any other component. The Level 2 default (currently MCP) has open governance and massive adoption, but the Level 1 protection is structural: the protocol is contained within the Engine. |
 | **Discipline** | Track the chosen protocol's versions. Budget for periodic updates. Don't build abstraction layers on top. |
 
-### Provider API (Adapter → Provider)
+### Model API (Adapter → Provider)
 
 | Dimension | Assessment |
 |-----------|-----------|
-| **Lock-in** | Zero. Each link independently swappable. Provider API adapter translates between the Engine's internal interface and whichever provider format is current — this is the most frequently swapped adapter (D139). |
+| **Lock-in** | Zero. Each link independently swappable. Model API adapter translates between the Engine's internal interface and whichever provider format is current — this is the most frequently swapped adapter (D139). |
 | **Concrete swap costs** | Same provider, different model: change one preference in Your Memory — zero code changes. Different provider: change `provider_adapter` in runtime config (1 field) + provide new adapter config file (1 file) + update env variable if needed — still zero code changes. |
 | **Discipline** | Have a config-level fallback to at least one alternate provider. Test it before production. |
 
@@ -486,7 +486,7 @@ Level 2 depends on Level 1 via npm package (D155) — clean semver separation, n
 The full path from user to capability:
 
 ```
-User → Interface → Gateway API → Engine → Provider API Adapter → Model Provider
+User → Interface → Gateway API → Engine → Model API Adapter → Model Provider
                                     ↓
                                Tool Protocol → Tool → Your Memory
 ```
@@ -528,7 +528,7 @@ The Engine's language becomes a team working language. The Engine is TypeScript/
 | **Security** | Zero | No proprietary security mechanisms | Security becomes a lock-in vector |
 | **Gateway** | Zero | Keep conversations in Memory via tools (D152) | Conversation data locked in Gateway |
 | **Gateway API** | Zero (we own it) | Design independently of current Engine | API becomes Engine-specific wrapper |
-| **Provider API** | Zero (adapter) | Concrete swap costs: same-provider = 1 change, cross-provider = 2 changes | Provider coupling |
+| **Model API** | Zero (adapter) | Concrete swap costs: same-provider = 1 change, cross-provider = 2 changes | Provider coupling |
 | **Gateway ↔ Engine** | Zero (internal) | Keep contract explicit and versioned | Components couple internally |
 | **Configuration** | Zero | Keep runtime config to 4 fields (D144) | Environment coupling |
 | **Deployment** | Zero | Local path always exists | Managed hosting becomes a dependency |

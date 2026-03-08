@@ -15,7 +15,7 @@ hide_table_of_contents: true
 
 ### Boundaries and Contracts
 
-- [ ] Component boundaries remain contract-driven — Gateway API, Provider API, Gateway-Engine contract (D64, D137).
+- [ ] Component boundaries remain contract-driven — Gateway API, Model API, Gateway-Engine contract (D64, D137).
 - [ ] No new dependency on another component's internals has been introduced (Principle 3).
 - [ ] Framework/library choices remain internal implementation details (Principle 2).
 
@@ -48,7 +48,7 @@ Run the sections that match changed areas.
 
 - [ ] Engine remains generic — no product-specific behavior in core loop (D39).
 - [ ] Engine behavior continues to emerge from memory content + tools + config (D40).
-- [ ] Engine remains provider-agnostic behind Provider API adapters (D139).
+- [ ] Engine remains provider-agnostic behind Model API adapters (D139).
 - [ ] Tool execution path remains protocol-agnostic at Level 1 — MCP default is allowed, not mandatory (D32, D53).
 
 ### Gateway
@@ -95,9 +95,9 @@ Run the sections that match changed areas.
 - [ ] Gateway API remains based on open, documented conventions (D16).
 - [ ] Adapter layer can absorb external API shape changes without core component rewrites (D139).
 
-### Provider API
+### Model API
 
-- [ ] Provider API remains stable for Engine-side usage.
+- [ ] Model API remains stable for Engine-side usage.
 - [ ] Provider-specific quirks remain outside Engine core.
 
 ### Gateway-Engine Contract

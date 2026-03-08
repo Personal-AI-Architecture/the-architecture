@@ -30,7 +30,7 @@ The only fixed contracts are the two APIs:
 | Contract | Fixed? | Why |
 |----------|--------|-----|
 | **Gateway API** | Yes | This is how clients talk to the system. Without a stable contract, clients break when internals change. |
-| **Provider API** | Yes | This is how the Engine talks to models. Without a stable contract, model swapping breaks. |
+| **Model API** | Yes | This is how the Engine talks to models. Without a stable contract, model swapping breaks. |
 | **Everything else** | Defaults | Bootstrap mechanism, tool discovery, configuration — all overridable. |
 
 This is the same "drop-down menu" principle from the foundation spec (Principle 2) applied to the Foundation's own internals. Bootstrap via minimal Engine config? That's the default. Tool discovery via configured sources + self-description? That's the default. Change either if your product needs something different.

@@ -8,7 +8,7 @@ info:
     response, auth middleware on path.
 
     This contract fills the one gap identified by the protocol evaluation (D136). The
-    Gateway API and Provider API are the swappability boundaries — external things plug
+    Gateway API and Model API are the swappability boundaries — external things plug
     into them. This is an internal contract between two components we control, inside the
     same deployment.
 

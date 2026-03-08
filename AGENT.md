@@ -12,7 +12,7 @@
                                                       │
                                              tools (read/write)
                                                       │
-      Clients  ──→  Gateway API  ──→  Gateway  ──→  Engine  ──→  Provider API  ──→  Models
+      Clients  ──→  Gateway API  ──→  Gateway  ──→  Engine  ──→  Model API  ──→  Models
     (external)                     (component)  (component)                      (external)
                                                       │
                         ─── Auth ───                  └──→ Tools (verbs)  ──→  External Memory (nouns)
@@ -36,21 +36,21 @@
 | API | What crosses it |
 |-----|----------------|
 | **Gateway API** | Clients <-> Gateway. Message + conversation ID + metadata -> streamed response. |
-| **Provider API** | Engine <-> Models. Prompt + tool definitions -> streamed completion + tool calls. |
+| **Model API** | Engine <-> Models. Prompt + tool definitions -> streamed completion + tool calls. |
 
 ### Externals (3)
 
 | External | What it is |
 |----------|-----------|
 | **Clients** | Any interface -- web, CLI, mobile, bot, voice. Connects through Gateway API. |
-| **Models** | External intelligence -- cloud or local. Accessed through Provider API. |
+| **Models** | External intelligence -- cloud or local. Accessed through Model API. |
 | **Tools** | Capabilities in the environment. Self-describing. Engine executes, Auth permissions. |
 
 ## Key Contracts
 
 - **Gateway <-> Engine:** `POST /engine/chat` with messages array -> SSE stream. See `specs/openapi/gateway-engine.yaml`.
 - **Gateway API:** See `specs/openapi/gateway-api.yaml`.
-- **Provider API:** See `specs/openapi/provider-api.yaml`.
+- **Model API:** See `specs/openapi/model-api.yaml`.
 - **Shared types:** See `specs/schemas/`.
 
 ## What NOT to Do (Lock-in Checks)

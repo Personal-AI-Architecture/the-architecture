@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "tool-definition.json",
   "title": "Tool Definition",
-  "description": "How a tool describes itself. Tools self-describe (D146) — definitions come from the tools themselves, not from manual configuration. MCP tools describe themselves via protocol, CLI tools provide manifest files, native functions are defined in code. Nobody writes tool definitions manually. Tool definitions are sent through the Provider API alongside system instructions and conversation history so the model knows what tools are available.",
+  "description": "How a tool describes itself. Tools self-describe (D146) — definitions come from the tools themselves, not from manual configuration. MCP tools describe themselves via protocol, CLI tools provide manifest files, native functions are defined in code. Nobody writes tool definitions manually. Tool definitions are sent through the Model API alongside system instructions and conversation history so the model knows what tools are available.",
   "type": "object",
   "required": ["name", "description", "parameters"],
   "properties": {

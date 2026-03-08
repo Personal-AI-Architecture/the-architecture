@@ -38,7 +38,7 @@ flowchart LR
     C[Clients external] -->|Gateway API| G[Gateway component]
     G -->|Auth middleware check| A[Auth component]
     A -->|POST engine chat and SSE stream internal contract D137| E[Engine component]
-    E -->|Provider API| M[Models external]
+    E -->|Model API| M[Models external]
 
     G -->|Conversation store tool D152| CST[Conversation Store Tool internal]
     CST -->|Read and write conversations| YM[Your Memory platform]
@@ -66,7 +66,7 @@ See [memory-spec.md](./memory-spec.md).
 
 ### AI Model(s)
 
-In a biological brain, memory and intelligence are fused — you can't upgrade your neurons or swap in better reasoning. You're stuck with both. A digital brain doesn't have that constraint. Your Memory persists as the platform. Intelligence arrives fresh through the Provider API — pluggable, swappable, upgradeable. Different models for different tasks, from any provider or your own, swapped with a config change. The brain reconstitutes from the same Memory with better intelligence every time a better model ships.
+In a biological brain, memory and intelligence are fused — you can't upgrade your neurons or swap in better reasoning. You're stuck with both. A digital brain doesn't have that constraint. Your Memory persists as the platform. Intelligence arrives fresh through the Model API — pluggable, swappable, upgradeable. Different models for different tasks, from any provider or your own, swapped with a config change. The brain reconstitutes from the same Memory with better intelligence every time a better model ships.
 
 This is the superpower a digital brain has over a biological one. The fastest-changing part of AI — model capability — is the cheapest thing to change in this system. You ride the breakneck pace of AI model improvement instead of being left behind.
 
@@ -111,7 +111,7 @@ Two kinds of communication, two kinds of lock-in protection:
 Components connect to the outside world through two APIs:
 
 1. The Gateway API - how clients connect
-2. The Provider API - how the Engine connects to models.
+2. The Model API - how the Engine connects to models.
 
 Between each contract and the external world sits an adapter — a thin translation layer you own. Your components speak a stable internal interface. The adapter translates to whatever external standard is current. Standard changes? Swap the adapter. Your components never knew the difference. The internal interface isn't sacred either — you own it, you can change it too.
 
@@ -164,16 +164,16 @@ How the world interacts with the system. Built on whatever the best industry sta
 
 See [gateway-spec.md](./gateway-spec.md).
 
-### Provider API — Engine ↔ Models
+### Model API — Engine ↔ Models
 
-How the system thinks. Today that means model-native tool calling — tool definitions sent with prompts, tool calls returned in completions. But the Provider API is a contract with an adapter, not a permanent commitment to this pattern. Better approach emerges? Swap the adapter.
+How the system thinks. Today that means model-native tool calling — tool definitions sent with prompts, tool calls returned in completions. But the Model API is a contract with an adapter, not a permanent commitment to this pattern. Better approach emerges? Swap the adapter.
 
 - **In:** Prompt (system instructions + conversation + tool definitions + context)
 - **Out:** Streamed completion (text + tool calls)
 
 See [models-spec.md](./models-spec.md).
 
-**What about tools?** Tool calls flow through the Provider API and are executed by the Engine. How the Engine communicates with tools — MCP today, something better tomorrow — is internal to the Engine, not an architectural boundary. No separate tool protocol API at Level 1. Memory tools are internal — the system can't function without reading and writing its own memory. External tools (Salesforce, weather, APIs) are additive — add or remove them without affecting the system. See [tools-spec.md](./tools-spec.md).
+**What about tools?** Tool calls flow through the Model API and are executed by the Engine. How the Engine communicates with tools — MCP today, something better tomorrow — is internal to the Engine, not an architectural boundary. No separate tool protocol API at Level 1. Memory tools are internal — the system can't function without reading and writing its own memory. External tools (Salesforce, weather, APIs) are additive — add or remove them without affecting the system. See [tools-spec.md](./tools-spec.md).
 
 **The memory/tool binary.** Everything the system processes reduces to two things: memory and tools. If it's data, it's memory. If it's not data, it's a tool. New capabilities arrive by adding tools and memory content, not by adding infrastructure. See [research/memory-tool-completeness.md](./research/memory-tool-completeness.md).
 
@@ -192,7 +192,7 @@ sequenceDiagram
     participant ConvTool as Conversation Store Tool
     participant Memory as Your Memory
     participant Engine
-    participant Provider as Provider API
+    participant Provider as Model API
     participant Model
     participant ToolRuntime as Tool Runtime
     participant External as External Services/Memory
@@ -316,7 +316,7 @@ Who does what — and who doesn't. Use this to verify that component specs don't
 | Protect access / control permissions | **Auth** | Your Memory, Gateway |
 | Manage conversations | **Gateway** | Engine, Your Memory |
 | Route requests to Engine | **Gateway** | Auth |
-| Connect to AI models | **Provider API** | Engine internals |
+| Connect to AI models | **Model API** | Engine internals |
 | Accept client connections | **Gateway API** | Engine |
 | Provide intelligence | **Models** (external) | Engine, Your Memory |
 | Display content to owners | **Clients** (external) | Gateway |

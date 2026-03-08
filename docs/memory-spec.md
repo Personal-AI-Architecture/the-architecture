@@ -27,7 +27,7 @@ Here, it's inverted. **Your Memory is the platform — the application serves it
                                                       │
                                              tools (read/write)
                                                       │
-      Clients  ──→  Gateway API  ──→  Gateway  ──→  Engine  ──→  Provider API  ──→  Models
+      Clients  ──→  Gateway API  ──→  Gateway  ──→  Engine  ──→  Model API  ──→  Models
     (external)        (API)       (component)  (component)       (API)          (external)
                                                       │
                         ─── Auth ───                  └──→ Tools (verbs)  ──→  External Memory (nouns)

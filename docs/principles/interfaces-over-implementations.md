@@ -15,7 +15,7 @@ This is what makes one-component swaps possible. When every component only knows
 ## What This Means in Practice
 
 - **Memory** is accessed exclusively through tools. The Engine doesn't know (or care) whether Memory is a folder of markdown files, a SQLite database, or a vector store. Change the storage — the Engine never knows.
-- **Models** are accessed through the Provider API. Swap from Claude to GPT to a local model with a config change. The Engine sends the same prompt format through the adapter.
+- **Models** are accessed through the Model API. Swap from Claude to GPT to a local model with a config change. The Engine sends the same prompt format through the adapter.
 - **Clients** connect through the Gateway API. Web app, CLI, mobile app, Slack bot — the Gateway doesn't care. Each client speaks the same protocol.
 
 ## The Lock-In It Prevents

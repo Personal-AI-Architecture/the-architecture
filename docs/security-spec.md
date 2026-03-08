@@ -70,7 +70,7 @@ This is analogous to how operating systems separate code execution from data (NX
 | **Instructions** | System prompt, skills, bootstrap | Follow and execute | "You are the owner's assistant. Read AGENT.md for your instructions." |
 | **Data** | Files in Your Memory, conversation history, tool results | Process and report on, never execute as instructions | A markdown file about finances, a conversation transcript, a search result |
 
-**Level 1:** Foundation provides the content separation mechanism — the ability to mark content as instructions vs data in prompts sent through the Provider API.
+**Level 1:** Foundation provides the content separation mechanism — the ability to mark content as instructions vs data in prompts sent through the Model API.
 
 **Level 2:** The product configures content separation as a default. The system prompt instructs the model to treat Your Memory content as data. Configurable by Level 2 builders who may need different behavior.
 
@@ -117,7 +117,7 @@ This is analogous to how operating systems separate code execution from data (NX
 
 #### 4. Model Provider Data Flow
 
-**The threat:** When the Engine sends a prompt through the Provider API, it includes system instructions, conversation history, and Memory content the model read. This data leaves the system and travels to the model provider. The provider sees everything the model processes.
+**The threat:** When the Engine sends a prompt through the Model API, it includes system instructions, conversation history, and Memory content the model read. This data leaves the system and travels to the model provider. The provider sees everything the model processes.
 
 **This is not a bug — it's how cloud models work.** The model needs context to function. Restricting what goes in the prompt cripples the system. The mitigation is transparency and choice, not restriction.
 
@@ -207,7 +207,7 @@ The spectrum is configurable per actor when multiple actors exist (owner might a
 
 The system distinguishes between instructions and data at the prompt level. See Threat Model > Prompt Injection for the full treatment.
 
-**Level 1:** Foundation provides the mechanism to mark content as instructions vs data in prompts sent through the Provider API.
+**Level 1:** Foundation provides the mechanism to mark content as instructions vs data in prompts sent through the Model API.
 
 **Level 2:** The product configures content separation as a default. The system prompt instructs the model to treat Memory content as data. Configurable by Level 2 builders.
 
@@ -388,7 +388,7 @@ The pattern: **each capability expansion adds security requirements, but never c
 
 ### OQ-1: Content Separation Implementation — DEFERRED to implementation
 
-How exactly is the instructions/data boundary communicated to the model? System prompt instructions? Special tokens/markers in the Provider API? Model-specific features (if available)? This is an implementation concern — research and test during the build phase, not an architectural question.
+How exactly is the instructions/data boundary communicated to the model? System prompt instructions? Special tokens/markers in the Model API? Model-specific features (if available)? This is an implementation concern — research and test during the build phase, not an architectural question.
 
 ### OQ-2: Anomaly Detection Definition — DEFERRED to future capability phase
 
@@ -410,7 +410,7 @@ How do we test that content separation works? Adversarial test suites, red team 
 - [ ] The owner knows what's protected, how, and what trade-offs exist (transparency)
 - [ ] Sandbox is enforced by two independent layers (Auth + tool config)
 - [ ] Audit trail captures all model actions for accountability and investigation
-- [ ] Content separation is active — instructions vs data marked at the Provider API level
+- [ ] Content separation is active — instructions vs data marked at the Model API level
 - [ ] Untrusted tools run in isolated containers
 - [ ] Secrets never live in Memory — always in configuration
 - [ ] Approval gates enforce write confirmation (configurable spectrum)

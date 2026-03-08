@@ -66,7 +66,7 @@ The contracts expressed as language-neutral schemas (OpenAPI for HTTP contracts,
 
 **Canonical (language-neutral):**
 - `gateway-api.yaml` — OpenAPI spec for Gateway API
-- `provider-api.yaml` — OpenAPI spec for Provider API
+- `model-api.yaml` — OpenAPI spec for Model API
 - `gateway-engine.yaml` — OpenAPI spec for Gateway ↔ Engine internal contract
 - `schemas/` — JSON Schema definitions for shared types (messages, tool definitions, configuration, SSE events)
 
@@ -114,8 +114,8 @@ A runnable test suite that validates *any* implementation against the architectu
 
 | Test ID | Test | Pass Criteria | Validates |
 |---------|------|---------------|-----------|
-| SWAP-1 | Provider swap | Change provider config → next message uses new provider → no code changes | Provider API contract, Principle 2 |
-| SWAP-2 | Model swap | Change model config → next message uses new model → no code changes | Provider API contract |
+| SWAP-1 | Provider swap | Change provider config → next message uses new provider → no code changes | Model API contract, Principle 2 |
+| SWAP-2 | Model swap | Change model config → next message uses new model → no code changes | Model API contract |
 | SWAP-3 | Tool swap | Add/remove a tool → system functions → no code changes to Engine/Gateway/Auth | D51, Principle 3 |
 
 **Architectural invariant tests:**
@@ -143,7 +143,7 @@ A runnable test suite that validates *any* implementation against the architectu
 | FS-1 | Move Your Memory | Export memory → import on fresh deployment → preferences honored, gaps reported, nothing lost | Principle 1, memory portability |
 | FS-2 | Add capability | Add a tool/skill/client/provider → Memory gains no outward dependencies → four-component structure holds | Principle 3, Principle 1, D64 |
 | FS-3 | Run on own hardware | Install on laptop/desktop/server → no external service required → full offline capability | D148, Pillars 2+3 |
-| FS-4 | Swap provider | = SWAP-1 | Provider API |
+| FS-4 | Swap provider | = SWAP-1 | Model API |
 | FS-5 | Swap client | = ARCH-3 | Gateway API |
 | FS-6 | Evolve Memory | Add search capability → no other component changes | Principle 1 |
 | FS-7 | Swap Engine | = ARCH-2 | D39, Principle 2 |
@@ -202,7 +202,7 @@ personal-ai-architecture/
 ├── specs/
 │   ├── openapi/                          ← Deliverable 2 (canonical OpenAPI)
 │   │   ├── gateway-api.yaml
-│   │   ├── provider-api.yaml
+│   │   ├── model-api.yaml
 │   │   └── gateway-engine.yaml
 │   └── schemas/                          ← JSON Schema shared types
 ├── src/                                  ← implementation

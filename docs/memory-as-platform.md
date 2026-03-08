@@ -20,7 +20,7 @@ That's why this system is built around memory as the platform.
                                                       │
                                              tools (read/write)
                                                       │
-      Clients  ──→  Gateway API  ──→  Gateway  ──→  Engine  ──→  Provider API  ──→  Models
+      Clients  ──→  Gateway API  ──→  Gateway  ──→  Engine  ──→  Model API  ──→  Models
     (external)        (API)       (component)  (component)       (API)          (external)
                                                       │
                         ─── Auth ───                  └──→ Tools (verbs)  ──→  External Memory (nouns)
@@ -187,7 +187,7 @@ BrainDrive has four components, two APIs, and three external dependencies (D64),
 | API | What It Connects |
 |-----------|-----------------|
 | **Gateway API** | Clients ↔ Gateway (any client speaks this) |
-| **Provider API** | Engine ↔ Models (any model connects through this) |
+| **Model API** | Engine ↔ Models (any model connects through this) |
 
 | External | BrainDrive Implementation |
 |----------|--------------------------|

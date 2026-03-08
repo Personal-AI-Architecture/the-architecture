@@ -26,7 +26,7 @@ The binary classifies everything the system *processes*. But two things resist f
 
 Intelligence itself doesn't fully decompose.
 
-Conceptually it breaks down: weights are the provider's memory (trained knowledge, stored as parameters), inference is a verb (the operation of generating a response). But the architecture elevates it to a required external dependency with its own API (the Provider API). Why?
+Conceptually it breaks down: weights are the provider's memory (trained knowledge, stored as parameters), inference is a verb (the operation of generating a response). But the architecture elevates it to a required external dependency with its own API (the Model API). Why?
 
 ### The superpower
 
@@ -34,7 +34,7 @@ In a human brain, neither memory nor intelligence is swappable. You're stuck wit
 
 The fastest-changing part of AI is model capability. A biological brain can't upgrade its neurons. A digital brain with persistent memory can upgrade its intelligence every time a better model ships — different models for different tasks, from any provider, swapped with a config change. That's not a limitation to work around. It's the whole advantage.
 
-To wield that advantage, the model needs its own API. If it were classified as just another tool, model access would flow through whatever tool mechanism the Engine uses internally — coupling it to Engine implementation details. The Provider API exists to keep model access as a clean, swappable boundary. That's what makes "swap your intelligence" a config change instead of a rebuild.
+To wield that advantage, the model needs its own API. If it were classified as just another tool, model access would flow through whatever tool mechanism the Engine uses internally — coupling it to Engine implementation details. The Model API exists to keep model access as a clean, swappable boundary. That's what makes "swap your intelligence" a config change instead of a rebuild.
 
 ### But what if you own the model and never want to swap it?
 
@@ -48,7 +48,7 @@ But if someone owns their model and never wants to swap it, coupling intelligenc
 
 **The real argument is about where inference happens.** Weights are data — store them wherever you want. But running inference isn't a storage operation. Memory's interface is read/write/search/version — data operations. Inference is fundamentally different. If you put inference inside Memory, you'd be adding an execution capability to a data substrate. Memory would need to know how to *run* a model, not just *store* one.
 
-The Provider API isn't separating you from your intelligence — it's separating storage from computation. Those are different operations even when the same person owns both. Your filing cabinet can hold the book. But the filing cabinet can't read the book and tell you what to do next. That requires a different kind of thing, even if you own both the cabinet and the book.
+The Model API isn't separating you from your intelligence — it's separating storage from computation. Those are different operations even when the same person owns both. Your filing cabinet can hold the book. But the filing cabinet can't read the book and tell you what to do next. That requires a different kind of thing, even if you own both the cabinet and the book.
 
 ### Exception 2: Auth — the cost of swappable intelligence
 
@@ -68,7 +68,7 @@ Both exceptions trace to the same root: the decision to make intelligence swappa
 
 ## 3. Systematic Decomposition
 
-Every concept people might think needs its own subsystem decomposes into memory + tools. The architecture's four components (Your Memory, Engine, Auth, Gateway) and two APIs (Gateway API, Provider API) already cover every concern.
+Every concept people might think needs its own subsystem decomposes into memory + tools. The architecture's four components (Your Memory, Engine, Auth, Gateway) and two APIs (Gateway API, Model API) already cover every concern.
 
 | What people call it | Memory (data/noun) | Tool (operation/verb) | Infrastructure concern |
 |---|---|---|---|
@@ -154,13 +154,13 @@ These are the system. They're not memory or tools — they're what processes mem
 
 **APIs:**
 - **Gateway API** — how clients talk to the Gateway.
-- **Provider API** — how the Engine talks to models.
+- **Model API** — how the Engine talks to models.
 
 These define the handshakes between parts of the system. They're contracts, not data or operations.
 
 **Externals:**
 - **Clients** — any interface that connects through the Gateway API.
-- **Models** — intelligence connected through the Provider API.
+- **Models** — intelligence connected through the Model API.
 - **Tools** — capabilities in the environment the Engine can execute.
 
 All three were originally proposed as components. All three dissolved during the component interviews (D51, D57, D62) because every concern they covered already mapped to an existing component.
@@ -179,7 +179,7 @@ If every concern maps to an existing component, it's not a new component. It's a
 
 This is the same test that dissolved three proposed components during the architecture interviews:
 
-- **Tools (D51-D53):** Definitions are self-describing — tools declare what they can do via protocol or manifest (D146). Execution is the Engine's job. Permissions are Auth's job. Nothing left over. Not a component. Not even an API — the Provider API and Engine internals already cover it.
+- **Tools (D51-D53):** Definitions are self-describing — tools declare what they can do via protocol or manifest (D146). Execution is the Engine's job. Permissions are Auth's job. Nothing left over. Not a component. Not even an API — the Model API and Engine internals already cover it.
 
 - **Interface/Client (D57-D58):** Clients are external. Managing conversations is the Gateway's job (new component created to fill an actual gap). The "Interface" didn't have a distinct job — it was an external connecting to the system. Dissolved into Gateway + external clients.
 

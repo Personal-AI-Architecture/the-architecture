@@ -27,7 +27,7 @@ This architecture uses the same tools — MCP servers, CLI tools, APIs, whatever
 
 What's different is that it doesn't build dedicated infrastructure around them. Tools are just operations that act on data (memory) — and everything they need already has a home.
 
-The architecture has four components, two APIs, and three external dependencies. Tools are one of the external dependencies — not a component, not an API. Tool calls flow through the Provider API and are executed by the Engine. No separate tool protocol needed.
+The architecture has four components, two APIs, and three external dependencies. Tools are one of the external dependencies — not a component, not an API. Tool calls flow through the Model API and are executed by the Engine. No separate tool protocol needed.
 
 ```
                               ┌───────────────────────────────────────────────┐
@@ -37,7 +37,7 @@ The architecture has four components, two APIs, and three external dependencies.
                                                       │
                                              tools (read/write)
                                                       │
-      Clients  ──→  Gateway API  ──→  Gateway  ──→  Engine  ──→  Provider API  ──→  Models
+      Clients  ──→  Gateway API  ──→  Gateway  ──→  Engine  ──→  Model API  ──→  Models
     (external)        (API)       (component)  (component)       (API)          (external)
                                                       │
                         ─── Auth ───                  └──→ Tools (verbs)  ──→  External Memory (nouns)
@@ -105,11 +105,11 @@ Tools don't have a distinct job that isn't already covered by existing component
 
 Nothing is left over. There is no gap that requires a dedicated component.
 
-**Tools are also not an API.** The foundation spec originally proposed a Tool Protocol API alongside the Gateway API and Provider API. But trace where each part actually lives.
+**Tools are also not an API.** The foundation spec originally proposed a Tool Protocol API alongside the Gateway API and Model API. But trace where each part actually lives.
 
-How tool calls are expressed — that's the Provider API. The model's API format already defines tool call syntax. How tool calls are executed — that's the Engine's implementation detail (MCP server, CLI command, native function). How results come back — that's the Provider API again, in the next message to the model.
+How tool calls are expressed — that's the Model API. The model's API format already defines tool call syntax. How tool calls are executed — that's the Engine's implementation detail (MCP server, CLI command, native function). How results come back — that's the Model API again, in the next message to the model.
 
-The Provider API covers one side. The Engine's implementation covers the other. There's no gap between them that needs a dedicated API. MCP, CLI tools, native functions — these aren't "the tool protocol." They're implementation options for how the Engine executes specific tools.
+The Model API covers one side. The Engine's implementation covers the other. There's no gap between them that needs a dedicated API. MCP, CLI tools, native functions — these aren't "the tool protocol." They're implementation options for how the Engine executes specific tools.
 
 ---
 
@@ -186,13 +186,13 @@ This set is illustrative, not prescriptive. A Level 2 product decides which tool
 
 ## Tool Context Management — What the Model Sees
 
-Tool definitions are sent through the Provider API alongside system instructions and conversation history. Every tool definition consumes context window space and costs tokens on every API call. With a handful of MVP tools, this is negligible. As the system expands — more filesystem tools, external API tools, marketplace tools — sending every registered tool definition with every prompt becomes wasteful and degrades model performance. Models make worse tool selections when presented with dozens of irrelevant options.
+Tool definitions are sent through the Model API alongside system instructions and conversation history. Every tool definition consumes context window space and costs tokens on every API call. With a handful of MVP tools, this is negligible. As the system expands — more filesystem tools, external API tools, marketplace tools — sending every registered tool definition with every prompt becomes wasteful and degrades model performance. Models make worse tool selections when presented with dozens of irrelevant options.
 
 ### Two sets: always-send and discoverable
 
 | Category | What it is | How it works |
 |----------|-----------|--------------|
-| **Always-send set** | Tools the owner uses regularly — their daily drivers | Definitions are sent with every prompt through the Provider API. Zero overhead to use. |
+| **Always-send set** | Tools the owner uses regularly — their daily drivers | Definitions are sent with every prompt through the Model API. Zero overhead to use. |
 | **Discoverable set** | Everything else that's registered in the environment | Available on demand through a discovery tool. Not sent with every prompt. |
 
 The **always-send set** is owner-configured. The owner decides which tools belong in their daily set based on how they work. A developer might always-send filesystem, git, and deployment tools. A writer might always-send filesystem and research tools. A business owner might always-send calendar, email, and CRM tools. The set reflects the individual, not a product decision.
@@ -235,7 +235,7 @@ The previous sections explain *what* tools are and *what they enable*. This sect
 
 When the model decides to use a tool, the sequence is:
 
-1. **Model produces a tool call** — "call `read` with `{path: '/library/finances/spec.md'}`" — expressed in the model's completion format through the Provider API
+1. **Model produces a tool call** — "call `read` with `{path: '/library/finances/spec.md'}`" — expressed in the model's completion format through the Model API
 2. **Engine receives the tool call** — the Engine sees a tool call in the model's response and executes it
 3. **Engine calls the tool** — using whatever execution mechanism the tool requires (MCP protocol, CLI command, native function call)
 4. **Tool returns a result** — data flows back to the Engine

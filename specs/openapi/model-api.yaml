@@ -1,9 +1,9 @@
 openapi: '3.1.0'
 info:
-  title: Provider API — Engine ↔ Model API
+  title: Model API — Engine ↔ Models
   version: '1.0.0'
   description: |
-    The Provider API is how the Engine calls models. It is one of the system's two
+    The Model API is how the Engine calls models. It is one of the system's two
     APIs — the contract that absorbs the fastest-moving part of AI.
 
     This is an internal interface (what the Engine speaks), not a specific provider's
@@ -15,7 +15,7 @@ info:
     - Engine → Model: Prompt (system instructions + conversation + tool definitions + context)
     - Model → Engine: Streamed completion (text + tool calls)
 
-    The Provider API handles:
+    The Model API handles:
     - Sending prompts to the model
     - Receiving streamed completions
     - Passing tool definitions (so the model knows what tools are available)
@@ -142,7 +142,7 @@ components:
             decide which tools to call. Includes both the always-send set and any
             dynamically loaded tools (D109).
 
-            Tool definitions are sent alongside prompts through the Provider API —
+            Tool definitions are sent alongside prompts through the Model API —
             this is how the model knows what tools are available. The model decides
             which tools to use — that decision is intelligence (D108).
         stream:

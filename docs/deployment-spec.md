@@ -32,7 +32,7 @@ The system must run on a computer the owner physically controls. No remote servi
 The system must be capable of operating with zero internet connectivity. This means:
 
 - The system starts without network access
-- The Engine connects to a model through the Provider API — that model can be local
+- The Engine connects to a model through the Model API — that model can be local
 - Tools execute without requiring external services (tools that call external APIs are optional additions, not requirements)
 - Your Memory is fully accessible
 - Auth works locally
@@ -60,7 +60,7 @@ Local models have their own hardware requirements (RAM, GPU) that are outside th
 
 ### 5. Single deployable unit by default
 
-All four components (Your Memory, Engine, Auth, Gateway) and both APIs (Gateway API, Provider API) deploy together on one machine as a single unit. One install, one start command, one thing to manage.
+All four components (Your Memory, Engine, Auth, Gateway) and both APIs (Gateway API, Model API) deploy together on one machine as a single unit. One install, one start command, one thing to manage.
 
 Splitting components across machines is allowed but not required — the single-unit deployment is the default. Split patterns are a Level 2 concern.
 
@@ -76,11 +76,11 @@ These are dependencies that could prevent the system from functioning if they di
 
 #### Model Provider
 
-**What it is:** The system needs an AI model to function. Models are accessed through the Provider API via adapters (see [adapter-spec.md](./adapter-spec.md)).
+**What it is:** The system needs an AI model to function. Models are accessed through the Model API via adapters (see [adapter-spec.md](./adapter-spec.md)).
 
 **The dependency:** Whether local (Ollama, llama.cpp) or cloud (OpenRouter, Anthropic), the owner depends on a model provider.
 
-**Escape path:** The Provider API adapter pattern makes switching providers a config change, not a code change (D147). Cloud to cloud, cloud to local, local to local — the swap cost is one adapter file. No single provider can hold the system hostage because the architecture is designed to swap between them. The offline contract (guarantee #2) ensures a local path always exists.
+**Escape path:** The Model API adapter pattern makes switching providers a config change, not a code change (D147). Cloud to cloud, cloud to local, local to local — the swap cost is one adapter file. No single provider can hold the system hostage because the architecture is designed to swap between them. The offline contract (guarantee #2) ensures a local path always exists.
 
 **Lock-in risk:** Low — architectural. The adapter pattern eliminates protocol lock-in. The remaining risk is capability lock-in (a weaker local model can't do what a cloud model can), which is an industry constraint, not an architecture constraint.
 

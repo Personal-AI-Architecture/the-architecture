@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "message.json",
   "title": "Message",
-  "description": "A message in the conversation. Uses the industry-standard role + content format (D16: use the prevailing standard, not a custom protocol). Messages flow through the Gateway API, the Gateway-Engine contract, and the Provider API — the same shape everywhere.",
+  "description": "A message in the conversation. Uses the industry-standard role + content format (D16: use the prevailing standard, not a custom protocol). Messages flow through the Gateway API, the Gateway-Engine contract, and the Model API — the same shape everywhere.",
   "type": "object",
   "required": ["role", "content"],
   "properties": {

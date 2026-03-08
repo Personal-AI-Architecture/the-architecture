@@ -7,11 +7,11 @@ hide_table_of_contents: true
 
 ## How we define this contract
 
-Every system with more than one component has to answer a basic question: how do they talk to each other? In this architecture, the two external boundaries — the Gateway API (how clients connect) and the Provider API (how the Engine connects to models) — were defined from the start. But there was one internal handoff left undefined: how does the Gateway pass a request to the Engine, and how does the Engine send results back?
+Every system with more than one component has to answer a basic question: how do they talk to each other? In this architecture, the two external boundaries — the Gateway API (how clients connect) and the Model API (how the Engine connects to models) — were defined from the start. But there was one internal handoff left undefined: how does the Gateway pass a request to the Engine, and how does the Engine send results back?
 
 A protocol evaluation (D136) looked at every communication gap in the architecture — 29+ potential interfaces — and found that all of them resolve through things that already exist (contracts, tools, configuration). All except this one. The Gateway needs to hand off a conversation to the Engine. The Engine needs to stream results back. Auth needs to sit on the path between them. That's the entire scope.
 
-This is **not** a third API. The Gateway API and Provider API are the swappability boundaries — external things plug into them. This is an internal contract between two components we control, inside the same deployment. It just needs to be well-defined so the components stay decoupled — you should be able to swap the Engine without touching the Gateway, and vice versa (FS-5, FS-7).
+This is **not** a third API. The Gateway API and Model API are the swappability boundaries — external things plug into them. This is an internal contract between two components we control, inside the same deployment. It just needs to be well-defined so the components stay decoupled — you should be able to swap the Engine without touching the Gateway, and vice versa (FS-5, FS-7).
 
 The design principle: **the simplest contract that fills the one gap.** One endpoint. One stream format. Auth on the path. No protocol envelope, no routing, no node registration, no versioning scheme. Two components in the same deployment don't need the ceremony of an external API — they need a clear agreement about the shape of the data and what to expect back.
 
@@ -24,7 +24,7 @@ The design principle: **the simplest contract that fills the one gap.** One endp
 One HTTP endpoint. Gateway POSTs a request, Engine returns an SSE stream. Auth middleware sits on the path.
 
 ```
-Client → Gateway API → Gateway → [Auth] → POST /engine/chat → Engine → Provider API → Model
+Client → Gateway API → Gateway → [Auth] → POST /engine/chat → Engine → Model API → Model
                                                                   ↓
                                                                 Tools
 ```

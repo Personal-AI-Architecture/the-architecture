@@ -6,7 +6,7 @@
 
 A generic, user-owned AI runtime. Zero lock-in by design.
 
-Four components (Your Memory, Engine, Auth, Gateway), two APIs (Gateway API, Provider API), three externals (Clients, Models, Tools). Every piece is swappable. Your data stays on your machine.
+Four components (Your Memory, Engine, Auth, Gateway), two APIs (Gateway API, Model API), three externals (Clients, Models, Tools). Every piece is swappable. Your data stays on your machine.
 
 ## What This Repository Is
 
@@ -135,7 +135,7 @@ Full architecture documentation lives in [`docs/`](docs/):
 ## Architecture
 
 ```
-Clients ──→ Gateway API ──→ Gateway ──→ Engine ──→ Provider API ──→ Models
+Clients ──→ Gateway API ──→ Gateway ──→ Engine ──→ Model API ──→ Models
                               │            │
                               │            └── Tools (discovered from tool_sources)
                               │

@@ -15,7 +15,7 @@ Why this matters: a generic Engine can pick up any tool the ecosystem produces �
 
 AI tool use collapsed the engineering cost of capabilities from "build across four layers" to "add a tool." The model is now good enough at deciding which tools to use and how to compose them without being told. This means the agent loop itself doesn't need to be smart — it just needs to reliably connect a model to tools and get out of the way.
 
-The Engine sits in the middle of the foundation's flow: clients connect through the Gateway, the Gateway routes to the Engine, the Engine calls models through the Provider API and executes tools from the environment. Your Memory is the platform — the Engine reads and writes to it through tools. The Gateway ↔ Engine interface is defined in [gateway-engine-contract.md](./gateway-engine-contract.md) (D137). The Engine receives a messages array (system prompt + conversation history + current message) and metadata via `POST /engine/chat`, then returns an SSE stream of events (text-delta, tool-call, tool-result, done, error). Auth middleware authenticates requests before they reach the Engine.
+The Engine sits in the middle of the foundation's flow: clients connect through the Gateway, the Gateway routes to the Engine, the Engine calls models through the Model API and executes tools from the environment. Your Memory is the platform — the Engine reads and writes to it through tools. The Gateway ↔ Engine interface is defined in [gateway-engine-contract.md](./gateway-engine-contract.md) (D137). The Engine receives a messages array (system prompt + conversation history + current message) and metadata via `POST /engine/chat`, then returns an SSE stream of events (text-delta, tool-call, tool-result, done, error). Auth middleware authenticates requests before they reach the Engine.
 
 **Related documents:** [foundation-spec.md](./foundation-spec.md) (architecture overview, links to all component specs)
 
@@ -45,7 +45,7 @@ These are explicit boundaries. They exist to prevent product-specific logic from
 The Engine runs a loop:
 
 1. **Accept a message** — from the Gateway (which routes requests from clients, API calls, scheduled triggers, or other agents)
-2. **Send it to a model** — along with a system prompt, tool definitions, and conversation history, through the Provider API
+2. **Send it to a model** — along with a system prompt, tool definitions, and conversation history, through the Model API
 3. **Execute tool calls** — whatever the model decides to do, through the tool protocol
 4. **Stream the response back** — to the Gateway
 5. **Repeat** — until the model signals it's done
@@ -144,7 +144,7 @@ None. The Engine spec is intentionally complete as-is. If a question arises abou
 
 - [ ] Engine accepts messages from any source and streams responses
 - [ ] Engine executes tool calls the model makes without knowing what the tools do
-- [ ] Engine works with any model through the Provider API
+- [ ] Engine works with any model through the Model API
 - [ ] Engine has zero product-specific code
 - [ ] Engine can be replaced with a different engine without changing any other component
 - [ ] Swapping engines requires only changing the Engine — Memory, Tools, Client, Auth, and Models are unaffected

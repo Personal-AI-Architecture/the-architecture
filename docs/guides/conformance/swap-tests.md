@@ -6,7 +6,7 @@
 
 ## SWAP-1: Provider Swap
 
-**Validates:** Provider API contract, Principle 2 (everything else is swappable)
+**Validates:** Model API contract, Principle 2 (everything else is swappable)
 
 **Setup:**
 1. System running with Provider A (e.g., OpenRouter adapter)
@@ -35,7 +35,7 @@
 
 ## SWAP-2: Model Swap
 
-**Validates:** Provider API contract, model independence
+**Validates:** Model API contract, model independence
 
 **Setup:**
 1. System running with Model A (e.g., Claude Sonnet via OpenRouter)

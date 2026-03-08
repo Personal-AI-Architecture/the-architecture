@@ -30,7 +30,7 @@ WITHOUT ADAPTERS:
   └── locked to standard ───────────────────────────────────────────── locked to standard─┘
 
 WITH ADAPTERS:
-  Client ──→ Gateway API Adapter ──→ Gateway ──→ Engine ──→ Provider API Adapter ──→ Model
+  Client ──→ Gateway API Adapter ──→ Gateway ──→ Engine ──→ Model API Adapter ──→ Model
              │                       │           │          │
              translates              speaks      speaks     translates
              external ↔ internal     internal    internal   internal ↔ external
@@ -53,7 +53,7 @@ WITH ADAPTERS:
 
 **Swap scenario:** A new standard supersedes OpenAI Chat Completions. Write a new adapter that translates the new format to/from the same internal interface. Gateway doesn't change. Auth doesn't change. Engine doesn't change. Clients adopt the new standard at their own pace (or you run both adapters during transition).
 
-### Provider API Adapter — Between Engine and Models
+### Model API Adapter — Between Engine and Models
 
 **External standard (today):** Provider-specific formats (OpenAI, Anthropic, OpenRouter — all variations on prompt + tool definitions in, completion + tool calls out).
 
@@ -95,7 +95,7 @@ Three pieces of config control this:
 "I prefer anthropic/claude-sonnet-4-6 via OpenRouter"
 ```
 
-At boot, the system loads the adapter, reads your preference, and every request flows through the same path: Engine → Provider API Adapter → model. Your client doesn't need to know which model is behind the system — it sends messages to the Gateway API and gets responses back.
+At boot, the system loads the adapter, reads your preference, and every request flows through the same path: Engine → Model API Adapter → model. Your client doesn't need to know which model is behind the system — it sends messages to the Gateway API and gets responses back.
 
 ### Two kinds of change
 
@@ -162,7 +162,7 @@ Everything has an intermediary. No exceptions. The architecture's zero-lock-in p
 
 This does not change the component count, API count, or external dependency count. The architecture remains: 4 components, 2 APIs, 3 externals.
 
-Adapters are implementation details within the existing APIs — they define *how* the API translates, not *what* the API is. The Gateway API is still the Gateway API. The Provider API is still the Provider API. The adapter is the mechanism that lets those contracts point at different standards over time.
+Adapters are implementation details within the existing APIs — they define *how* the API translates, not *what* the API is. The Gateway API is still the Gateway API. The Model API is still the Model API. The adapter is the mechanism that lets those contracts point at different standards over time.
 
 This also aligns with existing practice. Existing AI SDKs already work this way — they define a generic interface and provide adapters for multiple providers. We're recognizing a pattern that's already proven, not inventing something new.
 
