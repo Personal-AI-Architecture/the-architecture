@@ -1,0 +1,25 @@
+name: Mirror to BrainDriveAI
+
+on:
+  push:
+    branches: ['**']
+  delete:
+    branches: ['**']
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.MIRROR_DEPLOY_KEY }}
+
+      - name: Push mirror
+        run: |
+          git remote add mirror git@github.com:BrainDriveAI/the-architecture-mirror.git
+          git push mirror --all --force
+          git push mirror --tags --force
