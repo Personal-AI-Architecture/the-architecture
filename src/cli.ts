@@ -70,7 +70,7 @@ async function main() {
     case "--help":
     case "-h":
     default:
-      console.log("Personal AI Architecture — Level 1 Foundation");
+      console.log("Personal AI Architecture — the Architecture");
       console.log("");
       console.log("Commands:");
       console.log("  start         Start local server (default)");

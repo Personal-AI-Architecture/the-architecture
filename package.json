@@ -1,7 +1,7 @@
 {
   "name": "personal-ai-architecture",
   "version": "0.1.0",
-  "description": "Level 1 Foundation — Personal AI Architecture. Generic, user-owned AI runtime with zero lock-in.",
+  "description": "Personal AI Architecture. Generic, user-owned AI runtime with zero lock-in.",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

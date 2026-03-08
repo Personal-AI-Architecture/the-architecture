@@ -192,9 +192,9 @@ Per the protocol evaluation — these capabilities were considered and determine
 
 ---
 
-## Implementation Notes (Level 2 Reference)
+## Implementation Notes (Implementation Reference)
 
-> These are Level 2 product implementation notes, not Level 1 requirements. The contract above is the foundation. These notes show one way to implement it.
+> These are implementation notes, not architecture requirements. The contract above is the foundation. These notes show one way to implement it.
 
 ### Same-Process Option
 

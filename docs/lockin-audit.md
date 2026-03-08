@@ -49,11 +49,11 @@ Run the sections that match changed areas.
 - [ ] Engine remains generic — no product-specific behavior in core loop (D39).
 - [ ] Engine behavior continues to emerge from memory content + tools + config (D40).
 - [ ] Engine remains provider-agnostic behind Model API adapters (D139).
-- [ ] Tool execution path remains protocol-agnostic at Level 1 — MCP default is allowed, not mandatory (D32, D53).
+- [ ] Tool execution path remains protocol-agnostic in the architecture — MCP default is allowed, not mandatory (D32, D53).
 
 ### Gateway
 
-- [ ] Gateway remains client-agnostic and content-agnostic at Level 1 (D57, D58).
+- [ ] Gateway remains client-agnostic and content-agnostic in the architecture (D57, D58).
 - [ ] Conversation lifecycle stays in Gateway without coupling Gateway to Engine internals (D58).
 - [ ] Gateway-Engine interaction remains within the internal contract scope (D137).
 

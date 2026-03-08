@@ -101,10 +101,10 @@ The four pillars are values, not code — but they produce observable properties
 **Claim:** The owner owns their data, their configuration, and their deployment. Nothing external is required to access what's yours.
 
 **Verification:**
-- (a) All owner data is stored locally on owner-controlled hardware (Level 1).
+- (a) All owner data is stored locally on owner-controlled hardware (Architecture).
 - (b) Owner data is readable without the system running (standard tools: text editor, file browser, database viewer).
 - (c) Owner data can be copied, moved, or backed up with standard OS tools.
-- (d) No owner data is stored exclusively in a third-party service at Level 1.
+- (d) No owner data is stored exclusively in a third-party service in the architecture.
 
 **Fail condition:** Owner data requires the system to be running to access. Or owner data is stored in a format/location that requires proprietary tools to read. Or owner data is held by a third party with no local copy.
 
@@ -126,10 +126,10 @@ The four pillars are values, not code — but they produce observable properties
 
 **Verification:**
 - (a) Continued use makes Memory richer, which makes the system more valuable — this value persists across component swaps.
-- (b) No component degrades, expires, or loses functionality if the owner stops paying for a specific service (at Level 1).
-- (c) No Level 1 feature is disabled in code with a Level 2 paywall gate. Limitations reflect genuine architectural boundaries (e.g., local-only at Level 1), not artificial restrictions to drive upgrades.
+- (b) No component degrades, expires, or loses functionality if the owner stops paying for a specific service (in the architecture).
+- (c) No architecture feature is disabled in code with an implementation paywall gate. Limitations reflect genuine architectural boundaries (e.g., local-only in the architecture), not artificial restrictions to drive upgrades.
 
-**Fail condition:** Owner value is lost when a component is swapped. Or system functionality degrades when a specific commercial relationship ends (beyond the obvious: if you stop paying for a model API, you lose that model — but local models still work). Or a Level 1 capability is present in code but gated behind a Level 2 payment check.
+**Fail condition:** Owner value is lost when a component is swapped. Or system functionality degrades when a specific commercial relationship ends (beyond the obvious: if you stop paying for a model API, you lose that model — but local models still work). Or an architecture capability is present in code but gated behind an implementation payment check.
 
 ---
 
@@ -180,7 +180,7 @@ The four pillars are values, not code — but they produce observable properties
 - (a) **Component count:** The system has exactly four components and two APIs. No hidden infrastructure (message queues, service meshes, orchestrators) that must be understood to operate the system.
 - (b) **Comprehensibility test:** The architecture consists of exactly four components and two APIs with no hidden infrastructure. No component requires specialized domain expertise beyond general software engineering. The spec set (foundation + component specs) is the complete description — no tribal knowledge required.
 - (c) **Maintenance test:** Routine operations (update a model, add a tool, change a preference, deploy an update) can be performed by one person without coordinating with others.
-- (d) **No operational overhead:** The system does not require monitoring dashboards, log aggregation, container orchestration, or other operational infrastructure to function at Level 1.
+- (d) **No operational overhead:** The system does not require monitoring dashboards, log aggregation, container orchestration, or other operational infrastructure to function in the architecture.
 
 **Fail condition:** The system requires infrastructure not described in the four-component architecture. Or a competent developer cannot understand the architecture from the specs. Or routine operations require a team.
 
@@ -400,7 +400,7 @@ Each story is an acceptance test for the architecture itself.
 
 **Pass criteria:** Full functionality with local model and local tools. No external service required.
 
-**Fail criteria:** Any feature requires an internet connection or external service at Level 1.
+**Fail criteria:** Any feature requires an internet connection or external service in the architecture.
 
 ### FS-4. Swap a model provider
 
@@ -470,7 +470,7 @@ Each story is an acceptance test for the architecture itself.
 
 **Verification:** Deploy on a laptop, desktop, or home server. Confirm full functionality without external infrastructure (no cloud databases, no SaaS dependencies, no required external APIs).
 
-**Fail condition:** Level 1 deployment requires external infrastructure.
+**Fail condition:** Architecture deployment requires external infrastructure.
 
 ### DEP-2. Full offline capability
 
@@ -478,7 +478,7 @@ Each story is an acceptance test for the architecture itself.
 
 **Verification:** Disconnect from the network. Use a local model. Confirm the full loop works: send message → Engine processes → tools execute → response returned.
 
-**Fail condition:** Any part of the core loop fails without internet at Level 1 (with local model configured).
+**Fail condition:** Any part of the core loop fails without internet in the architecture (with local model configured).
 
 ### DEP-3. Localhost-only by default
 
@@ -498,11 +498,11 @@ Each story is an acceptance test for the architecture itself.
 
 ### DEP-5. Level boundary respected
 
-**Claim:** Level 1 is local deployment. Managed hosting is Level 2.
+**Claim:** The Architecture defines local deployment. Managed hosting is Implementation.
 
-**Verification:** Confirm no Level 1 code path requires managed hosting, cloud services, or remote infrastructure. Confirm managed hosting features are isolated as Level 2 extensions.
+**Verification:** Confirm no architecture code path requires managed hosting, cloud services, or remote infrastructure. Confirm managed hosting features are isolated as implementation extensions.
 
-**Fail condition:** Level 1 foundation code contains managed hosting dependencies or assumptions.
+**Fail condition:** Architecture code contains managed hosting dependencies or assumptions.
 
 ---
 

@@ -21,7 +21,7 @@ This does three things:
 
 This is simple to own, simple to control, and simple to change. An adapter is a stateless translation function, not a framework. One file, one job: translate.
 
-> **Level 1 (Foundation):** Adapters are an implementation pattern within the existing APIs — they don't add new components or contracts.
+> **Architecture:** Adapters are an implementation pattern within the existing APIs — they don't add new components or contracts.
 
 ```
 WITHOUT ADAPTERS:

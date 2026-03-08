@@ -106,7 +106,7 @@ Can one component add new fields to its messages without breaking any other comp
 
 | Thing | Why not | Where it lives |
 |-------|---------|---------------|
-| Specific message format (JSON-RPC, custom envelope, etc.) | Implementation choice — Level 2 | Product spec / implementation |
+| Specific message format (JSON-RPC, custom envelope, etc.) | Implementation choice | Product spec / implementation |
 | Specific transport (HTTP, gRPC, queues) | Deployment choice | [deployment-spec.md](./deployment-spec.md), component specs |
 | Semantic routing / task dispatch | The model decides (P4) | [engine-spec.md](./engine-spec.md) |
 | Specific error codes | Interface-specific | Each contract (e.g., [gateway-engine-contract.md](./gateway-engine-contract.md)) |

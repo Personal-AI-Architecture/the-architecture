@@ -3,17 +3,17 @@ sidebar_label: Customization
 hide_table_of_contents: true
 ---
 
-# Customization: How Products Build on the Foundation
+# Customization: How Implementations Build on the Architecture
 
 Every AI system has an extension model — plugins, hooks, middleware, SDKs, custom code. So what's different here?
 
 Here, customization is **content, not code.** The Foundation is a runtime — you don't extend it with code, you write programs that run on it. Your "program" is Your Memory content + tools + configuration + client. The runtime executes it. Components (Your Memory, Engine, Auth, Gateway) stay generic and unmodified. Prompts are the code now — the behavior of the system emerges from what's in Your Memory and what tools are available, not from custom code in the Engine, Gateway, or Auth.
 
-A Level 2 product is a dependency relationship, not a fork (D112). Your product repo imports Level 1 as a dependency. Level 1 improvements flow to every Level 2 product automatically. BrainDrive is the reference Level 2 product.
+An implementation is a dependency relationship, not a fork (D112). Your product repo imports the Architecture as a dependency. Architecture improvements flow to every implementation automatically. BrainDrive is the reference implementation.
 
 The audience is builders — product developers, AI agents, or product team members who want to know what ships by default, what's customizable, and how. Without this doc, every builder has to reverse-engineer the customization model from six component specs.
 
-> **Level 1 (Foundation):** This spec defines customization mechanisms that apply to any system built on the Foundation — the same mechanisms Level 2 builders and Level 3 owners both use.
+> **Architecture:** This spec defines customization mechanisms that apply to any system built on the Architecture — the same mechanisms implementers and Level 3 owners both use.
 
 **Related documents:** [foundation-spec.md](./foundation-spec.md) (architecture overview, links to all component specs)
 
@@ -39,21 +39,21 @@ This is the same "drop-down menu" principle from the foundation spec (Principle 
 
 | Level | What it is | Functional? | Who provides it |
 |-------|-----------|-------------|-----------------|
-| **Level 1 — Foundation** | Components + APIs + sensible defaults. The working generic system. | Yes — minimal but working | Foundation repo |
-| **Level 2 — Product** | Level 1 + product opinions (methodology, skills, starter content, branded client, default tools). | Yes — opinionated product | Product repo (e.g., BrainDrive) |
-| **Level 3 — Personalization** | Level 2 + owner customization (life pages, custom skills, preferences, industry packages). | Yes — personalized | The owner |
+| **Architecture** | Components + APIs + sensible defaults. The working generic system. | Yes — minimal but working | Architecture repo |
+| **Implementation** | Architecture + product opinions (methodology, skills, starter content, branded client, default tools). | Yes — opinionated product | Product repo (e.g., BrainDrive) |
+| **Level 3 — Personalization** | Implementation + owner customization (life pages, custom skills, preferences, industry packages). | Yes — personalized | The owner |
 
-Level 2 and Level 3 use **the same customization mechanisms**. The difference is who does it and when — a product builder ships Level 2 opinions as a product, an owner adds Level 3 opinions after the fact. The technical operations are identical.
+Implementation and Level 3 use **the same customization mechanisms**. The difference is who does it and when — a product builder ships implementation opinions as a product, an owner adds Level 3 opinions after the fact. The technical operations are identical.
 
 **Every recipient is an owner, not a user.** When a coach ships a coaching product, each coaching client gets their own personal AI system with the coach's defaults. The client owns their data, their Memory, their system. They're not registering for the coach's platform — they're receiving their own system that happens to start with the coach's methodology. This is the fundamental difference from traditional SaaS.
 
-A Level 2 product can be as thin as "Foundation + specialized Your Memory for coaching" or as thick as BrainDrive (which adds opinions across Your Memory, tools, config, and client). There's no minimum requirement — if you add one opinion to the Foundation and ship it, that's a Level 2 product.
+An implementation can be as thin as "Architecture + specialized Your Memory for coaching" or as thick as BrainDrive (which adds opinions across Your Memory, tools, config, and client). There's no minimum requirement — if you add one opinion to the Architecture and ship it, that's an implementation.
 
 ---
 
 ## The Four Customization Mechanisms
 
-There are four ways to customize the Foundation. All Level 2 and Level 3 customization works through these mechanisms.
+There are four ways to customize the Architecture. All implementation and Level 3 customization works through these mechanisms.
 
 ### 1. Your Memory Content
 
@@ -71,7 +71,7 @@ There are four ways to customize the Foundation. All Level 2 and Level 3 customi
 | Starter content | Pre-populated files the owner starts with | Starter library pages, templates, example projects |
 | Preference data | Product defaults stored as data in Your Memory | Default model preference, default tool policies, interaction style |
 
-**Level 1 default:** The Foundation provides the bootstrap mechanism (minimal Engine bootstrap prompt/config). **Level 2 provides the bootstrap target content** in Your Memory (for example, AGENT.md) and can override path/format conventions.
+**Architecture default:** The Architecture provides the bootstrap mechanism (minimal Engine bootstrap prompt/config). **The implementation provides the bootstrap target content** in Your Memory (for example, AGENT.md) and can override path/format conventions.
 
 **What stays generic:** Your Memory itself has no opinions. It stores and retrieves. It doesn't know what AGENT.md means or why your folder structure exists. The model reads the content and acts on it.
 
@@ -90,7 +90,7 @@ There are four ways to customize the Foundation. All Level 2 and Level 3 customi
 | Tool protocol | What protocol your tools use | MCP as default (D32), CLI for Git, native for approval gate |
 | Discoverable set | What's available on demand but not in every prompt | Future: marketplace tools, third-party integrations |
 
-**Level 1 default:** The Foundation ships a tool discovery mechanism — runtime config declares `tool_sources`, the Engine scans those sources, and tools self-describe (MCP/manifest/code). Tool preferences (always-send, policies) live in Your Memory. Override the mechanism if your product needs different discovery.
+**Architecture default:** The Architecture ships a tool discovery mechanism — runtime config declares `tool_sources`, the Engine scans those sources, and tools self-describe (MCP/manifest/code). Tool preferences (always-send, policies) live in Your Memory. Override the mechanism if your product needs different discovery.
 
 **What stays generic:** The Engine is a pass-through executor. It doesn't care what tools exist or what they do. It calls whatever the model asks for and returns the result.
 
@@ -110,7 +110,7 @@ There are four ways to customize the Foundation. All Level 2 and Level 3 customi
 | Deployment settings | How the system runs | Docker configuration, port assignments, resource limits |
 | Tool plumbing | Which tool sources to scan and how to connect | MCP server endpoints, CLI tool paths, manifest directories |
 
-**Level 1 default:** The Foundation ships defaults for all configuration. A Level 2 product overrides whatever it needs — model provider, auth mode, deployment config — and leaves the rest. Provider and model swaps are config-only, zero code changes (see [adapter-spec.md](./adapter-spec.md) for how adapters make this work).
+**Architecture default:** The Architecture ships defaults for all configuration. An implementation overrides whatever it needs — model provider, auth mode, deployment config — and leaves the rest. Provider and model swaps are config-only, zero code changes (see [adapter-spec.md](./adapter-spec.md) for how adapters make this work).
 
 **What stays generic:** Configuration is data. The Foundation reads it. Components behave accordingly. No code changes needed.
 
@@ -129,7 +129,7 @@ There are four ways to customize the Foundation. All Level 2 and Level 3 customi
 | UX patterns | How the owner interacts | Chat-based interaction, approval cards, action cards |
 | Feature surface | What the client exposes | Conversation view, library browser, settings |
 
-**Level 1 default:** The Foundation doesn't ship a client. A client is a Level 2 product decision. Any client that speaks the Gateway API is valid.
+**Architecture default:** The Architecture doesn't ship a client. A client is an implementation decision. Any client that speaks the Gateway API is valid.
 
 **What stays generic:** The Gateway API is client-agnostic (D59). It doesn't know or care what the client looks like. Multiple clients can coexist — web, mobile, CLI, voice, Discord, all connecting to the same system through the same API.
 
@@ -139,9 +139,9 @@ There are four ways to customize the Foundation. All Level 2 and Level 3 customi
 
 ## User Stories
 
-### CS-1: Build a Level 2 Product from Scratch — **Open**
+### CS-1: Build an Implementation from Scratch — **Open**
 
-As a product builder, I want to build a new product on the Level 1 Foundation so that I get a working AI system without building the infrastructure myself.
+As a product builder, I want to build a new product on the Architecture so that I get a working AI system without building the infrastructure myself.
 
 <details>
 <summary>Details — source, steps, acceptance criteria</summary>
@@ -149,7 +149,7 @@ As a product builder, I want to build a new product on the Level 1 Foundation so
 **Source:** Customization interview (Dave W + Claude, 2026-02-26)
 
 **Steps:**
-1. Builder adds Level 1 Foundation as a dependency (package, not fork)
+1. Builder adds the Architecture as a dependency (package, not fork)
 2. Builder creates Your Memory content for their use case (bootstrap target file, folder structure, skills, starter content)
 3. Builder configures tools for their use case (which tools ship, always-send set, tool protocols)
 4. Builder sets runtime/adapter configuration (provider adapter, auth mode, deployment config, `tool_sources`)
@@ -160,17 +160,17 @@ As a product builder, I want to build a new product on the Level 1 Foundation so
 **Acceptance Criteria (Given-When-Then):**
 
 ```gherkin
-Given a Level 1 Foundation installed as a dependency
+Given the Architecture installed as a dependency
 When a builder provides Your Memory content, tool preferences, and runtime/adapter config
 Then the system boots and functions as the builder's product
-And no Level 1 code has been modified
+And no architecture code has been modified
 ```
 
 ```gherkin
-Given a Level 2 product built on the Foundation
-When the Foundation repo ships an update (bug fix, new capability)
-Then the Level 2 product can adopt the update without conflict
-Because it depends on Level 1 as a package, not a fork
+Given an implementation built on the Architecture
+When the Architecture repo ships an update (bug fix, new capability)
+Then the implementation can adopt the update without conflict
+Because it depends on the Architecture as a package, not a fork
 ```
 
 **Status:** Open
@@ -196,7 +196,7 @@ As a product builder, I want to ship custom Your Memory content (bootstrap file,
 **Acceptance Criteria (Given-When-Then):**
 
 ```gherkin
-Given a Level 2 product with custom Your Memory content
+Given an implementation with custom Your Memory content
 When the Engine starts and applies bootstrap configuration
 Then the model follows the product's methodology
 And the model discovers skills, folder structure, and starter content from Your Memory
@@ -204,10 +204,10 @@ And Your Memory itself has zero knowledge of the product's conventions
 ```
 
 ```gherkin
-Given two different Level 2 products with different Your Memory content
-When both run on the same Foundation
+Given two different implementations with different Your Memory content
+When both run on the same Architecture
 Then each behaves according to its own Your Memory content
-And the Foundation code is identical in both cases
+And the architecture code is identical in both cases
 ```
 
 **Status:** Open
@@ -233,7 +233,7 @@ As a product builder, I want to ship tools specific to my use case so that the s
 **Acceptance Criteria (Given-When-Then):**
 
 ```gherkin
-Given a Level 2 product with custom tools configured
+Given an implementation with custom tools configured
 When the Engine starts
 Then it discovers and connects to the configured tools
 And tool definitions appear in prompts sent to the model
@@ -241,7 +241,7 @@ And the Engine has zero knowledge of what the tools do
 ```
 
 ```gherkin
-Given a Level 2 product that ships different tools than BrainDrive
+Given an implementation that ships different tools than BrainDrive
 When the system runs
 Then the model uses the product's tools, not BrainDrive's
 And the Engine, Your Memory, Auth, and Gateway code is identical
@@ -269,7 +269,7 @@ As a product builder, I want to create my own branded client so that my product 
 **Acceptance Criteria (Given-When-Then):**
 
 ```gherkin
-Given a Level 2 product with a custom branded client
+Given an implementation with a custom branded client
 When the client sends a message through the Gateway API
 Then the system processes it identically to any other client
 And the Gateway has zero knowledge of the client's branding or identity
@@ -286,9 +286,9 @@ And conversations are portable across clients (start on one, continue on another
 
 </details>
 
-### CS-5: Industry-Specific Level 2 Product (Coaching Example) — **Open**
+### CS-5: Industry-Specific Implementation (Coaching Example) — **Open**
 
-As an industry professional (e.g., a coach), I want to build a domain-specific product on the Foundation so that I can ship personal AI systems to my clients without building the infrastructure myself.
+As an industry professional (e.g., a coach), I want to build a domain-specific product on the Architecture so that I can ship personal AI systems to my clients without building the infrastructure myself.
 
 <details>
 <summary>Details — source, steps, acceptance criteria</summary>
@@ -296,7 +296,7 @@ As an industry professional (e.g., a coach), I want to build a domain-specific p
 **Source:** Customization interview — coaching platform example (Dave W + Claude, 2026-02-26)
 
 **Steps:**
-1. Coach starts with Level 1 Foundation as a dependency
+1. Coach starts with the Architecture as a dependency
 2. Coach creates coaching-specific Your Memory content (client intake templates, session notes structure, goal tracking, coaching frameworks)
 3. Coach creates coaching skills (intake interview, session summary, progress review)
 4. Coach optionally adds coaching tools (scheduling API integration, CRM connector)
@@ -306,12 +306,12 @@ As an industry professional (e.g., a coach), I want to build a domain-specific p
 **Acceptance Criteria (Given-When-Then):**
 
 ```gherkin
-Given a coaching product built on Level 1 Foundation
+Given a coaching product built on the Architecture
 When a coaching client receives their own system
 Then it behaves as a personal coaching AI with the coach's methodology
 And the client owns their data and Memory
-And no Foundation code has been modified
-And the coaching product can take Foundation updates without conflict
+And no architecture code has been modified
+And the coaching product can take architecture updates without conflict
 ```
 
 ```gherkin
@@ -327,7 +327,7 @@ Because both share the same APIs and contracts
 
 ### CS-6: Owner Personalization (Level 3) — **Open**
 
-As an owner, I want to customize my system beyond the Level 2 defaults so that it fits my specific needs.
+As an owner, I want to customize my system beyond the implementation defaults so that it fits my specific needs.
 
 <details>
 <summary>Details — source, steps, acceptance criteria</summary>
@@ -335,7 +335,7 @@ As an owner, I want to customize my system beyond the Level 2 defaults so that i
 **Source:** Customization interview, Ecosystem concept (D110, D113)
 
 **Steps:**
-1. Owner starts with a working Level 2 product
+1. Owner starts with a working implementation
 2. Owner adds personal Your Memory content (life pages, projects, personal context)
 3. Owner adds custom skills for their workflows
 4. Owner adjusts tool configuration (adds tools, changes always-send set)
@@ -344,17 +344,17 @@ As an owner, I want to customize my system beyond the Level 2 defaults so that i
 **Acceptance Criteria (Given-When-Then):**
 
 ```gherkin
-Given a Level 2 product with Level 3 personalization
+Given an implementation with Level 3 personalization
 When the system runs
-Then it reflects both the product opinions (Level 2) and owner preferences (Level 3)
+Then it reflects both the product opinions (Implementation) and owner preferences (Level 3)
 And the customization mechanisms are identical to what the product builder used
 ```
 
 ```gherkin
 Given an owner who personalizes their BrainDrive
-When BrainDrive ships a product update (Level 2)
+When BrainDrive ships a product update (Implementation)
 Then the owner's personalizations (Level 3) are preserved
-And the update applies cleanly because Level 3 content doesn't conflict with Level 2 defaults
+And the update applies cleanly because Level 3 content doesn't conflict with implementation defaults
 ```
 
 **Status:** Open
@@ -367,41 +367,41 @@ And the update applies cleanly because Level 3 content doesn't conflict with Lev
 
 ### Properties That Must Always Hold
 
-- [ ] Level 1 Foundation code is never modified by a Level 2 product — all customization is through Your Memory, tools, config, and client
-- [ ] Any Engine that implements the Foundation contract can boot any Level 2 product — the product's behavior comes from Your Memory, not from Engine customization
-- [ ] Removing all Level 2 customization leaves a working Level 1 system — the Foundation stands alone
-- [ ] Level 2 and Level 3 customization use identical mechanisms — there is no technical difference between product builder customization and owner customization
-- [ ] Foundation updates can be adopted by Level 2 products without merge conflicts — because Level 2 is a dependency layer, not a fork
-- [ ] Multiple Level 2 products can run on the same Foundation without interfering with each other
-- [ ] All customization must work through the four mechanisms — no backdoor code-level modification of Foundation components
+- [ ] Architecture code is never modified by an implementation — all customization is through Your Memory, tools, config, and client
+- [ ] Any Engine that implements the architecture contract can boot any implementation — the product's behavior comes from Your Memory, not from Engine customization
+- [ ] Removing all implementation customization leaves a working architecture system — the Architecture stands alone
+- [ ] Implementation and Level 3 customization use identical mechanisms — there is no technical difference between product builder customization and owner customization
+- [ ] Architecture updates can be adopted by implementations without merge conflicts — because an implementation is a dependency layer, not a fork
+- [ ] Multiple implementations can run on the same Architecture without interfering with each other
+- [ ] All customization must work through the four mechanisms — no backdoor code-level modification of architecture components
 - [ ] Secrets never appear in Your Memory or tracked config files — API key references only (see [security-spec.md](./security-spec.md))
 
 ### Edge Cases to Test
 
-- [ ] Level 2 product ships no custom tools — uses only Foundation defaults. System should still work.
-- [ ] Level 2 product ships no bootstrap file — overrides the default with a different bootstrap mechanism. System should still work.
-- [ ] Level 2 product overrides a Foundation default (e.g., different bootstrap path) — the override takes precedence cleanly.
-- [ ] Two Level 2 products ship conflicting configuration for the same Foundation instance — should be impossible (each Level 2 is its own deployment).
-- [ ] Owner (Level 3) overrides a Level 2 default — owner preference takes precedence.
-- [ ] Foundation ships a new default that conflicts with an existing Level 2 override — Level 2 override should continue to work.
+- [ ] Implementation ships no custom tools — uses only architecture defaults. System should still work.
+- [ ] Implementation ships no bootstrap file — overrides the default with a different bootstrap mechanism. System should still work.
+- [ ] Implementation overrides an architecture default (e.g., different bootstrap path) — the override takes precedence cleanly.
+- [ ] Two implementations ship conflicting configuration for the same Architecture instance — should be impossible (each implementation is its own deployment).
+- [ ] Owner (Level 3) overrides an implementation default — owner preference takes precedence.
+- [ ] Architecture ships a new default that conflicts with an existing implementation override — implementation override should continue to work.
 
 ### Failure Modes
 
 | Scenario | Expected Behavior |
 |----------|-------------------|
-| Level 2 product ships malformed bootstrap file | Engine reports error at startup — model can't load instructions. Clear error message pointing to the bootstrap file. |
-| Level 2 product ships tools that aren't available | Engine reports tool connection failure. Model informed of unavailable tools. System continues with available tools. |
-| Foundation update changes a default that Level 2 was relying on | Level 2's explicit override takes precedence. If Level 2 relied on the old default implicitly, the change surfaces as different behavior — caught by Level 2's test suite. |
+| Implementation ships malformed bootstrap file | Engine reports error at startup — model can't load instructions. Clear error message pointing to the bootstrap file. |
+| Implementation ships tools that aren't available | Engine reports tool connection failure. Model informed of unavailable tools. System continues with available tools. |
+| Architecture update changes a default that an implementation was relying on | Implementation's explicit override takes precedence. If the implementation relied on the old default implicitly, the change surfaces as different behavior — caught by the implementation's test suite. |
 | Owner tries to customize something the managed hosting deployment restricts | System rejects the customization with a clear message explaining the managed hosting constraint. |
 
 ---
 
 ## Open Questions
 
-- [x] **OQ-1: What exactly are the Level 1 defaults?** **Partially resolved (D153, D158).** Runtime config: `memory_root: ./your-memory`, `provider_adapter: openai-compatible`, `auth_mode: local`, `tool_sources: [built-in memory tools]`. Bootstrap: minimal generic system prompt, Level 2 overrides via `bootstrapTarget`. Memory tools: native read/write/edit/delete/search/list/history. Default `your-memory/` is empty on first boot. Remaining defaults will emerge during implementation.
-- [x] **OQ-2: How does Level 2 depend on Level 1 technically?** **Resolved (D155).** npm package. Level 1 publishes as a package, Level 2 `npm install`s it, imports components, configures, adds opinions, runs. Standard semver versioning.
-- ~~**OQ-3: How do Level 2 and Level 3 content coexist without conflicts?**~~ Partially answered: [configuration-spec.md](./configuration-spec.md) defines layered overrides (Level 1 → Level 2 → Level 3, owner wins). Remaining conventions (file-level coexistence) deferred to implementation.
-- [x] **OQ-4: Does the Foundation repo ship runnable code or specs + contracts?** **Resolved (D153):** Runnable code. The Foundation is a working runtime — `npm install`, provide Your Memory content + tools + config + client, and it runs. Ships sensible defaults (generic OpenAI-compatible provider adapter, local auth, `./your-memory` filesystem, built-in memory tools). All defaults overridable. Specs, schemas, conformance tests ship alongside as documentation and validation.
+- [x] **OQ-1: What exactly are the architecture defaults?** **Partially resolved (D153, D158).** Runtime config: `memory_root: ./your-memory`, `provider_adapter: openai-compatible`, `auth_mode: local`, `tool_sources: [built-in memory tools]`. Bootstrap: minimal generic system prompt, implementations override via `bootstrapTarget`. Memory tools: native read/write/edit/delete/search/list/history. Default `your-memory/` is empty on first boot. Remaining defaults will emerge during implementation.
+- [x] **OQ-2: How does an implementation depend on the Architecture technically?** **Resolved (D155).** npm package. The Architecture publishes as a package, implementations `npm install` it, import components, configure, add opinions, run. Standard semver versioning.
+- ~~**OQ-3: How do implementation and Level 3 content coexist without conflicts?**~~ Partially answered: [configuration-spec.md](./configuration-spec.md) defines layered overrides (Architecture → Implementation → Level 3, owner wins). Remaining conventions (file-level coexistence) deferred to implementation.
+- [x] **OQ-4: Does the Architecture repo ship runnable code or specs + contracts?** **Resolved (D153):** Runnable code. The Architecture is a working runtime — `npm install`, provide Your Memory content + tools + config + client, and it runs. Ships sensible defaults (generic OpenAI-compatible provider adapter, local auth, `./your-memory` filesystem, built-in memory tools). All defaults overridable. Specs, schemas, conformance tests ship alongside as documentation and validation.
 - ~~**OQ-5: How do we handle versioning across two repos?**~~ Deferred to implementation. Depends on delivery mechanism (see OQ-2).
 
 ---
@@ -409,11 +409,11 @@ And the update applies cleanly because Level 3 content doesn't conflict with Lev
 ## Success Criteria
 
 - [ ] Builders can understand the customization model — Foundation is a runtime, defaults not contracts, four mechanisms
-- [ ] Builders know what to provide to build a Level 2 product — Your Memory content, tools, config, client
-- [ ] BrainDrive serves as a reference Level 2 implementation
-- [ ] A Level 2 product boots correctly on Level 1 Foundation with custom Your Memory content, tools, and config — no Foundation code modified
-- [ ] Level 2 products ship as their own repo (dependency on Level 1) and as Docker images for owners
-- [ ] An AI agent can read this spec and build a working Level 2 product without additional guidance
+- [ ] Builders know what to provide to build an implementation — Your Memory content, tools, config, client
+- [ ] BrainDrive serves as the reference implementation
+- [ ] An implementation boots correctly on the Architecture with custom Your Memory content, tools, and config — no architecture code modified
+- [ ] Implementations ship as their own repo (dependency on the Architecture) and as Docker images for owners
+- [ ] An AI agent can read this spec and build a working implementation without additional guidance
 
 ---
 

@@ -25,7 +25,7 @@
     },
     "auth_mode": {
       "type": "string",
-      "description": "How authentication works in this deployment. Level 1 default is 'local' (auth on hardware the owner controls). Level 2 products may define additional modes. Auth is cross-cutting (D60) — independent of the Gateway and Engine.",
+      "description": "How authentication works in this deployment. Architecture default is 'local' (auth on hardware the owner controls). Implementations may define additional modes. Auth is cross-cutting (D60) — independent of the Gateway and Engine.",
       "default": "local",
       "examples": [
         "local"

@@ -133,7 +133,7 @@ See [communication-principles.md](./communication-principles.md).
 
 If you can't run the system on your own hardware, you don't fully own it. The foundation defines how the system runs on **hardware the owner physically controls** — your laptop, your desktop, your home server. Full offline capability, local data storage, no cloud service required. The system has dependencies (model provider, runtime) but none are inescapable — each has an escape path defined in [deployment-spec.md](./deployment-spec.md). Everything above — Your Memory as the platform, swappable components, two contracts — is theoretical if the system can only run on someone else's infrastructure. Deployment is where ownership becomes concrete.
 
-Managed hosting, VPS, and remote access are Level 2 product extensions — same code, different deployment. Memory portability means you move between deployment modes without losing anything. See [deployment-spec.md](./deployment-spec.md) for the full contract.
+Managed hosting, VPS, and remote access are implementation extensions — same code, different deployment. Memory portability means you move between deployment modes without losing anything. See [deployment-spec.md](./deployment-spec.md) for the full contract.
 
 ---
 
@@ -157,7 +157,7 @@ Both APIs are deliberately hollow — they exist to pass information forward wit
 
 ### Gateway API — Clients ↔ Gateway
 
-How the world interacts with the system. Built on whatever the best industry standard is today — someone else maintains the protocol, you just use it. Swappable via adapter when the standard shifts. Level 2 products choose the specific format (see [adapter-spec.md](./adapter-spec.md)).
+How the world interacts with the system. Built on whatever the best industry standard is today — someone else maintains the protocol, you just use it. Swappable via adapter when the standard shifts. Implementations choose the specific format (see [adapter-spec.md](./adapter-spec.md)).
 
 - **In:** Message content + conversation ID (optional) + metadata (client context, scope info)
 - **Out:** Streamed response + conversation ID + message record
@@ -173,7 +173,7 @@ How the system thinks. Today that means model-native tool calling — tool defin
 
 See [models-spec.md](./models-spec.md).
 
-**What about tools?** Tool calls flow through the Model API and are executed by the Engine. How the Engine communicates with tools — MCP today, something better tomorrow — is internal to the Engine, not an architectural boundary. No separate tool protocol API at Level 1. Memory tools are internal — the system can't function without reading and writing its own memory. External tools (Salesforce, weather, APIs) are additive — add or remove them without affecting the system. See [tools-spec.md](./tools-spec.md).
+**What about tools?** Tool calls flow through the Model API and are executed by the Engine. How the Engine communicates with tools — MCP today, something better tomorrow — is internal to the Engine, not an architectural boundary. No separate tool protocol API in the architecture. Memory tools are internal — the system can't function without reading and writing its own memory. External tools (Salesforce, weather, APIs) are additive — add or remove them without affecting the system. See [tools-spec.md](./tools-spec.md).
 
 **The memory/tool binary.** Everything the system processes reduces to two things: memory and tools. If it's data, it's memory. If it's not data, it's a tool. New capabilities arrive by adding tools and memory content, not by adding infrastructure. See [research/memory-tool-completeness.md](./research/memory-tool-completeness.md).
 
@@ -233,7 +233,7 @@ sequenceDiagram
 
 ## Foundation User Stories
 
-These stories validate the architecture itself. Product-level user stories are defined in the product spec (Level 2).
+These stories validate the architecture itself. Product-level user stories are defined in the product spec (Implementation).
 
 | # | Story |
 |---|-------|
@@ -361,7 +361,7 @@ Who does what — and who doesn't. Use this to verify that component specs don't
 | [communication-principles.md](./communication-principles.md) | Communication — six principles for lock-in-free internal communication |
 | [configuration-spec.md](./configuration-spec.md) | Configuration — preferences, runtime, tool self-description |
 | [deployment-spec.md](./deployment-spec.md) | Deployment — local-first contract |
-| [customization-spec.md](./customization-spec.md) | How Level 2 products build on the Foundation |
+| [customization-spec.md](./customization-spec.md) | How implementations build on the Architecture |
 | Decisions log (BrainDrive Library) | All pivot decisions (D1-D168 + D141-refined) |
 | [research/memory-tool-completeness.md](./research/memory-tool-completeness.md) | D135 completeness proof — memory/tool binary |
 | `guides/` | Developer guides, contracts, conformance tests, stubs |

@@ -11,7 +11,7 @@ All data, everywhere, is memory — the only question is whose. Your local files
 
 Your Memory is an **unopinionated substrate** — it persists and retrieves your data with zero opinions about what that data means. Opinions can live *in* Your Memory — skills, personality, methodology, context, instructions — but Your Memory doesn't enforce or interpret them. The model reads the content and gives it meaning. This is what keeps memory maximally portable — if the substrate had opinions, it would only work with systems that understand them.
 
-This is a **Level 1 (Foundation) spec** — it defines the generic Your Memory component that anyone could implement. It does not force a single storage technology, but it does require owner inspectability and exportability. Product-specific conventions (entry-point files, skills, folder structure, methodology) are Level 2 opinions that live *inside* Your Memory but are not defined *by* Your Memory.
+This is an **Architecture spec** — it defines the generic Your Memory component that anyone could implement. It does not force a single storage technology, but it does require owner inspectability and exportability. Product-specific conventions (entry-point files, skills, folder structure, methodology) are implementation opinions that live *inside* Your Memory but are not defined *by* Your Memory.
 
 ## Why we define it this way
 
@@ -115,7 +115,7 @@ If people interact with AI via robots in the future, the owner should bring thei
 
 Memory MUST support export. You can always get everything out. This is the baseline guarantee that makes ownership real.
 
-The specific export format is a Level 2 choice. The Level 1 requirement: everything exportable, in open formats.
+The specific export format is an implementation choice. The architecture requirement: everything exportable, in open formats.
 
 | Data | Included | Notes |
 |------|----------|-------|
@@ -135,7 +135,7 @@ Memory's contract is a small set of operations exposed as tools. These are inter
 
 Not all callers use tools the same way. The model accesses Your Memory through the Engine's tool loop — flexible, exploratory, judgment-based. Infrastructure components access Your Memory through dedicated internal tools scoped to their operational needs — fixed, mechanical, no judgment. The Gateway, for example, uses a conversation store tool for conversation management (D152). Both callers use the tool interface. Neither bypasses it.
 
-The specific operation names and signatures are Level 2 — the Level 1 requirement is that they map to the guarantees above.
+The specific operation names and signatures are implementation choices — the architecture requirement is that they map to the guarantees above.
 
 | Operation | What it does | Input | Output | Guarantee |
 |-----------|-------------|-------|--------|-----------|
@@ -184,7 +184,7 @@ This is analogous to POSIX file operations — `open`, `read`, `write`, `close`,
 
 ## Storage Mechanisms
 
-Memory is not a single storage technology. It's everything that persists behind the tools. Different data shapes use different storage mechanisms — all are Memory. The specific technologies are Level 2 choices.
+Memory is not a single storage technology. It's everything that persists behind the tools. Different data shapes use different storage mechanisms — all are Memory. The specific technologies are implementation choices.
 
 | Storage mechanism | What it holds | Why this mechanism |
 |-------------------|--------------|-------------------|
@@ -201,13 +201,13 @@ Adding a new storage mechanism is adding tool implementations, not changing the 
 
 Prompt assembly lives in Memory — skills, context, personality, instructions are all files. But the model needs instructions before it can read Memory. This creates a chicken-and-egg.
 
-The solution: a **minimal bootstrap prompt** in Engine configuration — the BIOS. Tiny, generic, just enough to tell the model where to look. The specific bootstrap content is a Level 2 choice. Example:
+The solution: a **minimal bootstrap prompt** in Engine configuration — the BIOS. Tiny, generic, just enough to tell the model where to look. The specific bootstrap content is an implementation choice. Example:
 
 > "You are the owner's assistant. Read the AGENT.md in the current folder for your instructions."
 
 Everything else — personality, skills, methodology, context — the model discovers by following that instruction.
 
-The bootstrap is Engine configuration, not Memory. One line. Generic. Level 2. Prompt assembly still lives in Memory. The bootstrap is just "look here."
+The bootstrap is Engine configuration, not Memory. One line. Generic. Implementation-specific. Prompt assembly still lives in Memory. The bootstrap is just "look here."
 
 ---
 

@@ -7,13 +7,13 @@ hide_table_of_contents: true
 
 Every AI system has security concerns — data protection, access control, threat mitigation, audit trails. So what's different here?
 
-Here, security is **a cross-cutting property of the whole system, not a bolt-on layer.** There is no security component. Security is enforced by existing components through configuration and contracts — Auth provides scope enforcement, tools provide container isolation, the Engine enforces timeouts, Your Memory provides version history. The Foundation provides the *mechanisms*; Level 2 products provide the *defaults*.
+Here, security is **a cross-cutting property of the whole system, not a bolt-on layer.** There is no security component. Security is enforced by existing components through configuration and contracts — Auth provides scope enforcement, tools provide container isolation, the Engine enforces timeouts, Your Memory provides version history. The Foundation provides the *mechanisms*; implementations provide the *defaults*.
 
-The guiding principle: **simple security that people use correctly beats complex security that gets misconfigured.** Every security control follows three tiers: Foundation provides mechanisms (no opinions), Level 2 provides sensible defaults (secure out of the box), and everything is configurable by the owner on their own hardware.
+The guiding principle: **simple security that people use correctly beats complex security that gets misconfigured.** Every security control follows three tiers: Foundation provides mechanisms (no opinions), implementations provide sensible defaults (secure out of the box), and everything is configurable by the owner on their own hardware.
 
 Auth answers "who can do what." This spec answers "what can go wrong, what do we protect, and how do we enforce it." This is not a regulatory compliance spec (GDPR, data residency belong in a separate regulation spec), not a replacement for auth-spec (identity and permissions stay there), and not an implementation guide (requirements, not technology choices).
 
-This is a **Level 1 (Foundation) spec** — it defines security mechanisms and requirements that apply to any system built on the Foundation, unopinionated about policy. Product-specific security defaults, managed hosting policies, and deployment-specific postures are Level 2 concerns documented in `research/security-product-design.md`.
+This is an **Architecture** spec — it defines security mechanisms and requirements that apply to any system built on the Foundation, unopinionated about policy. Product-specific security defaults, managed hosting policies, and deployment-specific postures are implementation concerns documented in `research/security-product-design.md`.
 
 **Related documents:** [foundation-spec.md](./foundation-spec.md) (architecture overview, links to all component specs)
 
@@ -29,7 +29,7 @@ These are explicit boundaries. Security does not add new components or change ex
 | A replacement for auth-spec | Auth handles identity and permissions. Security handles threats, protection, and enforcement. |
 | A regulation compliance spec | GDPR, data residency, right to deletion belong in a separate regulation spec |
 | Product logic in the Engine | Security controls must not violate Engine genericity (D39) |
-| Content awareness in the Gateway | Security controls must not make the Gateway content-aware at Level 1 |
+| Content awareness in the Gateway | Security controls must not make the Gateway content-aware in the architecture |
 | Opinions in Your Memory | Security controls must not add opinions to the unopinionated substrate (D43) |
 | Mandatory app-level encryption at rest | OS/infrastructure encryption is sufficient — app-level adds complexity without meaningful gain |
 | Security through obscurity | The security model is public. The code is open source. Scrutiny improves security. |
@@ -70,15 +70,15 @@ This is analogous to how operating systems separate code execution from data (NX
 | **Instructions** | System prompt, skills, bootstrap | Follow and execute | "You are the owner's assistant. Read AGENT.md for your instructions." |
 | **Data** | Files in Your Memory, conversation history, tool results | Process and report on, never execute as instructions | A markdown file about finances, a conversation transcript, a search result |
 
-**Level 1:** Foundation provides the content separation mechanism — the ability to mark content as instructions vs data in prompts sent through the Model API.
+**Architecture:** The Foundation provides the content separation mechanism — the ability to mark content as instructions vs data in prompts sent through the Model API.
 
-**Level 2:** The product configures content separation as a default. The system prompt instructs the model to treat Your Memory content as data. Configurable by Level 2 builders who may need different behavior.
+**Implementation:** The product configures content separation as a default. The system prompt instructs the model to treat Your Memory content as data. Configurable by implementation builders who may need different behavior.
 
 **Additional mitigations (defense in depth):**
 - Scope enforcement limits what damage an injection can cause (see Enforcement Mechanisms below)
 - Audit logging captures what the model read and did, enabling detection after the fact
 - Approval gates prevent injected write operations from executing without owner consent
-- Output filtering (future, Level 2) can inspect responses before they reach clients
+- Output filtering (future, Implementation) can inspect responses before they reach clients
 
 **What this doesn't solve:** A sophisticated injection that asks the model to include sensitive data in a seemingly normal response. Content separation reduces this risk but cannot eliminate it. This is an acknowledged limitation that improves as models improve at distinguishing instructions from data.
 
@@ -109,9 +109,9 @@ This is analogous to how operating systems separate code execution from data (NX
 
 **The threat:** Unauthorized access, request flooding, oversized payloads, or malformed input targeting the system's single entry point.
 
-**Level 1:** Foundation provides mechanisms for request validation (well-formed input, size limits) and extension points for rate limiting and abuse detection. The Gateway validates input structure before routing to the Engine.
+**Architecture:** The Foundation provides mechanisms for request validation (well-formed input, size limits) and extension points for rate limiting and abuse detection. The Gateway validates input structure before routing to the Engine.
 
-**Level 2:** Products configure rate limiting policies, request size limits, and abuse detection thresholds as appropriate for their deployment model.
+**Implementation:** Products configure rate limiting policies, request size limits, and abuse detection thresholds as appropriate for their deployment model.
 
 **Auth integration:** Every request must be authenticated before it reaches the Gateway's routing logic (D22, D60). Unauthenticated requests are rejected. Auth is the first line of defense. See [auth-spec.md](./auth-spec.md).
 
@@ -125,15 +125,15 @@ This is analogous to how operating systems separate code execution from data (NX
 - **Document the risk clearly.** Owners must understand: when you use a cloud model provider, your data goes to that provider. This should be stated during first-run setup and accessible in settings.
 - **Make the provider choice visible.** The owner should always know which provider is processing their data.
 - **Local models are the sovereign option.** Support for local model providers means owners who want zero data leaving their machine have that choice. The system works identically with local or cloud models.
-- **Future (configurable at Level 2):** If feasible, allow Level 2 builders to configure what Memory content can be included in prompts.
+- **Future (configurable in implementations):** If feasible, allow implementation builders to configure what Memory content can be included in prompts.
 
 #### 5. Hosting Provider Access
 
 **The threat:** When the system runs on infrastructure someone else controls — cloud hosting, managed hosting, VPS — the operator has access to the data. A malicious or negligent operator could access, copy, or leak Memory content.
 
-**The foundation's answer:** The system is designed to run on hardware the owner physically controls (D148). Local deployment is the sovereign option — no one else has access. This is the Level 1 guarantee.
+**The foundation's answer:** The system is designed to run on hardware the owner physically controls (D148). Local deployment is the sovereign option — no one else has access. This is the Architecture's guarantee.
 
-When a Level 2 product offers hosted deployment, the operator's access is a deployment trade-off the owner accepts by choosing that option. The security requirements for hosted deployment — operational access controls, audit logging, encryption, incident response — are Level 2 product concerns documented in `research/security-product-design.md`.
+When an implementation offers hosted deployment, the operator's access is a deployment trade-off the owner accepts by choosing that option. The security requirements for hosted deployment — operational access controls, audit logging, encryption, incident response — are implementation concerns documented in `research/security-product-design.md`.
 
 **What the foundation guarantees regardless of deployment:** Memory export always works. The owner can always leave with their data. No deployment choice creates permanent lock-in.
 
@@ -167,7 +167,7 @@ The sandbox is enforced by two independent layers:
 
 **Two independent layers means:** Auth failure alone doesn't breach the sandbox. Tool misconfiguration alone doesn't grant unauthorized access. Both must fail simultaneously for a complete breach.
 
-The Foundation provides both mechanisms. Level 2 products configure defaults. The owner can adjust on local deployment — that's their right on their own hardware.
+The Foundation provides both mechanisms. Implementations configure defaults. The owner can adjust on local deployment — that's their right on their own hardware.
 
 ### 2. Approval Gates
 
@@ -186,9 +186,9 @@ The spectrum is configurable per actor when multiple actors exist (owner might a
 
 ### 3. Audit Logging
 
-**Level 1 provides the mechanism.** The Foundation logs all actions — auth events, tool calls, Memory reads and writes — in a structured, queryable format. Action metadata (what happened, who, when, which tool) is always recorded regardless of logging level. Configurable levels control content detail, not whether actions are recorded.
+**The Architecture provides the mechanism.** The Foundation logs all actions — auth events, tool calls, Memory reads and writes — in a structured, queryable format. Action metadata (what happened, who, when, which tool) is always recorded regardless of logging level. Configurable levels control content detail, not whether actions are recorded.
 
-**Level 2 decides the display.** How the audit trail is presented to the owner is a client/product decision:
+**Implementations decide the display.** How the audit trail is presented to the owner is a client/product decision:
 - Real-time visibility ("reading finances/budget.md...") — a client feature
 - Queryable history ("what did the model read in this conversation?") — a product feature
 - Both, or neither — the Foundation doesn't prescribe
@@ -207,9 +207,9 @@ The spectrum is configurable per actor when multiple actors exist (owner might a
 
 The system distinguishes between instructions and data at the prompt level. See Threat Model > Prompt Injection for the full treatment.
 
-**Level 1:** Foundation provides the mechanism to mark content as instructions vs data in prompts sent through the Model API.
+**Architecture:** The Foundation provides the mechanism to mark content as instructions vs data in prompts sent through the Model API.
 
-**Level 2:** The product configures content separation as a default. The system prompt instructs the model to treat Memory content as data. Configurable by Level 2 builders.
+**Implementation:** The product configures content separation as a default. The system prompt instructs the model to treat Memory content as data. Configurable by implementation builders.
 
 ### 5. Tool Isolation
 
@@ -225,7 +225,7 @@ Container isolation protects against: unauthorized filesystem access, unauthoriz
 
 Version control provides history for Memory files. Combined with approval gates, this creates a safety net: if something goes wrong, you can see what changed and roll back.
 
-The Foundation provides the mechanism. Level 2 products configure whether version history is a feature (recommended, configurable) or a security control (always on, not configurable downward).
+The Foundation provides the mechanism. Implementations configure whether version history is a feature (recommended, configurable) or a security control (always on, not configurable downward).
 
 ---
 
@@ -267,7 +267,7 @@ Conversations receive the same protection as Your Memory — same access control
 Memory export must be protectable. The Foundation requires:
 - Export always works regardless of system state — the owner can always get their data out
 - Exports in open formats (maximum portability)
-- The export mechanism must support encryption (password or key) — whether encryption is default or optional is a Level 2 choice
+- The export mechanism must support encryption (password or key) — whether encryption is default or optional is an implementation choice
 
 ---
 
@@ -296,7 +296,7 @@ These requirements apply to each component. Cross-referenced into component spec
 - [ ] The Gateway must validate input structure before routing to the Engine — reject malformed requests
 - [ ] The Gateway must enforce request size limits — configurable, with sensible defaults
 - [ ] The Gateway must not interpret, filter, or modify message content — content-agnostic
-- [ ] The Gateway must provide extension points for rate limiting and abuse detection — Level 2 configures policies
+- [ ] The Gateway must provide extension points for rate limiting and abuse detection — implementations configure policies
 - [ ] The Gateway must support TLS for all external-facing connections
 
 ### Auth
@@ -349,7 +349,7 @@ These requirements apply to each component. Cross-referenced into component spec
 | In-process tool crashes | Engine may crash. This is why only trusted, code-reviewed tools run in-process. Engine restarts clean. |
 | Disk full on write | Tool reports failure to Engine, Engine reports to model. Model informs owner. No partial writes. |
 | Audit log storage full | System continues operating. Audit writes fail gracefully — log the failure, don't block the operation. Alert the owner. |
-| Model produces response containing injected sensitive data | Logged in audit trail for after-the-fact detection. Future: output filtering (Level 2) can inspect and block. |
+| Model produces response containing injected sensitive data | Logged in audit trail for after-the-fact detection. Future: output filtering (Implementation) can inspect and block. |
 
 ---
 
@@ -392,7 +392,7 @@ How exactly is the instructions/data boundary communicated to the model? System 
 
 ### OQ-2: Anomaly Detection Definition — DEFERRED to future capability phase
 
-What constitutes anomalous behavior? Needed before introducing external actors (D151: collaboration is system-to-system, so external actors within one system are a future concern, not Level 1).
+What constitutes anomalous behavior? Needed before introducing external actors (D151: collaboration is system-to-system, so external actors within one system are a future concern, not an Architecture concern).
 
 ### OQ-3: Output Filtering Extension Point — DEFERRED to future capability phase
 
@@ -440,4 +440,4 @@ How do we test that content separation works? Adversarial test suites, red team 
 
 ---
 
-*Security is a property of the whole system, not a feature you bolt on. The Foundation provides the mechanisms — scope enforcement, audit logging, content separation, tool isolation, approval gates, version history. Level 2 provides the sensible defaults. And through it all, the principle holds: simple security that people use correctly beats complex security that gets misconfigured.*
+*Security is a property of the whole system, not a feature you bolt on. The Foundation provides the mechanisms — scope enforcement, audit logging, content separation, tool isolation, approval gates, version history. Implementations provide the sensible defaults. And through it all, the principle holds: simple security that people use correctly beats complex security that gets misconfigured.*

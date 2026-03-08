@@ -13,7 +13,7 @@ Here, the interaction point is separated from the client. **The Gateway manages 
 
 Why this matters: because conversations live in the system (managed by the Gateway, stored in Your Memory), switching clients is seamless. Start a conversation on web, continue on mobile, pick it up on the CLI. The conversation persists regardless of which client connects. New interaction paradigms connect without system changes. No lock-in to any interface.
 
-The Gateway is to the system what the front door is to a building. It doesn't care who you are (Auth handles identity) or what you're carrying (the Engine handles processing). It manages the flow in and out. Auth is a **cross-cutting layer** independent of the Gateway — requests must be authenticated before interacting with the system, but how (middleware, proxy, sidecar) is a Level 2 decision. Both can be swapped independently, and neither has opinions about the other's implementation.
+The Gateway is to the system what the front door is to a building. It doesn't care who you are (Auth handles identity) or what you're carrying (the Engine handles processing). It manages the flow in and out. Auth is a **cross-cutting layer** independent of the Gateway — requests must be authenticated before interacting with the system, but how (middleware, proxy, sidecar) is an implementation decision. Both can be swapped independently, and neither has opinions about the other's implementation.
 
 Conversations are data. Data lives in Your Memory. Both the Gateway and the Engine are components that speak to Your Memory via tools — the difference is the Gateway always speaks to Your Memory via the same tool. The Engine uses whatever tools the model decides to — read this file, search for that, write something new — exploratory and different every time. The Gateway uses one tool for one purpose: a dedicated **conversation store tool** for storing messages, loading conversations, listing, and creating (D152). Mechanical, predictable, same every time.
 
@@ -21,7 +21,7 @@ The Gateway doesn't go through the Engine's tool loop (that would be circular �
 
 This follows the zero-outward-dependencies principle. The dependency points the right way: the Gateway depends on Your Memory (it reads and writes conversation data there through the tool), but Your Memory doesn't depend on the Gateway. Remove the Gateway, and Your Memory still sits there — conversations intact, readable with a text editor. Replace the Gateway with a different one, and it uses the same conversation store tool to pick up the same conversations. Your Memory never knew the Gateway existed.
 
-This is a **Level 1 (Foundation) spec** — it defines the generic Gateway that anyone could implement. Product-specific extensions (client metadata, browsing API, conversation UI conventions) are Level 2 (Product) opinions.
+This is an **Architecture spec** — it defines the generic Gateway that anyone could implement. Product-specific extensions (client metadata, browsing API, conversation UI conventions) are implementation opinions.
 
 **Related documents:** [foundation-spec.md](./foundation-spec.md) (architecture overview, links to all component specs)
 
@@ -44,7 +44,7 @@ These are explicit boundaries. They exist to prevent the Gateway from becoming o
 | Rate limiting | Operational / hosting concern | Gateway doesn't throttle |
 | Content filtering | Model or operational policy | Gateway doesn't filter |
 
-The context injection boundary is worth emphasizing. D20 says the client sends client metadata (folder path, context files) alongside messages. It would be tempting to have the Gateway handle this — "when the owner is in a certain context, automatically attach the right files." But that's a Level 2 product opinion. At Level 1, the Gateway passes through whatever the client sends. It doesn't add, modify, or interpret content. Making the Gateway context-aware would make it product-specific.
+The context injection boundary is worth emphasizing. D20 says the client sends client metadata (folder path, context files) alongside messages. It would be tempting to have the Gateway handle this — "when the owner is in a certain context, automatically attach the right files." But that's an implementation opinion. In the architecture, the Gateway passes through whatever the client sends. It doesn't add, modify, or interpret content. Making the Gateway context-aware would make it product-specific.
 
 ---
 
@@ -181,7 +181,7 @@ Per-component requirements from [security-spec.md](./security-spec.md). Security
 - [ ] The Gateway must validate input structure before routing to the Engine — reject malformed requests
 - [ ] The Gateway must enforce request size limits — configurable, with sensible defaults
 - [ ] The Gateway must not interpret, filter, or modify message content — content-agnostic (D59)
-- [ ] The Gateway must provide extension points for rate limiting and abuse detection — Level 2 configures policies
+- [ ] The Gateway must provide extension points for rate limiting and abuse detection — implementations configure policies
 - [ ] The Gateway must support TLS for all external-facing connections
 
 ---

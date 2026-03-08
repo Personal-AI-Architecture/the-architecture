@@ -12,7 +12,7 @@ Four components (Your Memory, Engine, Auth, Gateway), two APIs (Gateway API, Mod
 
 This repository is both:
 
-- A reference implementation of the Level 1 foundation architecture
+- A reference implementation of the foundation architecture
 - A validation suite that proves architectural promises (swappability, local-first operation, zero lock-in, clear boundaries)
 
 It is not intended to be a full product application. The default validation path is mock-first and can run without external model services.

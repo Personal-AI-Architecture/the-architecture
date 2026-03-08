@@ -23,7 +23,7 @@ Models are external regardless of where they run:
 | Local (Ollama on your machine) | HTTP request through Model API | Yes — same interface, different endpoint. The model is third-party weights running locally. |
 | Future (on-device, embedded) | Through Model API | Yes — the calling pattern is the same |
 
-This is a **Level 1 (Foundation) spec** — it defines what models are at the generic, unopinionated level. Product-specific model choices (OpenRouter default, single-model V1, pricing/allowances) are Level 2 (Product) opinions.
+This is an **Architecture spec** — it defines what models are at the generic, unopinionated level. Product-specific model choices (OpenRouter default, single-model V1, pricing/allowances) are implementation opinions.
 
 **Related documents:** [foundation-spec.md](./foundation-spec.md) (architecture overview, links to all component specs), [research/memory-tool-completeness.md](./research/memory-tool-completeness.md) (completeness proof — why the architecture needs no new components)
 

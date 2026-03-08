@@ -59,7 +59,7 @@ Three things follow from this:
 
 The rest of this document shows why.
 
-This is a **Level 1 (Foundation) document** — it defines how tools work at the generic, unopinionated level. Product-specific tool choices (which tools ship, what defaults, MCP as default protocol) are Level 2 (Product) opinions.
+This is an **Architecture document** — it defines how tools work at the generic, unopinionated level. Product-specific tool choices (which tools ship, what defaults, MCP as default protocol) are implementation opinions.
 
 **Related documents:** [foundation-spec.md](./foundation-spec.md) (architecture overview, links to all component specs)
 
@@ -180,7 +180,7 @@ A deployment needs very few tools to be functional. Filesystem operations (read,
 | **Git tool** | Version control | A standard external tool wrapped for the Engine — initializes repos, commits changes, provides diff. |
 | **Approval gate** | Write guard | A coded tool that *must* exist (see above) — intercepts write operations, pauses for owner confirmation. |
 
-This set is illustrative, not prescriptive. A Level 2 product decides which tools ship. The point is that a small number of tools — filesystem access, a skill loader, version control, and a write guard — is enough to run a fully functional system.
+This set is illustrative, not prescriptive. An implementation decides which tools ship. The point is that a small number of tools — filesystem access, a skill loader, version control, and a write guard — is enough to run a fully functional system.
 
 ---
 
@@ -279,7 +279,7 @@ Tool *definitions* come from the tools themselves — they self-describe what th
 | **CLI execution** | Engine spawns a child process, passes arguments, reads stdout/stderr. | Host binaries (Git, system utilities) |
 | **Native function call** | Direct function invocation within the Engine process. No serialization, no protocol overhead. | Built-in Engine functions (approval gate, audit logging) |
 
-**MCP is the default protocol** — this is a Level 2 opinion. MCP provides structured tool definitions, typed parameters, and a standard discovery mechanism. But the Level 1 architecture doesn't mandate it. Any mechanism that takes input and returns output works.
+**MCP is the default protocol** — this is an implementation opinion. MCP provides structured tool definitions, typed parameters, and a standard discovery mechanism. But the architecture doesn't mandate it. Any mechanism that takes input and returns output works.
 
 ### Tool isolation
 

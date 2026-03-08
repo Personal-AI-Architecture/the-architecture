@@ -276,8 +276,8 @@ describe("Lock-In Gate: 13 mandatory checks", () => {
     expect(convStoreSource).toContain("IF NOT EXISTS");
   });
 
-  // 13. Level boundary respected
-  it("check 13: no Level 2 product opinions in Level 1 code", async () => {
+  // 13. Architecture boundary respected
+  it("check 13: no implementation product opinions in architecture code", async () => {
     const sources = await allSourceContent();
 
     for (const f of sources) {
@@ -292,13 +292,13 @@ describe("Lock-In Gate: 13 mandatory checks", () => {
       // No BrainDrive product name in code
       expect(
         /\bBrainDrive\b/.test(nonCommentContent),
-        `${f.file} references BrainDrive (Level 2 product)`,
+        `${f.file} references BrainDrive (implementation product)`,
       ).toBe(false);
 
       // No managed hosting references
       expect(
         /managed.?hosting/i.test(nonCommentContent),
-        `${f.file} references managed hosting (Level 2)`,
+        `${f.file} references managed hosting (implementation)`,
       ).toBe(false);
     }
   });

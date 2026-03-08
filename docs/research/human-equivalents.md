@@ -12,7 +12,7 @@ The architecture makes claims that sound abstract — "tools are not a component
 
 ## The Three Levels
 
-### Level 1: You — The System Itself
+### Architecture: You — The System Itself
 
 A person has a brain and a body. The brain holds memory, applies intelligence, and controls access (who gets to know what about you). The body executes — it does what the brain decides.
 
@@ -26,7 +26,7 @@ A person has a brain and a body. The brain holds memory, applies intelligence, a
 
 This is the digital advantage: everything that's infrastructure can improve without losing what's personal.
 
-### Level 2: Internal Tools — How the Brain and Body Work Together
+### Implementation: Internal Tools — How the Brain and Body Work Together
 
 In a human, remembering and recalling aren't "tools you use" — they're just how your brain works. You don't think of reaching for a memory as picking up a tool.
 
@@ -39,7 +39,7 @@ In the architecture, Memory access is mediated through tools (read, write, searc
 | Searching your memory for something relevant | Memory search tool |
 | Your nervous system (connects brain to body) | The tool interface between Engine and Memory |
 
-### Level 3: External Tools — What Your Hands Hold
+### Personalization: External Tools — What Your Hands Hold
 
 This is where the real tool analogy kicks in. Humans make tools, use tools made by others, own some tools, pay to use others, and pay people to use tools on them.
 
@@ -198,7 +198,7 @@ You don't wake up with your entire day loaded in your head. You check a note on 
 | The notepad is tiny and generic — it works regardless of what your day looks like | The bootstrap is minimal and generic — one line, works for any product built on the architecture |
 | Your knowledge lives in your brain, not on the notepad | Instructions live in Your Memory, not in the bootstrap — the bootstrap just says "look here" |
 
-This is D50 and the BIOS analogy from memory-spec. The bootstrap is Engine configuration, not Memory. Level 2 products choose what the note says. Level 1 just defines that there is a note.
+This is D50 and the BIOS analogy from memory-spec. The bootstrap is Engine configuration, not Memory. Implementations choose what the note says. The Architecture just defines that there is a note.
 
 ---
 
@@ -268,19 +268,19 @@ The key insight: managed hosting doesn't change ownership. Your Memory is still 
 
 ---
 
-## Level 2 Customization — Human Anatomy vs Lifestyle
+## Implementation Customization — Human Anatomy vs Lifestyle
 
 Everyone has the same body plan — two arms, two legs, a brain, a heart. What you do with that body plan is entirely your choice. One person becomes a surgeon, another becomes a carpenter, another becomes a musician. Same anatomy, radically different lives.
 
 | Human | Architecture |
 |-------|-------------|
-| **Human anatomy** — the universal body plan everyone shares | **Level 1 Foundation** — 4 components, 2 APIs, 3 externals. Generic, unopinionated |
-| **Your lifestyle** — career, routines, preferences, personality | **Level 2 Product** — specific tools, default content, methodology, personality, brand |
-| **Anatomy doesn't prescribe lifestyle** — having hands doesn't mean you must be a pianist | **Foundation doesn't prescribe product** — having an Engine doesn't mean you must build a chatbot |
-| **Two people with the same anatomy live very different lives** — same infrastructure, different choices | **Two products on the same Foundation look completely different** — same architecture, different Memory contents |
-| **Your lifestyle choices are yours to change** — switch careers, move cities, change routines | **Level 2 opinions are swappable** — change the default tools, change the methodology, change the personality |
+| **Human anatomy** — the universal body plan everyone shares | **Architecture** — 4 components, 2 APIs, 3 externals. Generic, unopinionated |
+| **Your lifestyle** — career, routines, preferences, personality | **Implementation** — specific tools, default content, methodology, personality, brand |
+| **Anatomy doesn't prescribe lifestyle** — having hands doesn't mean you must be a pianist | **Architecture doesn't prescribe product** — having an Engine doesn't mean you must build a chatbot |
+| **Two people with the same anatomy live very different lives** — same infrastructure, different choices | **Two products on the same Architecture look completely different** — same architecture, different Memory contents |
+| **Your lifestyle choices are yours to change** — switch careers, move cities, change routines | **Implementation opinions are swappable** — change the default tools, change the methodology, change the personality |
 
-This is D65: Level 2 is composable lego blocks, each piece independently usable. The Foundation provides the body. The product provides the life.
+This is D65: the Implementation is composable lego blocks, each piece independently usable. The Architecture provides the body. The product provides the life.
 
 ---
 

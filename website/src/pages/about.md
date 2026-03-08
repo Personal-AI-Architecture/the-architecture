@@ -35,7 +35,7 @@ Four components, two APIs, five principles. Your Memory is the platform — ever
 
 ## BrainDrive
 
-BrainDrive is building a Level 2 product on top of this architecture — a personal AI system with managed hosting, tools, and a growing memory that compounds over time. The architecture is the foundation. BrainDrive is one product built on it. We hope there will be many more.
+BrainDrive is building an implementation on top of this architecture — a personal AI system with managed hosting, tools, and a growing memory that compounds over time. The architecture is the foundation. BrainDrive is one product built on it. We hope there will be many more.
 
 → [braindrive.ai](https://braindrive.ai)
 

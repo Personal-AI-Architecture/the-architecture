@@ -11,9 +11,9 @@ Here, the system **can always run on hardware you physically control.** Your lap
 
 Why this matters: in a biological system, your brain lives in your skull — you control the hardware by definition. For a digital brain, that's not automatic. Most AI systems put your brain on their servers — your memory, your conversations, your intelligence, all on hardware you'll never touch. This architecture says: your digital brain lives on your hardware. The promises elsewhere — own your Memory, swap your components, no lock-in — are theoretical if the system can only run on someone else's infrastructure. Deployment is where ownership becomes concrete. You can verify it by unplugging the ethernet cable.
 
-This spec defines the **deployment contract** — the guarantees the architecture makes about where and how the system can run. Not how to deploy (implementation) or managed hosting options (Level 2).
+This spec defines the **deployment contract** — the guarantees the architecture makes about where and how the system can run. Not how to deploy (implementation) or managed hosting options (Implementation).
 
-> **Level 1 (Foundation):** Local deployment on hardware the owner controls. Managed hosting, VPS/cloud deployment, and remote access are Level 2 concerns — opinions layered on top of this contract.
+> **Architecture:** Local deployment on hardware the owner controls. Managed hosting, VPS/cloud deployment, and remote access are implementation concerns — opinions layered on top of this contract.
 
 **Related documents:** [foundation-spec.md](./foundation-spec.md) (architecture overview, links to all component specs)
 
@@ -25,7 +25,7 @@ Five guarantees that any valid deployment of the Personal AI Architecture must h
 
 ### 1. Runs on hardware you control
 
-The system must run on a computer the owner physically controls. No remote service is required to start, operate, or shut down the system. "Physically controls" means the owner has root/admin access to the machine and can inspect, modify, or disconnect it at any time. The local deployment path must always exist — additional deployment options are Level 2 conveniences layered on top.
+The system must run on a computer the owner physically controls. No remote service is required to start, operate, or shut down the system. "Physically controls" means the owner has root/admin access to the machine and can inspect, modify, or disconnect it at any time. The local deployment path must always exist — additional deployment options are implementation conveniences layered on top.
 
 ### 2. Functions fully offline
 
@@ -62,7 +62,7 @@ Local models have their own hardware requirements (RAM, GPU) that are outside th
 
 All four components (Your Memory, Engine, Auth, Gateway) and both APIs (Gateway API, Model API) deploy together on one machine as a single unit. One install, one start command, one thing to manage.
 
-Splitting components across machines is allowed but not required — the single-unit deployment is the default. Split patterns are a Level 2 concern.
+Splitting components across machines is allowed but not required — the single-unit deployment is the default. Split patterns are an implementation concern.
 
 ---
 
@@ -108,12 +108,12 @@ These affect capability but not function.
 
 ## What the Deployment Contract Does NOT Cover
 
-These are explicitly out of scope for Level 1. Products built on the foundation (Level 2) address these.
+These are explicitly out of scope for the Architecture. Implementations address these.
 
-| Topic | Why it's not Level 1 |
+| Topic | Why it's not Architecture |
 |-------|---------------------|
 | **Managed hosting** | A product decision — "we run it for you" is an opinion on deployment, not a deployment contract (D111) |
-| **VPS / cloud self-hosting** | Deployment on hardware you don't physically control is a Level 2 concern |
+| **VPS / cloud self-hosting** | Deployment on hardware you don't physically control is an implementation concern |
 | **Remote access** | Accessing the system from outside your local network requires network exposure, which is a product/security decision |
 | **Update mechanics** | How updates are delivered and applied is implementation-specific |
 | **Backup and restore** | A product feature, not a deployment contract |
@@ -152,7 +152,7 @@ If you can't verify what you're running, you can't trust what you're running. Op
 
 ## Update Principles
 
-Updates must never compromise the owner's data or control. Two principles — mechanics are Level 2.
+Updates must never compromise the owner's data or control. Two principles — mechanics are implementation-specific.
 
 1. **Never risk data loss.** Your Memory, preferences, conversations, and auth data must survive any update. An update that could destroy or corrupt owner data is a broken update.
 
@@ -217,7 +217,7 @@ These verify that an implementation honors the deployment contract.
 
 ### ~~OQ-3: Port assignment convention~~ — RESOLVED
 
-**Resolution:** Level 2 product choice. The foundation defines that the Gateway listens on localhost (Network Posture section) but does not prescribe a port number. Each product built on the foundation chooses its own default. Port assignment is configuration, not architecture.
+**Resolution:** Implementation choice. The foundation defines that the Gateway listens on localhost (Network Posture section) but does not prescribe a port number. Each product built on the foundation chooses its own default. Port assignment is configuration, not architecture.
 
 ---
 

@@ -13,7 +13,7 @@ Here, configuration is split by what it actually is. **Preferences are personal 
 
 Why this matters: configuration is where lock-in hides. The architecture promises zero lock-in at every level — components via contracts, contracts via adapters, Your Memory via tools. But if swapping a provider means editing five config files across the system, the architecture's promise is hollow. Configuration must be as swappable as everything else. The anti-lock-in principle applies here: **if a normal swap requires more than one config change, you've introduced lock-in.**
 
-This is a **Level 1 (Foundation) document** — it defines how configuration works at the generic, unopinionated level. Product-specific defaults (which provider, which tools ship, what starter content) are Level 2 (Product) opinions.
+This is an **Architecture** document — it defines how configuration works at the generic, unopinionated level. Product-specific defaults (which provider, which tools ship, what starter content) are Implementation opinions.
 
 **Related documents:** [foundation-spec.md](./foundation-spec.md) (architecture overview, links to all component specs)
 
@@ -37,7 +37,7 @@ Your choices about how the system behaves. These are personal data. They describ
 
 **Where they live:** Your Memory. They're data about you — no different from your documents, skills, or decisions. When you move to a new system, your preferences travel. The new environment tries to honor them. If it can't (tool not available, model not supported), the system tells you.
 
-**What format:** Files in Your Memory. A config file in your library (e.g., `config/preferences.md` or `config/preferences.json`) — human-readable, editable, portable. The format is a Level 2 decision. The principle is Level 1: preferences are personal data.
+**What format:** Files in Your Memory. A config file in your library (e.g., `config/preferences.md` or `config/preferences.json`) — human-readable, editable, portable. The format is an implementation decision. The principle is architectural: preferences are personal data.
 
 ### 2. Runtime config — what's here
 
@@ -46,11 +46,11 @@ The thin bootstrap that tells the system what exists in this environment. Four f
 | Field | What it is | Example |
 |-------|-----------|---------|
 | `memory_root` | Where Your Memory lives on this system | `./your-memory` |
-| `provider_adapter` | Which adapter connects to AI models | `openai-compatible` (generic default — works with OpenRouter, Ollama, OpenAI, Anthropic). Level 2 products may ship a specific adapter (e.g., BrainDrive ships `openrouter`). |
-| `auth_mode` | How authentication works in this deployment | `local` (Level 1 default). Level 2 products may define additional modes (e.g., `managed`). |
+| `provider_adapter` | Which adapter connects to AI models | `openai-compatible` (generic default — works with OpenRouter, Ollama, OpenAI, Anthropic). Implementations may ship a specific adapter (e.g., BrainDrive ships `openrouter`). |
+| `auth_mode` | How authentication works in this deployment | `local` (architecture default). Implementations may define additional modes (e.g., `managed`). |
 | `tool_sources` | Where the system finds installed tools | `["./tools/", "/usr/local/mcp-servers/"]` |
 
-`model_default` is intentionally not here — which model to use is a preference (Level 2 product default or Level 3 owner choice), not an environment fact. It lives in preferences or adapter config.
+`model_default` is intentionally not here — which model to use is a preference (implementation default or Level 3 owner choice), not an environment fact. It lives in preferences or adapter config.
 
 **Example runtime config:**
 
@@ -101,19 +101,19 @@ Configuration follows the three-level model. Each level can override the one bel
 
 | Layer | What it provides | Example |
 |-------|-----------------|---------|
-| **Level 1 — Foundation defaults** | Sensible defaults that make the system work out of the box | `auth_mode: "local"`, no tools pre-configured |
-| **Level 2 — Product defaults** | Opinionated defaults from the product built on the foundation | BrainDrive sets `provider_adapter: "openrouter"`, ships starter tools, sets `model_default` |
+| **Architecture — Foundation defaults** | Sensible defaults that make the system work out of the box | `auth_mode: "local"`, no tools pre-configured |
+| **Implementation — Product defaults** | Opinionated defaults from the product built on the architecture | BrainDrive sets `provider_adapter: "openrouter"`, ships starter tools, sets `model_default` |
 | **Level 3 — Owner overrides** | The owner's choices, always final | Owner changes model, adds tools, sets policies |
 
-**Merge order is deterministic:** Level 1 → Level 2 → Level 3. A Level 3 override always wins. A Level 2 default applies unless the owner overrides it. A Level 1 default applies unless the product or owner overrides it.
+**Merge order is deterministic:** Architecture → Implementation → Level 3. A Level 3 override always wins. An implementation default applies unless the owner overrides it. An architecture default applies unless the product or owner overrides it.
 
-**One exception: environment safety constraints always win.** A Level 2 product may enforce security boundaries (D23) — tool allow lists, network restrictions, auth requirements — that override owner preferences. The full precedence chain:
+**One exception: environment safety constraints always win.** An implementation may enforce security boundaries (D23) — tool allow lists, network restrictions, auth requirements — that override owner preferences. The full precedence chain:
 
-> **Environment safety constraints (Level 2 product-enforced)** > **Owner preferences (Level 3)** > **Product defaults (Level 2)** > **Foundation defaults (Level 1)**
+> **Environment safety constraints (Implementation-enforced)** > **Owner preferences (Level 3)** > **Product defaults (Implementation)** > **Foundation defaults (Architecture)**
 
-An owner can override a product default. An owner cannot override a product-enforced safety constraint. On local deployment at Level 1, the owner is the final authority — there are no provider-enforced constraints.
+An owner can override a product default. An owner cannot override a product-enforced safety constraint. On local deployment in the architecture, the owner is the final authority — there are no provider-enforced constraints.
 
-**Preferences use the same layering:** Level 1 has no preferences (the foundation is unopinionated). Level 2 ships product defaults ("require approval for writes"). Level 3 is the owner's choices ("don't require approval, I trust the model"). Preferences merge the same way — owner wins, safety constraints aside.
+**Preferences use the same layering:** The Architecture has no preferences (the foundation is unopinionated). Implementations ship product defaults ("require approval for writes"). Level 3 is the owner's choices ("don't require approval, I trust the model"). Preferences merge the same way — owner wins, safety constraints aside.
 
 This means a product built on the foundation (like BrainDrive) ships with opinions that the owner can always override. The foundation itself ships with no opinions — just the mechanism.
 
@@ -125,11 +125,11 @@ Secrets (API keys, tokens, credentials) never appear in Your Memory or tracked c
 
 | Principle | Detail |
 |-----------|--------|
-| **Reference, never value** | Config refers to secrets by name: `$OPENROUTER_API_KEY`. The value comes from the environment (env var, secret store, or Level 2 platform). |
+| **Reference, never value** | Config refers to secrets by name: `$OPENROUTER_API_KEY`. The value comes from the environment (env var, secret store, or implementation platform). |
 | **Never in Your Memory** | Your Memory is portable, shareable, git-committed. Secrets in Your Memory are secrets leaked. |
 | **Never in runtime config** | Runtime config may be shared across deployments or checked into a repo. |
-| **Level 2 products may provide secrets** | A managed hosting product (Level 2) may supply API keys on behalf of the owner. |
-| **Local deployment: owner's responsibility** | On local (Level 1), the owner sets env vars or uses a `.env` file (gitignored). Standard practice. |
+| **Implementations may provide secrets** | A managed hosting product (Implementation) may supply API keys on behalf of the owner. |
+| **Local deployment: owner's responsibility** | On local (Architecture), the owner sets env vars or uses a `.env` file (gitignored). Standard practice. |
 
 ---
 
@@ -235,9 +235,9 @@ This is a CI test, not a guideline. It makes the principle enforceable. Run it o
 
 ## Open Questions
 
-### ~~OQ-1: Preference file format~~ — DEFERRED to Level 2
+### ~~OQ-1: Preference file format~~ — DEFERRED to Implementation
 
-**Resolution:** Level 2 product decision. The foundation requires "human-readable file in Your Memory" — the specific format (JSON, YAML, Markdown) is a product opinion.
+**Resolution:** Implementation decision. The foundation requires "human-readable file in Your Memory" — the specific format (JSON, YAML, Markdown) is a product opinion.
 
 ### ~~OQ-2: Tool manifest convention~~ — DEFERRED to implementation
 

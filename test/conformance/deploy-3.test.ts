@@ -38,9 +38,9 @@ describe("DEPLOY-3: Default localhost — gateway binds to 127.0.0.1 only", () =
     expect(serverSource).not.toContain("'0.0.0.0'");
   });
 
-  it("no configuration option to bind to all interfaces in Level 1", async () => {
+  it("no configuration option to bind to all interfaces in the architecture", async () => {
     // Static analysis: configuration schema should not include a host field
-    // that defaults to 0.0.0.0. Level 1 is localhost only.
+    // that defaults to 0.0.0.0. The architecture is localhost only.
     const configSchema = await readFile(
       resolve(import.meta.dirname, "../../specs/schemas/configuration.json"),
       "utf-8",

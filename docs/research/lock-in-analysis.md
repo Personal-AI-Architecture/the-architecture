@@ -49,8 +49,8 @@ The rest of this document walks through each component to confirm this holds and
 | Dimension | Risk Level | Detail |
 |-----------|-----------|--------|
 | **Data format** | None | Open formats only (D48). Everything exportable. No proprietary formats, no binary blobs. Storage mechanisms (files, databases, indexes) are all behind the tool interface — swap storage without changing anything else. |
-| **Organization & conventions** | None | Level 2 conventions (entry-point files, folder structure, skill format) live *in* Your Memory as content, not enforced *by* it. Any system that can read the storage can read them. |
-| **Version history** | Low | Level 1 requires version history capability. The specific mechanism is a Level 2 choice. If the mechanism evolves, define the abstract version history contract first. |
+| **Organization & conventions** | None | Implementation conventions (entry-point files, folder structure, skill format) live *in* Your Memory as content, not enforced *by* it. Any system that can read the storage can read them. |
+| **Version history** | Low | The architecture requires version history capability. The specific mechanism is an implementation choice. If the mechanism evolves, define the abstract version history contract first. |
 | **Tool semantics** | Low | If `search` means "grep" today and "semantic search" tomorrow, the tools are stable but behavior changes. Skills may need adjustment — hours, not days. |
 
 #### Why This Is Fully Portable
@@ -64,7 +64,7 @@ The memory-spec reinforces this with the "robot test" (D43): bring your memory t
 #### Exit Cost
 
 - **Moving everything:** Minutes to hours depending on storage size. Export in open formats — all storage mechanisms support it.
-- **Migrating version history:** Depends on the Level 2 mechanism. Hours if the mechanism is portable (e.g., Git). Longer if converting between systems — define the abstract contract first.
+- **Migrating version history:** Depends on the implementation mechanism. Hours if the mechanism is portable (e.g., Git). Longer if converting between systems — define the abstract contract first.
 
 #### Verdict
 
@@ -72,7 +72,7 @@ The memory-spec reinforces this with the "robot test" (D43): bring your memory t
 
 #### Discipline Required
 
-- **Define the abstract version history contract before evolving the mechanism.** The Level 2 version history choice is portable today. If storage evolves, the migration path needs to be defined before the change, not after.
+- **Define the abstract version history contract before evolving the mechanism.** The implementation version history choice is portable today. If storage evolves, the migration path needs to be defined before the change, not after.
 
 ---
 
@@ -229,9 +229,9 @@ Each tool is independent. Replace one without touching others. Add without modif
 
 **Owner-controlled tool availability (D109):** The owner controls which tools are sent with every prompt via an always-send set, with a discovery tool for the rest. This is a fine-grained portability mechanism — the owner's tool preferences travel with their memory, not with the deployment.
 
-**Level 2 default protocol (MCP) lock-in — effectively zero:**
+**Implementation default protocol (MCP) lock-in — effectively zero:**
 
-The Level 1 protection is structural: tool protocol is internal to the Engine, swappable without affecting other components. But the Level 2 default choice also matters practically:
+The architectural protection is structural: tool protocol is internal to the Engine, swappable without affecting other components. But the implementation default choice also matters practically:
 
 | Mitigating Factor | Why It Matters |
 |-------------------|---------------|
@@ -241,7 +241,7 @@ The Level 1 protection is structural: tool protocol is internal to the Engine, s
 | Open specification | Even if the Foundation falters, the spec is open and forkable |
 | Industry convergence | No competing protocol has meaningful traction |
 
-The probability of needing to replace MCP is near zero. MCP is the default but not mandated at Level 1 — CLI tools and native functions are equally valid (tools-spec). The realistic maintenance concern is MCP version updates as the spec evolves — and that's standard dependency management, not lock-in.
+The probability of needing to replace MCP is near zero. MCP is the default but not mandated in the architecture — CLI tools and native functions are equally valid (tools-spec). The realistic maintenance concern is MCP version updates as the spec evolves — and that's standard dependency management, not lock-in.
 
 #### Exit Cost
 
@@ -301,14 +301,14 @@ The probability of needing to replace MCP is near zero. MCP is the default but n
 
 ### 7. Security (Foundation Mechanisms)
 
-**Spec claim:** "Security controls must not create lock-in" (D29). The Foundation provides mechanisms — scope enforcement, audit logging, content separation, tool isolation, approval gates, version history. Level 2 provides sensible defaults.
+**Spec claim:** "Security controls must not create lock-in" (D29). The Foundation provides mechanisms — scope enforcement, audit logging, content separation, tool isolation, approval gates, version history. Implementations provide sensible defaults.
 
 #### Lock-In Assessment
 
 | Dimension | Risk Level | Detail |
 |-----------|-----------|--------|
 | **Tool isolation** | None | OCI standard containers — Docker, Podman, containerd. No proprietary sandboxing. |
-| **Encryption** | None | No mandatory app-level encryption at Level 1. OS encryption for local deployment. Export always works regardless of security level. |
+| **Encryption** | None | No mandatory app-level encryption in the architecture. OS encryption for local deployment. Export always works regardless of security level. |
 | **Audit logging** | None | Logging levels control detail, not whether events are logged. Schema exists from the start. |
 | **Scope enforcement** | None | Scope = available tools + Auth permissions (D55). No proprietary scope enforcer. |
 | **Content separation** | None | Primary prompt injection defense. Standard architectural pattern, not proprietary. |
@@ -329,14 +329,14 @@ The probability of needing to replace MCP is near zero. MCP is the default but n
 
 #### Discipline Required
 
-- **Don't introduce proprietary security mechanisms.** Every security control should use open standards or common patterns. If you need custom security, it belongs in Level 2 product code, not the Foundation.
+- **Don't introduce proprietary security mechanisms.** Every security control should use open standards or common patterns. If you need custom security, it belongs in implementation product code, not the Foundation.
 - **Keep memory export functional regardless of security level.** This invariant must be tested, not assumed.
 
 ---
 
 ### 8. Gateway (Conversation Management)
 
-**Spec claim:** The Gateway manages conversations and routes to the Engine (D58). It's generic, content-agnostic, and interface-agnostic at Level 1 (D59).
+**Spec claim:** The Gateway manages conversations and routes to the Engine (D58). It's generic, content-agnostic, and interface-agnostic in the architecture (D59).
 
 #### Lock-In Assessment
 
@@ -364,7 +364,7 @@ The probability of needing to replace MCP is near zero. MCP is the default but n
 #### Discipline Required
 
 - **Keep conversations in Your Memory via tools (D152).** If conversation data leaks into Gateway-owned storage, portability breaks.
-- **Maintain content-agnostic behavior (D59).** The Gateway passes data through without interpretation. Product-specific conversation behavior belongs in Level 2.
+- **Maintain content-agnostic behavior (D59).** The Gateway passes data through without interpretation. Product-specific conversation behavior belongs in implementations.
 
 ---
 
@@ -383,7 +383,7 @@ The probability of needing to replace MCP is near zero. MCP is the default but n
 
 | Dimension | Assessment |
 |-----------|-----------|
-| **Lock-in** | Zero. Tool protocol is internal to the Engine (D53) — not an API, not an architectural boundary. How the Engine communicates with tools is an implementation detail, swappable without affecting any other component. The Level 2 default (currently MCP) has open governance and massive adoption, but the Level 1 protection is structural: the protocol is contained within the Engine. |
+| **Lock-in** | Zero. Tool protocol is internal to the Engine (D53) — not an API, not an architectural boundary. How the Engine communicates with tools is an implementation detail, swappable without affecting any other component. The implementation default (currently MCP) has open governance and massive adoption, but the architectural protection is structural: the protocol is contained within the Engine. |
 | **Discipline** | Track the chosen protocol's versions. Budget for periodic updates. Don't build abstraction layers on top. |
 
 ### Model API (Adapter → Provider)
@@ -438,7 +438,7 @@ This is the most concrete enforcement mechanism in the architecture. Every other
 
 ### Deployment (D148, Five Guarantees)
 
-Level 1 defines local deployment only (D148). Managed hosting is Level 2 — same code, stricter configuration via D23.
+The architecture defines local deployment only (D148). Managed hosting is an implementation concern — same code, stricter configuration via D23.
 
 **Five deployment guarantees:**
 
@@ -450,7 +450,7 @@ Level 1 defines local deployment only (D148). Managed hosting is Level 2 — sam
 
 **Memory inspectable without the system running.** Text editor, file browser, database viewer — Your Memory is readable without booting the system. This is a portability guarantee that no proprietary system matches.
 
-**Managed hosting = Level 2:** Same code with stricter configuration. No deployment choice creates permanent lock-in. The local path always exists.
+**Managed hosting is an implementation concern:** Same code with stricter configuration. No deployment choice creates permanent lock-in. The local path always exists.
 
 #### Verdict
 
@@ -458,9 +458,9 @@ Level 1 defines local deployment only (D148). Managed hosting is Level 2 — sam
 
 ### Customization (D153, D155)
 
-Level 2 depends on Level 1 via npm package (D155) — clean semver separation, not a fork. Foundation updates flow automatically without merge conflicts.
+Implementations depend on the Architecture via npm package (D155) — clean semver separation, not a fork. Foundation updates flow automatically without merge conflicts.
 
-**Foundation ships runnable code with sensible defaults, all overridable (D153).** It's a working runtime, not just specs. Two boot modes: standalone (Foundation runs alone) and as-a-dependency (Level 2 imports and customizes).
+**Foundation ships runnable code with sensible defaults, all overridable (D153).** It's a working runtime, not just specs. Two boot modes: standalone (Foundation runs alone) and as-a-dependency (an Implementation imports and customizes).
 
 **Four customization mechanisms only:**
 
@@ -471,7 +471,7 @@ Level 2 depends on Level 1 via npm package (D155) — clean semver separation, n
 | **Configuration** | Environment and preferences | Model selection, provider, tool availability |
 | **Client** | Interface | Web app, mobile app, CLI, Discord bot |
 
-**Invariant: No code modification for Level 2/3.** All customization is runtime, not framework. Removing all Level 2 customization leaves a working Level 1 system. Level 2 and Level 3 use identical mechanisms — no technical difference between builder customization and owner personalization.
+**Invariant: No code modification for Implementation/Personalization.** All customization is runtime, not framework. Removing all implementation customization leaves a working Architecture. Implementation and Personalization use identical mechanisms — no technical difference between builder customization and owner personalization.
 
 #### Verdict
 
@@ -499,12 +499,12 @@ Each link is swappable. With 8+ components in the chain, version management matt
 
 This is normal open-source dependency management, not an architectural concern.
 
-### 2. Convention Portability (Level 2)
+### 2. Convention Portability (Implementation)
 
-Level 2 products build conventions on top of the Foundation — entry-point files, skill formats, folder structures, methodology. This is sometimes confused with lock-in, but the Level 1 architecture prevents it:
+Implementations build conventions on top of the Foundation — entry-point files, skill formats, folder structures, methodology. This is sometimes confused with lock-in, but the architecture prevents it:
 
 - **Conventions live *in* Your Memory, not enforced *by* it.** They're content, not infrastructure. Your Memory is an unopinionated substrate (D43) — it stores them without depending on them.
-- **Open formats make them readable by anything.** A competing system could read everything a Level 2 product wrote — because conventions are stored in open formats behind the tool interface. There's nothing to "export." It's already accessible.
+- **Open formats make them readable by anything.** A competing system could read everything an implementation wrote — because conventions are stored in open formats behind the tool interface. There's nothing to "export." It's already accessible.
 - **What doesn't travel is the agent.** The Engine that *acts on* the conventions is a generic commodity component — and that's swappable behind the Gateway API contract.
 
 The honest framing: **conventions are portable because Memory is portable — and Memory is portable because it has zero outward dependencies.**
@@ -607,7 +607,7 @@ The D147 anti-lock-in CI test is the concrete enforcement mechanism: three swaps
 | [models-spec.md](../models-spec.md) | Models spec — external intelligence |
 | [configuration-spec.md](../configuration-spec.md) | Configuration spec — runtime config and preferences |
 | [deployment-spec.md](../deployment-spec.md) | Deployment spec — local-first guarantees |
-| [customization-spec.md](../customization-spec.md) | Customization spec — Level 1/2/3 ecosystem |
+| [customization-spec.md](../customization-spec.md) | Customization spec — Architecture/Implementation/Personalization ecosystem |
 | [adapter-spec.md](../adapter-spec.md) | How contracts are made swappable via adapters (D139) |
 | [gateway-engine-contract.md](../gateway-engine-contract.md) | Gateway ↔ Engine internal contract (D137) |
 | [lockin-gate.md](../lockin-gate.md) | PR-level lock-in checklist — fast gate for every non-trivial PR |

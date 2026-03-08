@@ -15,7 +15,7 @@ Auth is a **cross-cutting layer** — it touches every other component, it's sec
 
 This is a **requirements and design spec**, not a technology choice document. The auth contract defined here is implementation-agnostic — any technology that satisfies the contract is valid. Technology recommendations are in `research/auth-research.md`.
 
-This is a **Level 1 (Foundation) spec** — it defines what the auth system does at the generic, unopinionated level. Product-specific auth choices (technology stack, managed hosting policies, MFA requirements, product evolution timeline) are Level 2 concerns documented in `research/auth-research.md` §Product Auth Design.
+This is an **Architecture spec** — it defines what the auth system does at the generic, unopinionated level. Product-specific auth choices (technology stack, managed hosting policies, MFA requirements, product evolution timeline) are implementation concerns documented in `research/auth-research.md` §Product Auth Design.
 
 **Related documents:** [foundation-spec.md](./foundation-spec.md) (architecture overview, links to all component specs)
 
@@ -89,7 +89,7 @@ Auth's job is one thing: **gate access**. Every request passes through auth. Aut
 
 The auth system must support these actor types. The identity model should accommodate all types from the start — even if only the owner exists initially — so that adding new actor types is a data change, not a schema change.
 
-**Level 1 implementation:** Build the schema and headers for all actor types, but only the owner flow needs to work at runtime. Multi-actor paths exist in the data model — they don't need to be exercised until a future capability phase activates them.
+**Architecture implementation:** Build the schema and headers for all actor types, but only the owner flow needs to work at runtime. Multi-actor paths exist in the data model — they don't need to be exercised until a future capability phase activates them.
 
 ### Humans
 
@@ -297,7 +297,7 @@ The minimal set (`auth_whoami`, `auth_check`, `auth_export`) should exist from t
 
 **Scenario:** Owner lost credentials, no recovery method configured.
 
-**Required behavior:** On a local deployment, the owner has filesystem access. Recovery path is through the filesystem — reset credentials via CLI tool or direct database modification. This is the owner's responsibility. Product-specific recovery paths (managed hosting support, account recovery flows) are Level 2 concerns.
+**Required behavior:** On a local deployment, the owner has filesystem access. Recovery path is through the filesystem — reset credentials via CLI tool or direct database modification. This is the owner's responsibility. Product-specific recovery paths (managed hosting support, account recovery flows) are implementation concerns.
 
 ### Auth Provider Failure
 
@@ -366,11 +366,11 @@ The pattern: **add actor types and permission rules, don't change the contract.*
 
 ### ~~OQ-1: Tool-Level Identity Propagation~~ — RESOLVED
 
-**Resolution:** Not needed at Level 1. Each system has one owner — the Engine always runs as that owner (D151). Multi-actor collaboration is system-to-system: collaborators bring their own systems and access shared Memory through Auth, not as users within your system. There are no users, only owners. If a future capability phase introduces delegated agents acting within the system, identity propagation becomes relevant — design it then, not now.
+**Resolution:** Not needed in the architecture. Each system has one owner — the Engine always runs as that owner (D151). Multi-actor collaboration is system-to-system: collaborators bring their own systems and access shared Memory through Auth, not as users within your system. There are no users, only owners. If a future capability phase introduces delegated agents acting within the system, identity propagation becomes relevant — design it then, not now.
 
 ### ~~OQ-2: Outbound Data Flow to External Tools~~ — RESOLVED
 
-**Resolution:** At Level 1, tool availability is the outbound data control. The owner chooses which tools are enabled (D109) — if you enable an external tool, you've accepted that the model may send data to it. The model decides what to include in each tool call, but can only call tools the owner made available. Fine-grained outbound policies (per-tool data restrictions, content filtering, "never send financial data to this tool") are Level 2 product features, not a foundation concern.
+**Resolution:** In the architecture, tool availability is the outbound data control. The owner chooses which tools are enabled (D109) — if you enable an external tool, you've accepted that the model may send data to it. The model decides what to include in each tool call, but can only call tools the owner made available. Fine-grained outbound policies (per-tool data restrictions, content filtering, "never send financial data to this tool") are implementation features, not an architecture concern.
 
 ---
 

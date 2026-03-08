@@ -18,21 +18,21 @@ Three developer audiences, each needing different things:
 
 | Audience | What they're doing | What they need |
 |----------|-------------------|----------------|
-| **Level 1 Implementer** | Building the foundation components themselves | Component contracts, interface shapes, validation criteria |
-| **Level 2 Product Builder** | Building an opinionated product on top of the foundation (e.g., BrainDrive) | Customization points, what to extend, what not to touch |
+| **Architecture Implementer** | Building the foundation components themselves | Component contracts, interface shapes, validation criteria |
+| **Implementation Builder** | Building an opinionated product on top of the foundation (e.g., BrainDrive) | Customization points, what to extend, what not to touch |
 | **System Extender** | Adding tools, skills, clients to a running instance | Tool registration, client connection, skill authoring |
 
 ### Onboarding Paths
 
 Each audience has a "start here" flow — the minimal set of files and first action to get productive:
 
-**Level 1 Implementer** — building the foundation:
+**Architecture Implementer** — building the foundation:
 1. Read `AGENT.md` (repo root) — architecture overview, component boundaries
 2. Read [guides/implementers-reference.md](./implementers-reference.md) — what each component must do
 3. Read `specs/openapi/` and `specs/schemas/` — the interface shapes to implement against
 4. Run the conformance suite to validate your implementation
 
-**Level 2 Product Builder** — building on the foundation:
+**Implementation Builder** — building on the foundation:
 1. Read `AGENT.md` (repo root) — architecture overview
 2. Read [customization-spec.md](../customization-spec.md) — extension points and constraints
 3. Read `specs/openapi/` and `specs/schemas/` — the API shapes your product uses

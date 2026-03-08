@@ -105,7 +105,7 @@ See `docs/guides/conformance/` for full test suite. See `docs/guides/implementer
 │   ├── configuration-spec.md             <- runtime config, preferences, tool self-description
 │   ├── deployment-spec.md                <- runs locally, functions offline
 │   ├── security-spec.md                  <- threat model, enforcement
-│   ├── customization-spec.md             <- how Level 2 products build on this
+│   ├── customization-spec.md             <- how implementations build on this
 │   ├── lockin-gate.md                    <- PR gate: 13 no-lock-in checks
 │   ├── lockin-audit.md                   <- milestone audit: deep verification
 │   ├── guides/

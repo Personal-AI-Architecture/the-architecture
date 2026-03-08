@@ -1,5 +1,5 @@
 /**
- * Personal AI Architecture — Level 1 Foundation
+ * Personal AI Architecture — the Architecture
  *
  * As-dependency entry point: import { boot } from "personal-ai-architecture"
  */
