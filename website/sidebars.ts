@@ -56,10 +56,11 @@ const sidebars: SidebarsConfig = {
   ],
 
   specsSidebar: [
+    'foundation-spec',
     {
       type: 'category',
       label: 'Core Specs',
-      collapsed: true,
+      collapsed: false,
       items: [
         'memory-spec',
         'engine-spec',
