@@ -62,7 +62,7 @@ const apis = [
     title: 'Model API',
     description:
       'How the engine connects to AI models. Swap providers with a config change — no code changes required.',
-    link: '/docs/engine-spec',
+    link: '/docs/models-spec',
   },
 ];
 
