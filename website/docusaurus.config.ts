@@ -5,7 +5,7 @@ import type * as Preset from '@docusaurus/preset-classic';
 const config: Config = {
   title: 'Personal AI Architecture',
   tagline: 'A lock-in-free architecture for personal AI systems',
-  favicon: 'img/favicon.ico',
+  favicon: 'img/paa-logo.png',
 
   future: {
     v4: true,
