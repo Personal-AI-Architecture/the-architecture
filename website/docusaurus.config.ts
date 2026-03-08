@@ -83,6 +83,11 @@ const config: Config = {
           position: 'left',
         },
         {
+          href: 'https://discuss.personalaiarchitecture.org',
+          label: 'Forum',
+          position: 'right',
+        },
+        {
           href: 'https://github.com/Personal-AI-Architecture/the-architecture',
           label: 'GitHub',
           position: 'right',
