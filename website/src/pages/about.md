@@ -1,56 +1,37 @@
 ---
-title: About
-description: The story behind the Personal AI Architecture
+title: About Us
+description: Who we are and why we're building this
 ---
 
-# About the Personal AI Architecture
+# About Us
 
-The Personal AI Architecture was created by [BrainDrive](https://braindrive.ai) — a company built on four pillars: Empowerment, Ownership, Freedom, and Sustainability.
+The Personal AI Architecture is an open source project by Dave Waring and Dave Jones, co-founders of [BrainDrive](https://braindrive.ai) — a personal AI platform for individuals who want to own their AI system.
 
-## Why This Exists
+## Why We're Doing This
 
-BrainDrive is building a personal AI system — one that works for you, that you own, that doesn't lock you in, and that succeeds with you rather than off you. In the process of designing that system, we realized the architecture itself was the most important thing we'd build. Not the product. Not the interface. The architecture.
+We're on a mission to build a superior user-owned alternative to Big Tech AI systems so the power of AI belongs not to a small number of Big Tech companies, but to the people.
 
-Because the architecture is what determines whether a system can evolve as fast as AI does. Whether you can swap a model when a better one ships. Whether you can move your data when you want to leave. Whether you own your AI or rent it.
+We believe accomplishing this mission will require more than any one company can do alone.
 
-So we decided to give it away.
+For this reason we are open sourcing the Personal AI Architecture, the foundation we are building the BrainDrive Personal AI system on top of.
 
-The Personal AI Architecture is MIT-licensed (code) and CC BY 4.0 (documentation). Anyone can use it, build on it, modify it, or compete with us using it. We believe that if this vision works, there will be so much opportunity that open-sourcing the architecture only makes the ecosystem stronger.
+The Architecture is designed to create a future where there are no AI system users, only owners.
 
-## The Architecture
+If this vision succeeds there will be more than enough opportunity for BrainDrive and any other company that wants to offer services to AI system owners.
 
-Four components, two APIs, five principles. Your Memory is the platform — everything else is swappable.
+We'll be sharing our learnings as we move towards implementing BrainDrive on top of this foundation, and hope others will do the same.
 
-- **13 finalized specs** covering every component, API, and cross-cutting concern
-- **243 tests** validating architectural invariants
-- **5 principles** that make lock-in avoidance a structural property, not a promise
-- **Published on npm** as a reference implementation
+## Get Involved
 
-→ [Read the Foundation Spec](/docs/foundation-spec)
+This architecture shouldn't be finished by one team.
 
-## Contributors
-
-- **Dave Waring** — Architecture, product design, documentation
-- **Dave Jones** — Architecture, implementation, testing
-
-## BrainDrive
-
-BrainDrive is building an implementation on top of this architecture — a personal AI system with managed hosting, tools, and a growing memory that compounds over time. The architecture is the foundation. BrainDrive is one product built on it. We hope there will be many more.
-
-→ [braindrive.ai](https://braindrive.ai)
+- **[Read the specs](/docs/foundation-spec)** — start with the Foundation Spec
+- **[Discuss](https://discuss.personalaiarchitecture.org)** — join the forum
+- **[Report issues](https://github.com/Personal-AI-Architecture/the-architecture/issues)** — help us improve
+- **[Build on it](https://github.com/Personal-AI-Architecture/the-architecture)** — MIT-licensed, build whatever you want
+- **[Contribute](https://github.com/Personal-AI-Architecture/the-architecture/blob/main/CONTRIBUTING.md)** — ideas, feedback, code
 
 ## License
 
 - **Code:** MIT License
 - **Documentation:** [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)
-
-## Get Involved
-
-The architecture is not finished — and it shouldn't be finished by one team. We're inviting the developer and architect community to participate.
-
-- **Read the specs** — start with the [Foundation Spec](/docs/foundation-spec)
-- **Discuss** — [Discourse forum](https://discuss.personalaiarchitecture.org)
-- **Report issues** — [GitHub Issues](https://github.com/Personal-AI-Architecture/the-architecture/issues)
-- **Build on it** — the architecture is MIT-licensed, build whatever you want
-
-We welcome contributions — whether it's ideas, feedback, bug reports, or code. See our [Contributing Guide](https://github.com/Personal-AI-Architecture/the-architecture/blob/main/CONTRIBUTING.md) to get started.
