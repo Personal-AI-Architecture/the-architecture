@@ -76,7 +76,7 @@ const config: Config = {
           label: 'The Architecture',
         },
         {
-          to: '/about',
+          to: '/docs/about',
           label: 'About Us',
           position: 'left',
         },

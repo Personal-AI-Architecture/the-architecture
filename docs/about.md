@@ -1,9 +1,9 @@
 ---
 title: About Us
 description: Who we are and why we're building this
+displayed_sidebar: null
+hide_table_of_contents: true
 ---
-
-# About Us
 
 The Personal AI Architecture is an open source project by Dave Waring and Dave Jones, co-founders of [BrainDrive](https://braindrive.ai) — a personal AI platform for individuals who want to own their AI system.
 
