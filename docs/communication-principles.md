@@ -50,7 +50,7 @@ This document covers communication **between internal components** — Gateway, 
 
 Communication is a layer between components, not inside them. If the Gateway has serialization logic baked into its code, or the Agent Loop hard-codes a message envelope format, swapping the communication approach means rewriting the components. That's coupling, not swappability.
 
-Components speak to an interface. The communication layer implements that interface. Swap the implementation, components don't know the difference. This is Foundation Principle 3 (Interfaces Over Implementations) applied to communication. Same principle that makes the Agent Loop swappable — it's defined by what it does, not how it talks.
+Components speak to an interface. The communication layer implements that interface. Swap the implementation, components don't know the difference. This is Foundation Principle 3 (Keep Responsibilities Where They Belong) applied to communication. Communication's job is to carry signals, not interpret them. The moment it starts doing another component's job, you can't swap it cleanly.
 
 Can you change how components communicate without changing the component code? If no, you've embedded communication and created lock-in.
 

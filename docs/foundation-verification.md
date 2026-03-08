@@ -135,7 +135,7 @@ The four pillars are values, not code — but they produce observable properties
 
 ## 3. Principle Verification
 
-### PR-1. Memory Is the Platform (Principle 1)
+### PR-1. Your Memory Should Have No Outbound Dependencies (Principle 1)
 
 **Claim:** Your Memory has zero outward dependencies. Every other component depends on it. It depends on none of them.
 
@@ -159,9 +159,9 @@ The four pillars are values, not code — but they produce observable properties
 
 **Fail condition:** Swapping any element requires changes to more than one component. Or an element exists with no identifiable intermediary protecting it from change propagation.
 
-### PR-3. Interfaces Over Implementations (Principle 3)
+### PR-3. Keep Responsibilities Where They Belong (Principle 3)
 
-**Claim:** Every component is defined by what it does, not how it works. Components interact only through defined interfaces.
+**Claim:** Every responsibility has exactly one owner. When work leaks across a boundary, swapping either component becomes harder.
 
 **Verification:**
 - (a) The Agent Loop does not know Memory's storage format — it calls tools.
@@ -172,7 +172,7 @@ The four pillars are values, not code — but they produce observable properties
 
 **Fail condition:** Any component directly accesses another component's internals (imports, shared state, format assumptions). Or swapping an implementation requires changes in a component that shouldn't know about it.
 
-### PR-4. Complexity Is Lock-In (Principle 4)
+### PR-4. Keep It Simple (Principle 4)
 
 **Claim:** The entire system must be understandable and maintainable by one developer + AI coding agents. Every additional component is a potential expertise dependency.
 

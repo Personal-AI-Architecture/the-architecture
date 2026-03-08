@@ -139,15 +139,15 @@ Managed hosting, VPS, and remote access are implementation extensions — same c
 
 ## Architecture Principles
 
-Five principles enforce the architecture:
+1. **Your Memory Should Have No Outbound Dependencies** — Your Memory depends on nothing. Everything else depends on it. Every component accesses it exclusively through tools.
+2. **Keep Everything Else Swappable** — Agent Loop, Auth, Gateway, clients, models, tools, contracts, hosting — all replaceable. Memory via tools, components via contracts, contracts via adapters.
+3. **Keep Responsibilities Where They Belong** — Leaks create lock-in. The Responsibility Matrix defines which component is responsible for what. Follow it.
+4. **Keep It Simple** — If the system requires a team of developers, you're locked in to that team. The entire system must be understandable and maintainable by one developer + AI coding agents.
+5. **Start Constrained, Expand Deliberately** — Each expansion is a deliberate step. Add tools, don't change architecture. Scope is a tool configuration decision, not an architecture decision.
 
-1. **Memory Is the Platform** — Everything else exists to serve Memory. The most portable, most independent, most durable part of the system. No other component should create dependencies that make Memory hard to move.
-2. **Everything Else Is Swappable** — Agent Loop, Auth, Gateway, clients, models, tools, contracts, hosting — all replaceable. Memory via tools, components via contracts, contracts via adapters. Every piece is a drop-down menu, not a permanent choice.
-3. **Interfaces Over Implementations** — Every component is defined by what it does, not how it works. The Agent Loop calls tools — it doesn't know if Memory is files or a database. This is what makes one-component swaps possible.
-4. **Complexity Is Lock-In** — If the system requires a team of developers, you're locked in to that team. That's a dependency as real as any vendor. The entire system must be understandable and maintainable by one developer + AI coding agents. Four components and two APIs isn't minimalism — every additional component is a potential expertise dependency.
-5. **Start Constrained, Expand Deliberately** — Products built on this don't have to use all capabilities at once. Each expansion — broader scope, more tools, external integrations — is a deliberate step.
+Nothing enforces these principles. You can violate any of them and the system still works. But every violation is lock-in you've chosen to accept.
 
-**Nothing enforces these principles.** You can bypass adapters, hardcode a provider, or couple components directly — the system still works. But every violation is a lock-in you've chosen to accept. The architecture makes the zero-lock-in path the easiest path, not the only path.
+See [Architecture Principles](./principles.md) for the full description of each principle.
 
 ---
 

@@ -192,37 +192,9 @@
       "depends_on": ["docs/foundation-spec.md"]
     },
     {
-      "path": "docs/principles/memory-is-the-platform.md",
+      "path": "docs/principles.md",
       "covers": [],
-      "tier": 3,
-      "update_trigger": "spec",
-      "depends_on": ["docs/foundation-spec.md"]
-    },
-    {
-      "path": "docs/principles/everything-else-is-swappable.md",
-      "covers": [],
-      "tier": 3,
-      "update_trigger": "spec",
-      "depends_on": ["docs/foundation-spec.md"]
-    },
-    {
-      "path": "docs/principles/interfaces-over-implementations.md",
-      "covers": [],
-      "tier": 3,
-      "update_trigger": "spec",
-      "depends_on": ["docs/foundation-spec.md"]
-    },
-    {
-      "path": "docs/principles/complexity-is-lockin.md",
-      "covers": [],
-      "tier": 3,
-      "update_trigger": "spec",
-      "depends_on": ["docs/foundation-spec.md"]
-    },
-    {
-      "path": "docs/principles/start-constrained-expand-deliberately.md",
-      "covers": [],
-      "tier": 3,
+      "tier": 2,
       "update_trigger": "spec",
       "depends_on": ["docs/foundation-spec.md"]
     },

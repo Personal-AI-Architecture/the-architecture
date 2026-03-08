@@ -136,8 +136,8 @@ Terms that are correct as-is: **Gateway**, **Auth**, **Your Memory**, **Tools**,
 
 ## Principles
 
-1. **Interfaces Over Implementations** -- components defined by what they do, not how
-2. **Memory Is the Platform** -- everything else serves it
-3. **Everything Else Is Swappable** -- via contracts, adapters, and tools
-4. **Start Constrained, Expand Deliberately** -- each expansion is additive
-5. **Thin Enough for Agents to Build** -- one developer + AI agents can maintain it
+1. **Your Memory Should Have No Outbound Dependencies** -- depends on nothing, everything depends on it
+2. **Keep Everything Else Swappable** -- via tools, contracts, and adapters
+3. **Keep Responsibilities Where They Belong** -- leaks create lock-in, follow the Responsibility Matrix
+4. **Keep It Simple** -- one developer + AI agents can maintain it
+5. **Start Constrained, Expand Deliberately** -- each expansion is additive

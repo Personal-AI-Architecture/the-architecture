@@ -2,18 +2,7 @@ import type {SidebarsConfig} from '@docusaurus/plugin-content-docs';
 
 const sidebars: SidebarsConfig = {
   principlesSidebar: [
-    {
-      type: 'category',
-      label: 'Architecture Principles',
-      collapsed: true,
-      items: [
-        'principles/memory-is-the-platform',
-        'principles/everything-else-is-swappable',
-        'principles/interfaces-over-implementations',
-        'principles/complexity-is-lockin',
-        'principles/start-constrained-expand-deliberately',
-      ],
-    },
+    'principles',
   ],
 
   architectureSidebar: [

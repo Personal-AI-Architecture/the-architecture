@@ -106,7 +106,7 @@ const config: Config = {
             },
             {
               label: 'Principles',
-              to: '/docs/principles/interfaces-over-implementations',
+              to: '/docs/principles',
             },
             {
               label: 'Foundation Spec',
