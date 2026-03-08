@@ -8,6 +8,7 @@ on:
 
 jobs:
   mirror:
+    if: github.repository == 'Personal-AI-Architecture/the-architecture'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
