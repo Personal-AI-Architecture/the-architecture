@@ -286,4 +286,4 @@ This is D65: Level 2 is composable lego blocks, each piece independently usable.
 
 ## Related Documents
 
-`foundation-spec.md` (architecture overview, links to all component specs)
+[foundation-spec.md](../foundation-spec.md) (architecture overview, links to all component specs)

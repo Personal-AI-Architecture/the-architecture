@@ -327,7 +327,7 @@ One HTTP endpoint. Not a third connector.
 | Contracts | Swappable via adapters |
 | Auth | Swappable via cross-cutting independence |
 
-**Adapters** are thin, stateless translation layers. Each describable in one sentence. See `adapter-spec.md` §How Model Configuration Works in Practice for the concrete model/provider swap walkthrough.
+**Adapters** are thin, stateless translation layers. Each describable in one sentence. See [adapter-spec.md](../adapter-spec.md) §How Model Configuration Works in Practice for the concrete model/provider swap walkthrough.
 
 **Tools** are data in the environment, not a component. Definitions self-describe, execution is Engine's job, permissions are Auth's job.
 

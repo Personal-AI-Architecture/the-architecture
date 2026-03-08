@@ -229,7 +229,7 @@ You can't be undercut by a more open alternative if you're already maximally ope
 
 ## Related Documents
 
-`foundation-spec.md` (architecture overview, links to all component specs)
+[foundation-spec.md](./foundation-spec.md) (architecture overview, links to all component specs)
 
 ---
 

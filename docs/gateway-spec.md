@@ -22,7 +22,7 @@ This follows the zero-outward-dependencies principle. The dependency points the 
 
 This is a **Level 1 (Foundation) spec** — it defines the generic Gateway that anyone could implement. Product-specific extensions (client metadata, browsing API, conversation UI conventions) are Level 2 (Product) opinions.
 
-**Related documents:** `foundation-spec.md` (architecture overview, links to all component specs)
+**Related documents:** [foundation-spec.md](./foundation-spec.md) (architecture overview, links to all component specs)
 
 ---
 
@@ -73,7 +73,7 @@ The Gateway sits between clients and the Engine. Their relationship:
 
 The Gateway knows about conversations. The Engine doesn't. The Engine knows about models and tools. The Gateway doesn't. Clean separation.
 
-The Gateway ↔ Engine interface is defined in `gateway-engine-contract.md` (D137). The Gateway assembles the messages array (system prompt from config + conversation history + current message + metadata) and POSTs to the Engine. The Engine returns an SSE stream. Auth middleware sits on the path.
+The Gateway ↔ Engine interface is defined in [gateway-engine-contract.md](./gateway-engine-contract.md) (D137). The Gateway assembles the messages array (system prompt from config + conversation history + current message + metadata) and POSTs to the Engine. The Engine returns an SSE stream. Auth middleware sits on the path.
 
 ---
 
@@ -149,7 +149,7 @@ Clients are not components of the system. They're external clients that connect 
 | D60 | Auth is a cross-cutting concern — independent of the Gateway | Auth and the Gateway don't know about each other. Requests must be authenticated before interacting with the system, but how (middleware, proxy, sidecar) is a Level 2 decision. Both can be swapped independently. |
 | D61 | Conversations live in the system, not in any client — enabling seamless client switching | Conversations are data in Your Memory, managed by the Gateway. Start on web, continue on mobile, pick up on CLI. The conversation persists regardless of which client connects. This is what makes clients truly external and interchangeable. |
 | D62 | Models are external intelligence, not a system component — addressed in Models interview | The interview raised the question of whether Models is a component. Models are called through the Provider API but aren't part of the system the way Your Memory, Engine, Auth, and Gateway are. Full treatment deferred to the Models interview. |
-| D137 | Gateway ↔ Engine is a plain HTTP API contract | POST /engine/chat with messages array + metadata. Engine returns SSE stream. Auth middleware on path. Tool definitions and provider config are boot-time, not per-request. See `gateway-engine-contract.md`. |
+| D137 | Gateway ↔ Engine is a plain HTTP API contract | POST /engine/chat with messages array + metadata. Engine returns SSE stream. Auth middleware on path. Tool definitions and provider config are boot-time, not per-request. See [gateway-engine-contract.md](./gateway-engine-contract.md). |
 | D152 | Gateway accesses Your Memory through a dedicated conversation store tool, not directly | Purpose-built internal tool for conversation management (store, load, list, create). Same tool interface as memory tools, called directly by Gateway — not through Engine's tool loop (circular dependency). One key to the mailbox, not a copy of every key. |
 
 ---
@@ -175,7 +175,7 @@ Clients are not components of the system. They're external clients that connect 
 
 ## Security Requirements
 
-Per-component requirements from `security-spec.md`. Security-spec owns the "why" (D131); this section owns the "what" for the Gateway.
+Per-component requirements from [security-spec.md](./security-spec.md). Security-spec owns the "why" (D131); this section owns the "what" for the Gateway.
 
 - [ ] The Gateway must validate input structure before routing to the Engine — reject malformed requests
 - [ ] The Gateway must enforce request size limits — configurable, with sensible defaults

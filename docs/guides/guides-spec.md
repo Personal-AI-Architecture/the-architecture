@@ -28,19 +28,19 @@ Each audience has a "start here" flow — the minimal set of files and first act
 
 **Level 1 Implementer** — building the foundation:
 1. Read `AGENT.md` (repo root) — architecture overview, component boundaries
-2. Read `guides/implementers-reference.md` — what each component must do
+2. Read [guides/implementers-reference.md](./implementers-reference.md) — what each component must do
 3. Read `specs/openapi/` and `specs/schemas/` — the interface shapes to implement against
 4. Run the conformance suite to validate your implementation
 
 **Level 2 Product Builder** — building on the foundation:
 1. Read `AGENT.md` (repo root) — architecture overview
-2. Read `customization-spec.md` — extension points and constraints
+2. Read [customization-spec.md](../customization-spec.md) — extension points and constraints
 3. Read `specs/openapi/` and `specs/schemas/` — the connector shapes your product uses
 4. Start from the component stubs or reference implementation
 
 **System Extender** — adding tools, skills, or clients:
 1. Read `AGENT.md` (repo root) — architecture overview
-2. Read `tools-spec.md` — how tools work in the architecture
+2. Read [tools-spec.md](../tools-spec.md) — how tools work in the architecture
 3. Read the tool definition schema in `specs/schemas/`
 4. Register your tool and test it
 
@@ -247,4 +247,4 @@ These items are important but premature to define now. Flagged for resolution be
 
 ## Related Documents
 
-`foundation-spec.md` (architecture overview, links to all component specs)
+[foundation-spec.md](../foundation-spec.md) (architecture overview, links to all component specs)

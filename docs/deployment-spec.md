@@ -14,7 +14,7 @@ This spec defines the **deployment contract** — the guarantees the architectur
 
 > **Level 1 (Foundation):** Local deployment on hardware the owner controls. Managed hosting, VPS/cloud deployment, and remote access are Level 2 concerns — opinions layered on top of this contract.
 
-**Related documents:** `foundation-spec.md` (architecture overview, links to all component specs)
+**Related documents:** [foundation-spec.md](./foundation-spec.md) (architecture overview, links to all component specs)
 
 ---
 
@@ -75,7 +75,7 @@ These are dependencies that could prevent the system from functioning if they di
 
 #### Model Provider
 
-**What it is:** The system needs an AI model to function. Models are accessed through the Provider API via adapters (see `adapter-spec.md`).
+**What it is:** The system needs an AI model to function. Models are accessed through the Provider API via adapters (see [adapter-spec.md](./adapter-spec.md)).
 
 **The dependency:** Whether local (Ollama, llama.cpp) or cloud (OpenRouter, Anthropic), the owner depends on a model provider.
 
@@ -118,7 +118,7 @@ These are explicitly out of scope for Level 1. Products built on the foundation 
 | **Backup and restore** | A product feature, not a deployment contract |
 | **Multi-instance** | Running multiple instances on one machine is a product pattern |
 | **System lifecycle** | Startup sequences, crash recovery, auto-restart are operational details |
-| **Data boundaries** | What data is allowed to leave the machine is a security concern (see `security-spec.md`) |
+| **Data boundaries** | What data is allowed to leave the machine is a security concern (see [security-spec.md](./security-spec.md)) |
 
 ---
 

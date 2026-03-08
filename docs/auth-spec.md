@@ -16,7 +16,7 @@ This is a **requirements and design spec**, not a technology choice document. Th
 
 This is a **Level 1 (Foundation) spec** — it defines what the auth system does at the generic, unopinionated level. Product-specific auth choices (technology stack, managed hosting policies, MFA requirements, product evolution timeline) are Level 2 concerns documented in `research/auth-research.md` §Product Auth Design.
 
-**Related documents:** `foundation-spec.md` (architecture overview, links to all component specs)
+**Related documents:** [foundation-spec.md](./foundation-spec.md) (architecture overview, links to all component specs)
 
 ---
 
@@ -390,7 +390,7 @@ The pattern: **add actor types and permission rules, don't change the contract.*
 
 ## Security Requirements
 
-Per-component requirements from `security-spec.md`. Security-spec owns the "why"; this section owns the "what" for Auth.
+Per-component requirements from [security-spec.md](./security-spec.md). Security-spec owns the "why"; this section owns the "what" for Auth.
 
 - [ ] Every request must be authenticated before interacting with the system (D22)
 - [ ] Unauthenticated requests must be rejected — fail closed
@@ -402,7 +402,7 @@ Per-component requirements from `security-spec.md`. Security-spec owns the "why"
 
 ## Related Documents
 
-`foundation-spec.md` (architecture overview, links to all component specs)
+[foundation-spec.md](./foundation-spec.md) (architecture overview, links to all component specs)
 
 ---
 

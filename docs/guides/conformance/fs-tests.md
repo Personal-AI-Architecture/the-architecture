@@ -1,6 +1,6 @@
 # Foundation User Story Tests
 
-> Validates the end-to-end promises of the architecture (FS-1 through FS-8 from `foundation-spec.md`).
+> Validates the end-to-end promises of the architecture (FS-1 through FS-8 from [foundation-spec.md](../../foundation-spec.md)).
 > Some tests overlap with SWAP/ARCH/DEPLOY tests — noted with `=` references.
 
 ---

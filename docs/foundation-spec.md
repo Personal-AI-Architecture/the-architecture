@@ -7,9 +7,7 @@ hide_table_of_contents: true
 
 The Personal AI Architecture is MIT Licensed, and designed to ensure that the power of AI belongs not to a few Big Tech companies, but to the people.
 
-It is not a personal AI system — it is the architecture you build one on top of. 
-
-An architecture with one goal: avoid lock-in.
+It is not a personal AI system — it is the architecture you build one on top of. An architecture with one goal: avoid lock-in.
 
 Lock-in to a vendor. Lock-in to a specific technology choice. And even lock-in to The Architecture itself.
 
@@ -23,7 +21,7 @@ This matters for two reasons:
 
 ### 1. It puts you back in control
 
-Your conversations, your preferences, your context are currently trapped inside software you don't control. Locking you inside their systems is Big Tech's business model. Your their user, and often times you are also their product.
+Your conversations, your preferences, your context are currently trapped inside software you don't control. Locking you inside their systems is Big Tech's business model. You're their user, and often times you are also their product.
 
 The Architecture is designed so there are no users. Only owners.
 
@@ -31,7 +29,7 @@ The Architecture is designed so there are no users. Only owners.
 
 An architecture that bets on today's stack is an architecture with an expiration date.
 
-Keeping all components decoupled and easily swapable allows your AI system to adapt at the speed of AI.
+Keeping all components decoupled and easily swappable allows your AI system to adapt at the speed of AI.
 
 Here's how it works. Four components, two connectors, three external dependencies:
 
@@ -64,7 +62,7 @@ This is also what compounds. Every conversation, every decision, every plan make
 
 Nothing else creates lock-in. Every component accesses Your Memory exclusively through tools — the model through the Engine's tool loop, infrastructure components through dedicated internal tools for their operational needs. Storage can evolve without anything else changing. The contract is the tools, not the storage. This ensures your AI system remains yours.
 
-See `memory-spec.md`.
+See [memory-spec.md](./memory-spec.md).
 
 ### AI Model(s)
 
@@ -72,7 +70,7 @@ In a biological brain, memory and intelligence are fused — you can't upgrade y
 
 This is the superpower a digital brain has over a biological one. The fastest-changing part of AI — model capability — is the cheapest thing to change in this system. You ride the breakneck pace of AI model improvement instead of being left behind.
 
-See `models-spec.md`.
+See [models-spec.md](./models-spec.md).
 
 ### Engine
 
@@ -82,13 +80,13 @@ New capabilities arrive by adding tools, not by changing the engine. This means 
 
 Everything that makes a product unique (methodology, personality, skills, folder structure) lives in Memory, not the Engine. The Engine is intentionally generic — a commodity component. Product behavior emerges from what's in the files.
 
-See `engine-spec.md`. For tools, see `tools-spec.md`.
+See [engine-spec.md](./engine-spec.md). For tools, see [tools-spec.md](./tools-spec.md).
 
 ### Auth
 
 Auth protects your memory. Every request passes through it, independent of the Gateway and Engine. You control who and what has access — today that's you, but the foundation is built for multi-actor access and AI agents acting on your behalf, each with exactly the permissions you grant.
 
-See `auth-spec.md`.
+See [auth-spec.md](./auth-spec.md).
 
 ### Gateway
 
@@ -98,7 +96,7 @@ This means no interface lock-in. Your AI meets you where you already are — bro
 
 Conversations live in the system, not in any client — start on web, continue on mobile, pick up on CLI.
 
-See `gateway-spec.md`.
+See [gateway-spec.md](./gateway-spec.md).
 
 ### Communication
 
@@ -119,23 +117,23 @@ Between each contract and the external world sits an adapter — a thin translat
 
 New model? Config change. Better engine? Swap it. New client? Point it at the same API. New standard? Swap the adapter. The cost of adopting anything new is one swap, not a rebuild.
 
-See `gateway-spec.md`, `models-spec.md`, `adapter-spec.md`.
+See [gateway-spec.md](./gateway-spec.md), [models-spec.md](./models-spec.md), [adapter-spec.md](./adapter-spec.md).
 
 #### Internal
 
 Components also communicate internally — Gateway to Engine, Auth middleware on the request path, Engine to tools. These aren't connectors. They're internal interfaces between components in the same deployment.
 
-To avoid lockin, the communication layer must only carry, and not interpret signals. Memory holds state, the model makes semantic decisions, Auth controls access. Communication does none of those things. When a responsibility leaks from its owner into the communication layer, it recouples the system — swapping communication now means dealing with work that doesn't belong to it.
+To avoid lock-in, the communication layer must only carry, and not interpret signals. Memory holds state, the model makes semantic decisions, Auth controls access. Communication does none of those things. When a responsibility leaks from its owner into the communication layer, it recouples the system — swapping communication now means dealing with work that doesn't belong to it.
 
-See `communication-principles.md`.
+See [communication-principles.md](./communication-principles.md).
 
 ---
 
 ## Deployment Model
 
-If you can't run the system on your own hardware, you don't fully own it. The foundation defines how the system runs on **hardware the owner physically controls** — your laptop, your desktop, your home server. Full offline capability, local data storage, no cloud service required. The system has dependencies (model provider, runtime) but none are inescapable — each has an escape path defined in `deployment-spec.md`. Everything above — Your Memory as the platform, swappable components, two contracts — is theoretical if the system can only run on someone else's infrastructure. Deployment is where ownership becomes concrete.
+If you can't run the system on your own hardware, you don't fully own it. The foundation defines how the system runs on **hardware the owner physically controls** — your laptop, your desktop, your home server. Full offline capability, local data storage, no cloud service required. The system has dependencies (model provider, runtime) but none are inescapable — each has an escape path defined in [deployment-spec.md](./deployment-spec.md). Everything above — Your Memory as the platform, swappable components, two contracts — is theoretical if the system can only run on someone else's infrastructure. Deployment is where ownership becomes concrete.
 
-Managed hosting, VPS, and remote access are Level 2 product extensions — same code, different deployment. Memory portability means you move between deployment modes without losing anything. See `deployment-spec.md` for the full contract.
+Managed hosting, VPS, and remote access are Level 2 product extensions — same code, different deployment. Memory portability means you move between deployment modes without losing anything. See [deployment-spec.md](./deployment-spec.md) for the full contract.
 
 ---
 
@@ -159,12 +157,12 @@ Both connectors are deliberately hollow — they exist to pass information forwa
 
 ### Gateway API — Clients ↔ Gateway
 
-How the world interacts with the system. Built on whatever the best industry standard is today — someone else maintains the protocol, you just use it. Swappable via adapter when the standard shifts. Level 2 products choose the specific format (see `adapter-spec.md`).
+How the world interacts with the system. Built on whatever the best industry standard is today — someone else maintains the protocol, you just use it. Swappable via adapter when the standard shifts. Level 2 products choose the specific format (see [adapter-spec.md](./adapter-spec.md)).
 
 - **In:** Message content + conversation ID (optional) + metadata (client context, scope info)
 - **Out:** Streamed response + conversation ID + message record
 
-See `gateway-spec.md`.
+See [gateway-spec.md](./gateway-spec.md).
 
 ### Provider API — Engine ↔ Models
 
@@ -173,17 +171,17 @@ How the system thinks. Today that means model-native tool calling — tool defin
 - **In:** Prompt (system instructions + conversation + tool definitions + context)
 - **Out:** Streamed completion (text + tool calls)
 
-See `models-spec.md`.
+See [models-spec.md](./models-spec.md).
 
-**What about tools?** Tool calls flow through the Provider API and are executed by the Engine. How the Engine communicates with tools — MCP today, something better tomorrow — is internal to the Engine, not an architectural boundary. No separate tool protocol connector at Level 1. Memory tools are internal — the system can't function without reading and writing its own memory. External tools (Salesforce, weather, APIs) are additive — add or remove them without affecting the system. See `tools-spec.md`.
+**What about tools?** Tool calls flow through the Provider API and are executed by the Engine. How the Engine communicates with tools — MCP today, something better tomorrow — is internal to the Engine, not an architectural boundary. No separate tool protocol connector at Level 1. Memory tools are internal — the system can't function without reading and writing its own memory. External tools (Salesforce, weather, APIs) are additive — add or remove them without affecting the system. See [tools-spec.md](./tools-spec.md).
 
-**The memory/tool binary.** Everything the system processes reduces to two things: memory and tools. If it's data, it's memory. If it's not data, it's a tool. New capabilities arrive by adding tools and memory content, not by adding infrastructure. See `research/memory-tool-completeness.md`.
+**The memory/tool binary.** Everything the system processes reduces to two things: memory and tools. If it's data, it's memory. If it's not data, it's a tool. New capabilities arrive by adding tools and memory content, not by adding infrastructure. See [research/memory-tool-completeness.md](./research/memory-tool-completeness.md).
 
 ### Internal Interface: Gateway ↔ Engine
 
 The Gateway ↔ Engine handoff is the one internal interface that needed definition — not a third connector, just a contract between two components in the same deployment.
 
-Gateway POSTs a request (messages + metadata) to the Engine, Engine returns an SSE stream (text, tool calls, results, completion). Auth middleware sits on the path. See `gateway-engine-contract.md` for the full contract.
+Gateway POSTs a request (messages + metadata) to the Engine, Engine returns an SSE stream (text, tool calls, results, completion). Auth middleware sits on the path. See [gateway-engine-contract.md](./gateway-engine-contract.md) for the full contract.
 
 ```mermaid
 sequenceDiagram
@@ -289,11 +287,11 @@ These decisions define the architecture. Product-level decisions (what ships whe
 | D64 | Four components, two connectors, three external dependencies | The final architecture resolved through six component interviews. |
 | D65 | Level 2 is composable lego blocks — each piece independently usable | A Level 2 product is a box of legos, not a monolith. No piece requires another piece. |
 | D135 | Memory/tool binary — if it's data, it's memory; if it's not data, it's a tool | Everything is either a noun (memory) or a verb (tool). New capabilities compose from existing primitives. "Your Memory" (D138) distinguishes the component from the concept. |
-| D137 | Gateway ↔ Engine is a plain HTTP API contract — not a third connector | One internal endpoint between two components we control. See `gateway-engine-contract.md`. |
+| D137 | Gateway ↔ Engine is a plain HTTP API contract — not a third connector | One internal endpoint between two components we control. See [gateway-engine-contract.md](./gateway-engine-contract.md). |
 | D138 | Memory component renamed to "Your Memory" | Distinguishes the component (your owned local storage) from the concept (all data is memory per D135). |
-| D139 | Contracts are swappable via adapters — completing zero-lock-in | Components via contracts, contracts via adapters, Memory via tools. The swappability chain is structurally complete. See `adapter-spec.md`. |
-| D143 | Configuration is a cross-cutting concern with its own spec | Not owned by any single component. Three categories: preferences (Your Memory), runtime config (thin bootstrap), tool self-description. See `configuration-spec.md`. |
-| D148 | Level 1 defines local deployment only — managed hosting is Level 2 | The foundation defines how the system runs on hardware the owner controls. Managed hosting is a product offering layered on top. See `deployment-spec.md`. |
+| D139 | Contracts are swappable via adapters — completing zero-lock-in | Components via contracts, contracts via adapters, Memory via tools. The swappability chain is structurally complete. See [adapter-spec.md](./adapter-spec.md). |
+| D143 | Configuration is a cross-cutting concern with its own spec | Not owned by any single component. Three categories: preferences (Your Memory), runtime config (thin bootstrap), tool self-description. See [configuration-spec.md](./configuration-spec.md). |
+| D148 | Level 1 defines local deployment only — managed hosting is Level 2 | The foundation defines how the system runs on hardware the owner controls. Managed hosting is a product offering layered on top. See [deployment-spec.md](./deployment-spec.md). |
 | D147 | Anti-lock-in CI test — three swaps must succeed with config-only changes | Provider swap, model swap, tool swap. If any requires code changes, lock-in has been introduced. CI-testable on every release. |
 
 Product-level decisions (D17 tool scope, D18 single-model path, D19 digest timing, D21 approval UX, D25 starter content) belong in the product spec. Architectural decisions are tracked in the BrainDrive Library.
@@ -322,7 +320,7 @@ Who does what — and who doesn't. Use this to verify that component specs don't
 | Accept client connections | **Gateway API** (connector) | Engine |
 | Provide intelligence | **Models** (external) | Engine, Your Memory |
 | Display content to owners | **Clients** (external) | Gateway |
-| Bootstrap the system | **Runtime config** (thin bootstrap — 4 fields, see `configuration-spec.md`) | Your Memory |
+| Bootstrap the system | **Runtime config** (thin bootstrap — 4 fields, see [configuration-spec.md](./configuration-spec.md)) | Your Memory |
 | Resolve concurrent writes | **Tool implementations** | Your Memory component |
 
 ---
@@ -331,22 +329,22 @@ Who does what — and who doesn't. Use this to verify that component specs don't
 
 | Document | Relationship |
 |----------|-------------|
-| `memory-as-platform.md` | Why memory is the architectural center |
-| `engine-spec.md` | Engine — generic agent loop |
-| `memory-spec.md` | Your Memory — unopinionated substrate |
-| `auth-spec.md` | Auth — cross-cutting identity and access control |
-| `gateway-spec.md` | Gateway — conversations and routing |
-| `tools-spec.md` | Tools — not a component or connector |
-| `models-spec.md` | Models — external intelligence |
-| `security-spec.md` | Security — threat model, enforcement, data protection |
-| `adapter-spec.md` | Adapters — swappable contracts |
-| `gateway-engine-contract.md` | Gateway ↔ Engine internal contract |
-| `communication-principles.md` | Communication — six principles for lock-in-free internal communication |
-| `configuration-spec.md` | Configuration — preferences, runtime, tool self-description |
-| `deployment-spec.md` | Deployment — local-first contract |
-| `customization-spec.md` | How Level 2 products build on the Foundation |
+| [memory-as-platform.md](./memory-as-platform.md) | Why memory is the architectural center |
+| [engine-spec.md](./engine-spec.md) | Engine — generic agent loop |
+| [memory-spec.md](./memory-spec.md) | Your Memory — unopinionated substrate |
+| [auth-spec.md](./auth-spec.md) | Auth — cross-cutting identity and access control |
+| [gateway-spec.md](./gateway-spec.md) | Gateway — conversations and routing |
+| [tools-spec.md](./tools-spec.md) | Tools — not a component or connector |
+| [models-spec.md](./models-spec.md) | Models — external intelligence |
+| [security-spec.md](./security-spec.md) | Security — threat model, enforcement, data protection |
+| [adapter-spec.md](./adapter-spec.md) | Adapters — swappable contracts |
+| [gateway-engine-contract.md](./gateway-engine-contract.md) | Gateway ↔ Engine internal contract |
+| [communication-principles.md](./communication-principles.md) | Communication — six principles for lock-in-free internal communication |
+| [configuration-spec.md](./configuration-spec.md) | Configuration — preferences, runtime, tool self-description |
+| [deployment-spec.md](./deployment-spec.md) | Deployment — local-first contract |
+| [customization-spec.md](./customization-spec.md) | How Level 2 products build on the Foundation |
 | Decisions log (BrainDrive Library) | All pivot decisions (D1-D168 + D141-refined) |
-| `research/memory-tool-completeness.md` | D135 completeness proof — memory/tool binary |
+| [research/memory-tool-completeness.md](./research/memory-tool-completeness.md) | D135 completeness proof — memory/tool binary |
 | `guides/` | Developer guides, contracts, conformance tests, stubs |
 | `research/` | Evaluations, analysis, and supporting research |
 
@@ -369,4 +367,3 @@ Who does what — and who doesn't. Use this to verify that component specs don't
 ---
 
 *This document defines the architecture — the four components, the two connectors, the three external dependencies, and why this system can evolve as fast as AI does. Product specs define what's built on this foundation. The pivot spec defines why we chose this direction.*
-

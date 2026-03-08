@@ -14,7 +14,7 @@ The audience is builders — product developers, AI agents, or product team memb
 
 > **Level 1 (Foundation):** This spec defines customization mechanisms that apply to any system built on the Foundation — the same mechanisms Level 2 builders and Level 3 owners both use.
 
-**Related documents:** `foundation-spec.md` (architecture overview, links to all component specs)
+**Related documents:** [foundation-spec.md](./foundation-spec.md) (architecture overview, links to all component specs)
 
 ---
 
@@ -97,7 +97,7 @@ There are four ways to customize the Foundation. All Level 2 and Level 3 customi
 
 **What it is:** Settings that control system behavior without modifying code.
 
-**How it works:** Configuration tells the Foundation's components how to behave. Your product provides sensible defaults; the owner can override them. See `configuration-spec.md` for the three-category model (preferences, runtime config, tool self-description) and layered overrides.
+**How it works:** Configuration tells the Foundation's components how to behave. Your product provides sensible defaults; the owner can override them. See [configuration-spec.md](./configuration-spec.md) for the three-category model (preferences, runtime config, tool self-description) and layered overrides.
 
 **What you provide:**
 
@@ -105,11 +105,11 @@ There are four ways to customize the Foundation. All Level 2 and Level 3 customi
 |------------|----------------|---------------------|
 | Model provider | Default provider and model | OpenRouter with configurable model selection |
 | Provider settings | API key references (env var names), temperature, token limits | `$OPENROUTER_API_KEY`, sensible defaults |
-| Auth settings | Authentication and authorization config | V1: owner-only (see `auth-spec.md`) |
+| Auth settings | Authentication and authorization config | V1: owner-only (see [auth-spec.md](./auth-spec.md)) |
 | Deployment settings | How the system runs | Docker configuration, port assignments, resource limits |
 | Tool plumbing | Which tool sources to scan and how to connect | MCP server endpoints, CLI tool paths, manifest directories |
 
-**Level 1 default:** The Foundation ships defaults for all configuration. A Level 2 product overrides whatever it needs — model provider, auth mode, deployment config — and leaves the rest. Provider and model swaps are config-only, zero code changes (see `adapter-spec.md` for how adapters make this work).
+**Level 1 default:** The Foundation ships defaults for all configuration. A Level 2 product overrides whatever it needs — model provider, auth mode, deployment config — and leaves the rest. Provider and model swaps are config-only, zero code changes (see [adapter-spec.md](./adapter-spec.md) for how adapters make this work).
 
 **What stays generic:** Configuration is data. The Foundation reads it. Components behave accordingly. No code changes needed.
 
@@ -373,7 +373,7 @@ And the update applies cleanly because Level 3 content doesn't conflict with Lev
 - [ ] Foundation updates can be adopted by Level 2 products without merge conflicts — because Level 2 is a dependency layer, not a fork
 - [ ] Multiple Level 2 products can run on the same Foundation without interfering with each other
 - [ ] All customization must work through the four mechanisms — no backdoor code-level modification of Foundation components
-- [ ] Secrets never appear in Your Memory or tracked config files — API key references only (see `security-spec.md`)
+- [ ] Secrets never appear in Your Memory or tracked config files — API key references only (see [security-spec.md](./security-spec.md))
 
 ### Edge Cases to Test
 
@@ -399,7 +399,7 @@ And the update applies cleanly because Level 3 content doesn't conflict with Lev
 
 - [x] **OQ-1: What exactly are the Level 1 defaults?** **Partially resolved (D153, D158).** Runtime config: `memory_root: ./your-memory`, `provider_adapter: openai-compatible`, `auth_mode: local`, `tool_sources: [built-in memory tools]`. Bootstrap: minimal generic system prompt, Level 2 overrides via `bootstrapTarget`. Memory tools: native read/write/edit/delete/search/list/history. Default `your-memory/` is empty on first boot. Remaining defaults will emerge during implementation.
 - [x] **OQ-2: How does Level 2 depend on Level 1 technically?** **Resolved (D155).** npm package. Level 1 publishes as a package, Level 2 `npm install`s it, imports components, configures, adds opinions, runs. Standard semver versioning.
-- ~~**OQ-3: How do Level 2 and Level 3 content coexist without conflicts?**~~ Partially answered: `configuration-spec.md` defines layered overrides (Level 1 → Level 2 → Level 3, owner wins). Remaining conventions (file-level coexistence) deferred to implementation.
+- ~~**OQ-3: How do Level 2 and Level 3 content coexist without conflicts?**~~ Partially answered: [configuration-spec.md](./configuration-spec.md) defines layered overrides (Level 1 → Level 2 → Level 3, owner wins). Remaining conventions (file-level coexistence) deferred to implementation.
 - [x] **OQ-4: Does the Foundation repo ship runnable code or specs + contracts?** **Resolved (D153):** Runnable code. The Foundation is a working runtime — `npm install`, provide Your Memory content + tools + config + client, and it runs. Ships sensible defaults (generic OpenAI-compatible provider adapter, local auth, `./your-memory` filesystem, built-in memory tools). All defaults overridable. Specs, schemas, conformance tests ship alongside as documentation and validation.
 - ~~**OQ-5: How do we handle versioning across two repos?**~~ Deferred to implementation. Depends on delivery mechanism (see OQ-2).
 

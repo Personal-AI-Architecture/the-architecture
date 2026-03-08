@@ -81,7 +81,7 @@ Ownership is a spectrum:
 | Someone else's shared files | Yes | No — their control |
 | The internet | Yes | No — not under your control |
 
-See `memory-as-platform.md` for the full argument on why memory is the platform, and `research/memory-tool-completeness.md` for the proof that this binary makes the architecture complete.
+See [memory-as-platform.md](./memory-as-platform.md) for the full argument on why memory is the platform, and [research/memory-tool-completeness.md](./research/memory-tool-completeness.md) for the proof that this binary makes the architecture complete.
 
 ---
 
@@ -236,7 +236,7 @@ Memory starts as a filing system and adds smarter tools on top. It does NOT evol
 
 Each stage is additive. The substrate test ensures new operations are genuinely new storage capabilities, not content operations disguised as tools.
 
-Memory's scope expands with the expanding sphere (see `foundation-spec.md` §How the Architecture Evolves) — from library folder (V1) to full filesystem (V2) to external services (V3) to federated data (V4). At every phase: you USE everything the system can access, you OWN the subset under your control in an open format.
+Memory's scope expands with the expanding sphere (see [foundation-spec.md](./foundation-spec.md) §How the Architecture Evolves) — from library folder (V1) to full filesystem (V2) to external services (V3) to federated data (V4). At every phase: you USE everything the system can access, you OWN the subset under your control in an open format.
 
 ---
 
@@ -282,7 +282,7 @@ None. Memory is a substrate — it stores and retrieves. If a question arises ab
 
 ## Security Requirements
 
-Per-component requirements from `security-spec.md`. Security-spec owns the "why"; this section owns the "what" for Your Memory.
+Per-component requirements from [security-spec.md](./security-spec.md). Security-spec owns the "why"; this section owns the "what" for Your Memory.
 
 - [ ] Memory must support full export in open formats — the owner can always get everything out
 - [ ] Memory must be independent of all other components — removing any component leaves Memory intact and readable
@@ -294,7 +294,7 @@ Per-component requirements from `security-spec.md`. Security-spec owns the "why"
 
 ## Related Documents
 
-`foundation-spec.md` (architecture overview, links to all component specs)
+[foundation-spec.md](./foundation-spec.md) (architecture overview, links to all component specs)
 
 ---
 

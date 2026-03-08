@@ -24,7 +24,7 @@ Models are external regardless of where they run:
 
 This is a **Level 1 (Foundation) spec** — it defines what models are at the generic, unopinionated level. Product-specific model choices (OpenRouter default, single-model V1, pricing/allowances) are Level 2 (Product) opinions.
 
-**Related documents:** `foundation-spec.md` (architecture overview, links to all component specs), `research/memory-tool-completeness.md` (completeness proof — why the architecture needs no new components)
+**Related documents:** [foundation-spec.md](./foundation-spec.md) (architecture overview, links to all component specs), [research/memory-tool-completeness.md](./research/memory-tool-completeness.md) (completeness proof — why the architecture needs no new components)
 
 ---
 
@@ -37,7 +37,7 @@ The Provider API is one of the system's two connectors. It defines how the Engin
 | **Engine → Model** | Prompt (system instructions + conversation history + tool definitions + context) |
 | **Model → Engine** | Streamed completion (text + tool calls) |
 
-Prompts in, completions out. The pattern is the same regardless of which model, which provider, or what capabilities the model has. Provider-specific API formats are abstracted behind the adapter — a thin translation layer between the Engine's internal interface and whatever format the provider expects. Switching models is a config change; switching providers is a config change plus an adapter swap. See `adapter-spec.md` §How Model Configuration Works in Practice for the concrete walkthrough.
+Prompts in, completions out. The pattern is the same regardless of which model, which provider, or what capabilities the model has. Provider-specific API formats are abstracted behind the adapter — a thin translation layer between the Engine's internal interface and whatever format the provider expects. Switching models is a config change; switching providers is a config change plus an adapter swap. See [adapter-spec.md](./adapter-spec.md) §How Model Configuration Works in Practice for the concrete walkthrough.
 
 The Provider API is a pass-through — it doesn't decide what goes into the prompt (Your Memory provides instructions and context), which tools to use (the model decides), or where responses are stored (Gateway manages conversations). It connects the Engine to whatever model is configured.
 
@@ -84,7 +84,7 @@ Memory is inert. It sits there and waits to be read. The model is the opposite �
 
 Auth is the other thing the binary doesn't fully dissolve. Auth's data (policies, tokens) is memory. Auth's operations (enforcement, validation) are tools. It decomposes cleanly — but exists as a component anyway, because security can't depend on swappable intelligence. Swap to a weaker model, and your security breaks.
 
-Both exceptions trace to the same root: making intelligence swappable. The Model needs its own connector so you *can* swap it. Auth needs independence so swapping it doesn't *break* security. One cause, two consequences. See `research/memory-tool-completeness.md` §2 for the full argument.
+Both exceptions trace to the same root: making intelligence swappable. The Model needs its own connector so you *can* swap it. Auth needs independence so swapping it doesn't *break* security. One cause, two consequences. See [research/memory-tool-completeness.md](./research/memory-tool-completeness.md) §2 for the full argument.
 
 ---
 

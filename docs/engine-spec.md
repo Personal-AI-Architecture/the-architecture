@@ -14,9 +14,9 @@ Why this matters: a generic Engine can pick up any tool the ecosystem produces �
 
 AI tool use collapsed the engineering cost of capabilities from "build across four layers" to "add a tool." The model is now good enough at deciding which tools to use and how to compose them without being told. This means the agent loop itself doesn't need to be smart — it just needs to reliably connect a model to tools and get out of the way.
 
-The Engine sits in the middle of the foundation's flow: clients connect through the Gateway, the Gateway routes to the Engine, the Engine calls models through the Provider API and executes tools from the environment. Your Memory is the platform — the Engine reads and writes to it through tools. The Gateway ↔ Engine interface is defined in `gateway-engine-contract.md` (D137). The Engine receives a messages array (system prompt + conversation history + current message) and metadata via `POST /engine/chat`, then returns an SSE stream of events (text-delta, tool-call, tool-result, done, error). Auth middleware authenticates requests before they reach the Engine.
+The Engine sits in the middle of the foundation's flow: clients connect through the Gateway, the Gateway routes to the Engine, the Engine calls models through the Provider API and executes tools from the environment. Your Memory is the platform — the Engine reads and writes to it through tools. The Gateway ↔ Engine interface is defined in [gateway-engine-contract.md](./gateway-engine-contract.md) (D137). The Engine receives a messages array (system prompt + conversation history + current message) and metadata via `POST /engine/chat`, then returns an SSE stream of events (text-delta, tool-call, tool-result, done, error). Auth middleware authenticates requests before they reach the Engine.
 
-**Related documents:** `foundation-spec.md` (architecture overview, links to all component specs)
+**Related documents:** [foundation-spec.md](./foundation-spec.md) (architecture overview, links to all component specs)
 
 ---
 
@@ -98,7 +98,7 @@ This is the only concurrency the Engine needs to handle: **parallel tool executi
 | Tool definitions | What tools are available | Pre-configured from tool sources (D143 — does not change per-request) |
 | Provider configuration | Which model, which provider, API key | Runtime config + adapter (D143 — does not change per-request) |
 
-See `configuration-spec.md` for the full boot sequence (D143).
+See [configuration-spec.md](./configuration-spec.md) for the full boot sequence (D143).
 
 ### Output
 
@@ -129,7 +129,7 @@ See `configuration-spec.md` for the full boot sequence (D143).
 | D42 | Engine renamed from "Harness" — "Engine" reflects that it's a commodity component | Every engine does the same thing. What makes the car different is everything around it. The Engine is the boring, interchangeable part. |
 | D50 | Bootstrap prompt is Engine configuration — minimal seed that lets the model self-bootstrap from Your Memory | One line: "Read the entry point in the current folder." Everything else the model discovers from Your Memory by following that instruction. |
 | D108 | Provider API must remain a connector, not a tool | The model decides what tools to call — you can't use a tool to call the thing that decides which tools to use. Circular dependency. The Provider API is structurally different from tools. |
-| D137 | Gateway ↔ Engine is a plain HTTP API contract | POST /engine/chat with messages array + metadata. Engine returns SSE stream. Auth middleware on path. See `gateway-engine-contract.md`. |
+| D137 | Gateway ↔ Engine is a plain HTTP API contract | POST /engine/chat with messages array + metadata. Engine returns SSE stream. Auth middleware on path. See [gateway-engine-contract.md](./gateway-engine-contract.md). |
 
 ---
 
@@ -152,7 +152,7 @@ None. The Engine spec is intentionally complete as-is. If a question arises abou
 
 ## Security Requirements
 
-Per-component requirements from `security-spec.md`. Security-spec owns the "why" (D131); this section owns the "what" for the Engine.
+Per-component requirements from [security-spec.md](./security-spec.md). Security-spec owns the "why" (D131); this section owns the "what" for the Engine.
 
 - [ ] The Engine must never store credentials, API keys, or tokens in its own state
 - [ ] The Engine must not persist data between loops — each loop starts clean (the model reconstitutes from Memory)

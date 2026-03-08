@@ -14,7 +14,7 @@ Auth answers "who can do what." This spec answers "what can go wrong, what do we
 
 This is a **Level 1 (Foundation) spec** — it defines security mechanisms and requirements that apply to any system built on the Foundation, unopinionated about policy. Product-specific security defaults, managed hosting policies, and deployment-specific postures are Level 2 concerns documented in `research/security-product-design.md`.
 
-**Related documents:** `foundation-spec.md` (architecture overview, links to all component specs)
+**Related documents:** [foundation-spec.md](./foundation-spec.md) (architecture overview, links to all component specs)
 
 ---
 
@@ -112,7 +112,7 @@ This is analogous to how operating systems separate code execution from data (NX
 
 **Level 2:** Products configure rate limiting policies, request size limits, and abuse detection thresholds as appropriate for their deployment model.
 
-**Auth integration:** Every request must be authenticated before it reaches the Gateway's routing logic (D22, D60). Unauthenticated requests are rejected. Auth is the first line of defense. See `auth-spec.md`.
+**Auth integration:** Every request must be authenticated before it reaches the Gateway's routing logic (D22, D60). Unauthenticated requests are rejected. Auth is the first line of defense. See [auth-spec.md](./auth-spec.md).
 
 #### 4. Model Provider Data Flow
 
@@ -212,13 +212,13 @@ The system distinguishes between instructions and data at the prompt level. See 
 
 ### 5. Tool Isolation
 
-Detailed in `tools-spec.md`. Formalized here as security controls:
+Detailed in [tools-spec.md](./tools-spec.md). Formalized here as security controls:
 
 - **System-shipped tools**: in-process, no isolation. Code-reviewed, shipped with the system.
 - **Owner-installed tools**: isolated by default (separate container), owner can override. Warning displayed on install.
 - **Untrusted tools** (future marketplace): mandatory isolation, dedicated container, restricted network, resource limits.
 
-Container isolation protects against: unauthorized filesystem access, unauthorized network calls, inter-tool interference, resource exhaustion. See `tools-spec.md` for the full isolation spectrum.
+Container isolation protects against: unauthorized filesystem access, unauthorized network calls, inter-tool interference, resource exhaustion. See [tools-spec.md](./tools-spec.md) for the full isolation spectrum.
 
 ### 6. Version History as Security Net
 
@@ -422,7 +422,7 @@ How do we test that content separation works? Adversarial test suites, red team 
 
 ## Related Documents
 
-`foundation-spec.md` (architecture overview, links to all component specs)
+[foundation-spec.md](./foundation-spec.md) (architecture overview, links to all component specs)
 
 ---
 

@@ -35,7 +35,7 @@ These criteria verify that the implementation matches the architectural topology
 
 **Claim:** Components communicate through exactly two connectors: the Gateway API (clients ↔ Gateway) and the Provider API (Engine ↔ models).
 
-**Verification:** Trace every external integration point. Each must route through one of the two connectors, be internal (Gateway ↔ Engine contract), or be internal to the Engine (Engine ↔ Tools execution, which is not an architectural boundary — see `tools-spec.md`).
+**Verification:** Trace every external integration point. Each must route through one of the two connectors, be internal (Gateway ↔ Engine contract), or be internal to the Engine (Engine ↔ Tools execution, which is not an architectural boundary — see [tools-spec.md](./tools-spec.md)).
 
 **Fail condition:** A third connector exists — an external-facing protocol boundary that is neither the Gateway API nor the Provider API. (The Gateway ↔ Engine internal contract is explicitly not a connector per D137. Engine ↔ Tool communication is internal to the Engine, not a connector.)
 
@@ -238,7 +238,7 @@ The four pillars are values, not code — but they produce observable properties
 
 **Verification:** Inspect the internal contract. Confirm the request/response format matches the spec. Confirm the Engine does not receive per-request configuration (tools, provider, model) from the Gateway.
 
-**Fail condition:** The Gateway sends per-request configuration that changes Engine behavior. Or the internal contract carries data not specified in `gateway-engine-contract.md`.
+**Fail condition:** The Gateway sends per-request configuration that changes Engine behavior. Or the internal contract carries data not specified in [gateway-engine-contract.md](./gateway-engine-contract.md).
 
 ---
 
@@ -546,10 +546,10 @@ Each story is an acceptance test for the architecture itself.
 
 | When | What to run | Document |
 |------|-------------|----------|
-| **Every PR** | Lock-in gate (subset of this doc optimized for speed) | `lockin-gate.md` |
-| **Every milestone** | Lock-in audit + swap tests | `lockin-audit.md` |
-| **Every release** | Full foundation verification (this doc) | `foundation-verification.md` |
-| **Architecture change** | Full foundation verification + affected component specs | `foundation-verification.md` + component specs |
+| **Every PR** | Lock-in gate (subset of this doc optimized for speed) | [lockin-gate.md](./lockin-gate.md) |
+| **Every milestone** | Lock-in audit + swap tests | [lockin-audit.md](./lockin-audit.md) |
+| **Every release** | Full foundation verification (this doc) | [foundation-verification.md](./foundation-verification.md) |
+| **Architecture change** | Full foundation verification + affected component specs | [foundation-verification.md](./foundation-verification.md) + component specs |
 
 ---
 
@@ -557,15 +557,15 @@ Each story is an acceptance test for the architecture itself.
 
 | Document | Relationship |
 |----------|-------------|
-| `foundation-spec.md` | Parent — this doc verifies claims made there |
-| `lockin-gate.md` | Subset — PR-level checks extracted from sections 3, 4, 5, 9 |
-| `lockin-audit.md` | Subset — milestone-level checks extracted from sections 3, 4, 5, 6, 7, 9 |
-| `zero-lockin-checklist.md` | Index — points to gate, audit, and this doc |
-| `deployment-spec.md` | Source for section 9 (Deployment Verification) |
-| `configuration-spec.md` | Source for X-1 (Configuration Verification) |
-| `adapter-spec.md` | Source for C-4 (Adapter Verification) |
-| `gateway-engine-contract.md` | Source for C-5 (Internal Contract Verification) |
-| `security-spec.md` | Source for X-2 (Secrets Verification) and deployment network posture |
+| [foundation-spec.md](./foundation-spec.md) | Parent — this doc verifies claims made there |
+| [lockin-gate.md](./lockin-gate.md) | Subset — PR-level checks extracted from sections 3, 4, 5, 9 |
+| [lockin-audit.md](./lockin-audit.md) | Subset — milestone-level checks extracted from sections 3, 4, 5, 6, 7, 9 |
+| [zero-lockin-checklist.md](./zero-lockin-checklist.md) | Index — points to gate, audit, and this doc |
+| [deployment-spec.md](./deployment-spec.md) | Source for section 9 (Deployment Verification) |
+| [configuration-spec.md](./configuration-spec.md) | Source for X-1 (Configuration Verification) |
+| [adapter-spec.md](./adapter-spec.md) | Source for C-4 (Adapter Verification) |
+| [gateway-engine-contract.md](./gateway-engine-contract.md) | Source for C-5 (Internal Contract Verification) |
+| [security-spec.md](./security-spec.md) | Source for X-2 (Secrets Verification) and deployment network posture |
 
 ---
 

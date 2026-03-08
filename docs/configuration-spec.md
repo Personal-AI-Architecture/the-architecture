@@ -14,7 +14,7 @@ Why this matters: configuration is where lock-in hides. The architecture promise
 
 This is a **Level 1 (Foundation) document** — it defines how configuration works at the generic, unopinionated level. Product-specific defaults (which provider, which tools ship, what starter content) are Level 2 (Product) opinions.
 
-**Related documents:** `foundation-spec.md` (architecture overview, links to all component specs)
+**Related documents:** [foundation-spec.md](./foundation-spec.md) (architecture overview, links to all component specs)
 
 ---
 
@@ -134,7 +134,7 @@ Secrets (API keys, tokens, credentials) never appear in Your Memory or tracked c
 
 ## Adapter Config
 
-Each adapter (see `adapter-spec.md`, D139) may have its own config file. This is where provider-specific settings live — not in runtime config, not in preferences.
+Each adapter (see [adapter-spec.md](./adapter-spec.md), D139) may have its own config file. This is where provider-specific settings live — not in runtime config, not in preferences.
 
 | Adapter | What its config contains | Example |
 |---------|------------------------|---------|
@@ -152,7 +152,7 @@ Each adapter (see `adapter-spec.md`, D139) may have its own config file. This is
 }
 ```
 
-**Swapping a provider = swapping an adapter file.** Runtime config points to which adapter (`provider_adapter: "openrouter"`). The adapter file contains everything provider-specific. Nothing else in the system knows or cares about provider details. See `adapter-spec.md` §How Model Configuration Works in Practice for the full walkthrough of model and provider swaps — what changes, what doesn't, and the two kinds of change (same provider vs different provider).
+**Swapping a provider = swapping an adapter file.** Runtime config points to which adapter (`provider_adapter: "openrouter"`). The adapter file contains everything provider-specific. Nothing else in the system knows or cares about provider details. See [adapter-spec.md](./adapter-spec.md) §How Model Configuration Works in Practice for the full walkthrough of model and provider swaps — what changes, what doesn't, and the two kinds of change (same provider vs different provider).
 
 This is the same pattern as the architecture's contracts: components speak a generic internal interface, adapters translate to/from the specific external standard. Configuration follows the same principle: runtime config speaks generically, adapter config handles the specifics.
 
@@ -167,7 +167,7 @@ At startup, the system reads configuration in a strict sequence. Each phase depe
 3. **Discover tools** — scan `tool_sources` paths. For each tool found: MCP servers announce their tools via protocol, manifest files are read, built-in tools are loaded from code. Now the system knows what tools are available.
 4. **Mount Your Memory** — use `memory_root` to locate Your Memory on the filesystem. At this point Your Memory is accessible but no preferences have been read yet.
 5. **Read preferences** — read the preferences file from Your Memory (direct file read, not through the Engine — no tools required). Apply preference filters: always-send set, tool policies, approval requirements, model choice.
-6. **Ready** — the Engine has tools, a provider, and preferences. The Gateway starts accepting connections (see `gateway-engine-contract.md` for request flow).
+6. **Ready** — the Engine has tools, a provider, and preferences. The Gateway starts accepting connections (see [gateway-engine-contract.md](./gateway-engine-contract.md) for request flow).
 
 **Phases 1-3 are environment.** They happen before Your Memory is involved. They describe the desk.
 **Phase 4-5 are personal.** They read from Your Memory. They describe you.
@@ -240,7 +240,7 @@ This is a CI test, not a guideline. It makes the principle enforceable. Run it o
 
 ### ~~OQ-2: Tool manifest convention~~ — DEFERRED to implementation
 
-**Resolution:** Owned by `tools-spec.md`. Tools self-describe via MCP protocol, manifest files, or built-in definitions (D146). The manifest convention is a tools implementation detail, not a configuration concern.
+**Resolution:** Owned by [tools-spec.md](./tools-spec.md). Tools self-describe via MCP protocol, manifest files, or built-in definitions (D146). The manifest convention is a tools implementation detail, not a configuration concern.
 
 ### ~~OQ-3: Runtime config location convention~~ — DEFERRED to implementation
 
@@ -262,7 +262,7 @@ This is a CI test, not a guideline. It makes the principle enforceable. Run it o
 
 ## Security Requirements
 
-Per-component requirements from `security-spec.md`. Security-spec owns the "why"; this section owns the "what" for Configuration.
+Per-component requirements from [security-spec.md](./security-spec.md). Security-spec owns the "why"; this section owns the "what" for Configuration.
 
 - [ ] Secrets (API keys, tokens, credentials) must never be stored in Your Memory or tracked config files — environment variables or gitignored `.env` files only
 - [ ] Runtime config must not contain secrets by value — only references (`$OPENROUTER_API_KEY`)

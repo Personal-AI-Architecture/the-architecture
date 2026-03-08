@@ -60,7 +60,7 @@ The rest of this document shows why.
 
 This is a **Level 1 (Foundation) document** — it defines how tools work at the generic, unopinionated level. Product-specific tool choices (which tools ship, what defaults, MCP as default protocol) are Level 2 (Product) opinions.
 
-**Related documents:** `foundation-spec.md` (architecture overview, links to all component specs)
+**Related documents:** [foundation-spec.md](./foundation-spec.md) (architecture overview, links to all component specs)
 
 ---
 
@@ -245,7 +245,7 @@ The Engine doesn't interpret, filter, or modify tool calls or results. It's a pa
 
 ### Tool registration — how the Engine knows what's available
 
-There's no special registration system. The Engine's normal loop (see `engine-spec.md`) already includes tool definitions as an input alongside the system prompt and conversation history. "Registration" is just how those definitions get there.
+There's no special registration system. The Engine's normal loop (see [engine-spec.md](./engine-spec.md)) already includes tool definitions as an input alongside the system prompt and conversation history. "Registration" is just how those definitions get there.
 
 Tool plumbing — where tools live, what addresses to connect to — is environment configuration that travels with the deployment. Tool preferences — which tools to always-send, what policies to apply — are personal data in Your Memory. At startup, the Engine reads environment config to know where to find tools, then discovers what they offer. How it gets the actual definitions depends on the tool:
 
@@ -333,7 +333,7 @@ When software talks *to* the system (not *for* the system), it should go through
 | D56 | The model should know about tools that exist but aren't permissioned — the Engine doesn't need to | The model benefits from knowing "this tool exists but you can't use it" so it can give the owner a useful response. The Engine doesn't care why a tool is unavailable — it just knows it can't execute it. Richer information flows to the intelligence (model), simpler information flows to the executor (Engine). |
 | D109 | Owner controls which tools are sent with every prompt (always-send set) vs. available on demand (discoverable set) — a discovery meta-tool bridges the gap | Sending every registered tool definition with every prompt wastes context, costs tokens, and degrades model quality as tool count grows. Splitting into owner-configured always-send + discoverable sets keeps the prompt lean while preserving access to everything. The owner — not the platform — decides the tradeoff. This is a concrete expression of user-owned AI: you control what your AI has at its fingertips. |
 | D135 | Memory/tool binary — if it's data, it's memory; if it's not data, it's a tool | All data, anywhere, is memory — the only question is whose. Tools are the verbs, memory is the nouns. Clean binary that decomposes everything the system processes. |
-| D141 | Tool configs are environment configuration, not personal data — they travel with the deployment, not with Your Memory | Dave J identified that storing tool configs in Your Memory creates a false dependency: move your memory to another system and it references tools that don't exist. Tool plumbing (server addresses, ports) and installation describe the deployment environment, not the user's personal data. Same principle as `.env` files or `settings.json`. **Refined by D141-refined:** original scope was too broad. Tool definitions → provided by tools themselves (D146). Tool preferences (always-send, policies) → Your Memory (D145). Only plumbing stays in environment config. See `configuration-spec.md` §Impact on D141. |
+| D141 | Tool configs are environment configuration, not personal data — they travel with the deployment, not with Your Memory | Dave J identified that storing tool configs in Your Memory creates a false dependency: move your memory to another system and it references tools that don't exist. Tool plumbing (server addresses, ports) and installation describe the deployment environment, not the user's personal data. Same principle as `.env` files or `settings.json`. **Refined by D141-refined:** original scope was too broad. Tool definitions → provided by tools themselves (D146). Tool preferences (always-send, policies) → Your Memory (D145). Only plumbing stays in environment config. See [configuration-spec.md](./configuration-spec.md) §Impact on D141. |
 | D141-refined | Three-way split: tool definitions → self-describing (D146), plumbing → environment config, preferences → Your Memory (D145) | Original D141 scope was too broad — moving everything to environment config pulled personal preferences away from the owner. The refinement keeps only plumbing in environment config, returns preferences to Your Memory, and lets tools self-describe their own definitions. |
 | D145 | Tool preferences are personal data in Your Memory — they travel with you | "Always load git tools" is about you, not about this desk. Preferences (always-send set, policies, interaction style) belong in Your Memory because they describe the owner, not the deployment. |
 | D146 | Tools self-describe — definitions come from the tools themselves, not from manual configuration | MCP tools describe themselves via protocol. Other tools provide manifest files. Nobody writes tool definitions manually. This is the first leg of the D141-refined three-way split. |
@@ -371,7 +371,7 @@ Option 1 is simpler and matches how MCP works today. Option 2 enforces the parit
 
 ## Security Requirements
 
-Per-component requirements from `security-spec.md`. Security-spec owns the "why"; this section owns the "what" for Tools.
+Per-component requirements from [security-spec.md](./security-spec.md). Security-spec owns the "why"; this section owns the "what" for Tools.
 
 - [ ] Untrusted tools must run in isolated containers — mandatory, not configurable. Restricted filesystem, restricted network, resource limits
 - [ ] Tool isolation must be independent of Auth — even if Auth fails, the tool can't escape its container

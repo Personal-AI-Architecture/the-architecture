@@ -37,9 +37,9 @@ Every principle in this document is a specific case of the same rule: don't do a
 
 Pain from your hand and pain from your foot travel the same pathways using the same signal structure — your brain doesn't need a different protocol for each organ. The nervous system is consistent, observable, and dumb — it carries signals, it doesn't interpret them. The brain does the thinking.
 
-This document covers communication **between internal components** — Gateway, Engine, Auth, and the tools/services they interact with. It does not cover the Gateway API connector (external client boundary — see `gateway-spec.md`), the Provider API connector (external model boundary — see `models-spec.md`), or client-side communication. Those have their own specs.
+This document covers communication **between internal components** — Gateway, Engine, Auth, and the tools/services they interact with. It does not cover the Gateway API connector (external client boundary — see [gateway-spec.md](./gateway-spec.md)), the Provider API connector (external model boundary — see [models-spec.md](./models-spec.md)), or client-side communication. Those have their own specs.
 
-**Related documents:** `foundation-spec.md` (architecture overview, links to all component specs)
+**Related documents:** [foundation-spec.md](./foundation-spec.md) (architecture overview, links to all component specs)
 
 ---
 
@@ -59,7 +59,7 @@ If every internal interface has its own message shape, field names, and type con
 
 This applies to errors too. When every interface invents its own error shape, error handling becomes per-interface custom code. Errors are part of the contract, not an afterthought — machine-readable codes, correlation context, no leaked internals. Same structural conventions as normal messages.
 
-At minimum, every internal request carries: a correlation ID (P5), a timestamp, and enough context for the receiver to process it without ambient state. Events within a stream (like SSE events) inherit the request's correlation context — they don't each carry their own. The `gateway-engine-contract.md` is one application of this — its `metadata` object and field conventions should be the starting point for other internal interfaces, not an island.
+At minimum, every internal request carries: a correlation ID (P5), a timestamp, and enough context for the receiver to process it without ambient state. Events within a stream (like SSE events) inherit the request's correlation context — they don't each carry their own. The [gateway-engine-contract.md](./gateway-engine-contract.md) is one application of this — its `metadata` object and field conventions should be the starting point for other internal interfaces, not an island.
 
 Consistency means one swap, not N. Can a developer reading any internal message recognize the structure without checking which interface produced it? If not, each interface is its own lock-in surface.
 
@@ -106,11 +106,11 @@ Can one component add new fields to its messages without breaking any other comp
 | Thing | Why not | Where it lives |
 |-------|---------|---------------|
 | Specific message format (JSON-RPC, custom envelope, etc.) | Implementation choice — Level 2 | Product spec / implementation |
-| Specific transport (HTTP, gRPC, queues) | Deployment choice | `deployment-spec.md`, component specs |
-| Semantic routing / task dispatch | The model decides (P4) | `engine-spec.md` |
-| Specific error codes | Interface-specific | Each contract (e.g., `gateway-engine-contract.md`) |
-| Authentication mechanism | Auth's responsibility | `auth-spec.md` |
-| The Gateway-Engine contract details | Already defined | `gateway-engine-contract.md` |
+| Specific transport (HTTP, gRPC, queues) | Deployment choice | [deployment-spec.md](./deployment-spec.md), component specs |
+| Semantic routing / task dispatch | The model decides (P4) | [engine-spec.md](./engine-spec.md) |
+| Specific error codes | Interface-specific | Each contract (e.g., [gateway-engine-contract.md](./gateway-engine-contract.md)) |
+| Authentication mechanism | Auth's responsibility | [auth-spec.md](./auth-spec.md) |
+| The Gateway-Engine contract details | Already defined | [gateway-engine-contract.md](./gateway-engine-contract.md) |
 
 ---
 

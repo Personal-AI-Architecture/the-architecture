@@ -114,7 +114,7 @@ At boot, the system loads the adapter, reads your preference, and every request 
 
 In both cases: Engine doesn't change. Gateway doesn't change. Auth doesn't change. Your Memory doesn't change (except the preference). Your client doesn't change. This is the D147 anti-lock-in test — if any swap requires code changes, lock-in has been introduced.
 
-See `configuration-spec.md` for runtime config details, boot sequence, and the full anti-lock-in test.
+See [configuration-spec.md](./configuration-spec.md) for runtime config details, boot sequence, and the full anti-lock-in test.
 
 ---
 
@@ -167,7 +167,7 @@ This also aligns with existing practice. Existing AI SDKs already work this way 
 
 ---
 
-**Related documents:** `foundation-spec.md` (architecture overview, links to all component specs)
+**Related documents:** [foundation-spec.md](./foundation-spec.md) (architecture overview, links to all component specs)
 
 ---
 

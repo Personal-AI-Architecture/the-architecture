@@ -14,7 +14,7 @@ This is **not** a third connector. The Gateway API and Provider API are the swap
 
 The design principle: **the simplest contract that fills the one gap.** One endpoint. One stream format. Auth on the path. No protocol envelope, no routing, no node registration, no versioning scheme. Two components in the same deployment don't need the ceremony of an external API — they need a clear agreement about the shape of the data and what to expect back.
 
-**Related documents:** `foundation-spec.md` (architecture overview, links to all component specs)
+**Related documents:** [foundation-spec.md](./foundation-spec.md) (architecture overview, links to all component specs)
 
 ---
 
@@ -226,7 +226,7 @@ Most AI SDKs produce streaming events that map directly to this contract's SSE e
 
 ## Security Requirements
 
-Per-component requirements from `security-spec.md`. Security-spec owns the "why" (D131); this section owns the "what" for the Gateway ↔ Engine interface.
+Per-component requirements from [security-spec.md](./security-spec.md). Security-spec owns the "why" (D131); this section owns the "what" for the Gateway ↔ Engine interface.
 
 - [ ] Every request must pass through Auth middleware before reaching the Engine — no bypass path
 - [ ] Credentials (tokens, API keys, session IDs) must never appear in the request body — Auth validates and attaches identity via headers (`X-Actor-ID`, `X-Actor-Permissions`)
