@@ -35,7 +35,7 @@ Each audience has a "start here" flow — the minimal set of files and first act
 **Level 2 Product Builder** — building on the foundation:
 1. Read `AGENT.md` (repo root) — architecture overview
 2. Read [customization-spec.md](../customization-spec.md) — extension points and constraints
-3. Read `specs/openapi/` and `specs/schemas/` — the connector shapes your product uses
+3. Read `specs/openapi/` and `specs/schemas/` — the API shapes your product uses
 4. Start from the component stubs or reference implementation
 
 **System Extender** — adding tools, skills, or clients:
@@ -53,7 +53,7 @@ Each audience has a "start here" flow — the minimal set of files and first act
 A single document (~300 lines) containing *only* what you need to build against:
 
 - The 4 components, what each must do (not why)
-- The 2 connector contracts (referencing the canonical schemas)
+- The 2 API contracts (referencing the canonical schemas)
 - The Gateway-Engine contract
 - The responsibility matrix (distilled from foundation-spec)
 - Conformance criteria (test IDs, pass/fail)
@@ -65,8 +65,8 @@ No decisions, no rationale, no history. Just the implementation contract. Think 
 The contracts expressed as language-neutral schemas (OpenAPI for HTTP contracts, JSON Schema for data shapes, SSE event schema for streaming). These are the canonical, authoritative contract definitions.
 
 **Canonical (language-neutral):**
-- `gateway-api.yaml` — OpenAPI spec for Gateway API connector
-- `provider-api.yaml` — OpenAPI spec for Provider API connector
+- `gateway-api.yaml` — OpenAPI spec for Gateway API
+- `provider-api.yaml` — OpenAPI spec for Provider API
 - `gateway-engine.yaml` — OpenAPI spec for Gateway ↔ Engine internal contract
 - `schemas/` — JSON Schema definitions for shared types (messages, tool definitions, configuration, SSE events)
 
@@ -125,7 +125,7 @@ A runnable test suite that validates *any* implementation against the architectu
 | ARCH-1 | Memory zero dependencies | Stop all components except Memory storage → Memory is still readable with standard tools (text editor, file browser, DB viewer) | Principle 1, foundation-spec §Your Memory |
 | ARCH-2 | Engine swap | Replace Engine implementation → Gateway/Memory/Auth/tools unaffected → system functions | D39, FS-7 |
 | ARCH-3 | Client swap | New client speaks Gateway API → system serves it identically | D57, FS-5 |
-| ARCH-4 | Schema conformance | All connector payloads validate against canonical schemas in `specs/` | D16, Principle 3 |
+| ARCH-4 | Schema conformance | All API payloads validate against canonical schemas in `specs/` | D16, Principle 3 |
 
 **Deployment invariant tests (from deployment-spec + security-spec):**
 
@@ -230,7 +230,7 @@ Items 1-3 should exist before the foundation repo goes public. Items 4-6 can fol
 
 These items are important but premature to define now. Flagged for resolution before 1.0:
 
-- **Contract versioning policy** — semver, deprecation windows, backward-compatibility guarantees for connectors. Define when there are deployed contracts to version.
+- **Contract versioning policy** — semver, deprecation windows, backward-compatibility guarantees for APIs. Define when there are deployed contracts to version.
 - **Folder reorganization** — if `guides/` grows large enough that mixing docs and executable artifacts causes friction, split into `guides/` (docs), `examples/` (runnable code), `conformance/` (test suite). Reorganize when the content warrants it, not before.
 
 ---

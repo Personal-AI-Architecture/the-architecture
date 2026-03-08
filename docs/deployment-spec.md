@@ -60,7 +60,7 @@ Local models have their own hardware requirements (RAM, GPU) that are outside th
 
 ### 5. Single deployable unit by default
 
-All four components (Your Memory, Engine, Auth, Gateway) and both connectors (Gateway API, Provider API) deploy together on one machine as a single unit. One install, one start command, one thing to manage.
+All four components (Your Memory, Engine, Auth, Gateway) and both APIs (Gateway API, Provider API) deploy together on one machine as a single unit. One install, one start command, one thing to manage.
 
 Splitting components across machines is allowed but not required — the single-unit deployment is the default. Split patterns are a Level 2 concern.
 

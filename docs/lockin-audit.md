@@ -88,7 +88,7 @@ Run the sections that match changed areas.
 
 ---
 
-## 3. Connector and Interface Checks
+## 3. API and Interface Checks
 
 ### Gateway API
 
@@ -104,7 +104,7 @@ Run the sections that match changed areas.
 
 - [ ] Internal contract remains explicit and versioned as needed (D137).
 - [ ] New fields/behavior are backward-compatible or version-gated.
-- [ ] Interface remains internal — not promoted into a third public connector by accident (D137).
+- [ ] Interface remains internal — not promoted into a third public API by accident (D137).
 
 ---
 

@@ -75,7 +75,7 @@ A documentation update is required when a change touches code or specs that a do
 | **Schema change** (`specs/schemas/`) | All docs referencing the schema + generated types must be regenerated | AI agent (auto) | CI gate + `generate:types` check |
 | **OpenAPI change** (`specs/openapi/`) | Component specs for affected contracts + AGENT.md | AI agent (auto) | CI gate |
 | **Config change** (`adapters/`, config-related src) | configuration-spec + README quickstart | AI agent (auto) | CI gate |
-| **New component or connector** | foundation-spec, AGENT.md, implementers-reference, file map | Human + AI agent | PR review |
+| **New component or API** | foundation-spec, AGENT.md, implementers-reference, file map | Human + AI agent | PR review |
 | **Architectural/philosophical change** | foundation-spec, relevant component specs, README | Human-authored, AI-verified | PR review |
 | **Dependency or tooling change** | README (if user-facing), deployment-spec (if runtime) | AI agent (auto) | CI gate |
 

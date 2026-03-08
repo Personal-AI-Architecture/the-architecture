@@ -19,9 +19,9 @@ The Personal AI Architecture is MIT-licensed (code) and CC BY 4.0 (documentation
 
 ## The Architecture
 
-Four components, two connectors, five principles. Your Memory is the platform — everything else is swappable.
+Four components, two APIs, five principles. Your Memory is the platform — everything else is swappable.
 
-- **13 finalized specs** covering every component, connector, and cross-cutting concern
+- **13 finalized specs** covering every component, API, and cross-cutting concern
 - **243 tests** validating architectural invariants
 - **5 principles** that make lock-in avoidance a structural property, not a promise
 - **Published on npm** as a reference implementation

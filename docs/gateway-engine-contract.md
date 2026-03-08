@@ -11,7 +11,7 @@ Every system with more than one component has to answer a basic question: how do
 
 A protocol evaluation (D136) looked at every communication gap in the architecture — 29+ potential interfaces — and found that all of them resolve through things that already exist (contracts, tools, configuration). All except this one. The Gateway needs to hand off a conversation to the Engine. The Engine needs to stream results back. Auth needs to sit on the path between them. That's the entire scope.
 
-This is **not** a third connector. The Gateway API and Provider API are the swappability boundaries — external things plug into them. This is an internal contract between two components we control, inside the same deployment. It just needs to be well-defined so the components stay decoupled — you should be able to swap the Engine without touching the Gateway, and vice versa (FS-5, FS-7).
+This is **not** a third API. The Gateway API and Provider API are the swappability boundaries — external things plug into them. This is an internal contract between two components we control, inside the same deployment. It just needs to be well-defined so the components stay decoupled — you should be able to swap the Engine without touching the Gateway, and vice versa (FS-5, FS-7).
 
 The design principle: **the simplest contract that fills the one gap.** One endpoint. One stream format. Auth on the path. No protocol envelope, no routing, no node registration, no versioning scheme. Two components in the same deployment don't need the ceremony of an external API — they need a clear agreement about the shape of the data and what to expect back.
 

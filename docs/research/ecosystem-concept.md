@@ -10,7 +10,7 @@ Every instance of a product built on this architecture has up to three levels:
 
 | Level | What it is | Always present? |
 |-------|-----------|-----------------|
-| **Level 1 — Foundation** | The generic architecture: 4 components (Your Memory, Engine, Auth, Gateway), 2 connectors (Gateway API, Provider API), 3 externals (Clients, Models, Tools). No opinions. | Yes |
+| **Level 1 — Foundation** | The generic architecture: 4 components (Your Memory, Engine, Auth, Gateway), 2 APIs (Gateway API, Provider API), 3 externals (Clients, Models, Tools). No opinions. | Yes |
 | **Level 2 — Product** | The Foundation + a product's shipped opinions and defaults. For BrainDrive: AGENT.md bootstrap, starter library, skills as markdown, OpenRouter default, MCP as default tool protocol, methodology, folder structure, web interface. | Yes |
 | **Level 3 — Personalization** | What the owner adds to make it theirs: life pages, custom skills, projects, profile, model preferences, tool choices. | Optional |
 
@@ -38,15 +38,15 @@ The two-repo structure makes BrainDrive the best possible example. A developer l
 
 BrainDrive is both a product and an example of how to build user-owned AI systems on a foundation that prevents lock-in and lets developers ride the AI wave instead of getting washed away by it.
 
-Because everyone builds on the same Foundation (or foundational way of thinking), any product built on it is composable by default. Products in the ecosystem progress together and benefit each other — even if they compete in the marketplace. The connector contracts (Gateway API, Provider API) are what make this composability real.
+Because everyone builds on the same Foundation (or foundational way of thinking), any product built on it is composable by default. Products in the ecosystem progress together and benefit each other — even if they compete in the marketplace. The API contracts (Gateway API, Provider API) are what make this composability real.
 
-**Example:** Someone builds "TherapyBrain" or "LegalBrain" on the Foundation. Their tools, skills, and clients work with BrainDrive because they share the same connectors and contracts. A tool built for one product works with any other product on the Foundation.
+**Example:** Someone builds "TherapyBrain" or "LegalBrain" on the Foundation. Their tools, skills, and clients work with BrainDrive because they share the same APIs and contracts. A tool built for one product works with any other product on the Foundation.
 
 ### Repo structure
 
 | Repo | What it contains | Who it's for |
 |------|-----------------|-------------|
-| **Foundation** (name TBD) | Level 1 — the generic architecture, components, connectors, contracts | Developers building user-owned AI systems |
+| **Foundation** (name TBD) | Level 1 — the generic architecture, components, APIs, contracts | Developers building user-owned AI systems |
 | **BrainDrive** | Level 2 — BrainDrive's opinions, defaults, starter library, methodology, client | Users who want the BrainDrive product; developers who want to see a reference implementation |
 
 The Foundation repo is the movement. The BrainDrive repo is the product. Both open source. BrainDrive depends on the Foundation. Other products can too.

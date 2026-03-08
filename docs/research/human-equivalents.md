@@ -274,7 +274,7 @@ Everyone has the same body plan — two arms, two legs, a brain, a heart. What y
 
 | Human | Architecture |
 |-------|-------------|
-| **Human anatomy** — the universal body plan everyone shares | **Level 1 Foundation** — 4 components, 2 connectors, 3 externals. Generic, unopinionated |
+| **Human anatomy** — the universal body plan everyone shares | **Level 1 Foundation** — 4 components, 2 APIs, 3 externals. Generic, unopinionated |
 | **Your lifestyle** — career, routines, preferences, personality | **Level 2 Product** — specific tools, default content, methodology, personality, brand |
 | **Anatomy doesn't prescribe lifestyle** — having hands doesn't mean you must be a pianist | **Foundation doesn't prescribe product** — having an Engine doesn't mean you must build a chatbot |
 | **Two people with the same anatomy live very different lives** — same infrastructure, different choices | **Two products on the same Foundation look completely different** — same architecture, different Memory contents |

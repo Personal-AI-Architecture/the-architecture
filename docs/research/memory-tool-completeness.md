@@ -26,7 +26,7 @@ The binary classifies everything the system *processes*. But two things resist f
 
 Intelligence itself doesn't fully decompose.
 
-Conceptually it breaks down: weights are the provider's memory (trained knowledge, stored as parameters), inference is a verb (the operation of generating a response). But the architecture elevates it to a required external dependency with its own connector (the Provider API). Why?
+Conceptually it breaks down: weights are the provider's memory (trained knowledge, stored as parameters), inference is a verb (the operation of generating a response). But the architecture elevates it to a required external dependency with its own API (the Provider API). Why?
 
 ### The superpower
 
@@ -34,7 +34,7 @@ In a human brain, neither memory nor intelligence is swappable. You're stuck wit
 
 The fastest-changing part of AI is model capability. A biological brain can't upgrade its neurons. A digital brain with persistent memory can upgrade its intelligence every time a better model ships — different models for different tasks, from any provider, swapped with a config change. That's not a limitation to work around. It's the whole advantage.
 
-To wield that advantage, the model needs its own connector. If it were classified as just another tool, model access would flow through whatever tool mechanism the Engine uses internally — coupling it to Engine implementation details. The Provider API exists to keep model access as a clean, swappable boundary. That's what makes "swap your intelligence" a config change instead of a rebuild.
+To wield that advantage, the model needs its own API. If it were classified as just another tool, model access would flow through whatever tool mechanism the Engine uses internally — coupling it to Engine implementation details. The Provider API exists to keep model access as a clean, swappable boundary. That's what makes "swap your intelligence" a config change instead of a rebuild.
 
 ### But what if you own the model and never want to swap it?
 
@@ -62,13 +62,13 @@ But we made intelligence swappable. That's the superpower. And the moment intell
 
 Auth exists as a component not because it resists the memory/tool binary — it doesn't. Auth exists because the Model is the most volatile part of the system, and security can't be volatile. It's the architectural cost of swappable intelligence. You separate them precisely *because* you made intelligence replaceable.
 
-Both exceptions trace to the same root: the decision to make intelligence swappable (the superpower from Exception 1). The Model needs its own connector so you *can* swap it. Auth needs to be independent so swapping it doesn't break security. One cause, two consequences.
+Both exceptions trace to the same root: the decision to make intelligence swappable (the superpower from Exception 1). The Model needs its own API so you *can* swap it. Auth needs to be independent so swapping it doesn't break security. One cause, two consequences.
 
 ---
 
 ## 3. Systematic Decomposition
 
-Every concept people might think needs its own subsystem decomposes into memory + tools. The architecture's four components (Your Memory, Engine, Auth, Gateway) and two connectors (Gateway API, Provider API) already cover every concern.
+Every concept people might think needs its own subsystem decomposes into memory + tools. The architecture's four components (Your Memory, Engine, Auth, Gateway) and two APIs (Gateway API, Provider API) already cover every concern.
 
 | What people call it | Memory (data/noun) | Tool (operation/verb) | Infrastructure concern |
 |---|---|---|---|
@@ -152,7 +152,7 @@ The binary classifies the water, not the plumbing. The infrastructure itself —
 
 These are the system. They're not memory or tools — they're what processes memory and tools.
 
-**Connectors:**
+**APIs:**
 - **Gateway API** — how clients talk to the Gateway.
 - **Provider API** — how the Engine talks to models.
 
@@ -179,11 +179,11 @@ If every concern maps to an existing component, it's not a new component. It's a
 
 This is the same test that dissolved three proposed components during the architecture interviews:
 
-- **Tools (D51-D53):** Definitions are self-describing — tools declare what they can do via protocol or manifest (D146). Execution is the Engine's job. Permissions are Auth's job. Nothing left over. Not a component. Not even a connector — the Provider API and Engine internals already cover it.
+- **Tools (D51-D53):** Definitions are self-describing — tools declare what they can do via protocol or manifest (D146). Execution is the Engine's job. Permissions are Auth's job. Nothing left over. Not a component. Not even an API — the Provider API and Engine internals already cover it.
 
 - **Interface/Client (D57-D58):** Clients are external. Managing conversations is the Gateway's job (new component created to fill an actual gap). The "Interface" didn't have a distinct job — it was an external connecting to the system. Dissolved into Gateway + external clients.
 
-- **Models (D62-D63):** Provider routing is the Engine's implementation. API keys are configuration. Model selection is configuration. Fallback is the Engine's concern. No distinct job. Not a component — an external dependency with its own connector.
+- **Models (D62-D63):** Provider routing is the Engine's implementation. API keys are configuration. Model selection is configuration. Fallback is the Engine's concern. No distinct job. Not a component — an external dependency with its own API.
 
 Each time, the question was the same: is there a gap? Each time, the answer was no — existing components already covered every concern.
 
@@ -198,6 +198,6 @@ New capabilities arrive by adding tools and memory content, not by adding compon
 - Want Salesforce integration? Add API credentials (memory) and a Salesforce query tool. No new component.
 - Want skills? Add skill files (memory). The Engine already reads files and the model already follows instructions. No new component.
 
-The four components, two connectors, and three externals are sufficient. The architecture is complete — not because it anticipated every capability, but because it decomposed to a level where new capabilities compose from existing primitives rather than requiring new infrastructure.
+The four components, two APIs, and three externals are sufficient. The architecture is complete — not because it anticipated every capability, but because it decomposed to a level where new capabilities compose from existing primitives rather than requiring new infrastructure.
 
 That's the point. Memory is the nouns. Tools are the verbs. Everything is a sentence made of nouns and verbs. You don't need a new part of speech.

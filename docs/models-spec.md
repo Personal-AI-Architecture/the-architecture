@@ -31,7 +31,7 @@ This is a **Level 1 (Foundation) spec** — it defines what models are at the ge
 
 ## The Provider API
 
-The Provider API is one of the system's two connectors. It defines how the Engine calls models:
+The Provider API is one of the system's two APIs. It defines how the Engine calls models:
 
 | Direction | What flows |
 |-----------|-----------|
@@ -69,7 +69,7 @@ The memory/tool binary says everything the system processes is either data (memo
 
 Conceptually, they do. Weights are the provider's memory — trained knowledge stored as parameters. Inference is a verb — the operation of generating a response. Noun and verb. The model decomposes.
 
-But the architecture elevates it to an external dependency with its own connector anyway. Three reasons.
+But the architecture elevates it to an external dependency with its own API anyway. Three reasons.
 
 ### Swappable intelligence needs its own boundary
 
@@ -85,11 +85,11 @@ Memory is inert. It sits there and waits to be read. The model is the opposite �
 
 Auth is the other thing the binary doesn't fully dissolve. Auth's data (policies, tokens) is memory. Auth's operations (enforcement, validation) are tools. It decomposes cleanly — but exists as a component anyway, because security can't depend on swappable intelligence. Swap to a weaker model, and your security breaks.
 
-Both exceptions trace to the same root: making intelligence swappable. The Model needs its own connector so you *can* swap it. Auth needs independence so swapping it doesn't *break* security. One cause, two consequences. See [research/memory-tool-completeness.md](./research/memory-tool-completeness.md) §2 for the full argument.
+Both exceptions trace to the same root: making intelligence swappable. The Model needs its own API so you *can* swap it. Auth needs independence so swapping it doesn't *break* security. One cause, two consequences. See [research/memory-tool-completeness.md](./research/memory-tool-completeness.md) §2 for the full argument.
 
 ---
 
-## Why the Provider API Is a Connector, Not a Tool
+## Why the Provider API Is a Contract, Not a Tool
 
 The primary model can't be a tool — it *is* the intelligence making tool decisions. Tools are things the model decides to use. If "call the model" were itself a tool, you'd have a bootstrap problem: who decides to call it? You need intelligence to make tool decisions. You can't use a tool to call the thing that decides which tools to use.
 

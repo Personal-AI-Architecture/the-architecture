@@ -11,7 +11,7 @@ hide_table_of_contents: true
 
 ## Architecture Overview
 
-**4 components**, **2 connectors**, **3 externals**.
+**4 components**, **2 APIs**, **3 externals**.
 
 ```
                               +-----------------------------------------------+
@@ -22,7 +22,7 @@ hide_table_of_contents: true
                                              tools (read/write)
                                                       |
       Clients  -->  Gateway API  -->  Gateway  -->  Engine  -->  Provider API  -->  Models
-    (external)      (connector)     (component)  (component)     (connector)      (external)
+    (external)        (API)        (component)  (component)       (API)          (external)
                                                       |
                         --- Auth ---                  +--> Tools (verbs)  -->  External Memory (nouns)
                         (cross-cutting                     |-- MCP servers      |-- Salesforce data
@@ -34,7 +34,7 @@ hide_table_of_contents: true
 | Layer | Elements |
 |-------|----------|
 | Components | Your Memory, Engine, Auth, Gateway |
-| Connectors | Gateway API (clients <-> Gateway), Provider API (Engine <-> Models) |
+| APIs | Gateway API (clients <-> Gateway), Provider API (Engine <-> Models) |
 | Externals | Clients, Models, Tools |
 
 ---
@@ -136,7 +136,7 @@ Stores conversations in Your Memory.
 
 ---
 
-## Connector Contracts
+## API Contracts
 
 ### Gateway API (Clients <-> Gateway)
 
@@ -164,7 +164,7 @@ Model-native tool calling is the current approach. Swappable via adapter.
 
 ## Internal Contract: Gateway <-> Engine
 
-One HTTP endpoint. Not a third connector.
+One HTTP endpoint. Not a third API.
 
 ### `POST /engine/chat`
 
@@ -234,8 +234,8 @@ One HTTP endpoint. Not a third connector.
 | Protect access / permissions | Auth | Your Memory, Gateway |
 | Manage conversations | Gateway | Engine, Your Memory |
 | Route requests to Engine | Gateway | Auth |
-| Connect to AI models | Provider API (connector) | Engine internals |
-| Accept client connections | Gateway API (connector) | Engine |
+| Connect to AI models | Provider API | Engine internals |
+| Accept client connections | Gateway API | Engine |
 | Provide intelligence | Models (external) | Engine, Your Memory |
 | Display content to owners | Clients (external) | Gateway |
 | Bootstrap the system | Runtime config (4 fields) | Your Memory |
@@ -292,7 +292,7 @@ One HTTP endpoint. Not a third connector.
 | ARCH-1 | Memory zero dependencies | Stop all components except Memory storage -> still readable with standard tools |
 | ARCH-2 | Engine swap | Replace Engine -> Gateway/Memory/Auth/tools unaffected |
 | ARCH-3 | Client swap | New client speaks Gateway API -> system serves identically |
-| ARCH-4 | Schema conformance | All connector payloads validate against canonical schemas |
+| ARCH-4 | Schema conformance | All API payloads validate against canonical schemas |
 
 ### Deployment Invariant Tests
 

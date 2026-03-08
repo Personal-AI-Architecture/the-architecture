@@ -25,7 +25,7 @@ The audience is builders — product developers, AI agents, or product team memb
 
 The Foundation ships sensible defaults for everything a working system needs — runtime config shape, tool discovery mechanism, basic configuration behavior. **These are defaults, not fixed contracts.** Override any of them.
 
-The only fixed contracts are the two connectors:
+The only fixed contracts are the two APIs:
 
 | Contract | Fixed? | Why |
 |----------|--------|-----|
@@ -39,7 +39,7 @@ This is the same "drop-down menu" principle from the foundation spec (Principle 
 
 | Level | What it is | Functional? | Who provides it |
 |-------|-----------|-------------|-----------------|
-| **Level 1 — Foundation** | Components + connectors + sensible defaults. The working generic system. | Yes — minimal but working | Foundation repo |
+| **Level 1 — Foundation** | Components + APIs + sensible defaults. The working generic system. | Yes — minimal but working | Foundation repo |
 | **Level 2 — Product** | Level 1 + product opinions (methodology, skills, starter content, branded client, default tools). | Yes — opinionated product | Product repo (e.g., BrainDrive) |
 | **Level 3 — Personalization** | Level 2 + owner customization (life pages, custom skills, preferences, industry packages). | Yes — personalized | The owner |
 
@@ -133,7 +133,7 @@ There are four ways to customize the Foundation. All Level 2 and Level 3 customi
 
 **What stays generic:** The Gateway API is client-agnostic (D59). It doesn't know or care what the client looks like. Multiple clients can coexist — web, mobile, CLI, voice, Discord, all connecting to the same system through the same API.
 
-**Branding is a client concern, not an architecture concern.** A coaching product built on the Foundation can have its own branding, its own name, its own look — the Foundation has no branding baked into its components or connectors.
+**Branding is a client concern, not an architecture concern.** A coaching product built on the Foundation can have its own branding, its own name, its own look — the Foundation has no branding baked into its components or APIs.
 
 ---
 
@@ -318,7 +318,7 @@ And the coaching product can take Foundation updates without conflict
 Given a coaching product and BrainDrive both built on the same Foundation
 When tools are developed for one product
 Then compatible tools work on the other product without modification
-Because both share the same connectors and contracts
+Because both share the same APIs and contracts
 ```
 
 **Status:** Open

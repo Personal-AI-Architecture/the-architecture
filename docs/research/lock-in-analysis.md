@@ -368,7 +368,7 @@ The probability of needing to replace MCP is near zero. MCP is the default but n
 
 ---
 
-## Connector Analysis
+## API Analysis
 
 ### Gateway API (Product-Defined)
 
@@ -383,7 +383,7 @@ The probability of needing to replace MCP is near zero. MCP is the default but n
 
 | Dimension | Assessment |
 |-----------|-----------|
-| **Lock-in** | Zero. Tool protocol is internal to the Engine (D53) — not a connector, not an architectural boundary. How the Engine communicates with tools is an implementation detail, swappable without affecting any other component. The Level 2 default (currently MCP) has open governance and massive adoption, but the Level 1 protection is structural: the protocol is contained within the Engine. |
+| **Lock-in** | Zero. Tool protocol is internal to the Engine (D53) — not an API, not an architectural boundary. How the Engine communicates with tools is an implementation detail, swappable without affecting any other component. The Level 2 default (currently MCP) has open governance and massive adoption, but the Level 1 protection is structural: the protocol is contained within the Engine. |
 | **Discipline** | Track the chosen protocol's versions. Budget for periodic updates. Don't build abstraction layers on top. |
 
 ### Provider API (Adapter → Provider)
@@ -398,7 +398,7 @@ The probability of needing to replace MCP is near zero. MCP is the default but n
 
 | Dimension | Assessment |
 |-----------|-----------|
-| **Lock-in** | Zero. Plain HTTP API contract — one endpoint, SSE streaming, auth on path. Not a third connector — two components in the same deployment don't need the ceremony of an external API. |
+| **Lock-in** | Zero. Plain HTTP API contract — one endpoint, SSE streaming, auth on path. Not a third API — two components in the same deployment don't need the ceremony of an external API. |
 | **Standards** | HTTP, Server-Sent Events, industry-standard `role` + `content` message format (D16). |
 | **Success criteria** | Swapping the Engine does not require Gateway changes. Swapping the Gateway does not require Engine changes. Contract works as both HTTP endpoint and direct function call without shape changes. |
 | **Discipline** | Keep the contract explicit and versioned. Auth middleware sits between them independently — authenticates without either component knowing how. |

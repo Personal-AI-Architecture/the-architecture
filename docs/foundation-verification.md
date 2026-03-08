@@ -29,15 +29,15 @@ These criteria verify that the implementation matches the architectural topology
 
 **Verification:** Enumerate every deployed unit that contains business logic or state management. Map each to one of the four components. Identify any that don't map.
 
-**Fail condition:** A fifth component exists that is not classifiable as Your Memory, Engine, Auth, or Gateway — and is not an external dependency, a connector, or an adapter.
+**Fail condition:** A fifth component exists that is not classifiable as Your Memory, Engine, Auth, or Gateway — and is not an external dependency, an API, or an adapter.
 
-### S-2. Two connectors (D64)
+### S-2. Two APIs (D64)
 
-**Claim:** Components communicate through exactly two connectors: the Gateway API (clients ↔ Gateway) and the Provider API (Engine ↔ models).
+**Claim:** Components communicate through exactly two APIs: the Gateway API (clients ↔ Gateway) and the Provider API (Engine ↔ models).
 
-**Verification:** Trace every external integration point. Each must route through one of the two connectors, be internal (Gateway ↔ Engine contract), or be internal to the Engine (Engine ↔ Tools execution, which is not an architectural boundary — see [tools-spec.md](./tools-spec.md)).
+**Verification:** Trace every external integration point. Each must route through one of the two APIs, be internal (Gateway ↔ Engine contract), or be internal to the Engine (Engine ↔ Tools execution, which is not an architectural boundary — see [tools-spec.md](./tools-spec.md)).
 
-**Fail condition:** A third connector exists — an external-facing protocol boundary that is neither the Gateway API nor the Provider API. (The Gateway ↔ Engine internal contract is explicitly not a connector per D137. Engine ↔ Tool communication is internal to the Engine, not a connector.)
+**Fail condition:** A third API exists — an external-facing protocol boundary that is neither the Gateway API nor the Provider API. (The Gateway ↔ Engine internal contract is explicitly not an API per D137. Engine ↔ Tool communication is internal to the Engine, not an API.)
 
 ### S-3. Three external dependencies (D64)
 
@@ -47,13 +47,13 @@ These criteria verify that the implementation matches the architectural topology
 
 **Fail condition:** An external dependency exists that cannot be classified into one of the three categories, or an external dependency has been internalized as a component.
 
-### S-4. Gateway ↔ Engine is internal, not a connector (D137)
+### S-4. Gateway ↔ Engine is internal, not an API (D137)
 
-**Claim:** The interface between Gateway and Engine is a plain HTTP API contract between two co-deployed components — not a third public connector.
+**Claim:** The interface between Gateway and Engine is a plain HTTP API contract between two co-deployed components — not a third public API.
 
 **Verification:** Inspect the Gateway ↔ Engine interface. Confirm it is not documented or exposed as a public integration point. Confirm no external system connects through it.
 
-**Fail condition:** Third-party systems or clients connect directly to the Engine, bypassing the Gateway. Or the interface has been promoted to a public, versioned connector with external consumers.
+**Fail condition:** Third-party systems or clients connect directly to the Engine, bypassing the Gateway. Or the interface has been promoted to a public, versioned API with external consumers.
 
 ### S-5. Tools are not a component (D51)
 
@@ -67,7 +67,7 @@ These criteria verify that the implementation matches the architectural topology
 
 **Claim:** Models are external intelligence accessed through the Provider API. The system does not contain a model.
 
-**Verification:** Confirm the system does not bundle, embed, or require a specific model to function. Confirm model access is exclusively through the Provider API connector.
+**Verification:** Confirm the system does not bundle, embed, or require a specific model to function. Confirm model access is exclusively through the Provider API.
 
 **Fail condition:** A model is embedded in the system as a required internal component, or model access bypasses the Provider API.
 
@@ -177,8 +177,8 @@ The four pillars are values, not code — but they produce observable properties
 **Claim:** The entire system must be understandable and maintainable by one developer + AI coding agents. Every additional component is a potential expertise dependency.
 
 **Verification:**
-- (a) **Component count:** The system has exactly four components and two connectors. No hidden infrastructure (message queues, service meshes, orchestrators) that must be understood to operate the system.
-- (b) **Comprehensibility test:** The architecture consists of exactly four components and two connectors with no hidden infrastructure. No component requires specialized domain expertise beyond general software engineering. The spec set (foundation + component specs) is the complete description — no tribal knowledge required.
+- (a) **Component count:** The system has exactly four components and two APIs. No hidden infrastructure (message queues, service meshes, orchestrators) that must be understood to operate the system.
+- (b) **Comprehensibility test:** The architecture consists of exactly four components and two APIs with no hidden infrastructure. No component requires specialized domain expertise beyond general software engineering. The spec set (foundation + component specs) is the complete description — no tribal knowledge required.
 - (c) **Maintenance test:** Routine operations (update a model, add a tool, change a preference, deploy an update) can be performed by one person without coordinating with others.
 - (d) **No operational overhead:** The system does not require monitoring dashboards, log aggregation, container orchestration, or other operational infrastructure to function at Level 1.
 
@@ -194,7 +194,7 @@ The four pillars are values, not code — but they produce observable properties
 - (c) Each scope expansion is independently reversible — removing tools reduces capability without breaking the system.
 - (d) The evolution table holds: V1 → V2 → V3 → V4 each changes only tool configuration, not architecture.
 
-**Fail condition:** Expanding scope requires architectural changes (new components, new connectors, new contracts). Or reducing scope breaks the system. Or a capability expansion is irreversible.
+**Fail condition:** Expanding scope requires architectural changes (new components, new APIs, new contracts). Or reducing scope breaks the system. Or a capability expansion is irreversible.
 
 ---
 
@@ -216,13 +216,13 @@ The four pillars are values, not code — but they produce observable properties
 
 **Fail condition:** The Engine contains provider-specific logic outside the adapter. Or the Provider API payload includes implementation-specific fields not in the contract.
 
-### C-3. Connectors are hollow
+### C-3. APIs are hollow
 
-**Claim:** Both connectors exist to pass information forward with minimal opinion. The less they do, the more they survive.
+**Claim:** Both APIs exist to pass information forward with minimal opinion. The less they do, the more they survive.
 
-**Verification:** Examine connector implementations. They should contain no business logic, no data transformation beyond format mapping, no conditional behavior based on content.
+**Verification:** Examine API implementations. They should contain no business logic, no data transformation beyond format mapping, no conditional behavior based on content.
 
-**Fail condition:** A connector contains business logic (routing decisions based on message content, data enrichment, content-aware transformation). Connectors that "do things" are components in disguise. Note: security boundary enforcement (input well-formedness validation, request size limits) is not business logic — it's required by the security spec and does not violate hollowness.
+**Fail condition:** An API contains business logic (routing decisions based on message content, data enrichment, content-aware transformation). APIs that "do things" are components in disguise. Note: security boundary enforcement (input well-formedness validation, request size limits) is not business logic — it's required by the security spec and does not violate hollowness.
 
 ### C-4. Adapters are thin translation layers (D139)
 
@@ -318,8 +318,8 @@ For each row in the matrix, verify:
 | Protect access / control permissions | Auth | Confirm Auth is the sole permission enforcer | Gateway or Engine contains access control logic independent of Auth |
 | Manage conversations | Gateway | Confirm conversation lifecycle (create, list, retrieve, store) lives in Gateway | Engine or Memory manages conversation state |
 | Route requests to Engine | Gateway | Confirm Gateway routes, Auth doesn't route | Auth contains routing logic |
-| Connect to AI models | Provider API (connector) | Confirm model access goes through Provider API | Engine calls models directly, bypassing the connector |
-| Accept client connections | Gateway API (connector) | Confirm clients connect through Gateway API | Clients connect directly to Engine or other components |
+| Connect to AI models | Provider API | Confirm model access goes through Provider API | Engine calls models directly, bypassing the API |
+| Accept client connections | Gateway API | Confirm clients connect through Gateway API | Clients connect directly to Engine or other components |
 | Display content to owners | Clients (external) | Confirm no component contains display/rendering logic | Gateway or Engine contains client-specific UI logic |
 | Bootstrap the system | Runtime config | Confirm bootstrap is thin (4 fields per configuration-spec) | Bootstrap requires Memory content or complex configuration |
 | Resolve concurrent writes | Tool implementations | Confirm concurrency handling lives in tool implementations, not in Memory component | Memory component contains locking or conflict resolution logic |
@@ -352,9 +352,9 @@ Foundation decisions are architectural commitments. Each is verifiable.
 | D39 | Engine is generic — no product-specific logic | Engine contains no product-specific conditionals, feature flags, or domain logic | Engine contains product-specific behavior |
 | D40 | Prompts and skills live in Memory | Prompt assembly reads from files in Memory; skills are Memory content | Prompts are hardcoded in Engine source; skills are compiled code |
 | D51 | Tools = definitions in Memory + execution in Engine + permissions in Auth | No standalone tools component | A tools service exists outside these three |
-| D53 | No tool protocol connector | Tool calls flow Engine → Provider API → Model, execution is internal to Engine | A third connector exists for tool communication |
+| D53 | No tool protocol API | Tool calls flow Engine → Provider API → Model, execution is internal to Engine | A third API exists for tool communication |
 | D60 | Auth is independent of Gateway | Auth and Gateway have no mutual dependencies; either can be swapped independently | Auth imports Gateway code or vice versa |
-| D135 | Memory/tool binary holds | Every new capability maps to memory (data) or tools (actions), not new infrastructure | A capability requires a new component or connector |
+| D135 | Memory/tool binary holds | Every new capability maps to memory (data) or tools (actions), not new infrastructure | A capability requires a new component or API |
 | D139 | Swappability chain is complete | For every element: Memory → tools, components → contracts, contracts → adapters | An element exists with no intermediary absorbing change |
 | D143 | Configuration is cross-cutting, three categories | Preferences in Memory, runtime config is thin bootstrap, tool self-description — no single component owns all config | Configuration is owned by one component or requires a config service |
 | D147 | Three swaps pass config-only | Provider swap, model swap, tool swap — each with config/adapter changes only | Any swap requires cross-component code changes |
@@ -383,12 +383,12 @@ Each story is an acceptance test for the architecture itself.
 **Test procedure:**
 1. Add a new tool (or skill, client, or model provider).
 2. Verify Memory gained no outward dependencies.
-3. Verify no component bypasses connectors.
+3. Verify no component bypasses APIs.
 4. Verify the four-component structure holds (no new component was introduced).
 
 **Pass criteria:** Capability added. Architecture unchanged. Memory still has zero outward dependencies.
 
-**Fail criteria:** Adding a capability required a new component, a new connector, or created a Memory dependency on external infrastructure.
+**Fail criteria:** Adding a capability required a new component, a new API, or created a Memory dependency on external infrastructure.
 
 ### FS-3. Run on your own hardware
 
@@ -458,7 +458,7 @@ Each story is an acceptance test for the architecture itself.
 
 **Pass criteria:** Each expansion/contraction is tool configuration only. Architecture unchanged throughout.
 
-**Fail criteria:** Scope expansion required new components, connectors, or architectural changes.
+**Fail criteria:** Scope expansion required new components, APIs, or architectural changes.
 
 ---
 

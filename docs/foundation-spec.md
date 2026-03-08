@@ -31,14 +31,14 @@ An architecture that bets on today's stack is an architecture with an expiration
 
 Keeping all components decoupled and easily swappable allows your AI system to adapt at the speed of AI.
 
-Here's how it works. Four components, two connectors, three external dependencies:
+Here's how it works. Four components, two APIs, three external dependencies:
 
 ```mermaid
 flowchart LR
-    C[Clients external] -->|Gateway API connector| G[Gateway component]
+    C[Clients external] -->|Gateway API| G[Gateway component]
     G -->|Auth middleware check| A[Auth component]
     A -->|POST engine chat and SSE stream internal contract D137| E[Engine component]
-    E -->|Provider API connector| M[Models external]
+    E -->|Provider API| M[Models external]
 
     G -->|Conversation store tool D152| CST[Conversation Store Tool internal]
     CST -->|Read and write conversations| YM[Your Memory platform]
@@ -108,7 +108,7 @@ Two kinds of communication, two kinds of lock-in protection:
 
 #### External — Two Contracts
 
-Components connect to the outside world through two connectors:
+Components connect to the outside world through two APIs:
 
 1. The Gateway API - how clients connect
 2. The Provider API - how the Engine connects to models.
@@ -121,7 +121,7 @@ See [gateway-spec.md](./gateway-spec.md), [models-spec.md](./models-spec.md), [a
 
 #### Internal
 
-Components also communicate internally — Gateway to Engine, Auth middleware on the request path, Engine to tools. These aren't connectors. They're internal interfaces between components in the same deployment.
+Components also communicate internally — Gateway to Engine, Auth middleware on the request path, Engine to tools. These aren't APIs. They're internal interfaces between components in the same deployment.
 
 To avoid lock-in, the communication layer must only carry, and not interpret signals. Memory holds state, the model makes semantic decisions, Auth controls access. Communication does none of those things. When a responsibility leaks from its owner into the communication layer, it recouples the system — swapping communication now means dealing with work that doesn't belong to it.
 
@@ -144,7 +144,7 @@ Five principles enforce the architecture:
 1. **Memory Is the Platform** — Everything else exists to serve Memory. The most portable, most independent, most durable part of the system. No other component should create dependencies that make Memory hard to move.
 2. **Everything Else Is Swappable** — Engine, Auth, Gateway, clients, models, tools, contracts, hosting — all replaceable. Memory via tools, components via contracts, contracts via adapters. Every piece is a drop-down menu, not a permanent choice.
 3. **Interfaces Over Implementations** — Every component is defined by what it does, not how it works. The Engine calls tools — it doesn't know if Memory is files or a database. This is what makes one-component swaps possible.
-4. **Complexity Is Lock-In** — If the system requires a team of developers, you're locked in to that team. That's a dependency as real as any vendor. The entire system must be understandable and maintainable by one developer + AI coding agents. Four components and two connectors isn't minimalism — every additional component is a potential expertise dependency.
+4. **Complexity Is Lock-In** — If the system requires a team of developers, you're locked in to that team. That's a dependency as real as any vendor. The entire system must be understandable and maintainable by one developer + AI coding agents. Four components and two APIs isn't minimalism — every additional component is a potential expertise dependency.
 5. **Start Constrained, Expand Deliberately** — Products built on this don't have to use all capabilities at once. Each expansion — broader scope, more tools, external integrations — is a deliberate step.
 
 **Nothing enforces these principles.** You can bypass adapters, hardcode a provider, or couple components directly — the system still works. But every violation is a lock-in you've chosen to accept. The architecture makes the zero-lock-in path the easiest path, not the only path.
@@ -153,7 +153,7 @@ Five principles enforce the architecture:
 
 ## What Crosses the Contracts
 
-Both connectors are deliberately hollow — they exist to pass information forward with minimal opinion. The less they do, the more they survive.
+Both APIs are deliberately hollow — they exist to pass information forward with minimal opinion. The less they do, the more they survive.
 
 ### Gateway API — Clients ↔ Gateway
 
@@ -166,20 +166,20 @@ See [gateway-spec.md](./gateway-spec.md).
 
 ### Provider API — Engine ↔ Models
 
-How the system thinks. Today that means model-native tool calling — tool definitions sent with prompts, tool calls returned in completions. But the Provider API is a connector with an adapter, not a permanent commitment to this pattern. Better approach emerges? Swap the adapter.
+How the system thinks. Today that means model-native tool calling — tool definitions sent with prompts, tool calls returned in completions. But the Provider API is a contract with an adapter, not a permanent commitment to this pattern. Better approach emerges? Swap the adapter.
 
 - **In:** Prompt (system instructions + conversation + tool definitions + context)
 - **Out:** Streamed completion (text + tool calls)
 
 See [models-spec.md](./models-spec.md).
 
-**What about tools?** Tool calls flow through the Provider API and are executed by the Engine. How the Engine communicates with tools — MCP today, something better tomorrow — is internal to the Engine, not an architectural boundary. No separate tool protocol connector at Level 1. Memory tools are internal — the system can't function without reading and writing its own memory. External tools (Salesforce, weather, APIs) are additive — add or remove them without affecting the system. See [tools-spec.md](./tools-spec.md).
+**What about tools?** Tool calls flow through the Provider API and are executed by the Engine. How the Engine communicates with tools — MCP today, something better tomorrow — is internal to the Engine, not an architectural boundary. No separate tool protocol API at Level 1. Memory tools are internal — the system can't function without reading and writing its own memory. External tools (Salesforce, weather, APIs) are additive — add or remove them without affecting the system. See [tools-spec.md](./tools-spec.md).
 
 **The memory/tool binary.** Everything the system processes reduces to two things: memory and tools. If it's data, it's memory. If it's not data, it's a tool. New capabilities arrive by adding tools and memory content, not by adding infrastructure. See [research/memory-tool-completeness.md](./research/memory-tool-completeness.md).
 
 ### Internal Interface: Gateway ↔ Engine
 
-The Gateway ↔ Engine handoff is the one internal interface that needed definition — not a third connector, just a contract between two components in the same deployment.
+The Gateway ↔ Engine handoff is the one internal interface that needed definition — not a third API, just a contract between two components in the same deployment.
 
 Gateway POSTs a request (messages + metadata) to the Engine, Engine returns an SSE stream (text, tool calls, results, completion). Auth middleware sits on the path. See [gateway-engine-contract.md](./gateway-engine-contract.md) for the full contract.
 
@@ -316,8 +316,8 @@ Who does what — and who doesn't. Use this to verify that component specs don't
 | Protect access / control permissions | **Auth** | Your Memory, Gateway |
 | Manage conversations | **Gateway** | Engine, Your Memory |
 | Route requests to Engine | **Gateway** | Auth |
-| Connect to AI models | **Provider API** (connector) | Engine internals |
-| Accept client connections | **Gateway API** (connector) | Engine |
+| Connect to AI models | **Provider API** | Engine internals |
+| Accept client connections | **Gateway API** | Engine |
 | Provide intelligence | **Models** (external) | Engine, Your Memory |
 | Display content to owners | **Clients** (external) | Gateway |
 | Bootstrap the system | **Runtime config** (thin bootstrap — 4 fields, see [configuration-spec.md](./configuration-spec.md)) | Your Memory |
@@ -353,7 +353,7 @@ Who does what — and who doesn't. Use this to verify that component specs don't
 | [memory-spec.md](./memory-spec.md) | Your Memory — unopinionated substrate |
 | [auth-spec.md](./auth-spec.md) | Auth — cross-cutting identity and access control |
 | [gateway-spec.md](./gateway-spec.md) | Gateway — conversations and routing |
-| [tools-spec.md](./tools-spec.md) | Tools — not a component or connector |
+| [tools-spec.md](./tools-spec.md) | Tools — not a component |
 | [models-spec.md](./models-spec.md) | Models — external intelligence |
 | [security-spec.md](./security-spec.md) | Security — threat model, enforcement, data protection |
 | [adapter-spec.md](./adapter-spec.md) | Adapters — swappable contracts |
@@ -385,4 +385,4 @@ Who does what — and who doesn't. Use this to verify that component specs don't
 
 ---
 
-*This document defines the architecture — the four components, the two connectors, the three external dependencies, and why this system can evolve as fast as AI does. Product specs define what's built on this foundation. The pivot spec defines why we chose this direction.*
+*This document defines the architecture — the four components, the two APIs, the three external dependencies, and why this system can evolve as fast as AI does. Product specs define what's built on this foundation. The pivot spec defines why we chose this direction.*

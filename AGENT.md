@@ -1,6 +1,6 @@
 # Personal AI Architecture
 
-> **What this is:** A generic foundation for building personal AI systems. 4 components, 2 connectors, 3 externals. Zero lock-in by design.
+> **What this is:** A generic foundation for building personal AI systems. 4 components, 2 APIs, 3 externals. Zero lock-in by design.
 
 ## Architecture
 
@@ -13,7 +13,7 @@
                                              tools (read/write)
                                                       │
       Clients  ──→  Gateway API  ──→  Gateway  ──→  Engine  ──→  Provider API  ──→  Models
-    (external)      (connector)     (component)  (component)     (connector)      (external)
+    (external)                     (component)  (component)                      (external)
                                                       │
                         ─── Auth ───                  └──→ Tools (verbs)  ──→  External Memory (nouns)
                         (cross-cutting                     ├── MCP servers      ├── Salesforce data
@@ -31,10 +31,10 @@
 | **Auth** | Cross-cutting identity and access control. Independent of Gateway. Middleware on every request path. |
 | **Gateway** | Manage conversations and route to Engine. Content-agnostic, interface-agnostic. |
 
-### Connectors (2)
+### APIs (2)
 
-| Connector | What crosses it |
-|-----------|----------------|
+| API | What crosses it |
+|-----|----------------|
 | **Gateway API** | Clients <-> Gateway. Message + conversation ID + metadata -> streamed response. |
 | **Provider API** | Engine <-> Models. Prompt + tool definitions -> streamed completion + tool calls. |
 

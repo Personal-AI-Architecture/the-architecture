@@ -1,10 +1,10 @@
 openapi: '3.1.0'
 info:
-  title: Provider API — Engine ↔ Model Connector
+  title: Provider API — Engine ↔ Model API
   version: '1.0.0'
   description: |
     The Provider API is how the Engine calls models. It is one of the system's two
-    connectors — the contract that absorbs the fastest-moving part of AI.
+    APIs — the contract that absorbs the fastest-moving part of AI.
 
     This is an internal interface (what the Engine speaks), not a specific provider's
     API. An adapter translates between this generic internal interface and

@@ -38,7 +38,7 @@ Every principle in this document is a specific case of the same rule: don't do a
 
 Pain from your hand and pain from your foot travel the same pathways using the same signal structure — your brain doesn't need a different protocol for each organ. The nervous system is consistent, observable, and dumb — it carries signals, it doesn't interpret them. The brain does the thinking.
 
-This document covers communication **between internal components** — Gateway, Engine, Auth, and the tools/services they interact with. It does not cover the Gateway API (client boundary — see [gateway-spec.md](./gateway-spec.md)), the Provider API connector (external model boundary — see [models-spec.md](./models-spec.md)), or client-side communication. Those have their own specs.
+This document covers communication **between internal components** — Gateway, Engine, Auth, and the tools/services they interact with. It does not cover the Gateway API (client boundary — see [gateway-spec.md](./gateway-spec.md)), the Provider API (external model boundary — see [models-spec.md](./models-spec.md)), or client-side communication. Those have their own specs.
 
 **Related documents:** [foundation-spec.md](./foundation-spec.md) (architecture overview, links to all component specs)
 

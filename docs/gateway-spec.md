@@ -157,7 +157,7 @@ Clients are not components of the system. They connect through the Gateway (D57)
 
 ## Open Questions
 
-- [x] **OQ-1: Is Models a system component or external intelligence?** **Resolved.** D63 established that Models are external intelligence, not a component. The system calls a model through the Provider API — it doesn't contain one. Final architecture (D64): 4 components, 2 connectors, 3 external dependencies.
+- [x] **OQ-1: Is Models a system component or external intelligence?** **Resolved.** D63 established that Models are external intelligence, not a component. The system calls a model through the Provider API — it doesn't contain one. Final architecture (D64): 4 components, 2 APIs, 3 external dependencies.
 
 ---
 
@@ -200,4 +200,4 @@ Per-component requirements from [security-spec.md](./security-spec.md). Security
 
 ---
 
-*The Gateway is the door. Auth checks who's coming in. The Engine processes what arrives. Your Memory persists what matters. Four components, two connectors, infinite clients.*
+*The Gateway is the door. Auth checks who's coming in. The Engine processes what arrives. Your Memory persists what matters. Four components, two APIs, infinite clients.*

@@ -21,7 +21,7 @@ That's why this system is built around memory as the platform.
                                              tools (read/write)
                                                       │
       Clients  ──→  Gateway API  ──→  Gateway  ──→  Engine  ──→  Provider API  ──→  Models
-    (external)      (connector)     (component)  (component)     (connector)      (external)
+    (external)        (API)       (component)  (component)       (API)          (external)
                                                       │
                         ─── Auth ───                  └──→ Tools (verbs)  ──→  External Memory (nouns)
                         (cross-cutting                     ├── MCP servers      ├── Salesforce data
@@ -175,7 +175,7 @@ BrainDrive uses MCP (Model Context Protocol) as the tool standard. But the archi
 
 ## Four Components Serving Your Memory
 
-BrainDrive has four components, two connectors, and three external dependencies (D64), each defined by its role relative to the owner's memory:
+BrainDrive has four components, two APIs, and three external dependencies (D64), each defined by its role relative to the owner's memory:
 
 | Component | BrainDrive Implementation |
 |-----------|--------------------------|
@@ -184,7 +184,7 @@ BrainDrive has four components, two connectors, and three external dependencies 
 | **Auth** | Owner-controlled access (cross-cutting layer) |
 | **Gateway** | Conversation management, routes interactions to the Engine |
 
-| Connector | What It Connects |
+| API | What It Connects |
 |-----------|-----------------|
 | **Gateway API** | Clients ↔ Gateway (any client speaks this) |
 | **Provider API** | Engine ↔ Models (any model connects through this) |

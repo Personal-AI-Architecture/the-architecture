@@ -21,7 +21,7 @@ This does three things:
 
 This is simple to own, simple to control, and simple to change. An adapter is a stateless translation function, not a framework. One file, one job: translate.
 
-> **Level 1 (Foundation):** Adapters are an implementation pattern within the existing connectors — they don't add new components or contracts.
+> **Level 1 (Foundation):** Adapters are an implementation pattern within the existing APIs — they don't add new components or contracts.
 
 ```
 WITHOUT ADAPTERS:
@@ -160,9 +160,9 @@ Everything has an intermediary. No exceptions. The architecture's zero-lock-in p
 
 ## Architectural Impact
 
-This does not change the component count, connector count, or external dependency count. The architecture remains: 4 components, 2 connectors, 3 externals.
+This does not change the component count, API count, or external dependency count. The architecture remains: 4 components, 2 APIs, 3 externals.
 
-Adapters are implementation details within the existing connectors — they define *how* the connector translates, not *what* the connector is. The Gateway API is still the Gateway API. The Provider API is still the Provider API. The adapter is the mechanism that lets those contracts point at different standards over time.
+Adapters are implementation details within the existing APIs — they define *how* the API translates, not *what* the API is. The Gateway API is still the Gateway API. The Provider API is still the Provider API. The adapter is the mechanism that lets those contracts point at different standards over time.
 
 This also aligns with existing practice. Existing AI SDKs already work this way — they define a generic interface and provide adapters for multiple providers. We're recognizing a pattern that's already proven, not inventing something new.
 
