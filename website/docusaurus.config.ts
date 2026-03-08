@@ -58,6 +58,10 @@ const config: Config = {
     },
     navbar: {
       title: 'Personal AI Architecture',
+      logo: {
+        alt: 'Personal AI Architecture',
+        src: 'img/paa-logo.png',
+      },
       items: [
         {
           type: 'docSidebar',
