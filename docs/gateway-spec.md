@@ -78,9 +78,9 @@ The Gateway ↔ Engine interface is defined in [gateway-engine-contract.md](./ga
 
 ---
 
-## Clients — External
+## Clients
 
-Clients are not components of the system. They're external clients that connect through the Gateway (D57). Any client that can:
+Clients are not components of the system. They connect through the Gateway (D57). Any client that can:
 
 1. Send a message (any content type) to the Gateway
 2. Receive a streamed response
@@ -164,7 +164,7 @@ Clients are not components of the system. They're external clients that connect 
 ## Success Criteria
 
 - [ ] The Gateway manages conversations — create, list, resume, store messages — without any interface-specific logic
-- [ ] Any external client can connect to the Gateway and have a conversation
+- [ ] Any client can connect to the Gateway and have a conversation
 - [ ] Conversations survive interface switches — start on one client, continue on another, no data lost
 - [ ] The Gateway passes any content type through without interpretation — text, images, audio, video, files
 - [ ] The Gateway routes to the Engine without knowing what the Engine does with the message

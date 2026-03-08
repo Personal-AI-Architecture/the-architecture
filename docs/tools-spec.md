@@ -309,7 +309,7 @@ Container isolation protects against four risks: **filesystem access** (tool see
 
 **Any external caller — whether a human client or a programmatic tool/agent — should be able to use the same API to interact with the system.**
 
-The Gateway API is the single entry point for all external clients. This creates a clean separation between two kinds of tool:
+The Gateway API is the single entry point for all clients. This creates a clean separation between two kinds of tool:
 
 | Category | Relationship to Engine | Example |
 |----------|----------------------|---------|
@@ -348,7 +348,7 @@ When software talks *to* the system (not *for* the system), it should go through
 In the MVP, tools are in-process — the Engine calls them directly. In V1+, when tools run as separate services or containers, how does discovery work? Two options:
 
 1. **Engine-direct** — The Engine connects to configured tool servers at startup and discovers their capabilities via MCP. Tools register with the Engine, not the Gateway.
-2. **Gateway-mediated** — Tools register through the Gateway API, the same way any external client connects. The Gateway tells the Engine what tools are available.
+2. **Gateway-mediated** — Tools register through the Gateway API, the same way any client connects. The Gateway tells the Engine what tools are available.
 
 Option 1 is simpler and matches how MCP works today. Option 2 enforces the parity principle (tools use the same API as clients) but adds complexity to the Gateway. This doesn't need to be resolved for the MVP — tools are in-process either way. Revisit for V1 Gateway design.
 

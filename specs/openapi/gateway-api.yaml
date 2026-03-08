@@ -1,9 +1,9 @@
 openapi: '3.1.0'
 info:
-  title: Gateway API — External Client Contract
+  title: Gateway API — Client Contract
   version: '1.0.0'
   description: |
-    The Gateway API is how external clients interact with the Personal AI system.
+    The Gateway API is how clients interact with the Personal AI system.
     Web apps, CLIs, mobile apps, bots, voice assistants, other AI agents — any client
     that can send messages and receive streamed responses is valid.
 
@@ -392,7 +392,7 @@ components:
             - assistant
           description: |
             Who sent this message:
-            - user: The human or external client
+            - user: The human or client
             - assistant: The AI model's response
         content:
           type: string

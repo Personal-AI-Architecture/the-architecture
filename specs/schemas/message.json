@@ -9,7 +9,7 @@
     "role": {
       "type": "string",
       "enum": ["system", "user", "assistant", "tool"],
-      "description": "The role of the message sender. system: Bootstrap prompt from configuration. user: Human or external client message. assistant: Previous model response (may include tool_calls). tool: Tool execution result returned to the model."
+      "description": "The role of the message sender. system: Bootstrap prompt from configuration. user: Human or client message. assistant: Previous model response (may include tool_calls). tool: Tool execution result returned to the model."
     },
     "content": {
       "type": "string",

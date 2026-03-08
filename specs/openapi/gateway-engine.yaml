@@ -168,7 +168,7 @@ components:
           description: |
             The role of the message sender:
             - system: Bootstrap prompt from configuration
-            - user: Human or external client message
+            - user: Human or client message
             - assistant: Previous model response
             - tool: Tool execution result returned to the model
         content:
