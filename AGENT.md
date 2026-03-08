@@ -119,6 +119,21 @@ See `docs/guides/conformance/` for full test suite. See `docs/guides/implementer
 └── test/                                 <- tests
 ```
 
+## Vocabulary
+
+Use these terms consistently. The "Don't Use" column lists old terms that should be replaced when encountered.
+
+| Use | Don't Use | Notes |
+|-----|-----------|-------|
+| **Agent Loop** | Engine | Describes what it does: send to model, get tool calls, execute, loop |
+| **APIs** | Connectors | Gateway API, Model API — just call them what they are |
+| **Model API** | Provider API | "Model API" is immediately clear |
+| **Clients** or **Apps** | External clients | Web app, CLI, mobile app, Discord bot — concrete terms |
+| **Architecture** | Level 1 | The specs, contracts, and reference implementation |
+| **Implementation** | Level 2 | What you build on the architecture (e.g., BrainDrive) |
+
+Terms that are correct as-is: **Gateway**, **Auth**, **Your Memory**, **Tools**, **Adapters**, **Contracts**.
+
 ## Principles
 
 1. **Interfaces Over Implementations** -- components defined by what they do, not how

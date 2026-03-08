@@ -325,6 +325,25 @@ Who does what — and who doesn't. Use this to verify that component specs don't
 
 ---
 
+## Glossary
+
+| Term | Meaning |
+|------|---------|
+| **Your Memory** | The platform. Your data, config, preferences, conversations. Zero outward dependencies. |
+| **Agent Loop** | The component that sends messages to models, executes tool calls, and repeats until done. |
+| **Gateway** | The front door. Manages conversations and routes messages. Any client that speaks the API works. |
+| **Auth** | Controls access. Independent of every other component. |
+| **Gateway API** | How clients (apps, interfaces) connect to the system. |
+| **Model API** | How the agent loop connects to AI models. Swap providers with a config change. |
+| **Adapters** | Make contracts swappable. One side stays stable, the other side adapts. |
+| **Tools** | Capabilities in the environment. Self-describing. The agent loop executes them, auth governs them. |
+| **Contracts** | Defined boundaries between components. Independent of both sides. |
+| **Clients** | Apps and interfaces that connect to the system — web app, CLI, mobile app, Discord bot. |
+| **Architecture** | The specs, contracts, and reference implementation (this project). |
+| **Implementation** | What you build on the architecture (e.g., BrainDrive). |
+
+---
+
 ## Related Documents
 
 | Document | Relationship |
