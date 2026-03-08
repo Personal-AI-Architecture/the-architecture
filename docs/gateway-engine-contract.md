@@ -1,4 +1,5 @@
 ---
+sidebar_label: Gateway API
 hide_table_of_contents: true
 ---
 

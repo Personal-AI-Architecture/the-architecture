@@ -1,4 +1,5 @@
 ---
+sidebar_label: Customization
 hide_table_of_contents: true
 ---
 
