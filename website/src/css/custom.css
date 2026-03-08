@@ -40,6 +40,11 @@
   font-weight: 400;
 }
 
+[data-theme='dark'] .navbar {
+  background-color: #1e2a3a;
+  box-shadow: none;
+}
+
 [data-theme='dark'] {
   --ifm-color-primary: #6b8fd4;
   --ifm-color-primary-dark: #5580cd;

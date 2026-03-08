@@ -1,24 +1,40 @@
 .heroBanner {
-  padding: 6rem 0;
+  padding: 3rem 0 4rem;
   text-align: center;
   position: relative;
   overflow: hidden;
-  background: linear-gradient(135deg, var(--ifm-color-primary-darkest), var(--ifm-color-primary-dark));
+  background: #1e2a3a;
   color: white;
+}
+
+.heroLogo {
+  width: 80px;
+  height: 80px;
+  margin-bottom: 1.5rem;
+  border-radius: 12px;
 }
 
 .heroTitle {
-  font-size: 3rem;
+  font-size: 2.2rem;
   font-weight: 800;
   color: white;
+  margin-bottom: 1rem;
 }
 
 .heroSubtitle {
-  font-size: 1.3rem;
+  font-size: 1.5rem;
   max-width: 700px;
-  margin: 1rem auto 2rem;
+  margin: 0 auto 2rem;
   opacity: 0.9;
   line-height: 1.6;
+}
+
+.heroComparison {
+  max-width: 700px;
+  width: 100%;
+  height: auto;
+  margin: 1.5rem auto 1rem;
+  border-radius: 8px;
 }
 
 .buttons {
@@ -29,6 +45,53 @@
   flex-wrap: wrap;
 }
 
+.buttons a {
+  background: white;
+  color: #000;
+  border: 1px solid #000;
+  font-weight: 700;
+  padding: 0.85rem 2rem;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.buttons a:hover {
+  background: white;
+  color: #000;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  text-decoration: none;
+}
+
+/* What / Why */
+.whatWhy {
+  padding: 3rem 0;
+  text-align: center;
+  background: var(--ifm-background-surface-color);
+}
+
+.whatWhy p {
+  font-size: 1.2rem;
+  line-height: 1.8;
+  margin-bottom: 0.5rem;
+}
+
+/* Architecture Diagram */
+.diagram {
+  padding: 3rem 0;
+  background: var(--ifm-background-color);
+  text-align: center;
+}
+
+.diagramImage {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
+
+/* Your Memory is the Platform + How They Connect */
 .manifesto {
   padding: 4rem 0;
 }
@@ -38,31 +101,19 @@
   margin: 0 auto;
   font-size: 1.1rem;
   line-height: 1.8;
+  padding: 0 1rem;
 }
 
 .manifestoContent h2 {
-  margin-top: 3rem;
-  margin-bottom: 1rem;
+  margin-top: 0;
+  margin-bottom: 1.5rem;
 }
 
 .manifestoContent p {
   margin-bottom: 1.2rem;
 }
 
-.architectureDiagram {
-  margin: 2rem 0;
-  padding: 1.5rem;
-  border-radius: 8px;
-  overflow-x: auto;
-  font-size: 0.85rem;
-  background: var(--ifm-code-background);
-}
-
-.architectureDiagram pre {
-  margin: 0;
-  background: none;
-}
-
+/* Four Components */
 .principles {
   padding: 4rem 0;
   background: var(--ifm-background-surface-color);
@@ -71,6 +122,13 @@
 .sectionTitle {
   text-align: center;
   font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.sectionTitleSmall {
+  text-align: center;
+  font-size: 1.5rem;
+  margin-top: 2rem;
   margin-bottom: 0.5rem;
 }
 
@@ -84,10 +142,20 @@
 
 .principlesGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  grid-template-columns: repeat(4, 1fr);
   gap: 1.5rem;
-  max-width: 1000px;
+  max-width: 1100px;
   margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.apisGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  max-width: 700px;
+  margin: 1.5rem auto 0;
+  padding: 0 1rem;
 }
 
 .principleCard {
@@ -109,12 +177,93 @@
 .principleCard h3 {
   font-size: 1.1rem;
   margin-bottom: 0.5rem;
+  text-align: center;
 }
 
 .principleCard p {
   font-size: 0.95rem;
   opacity: 0.85;
   margin: 0;
+}
+
+/* What Exists Today */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1.5rem;
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.statCard {
+  text-align: center;
+  padding: 2rem 1rem;
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: 8px;
+}
+
+.statNumber {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--ifm-color-primary);
+  line-height: 1;
+  margin-bottom: 0.5rem;
+}
+
+.statLabel {
+  font-size: 0.95rem;
+  opacity: 0.8;
+}
+
+/* CTA */
+.cta {
+  padding: 4rem 0;
+}
+
+.ctaSteps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.ctaStep {
+  text-align: center;
+  padding: 2rem 1.5rem;
+}
+
+.stepNumber {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--ifm-color-primary);
+  margin-bottom: 1rem;
+  width: 3rem;
+  height: 3rem;
+  line-height: 3rem;
+  border-radius: 50%;
+  border: 2px solid var(--ifm-color-primary);
+  margin: 0 auto 1rem;
+}
+
+.ctaStep h3 {
+  font-size: 1.2rem;
+  margin-bottom: 0.75rem;
+}
+
+.ctaStep p {
+  font-size: 0.95rem;
+  opacity: 0.85;
+  margin-bottom: 1rem;
+}
+
+.ctaStep code {
+  font-size: 0.85rem;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  background: var(--ifm-code-background);
 }
 
 @media screen and (max-width: 996px) {
@@ -126,7 +275,19 @@
     font-size: 2rem;
   }
 
-  .heroSubtitle {
+  .tldrLine {
     font-size: 1.1rem;
+  }
+
+  .principlesGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .apisGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
   }
 }

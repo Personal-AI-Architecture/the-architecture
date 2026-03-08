@@ -1,5 +1,9 @@
 # Personal AI Architecture
 
+**What:** Use any interface, any model, any tool. Even the system itself is swappable.
+
+**Why:** You're never locked into anyone's system, and you can upgrade yours at the speed of AI.
+
 A generic, user-owned AI runtime. Zero lock-in by design.
 
 Four components (Your Memory, Engine, Auth, Gateway), two connectors (Gateway API, Provider API), three externals (Clients, Models, Tools). Every piece is swappable. Your data stays on your machine.

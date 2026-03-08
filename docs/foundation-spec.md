@@ -5,6 +5,12 @@ hide_table_of_contents: true
 
 # The Architecture
 
+> **TLDR**
+>
+> **What:** Use any interface, any model, any tool. Even the system itself is swappable.
+>
+> **Why:** You're never locked into anyone's system, and you can upgrade yours at the speed of AI.
+
 The Personal AI Architecture is MIT Licensed, and designed to ensure that the power of AI belongs not to a few Big Tech companies, but to the people.
 
 It is not a personal AI system — it is the architecture you build one on top of. An architecture with one goal: avoid lock-in.
