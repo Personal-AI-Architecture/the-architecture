@@ -12,8 +12,8 @@ The entire system must be understandable and maintainable by one developer + AI 
 
 ## What This Means in Practice
 
-- **Four components** — Your Memory, Engine, Auth, Gateway. Not five. Not six. Every proposed addition must justify itself against this principle.
-- **Two APIs** — Gateway API, Model API. Not three. Tool execution is internal to the Engine, not a separate API.
+- **Four components** — Your Memory, Agent Loop, Auth, Gateway. Not five. Not six. Every proposed addition must justify itself against this principle.
+- **Two APIs** — Gateway API, Model API. Not three. Tool execution is internal to the Agent Loop, not a separate API.
 - **Three external dependencies** — Clients, Models, Tools. External means outside the system boundary.
 
 The architecture was resolved through six component interviews. Models, Tools, and Clients were each evaluated as potential components and deliberately excluded — they're external dependencies, not system components.

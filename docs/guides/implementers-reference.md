@@ -21,7 +21,7 @@ hide_table_of_contents: true
                                                       |
                                              tools (read/write)
                                                       |
-      Clients  -->  Gateway API  -->  Gateway  -->  Engine  -->  Model API  -->  Models
+      Clients  -->  Gateway API  -->  Gateway  -->  Agent Loop  -->  Model API  -->  Models
     (external)        (API)        (component)  (component)       (API)          (external)
                                                       |
                         --- Auth ---                  +--> Tools (verbs)  -->  External Memory (nouns)
@@ -33,8 +33,8 @@ hide_table_of_contents: true
 
 | Layer | Elements |
 |-------|----------|
-| Components | Your Memory, Engine, Auth, Gateway |
-| APIs | Gateway API (clients <-> Gateway), Model API (Engine <-> Models) |
+| Components | Your Memory, Agent Loop, Auth, Gateway |
+| APIs | Gateway API (clients <-> Gateway), Model API (Agent Loop <-> Models) |
 | Externals | Clients, Models, Tools |
 
 ---
@@ -67,7 +67,7 @@ hide_table_of_contents: true
 
 **Skills** are prompts stored in Your Memory. The model reads and follows them.
 
-### Engine (generic agent loop)
+### Agent Loop (generic agent loop)
 
 Generic, commodity, no product-specific logic.
 
@@ -79,7 +79,7 @@ Generic, commodity, no product-specific logic.
 | Concurrency | Must handle multiple concurrent loops independently |
 | Scope | Connects models to tools -- nothing else |
 
-**Engine does NOT:**
+**The Agent Loop does NOT:**
 
 - Construct prompts
 - Manage skills
@@ -102,7 +102,7 @@ Independent of Gateway -- both are swappable independently.
 | Authorize | (identity, resource, action) -> allow/deny |
 | Manage | modify permissions |
 
-**Middleware position:** Sits between Gateway and Engine. Validates via headers, rejects unauthorized with 401.
+**Middleware position:** Sits between Gateway and the Agent Loop. Validates via headers, rejects unauthorized with 401.
 
 **Headers:** `X-Actor-ID`, `X-Actor-Permissions`
 
@@ -114,7 +114,7 @@ Data format is product-owned, not provider-specific.
 
 ### Gateway (conversations and routing)
 
-Manages conversations and routes to Engine. Content-agnostic, interface-agnostic.
+Manages conversations and routes to the Agent Loop. Content-agnostic, interface-agnostic.
 
 **Operations:** create conversation (implicit on first message), list, resume, history
 
@@ -149,7 +149,7 @@ How the world interacts with the system.
 
 Built on prevailing industry standard. Swappable via adapter.
 
-### Model API (Engine <-> Models)
+### Model API (Agent Loop <-> Models)
 
 How the system thinks.
 
@@ -162,7 +162,7 @@ Model-native tool calling is the current approach. Swappable via adapter.
 
 ---
 
-## Internal Contract: Gateway <-> Engine
+## Internal Contract: Gateway <-> Agent Loop
 
 One HTTP endpoint. Not a third API.
 
@@ -211,7 +211,7 @@ One HTTP endpoint. Not a third API.
 |------|---------|
 | 400 | Invalid request |
 | 401 | Auth rejected |
-| 503 | Engine unavailable |
+| 503 | Agent Loop unavailable |
 
 **Mid-stream error codes:** `provider_error`, `tool_error`, `context_overflow`
 
@@ -225,18 +225,18 @@ One HTTP endpoint. Not a third API.
 |---|---|---|
 | Persist, retrieve, search, version data | Your Memory (via tools) | |
 | Provide structure (paths, hierarchy) | Your Memory provides it | Model/owner decides what |
-| Understand content, make meaning | Model | Your Memory, Engine |
-| Assemble prompts | Model reads from Your Memory | Engine, Your Memory |
-| Select context | Model | Your Memory, Engine |
-| Execute tools | Engine | Your Memory |
-| Decide which tools to use | Model (via Engine loop) | Your Memory, Gateway |
-| Execute skills | Model + Engine | Your Memory |
+| Understand content, make meaning | Model | Your Memory, Agent Loop |
+| Assemble prompts | Model reads from Your Memory | Agent Loop, Your Memory |
+| Select context | Model | Your Memory, Agent Loop |
+| Execute tools | Agent Loop | Your Memory |
+| Decide which tools to use | Model (via agent loop) | Your Memory, Gateway |
+| Execute skills | Model + Agent Loop | Your Memory |
 | Protect access / permissions | Auth | Your Memory, Gateway |
-| Manage conversations | Gateway | Engine, Your Memory |
-| Route requests to Engine | Gateway | Auth |
-| Connect to AI models | Model API | Engine internals |
-| Accept client connections | Gateway API | Engine |
-| Provide intelligence | Models (external) | Engine, Your Memory |
+| Manage conversations | Gateway | Agent Loop, Your Memory |
+| Route requests to Agent Loop | Gateway | Auth |
+| Connect to AI models | Model API | Agent Loop internals |
+| Accept client connections | Gateway API | Agent Loop |
+| Provide intelligence | Models (external) | Agent Loop, Your Memory |
 | Display content to owners | Clients (external) | Gateway |
 | Bootstrap the system | Runtime config (4 fields) | Your Memory |
 | Resolve concurrent writes | Tool implementations | Your Memory component |
@@ -262,7 +262,7 @@ One HTTP endpoint. Not a third API.
 | Tool definitions | Self-describing (from the tools themselves) |
 | Secrets | Environment variables only (never in files) |
 | Skills | Prompts in Your Memory |
-| Bootstrap prompt | One line in Engine config: "Read AGENT.md for your instructions" |
+| Bootstrap prompt | One line in Agent Loop config: "Read AGENT.md for your instructions" |
 
 ### Boot Sequence
 
@@ -290,7 +290,7 @@ One HTTP endpoint. Not a third API.
 | ID | Test | Pass Condition |
 |----|------|----------------|
 | ARCH-1 | Memory zero dependencies | Stop all components except Memory storage -> still readable with standard tools |
-| ARCH-2 | Engine swap | Replace Engine -> Gateway/Memory/Auth/tools unaffected |
+| ARCH-2 | Agent Loop swap | Replace Agent Loop -> Gateway/Memory/Auth/tools unaffected |
 | ARCH-3 | Client swap | New client speaks Gateway API -> system serves identically |
 | ARCH-4 | Schema conformance | All API payloads validate against canonical schemas |
 
@@ -313,7 +313,7 @@ One HTTP endpoint. Not a third API.
 | FS-4 | Swap provider | = SWAP-1 |
 | FS-5 | Swap client | = ARCH-3 |
 | FS-6 | Evolve Memory | Add search capability -> no other component changes |
-| FS-7 | Swap Engine | = ARCH-2 |
+| FS-7 | Swap Agent Loop | = ARCH-2 |
 | FS-8 | Expand scope via tools | Add tools -> broader capability -> no architectural changes |
 
 ---
@@ -329,6 +329,6 @@ One HTTP endpoint. Not a third API.
 
 **Adapters** are thin, stateless translation layers. Each describable in one sentence. See [adapter-spec.md](../adapter-spec.md) §How Model Configuration Works in Practice for the concrete model/provider swap walkthrough.
 
-**Tools** are data in the environment, not a component. Definitions self-describe, execution is Engine's job, permissions are Auth's job.
+**Tools** are data in the environment, not a component. Definitions self-describe, execution is the Agent Loop's job, permissions are Auth's job.
 
 **Everything** is either memory (nouns/data) or tools (verbs/operations). No third category.

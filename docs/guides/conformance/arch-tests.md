@@ -13,7 +13,7 @@
 2. All components operational
 
 **Procedure:**
-1. Stop the Engine process
+1. Stop the Agent Loop process
 2. Stop the Gateway process
 3. Stop Auth
 4. Stop all tool servers / MCP processes
@@ -34,33 +34,33 @@
 
 ---
 
-## ARCH-2: Engine Swap
+## ARCH-2: Agent Loop Swap
 
-**Validates:** D39 (Engine is generic), FS-7 (Swap the Engine)
+**Validates:** D39 (Agent Loop is generic), FS-7 (Swap the Agent Loop)
 
 **Setup:**
-1. System running with Engine Implementation A
+1. System running with Agent Loop Implementation A
 2. Test conversation completing successfully
-3. Engine Implementation B available (different codebase, same contract)
+3. Agent Loop Implementation B available (different codebase, same contract)
 
 **Procedure:**
 1. Stop the system
-2. Replace Engine A binary/container with Engine B
+2. Replace Agent Loop A binary/container with Agent Loop B
 3. Keep all other components, config, Your Memory, tools unchanged
 4. Start the system
 5. Run the same test conversation
 
 **Pass criteria:**
-- [ ] Test conversation completes successfully with Engine B
+- [ ] Test conversation completes successfully with Agent Loop B
 - [ ] Gateway operates identically — same conversation management
 - [ ] Auth operates identically — same authentication/authorization
 - [ ] Your Memory is unchanged — same files, same data
 - [ ] Tools work identically — same tool calls succeed
 - [ ] Clients connect identically — same Gateway API
-- [ ] Only the Engine binary/container was changed
+- [ ] Only the Agent Loop binary/container was changed
 
 **Failure indicators:**
-- Gateway needed modification to work with Engine B
+- Gateway needed modification to work with Agent Loop B
 - Auth needed modification
 - Tool definitions or configurations needed changes
 - Your Memory format was incompatible
@@ -88,7 +88,7 @@
 - [ ] Full conversation history is available
 - [ ] New messages from Client B are processed identically
 - [ ] The system has no knowledge of which client is connected
-- [ ] Zero changes to Gateway, Engine, Auth, Your Memory, or tools
+- [ ] Zero changes to Gateway, Agent Loop, Auth, Your Memory, or tools
 
 **Failure indicators:**
 - The Gateway needed to know about Client B
@@ -109,13 +109,13 @@
 **Procedure:**
 1. Capture all Gateway API requests and responses
 2. Capture all Model API requests and responses
-3. Capture all Gateway ↔ Engine requests and SSE events
+3. Capture all Gateway ↔ Agent Loop requests and SSE events
 4. Validate each payload against the corresponding canonical schema
 
 **Pass criteria:**
 - [ ] Every Gateway API request validates against `gateway-api.yaml`
 - [ ] Every Gateway API response validates against `gateway-api.yaml`
-- [ ] Every Engine request validates against `gateway-engine.yaml`
+- [ ] Every Agent Loop request validates against `gateway-engine.yaml`
 - [ ] Every SSE event validates against the event schemas in `gateway-engine.yaml`
 - [ ] Every Model API request validates against `model-api.yaml`
 - [ ] Every Model API response validates against `model-api.yaml`

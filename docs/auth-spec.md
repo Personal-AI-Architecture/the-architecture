@@ -75,9 +75,9 @@ These are explicit boundaries. They exist to prevent other concerns from creepin
 | Responsibility | Where It Lives | NOT in Auth |
 |---------------|---------------|-------------|
 | Persist data | Your Memory (via tools) | Auth does not own data storage |
-| Decide what to do | Model (via Engine) | Auth does not make content decisions |
+| Decide what to do | Model (via Agent Loop) | Auth does not make content decisions |
 | Route requests | Gateway | Auth does not route |
-| Execute tools | Engine | Auth does not execute |
+| Execute tools | Agent Loop | Auth does not execute |
 | Manage conversations | Gateway | Auth does not track conversations |
 | Define product behavior | Your Memory (instructions, skills) | Auth has no product logic |
 
@@ -236,7 +236,7 @@ Three operations:
 | Operation | Input | Output | Used By |
 |-----------|-------|--------|---------|
 | **Authenticate** | Request (cookie, token, or API key) | Identity (who is this, what type, active/inactive) | Auth middleware — every request passes through this |
-| **Authorize** | Identity + resource + action | Allow or deny | Engine (before tool calls), client (before rendering), tools (before execution) |
+| **Authorize** | Identity + resource + action | Allow or deny | Agent Loop (before tool calls), client (before rendering), tools (before execution) |
 | **Manage** | Identity + permission change | Success or failure | Agent (through tools, when owner asks), settings UI (as fallback) |
 
 ### Data Format
@@ -366,7 +366,7 @@ The pattern: **add actor types and permission rules, don't change the contract.*
 
 ### ~~OQ-1: Tool-Level Identity Propagation~~ — RESOLVED
 
-**Resolution:** Not needed in the architecture. Each system has one owner — the Engine always runs as that owner (D151). Multi-actor collaboration is system-to-system: collaborators bring their own systems and access shared Memory through Auth, not as users within your system. There are no users, only owners. If a future capability phase introduces delegated agents acting within the system, identity propagation becomes relevant — design it then, not now.
+**Resolution:** Not needed in the architecture. Each system has one owner — the Agent Loop always runs as that owner (D151). Multi-actor collaboration is system-to-system: collaborators bring their own systems and access shared Memory through Auth, not as users within your system. There are no users, only owners. If a future capability phase introduces delegated agents acting within the system, identity propagation becomes relevant — design it then, not now.
 
 ### ~~OQ-2: Outbound Data Flow to External Tools~~ — RESOLVED
 
@@ -421,4 +421,4 @@ Per-component requirements from [security-spec.md](./security-spec.md). Security
 
 ---
 
-*Auth is the gatekeeper — the component that makes all other components safely swappable. Its independence is what lets the Model, Engine, Gateway, and even Auth itself be replaced without compromising security. A personal AI system needs access control that persists regardless of what intelligence is plugged in.*
+*Auth is the gatekeeper — the component that makes all other components safely swappable. Its independence is what lets the Model, Agent Loop, Gateway, and even Auth itself be replaced without compromising security. A personal AI system needs access control that persists regardless of what intelligence is plugged in.*

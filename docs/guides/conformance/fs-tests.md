@@ -53,7 +53,7 @@
 
 **Add a tool:**
 1. Install a new MCP server or CLI tool in a `tool_sources` path
-2. Restart Engine (or hot-reload)
+2. Restart the Agent Loop (or hot-reload)
 3. Verify the tool is discoverable and usable
 
 **Add a skill:**
@@ -79,10 +79,10 @@
 - [ ] The addition is purely data/configuration entering the system
 
 **Failure indicators:**
-- Adding a tool required modifying the Engine
+- Adding a tool required modifying the Agent Loop
 - Adding a skill required code changes
 - Adding a client required Gateway modifications
-- Adding a provider required Engine changes beyond the adapter
+- Adding a provider required Agent Loop changes beyond the adapter
 - Your Memory now depends on a specific tool or service being present
 
 ---
@@ -132,30 +132,30 @@
 1. Install the semantic search tool (MCP server or native function)
 2. Index existing Your Memory content into a vector store
 3. Add the semantic search tool to the always-send set (preference in Your Memory)
-4. Restart Engine
+4. Restart the Agent Loop
 5. Use semantic search in a conversation
 
 **Pass criteria:**
 - [ ] Semantic search works alongside existing file search
-- [ ] No other component changed — Engine, Gateway, Auth, clients are unmodified
+- [ ] No other component changed — Agent Loop, Gateway, Auth, clients are unmodified
 - [ ] Existing file search still works identically
 - [ ] The vector index is derived data — deleting it doesn't lose source content
 - [ ] Adding the search capability was purely additive
 
 **Failure indicators:**
-- Engine needed modification to support semantic search
+- Agent Loop needed modification to support semantic search
 - Gateway needed to know about the new search capability
 - Existing search broke when the new search was added
 - The vector index became a dependency (system fails without it)
 
 ---
 
-## FS-7: Swap Engine
+## FS-7: Swap Agent Loop
 
 **Equivalent to:** ARCH-2
 
 **Pass criteria:**
-- [ ] Replace Engine implementation → Gateway/Memory/Auth/tools unaffected → system functions
+- [ ] Replace Agent Loop implementation → Gateway/Memory/Auth/tools unaffected → system functions
 
 ---
 
@@ -173,14 +173,14 @@
 
 **Pass criteria:**
 - [ ] Scope expanded from library to filesystem by adding tools — no architectural changes
-- [ ] Engine didn't change — it uses whatever tools are available
+- [ ] Agent Loop didn't change — it uses whatever tools are available
 - [ ] Gateway didn't change — it routes the same way
 - [ ] Auth controls which expanded tools each actor can use
 - [ ] Memory tools (library-scoped) continue to work identically
 - [ ] The expansion is reversible — remove the tools and scope contracts back
 
 **Failure indicators:**
-- Scope expansion required Engine modification
+- Scope expansion required Agent Loop modification
 - A "scope manager" or "boundary enforcer" component was needed
 - Expanding scope required Gateway or client changes
 - The expansion couldn't be reversed by removing tools

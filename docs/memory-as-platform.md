@@ -20,8 +20,8 @@ That's why this system is built around memory as the platform.
                                                       │
                                              tools (read/write)
                                                       │
-      Clients  ──→  Gateway API  ──→  Gateway  ──→  Engine  ──→  Model API  ──→  Models
-    (external)        (API)       (component)  (component)       (API)          (external)
+      Clients  ──→  Gateway API  ──→  Gateway  ──→  Agent Loop  ──→  Model API  ──→  Models
+    (external)        (API)       (component)   (component)        (API)          (external)
                                                       │
                         ─── Auth ───                  └──→ Tools (verbs)  ──→  External Memory (nouns)
                         (cross-cutting                     ├── MCP servers      ├── Salesforce data
@@ -30,9 +30,9 @@ That's why this system is built around memory as the platform.
                          requests)
 ```
 
-Every other component — the client, the agent engine, the models, the tools — depends on memory to be useful. Memory depends on none of them to exist. Everything else is infrastructure built on top of it.
+Every other component — the client, the agent loop, the models, the tools — depends on memory to be useful. Memory depends on none of them to exist. Everything else is infrastructure built on top of it.
 
-The system is architected so that memory has zero outward dependencies. Swap the engine, change the model, replace the client — memory is unaffected. It's the one thing that persists when everything else is upgraded, replaced, or removed. Regardless of what happens to the rest of the system, you can always take your memory with you — to a new setup, a new product, or whatever comes next.
+The system is architected so that memory has zero outward dependencies. Swap the agent loop, change the model, replace the client — memory is unaffected. It's the one thing that persists when everything else is upgraded, replaced, or removed. Regardless of what happens to the rest of the system, you can always take your memory with you — to a new setup, a new product, or whatever comes next.
 
 Architecting the system this way changes how we define memory itself. When memory is a feature of an app, it only needs to be as wide as the app's features — chat history, preferences, maybe a document store. When memory is the platform that everything else is built on, it has to encompass everything the system can draw from.
 
@@ -108,16 +108,16 @@ The test for memory independence: take your memory to a completely different sys
 
 ## Everything Else Is Swappable
 
-If memory is the only durable layer, everything else is infrastructure — and infrastructure should be replaceable. Client, agent engine, models, tools, hosting, auth — all of it.
+If memory is the only durable layer, everything else is infrastructure — and infrastructure should be replaceable. Client, agent loop, models, tools, hosting, auth — all of it.
 
-This isn't just philosophical. In a landscape where the best tool for any job changes every few months, being locked into any specific implementation is a liability. The architecture should make swapping any component cheap and contained. New model? Change a configuration value. Better client? Point it at the same memory. Better agent engine? Swap it behind the API.
+This isn't just philosophical. In a landscape where the best tool for any job changes every few months, being locked into any specific implementation is a liability. The architecture should make swapping any component cheap and contained. New model? Change a configuration value. Better client? Point it at the same memory. Better agent loop? Swap it behind the API.
 
 The components of a memory-centric AI system exist in defined roles relative to memory:
 
 | Role | What It Does |
 |------|-------------|
 | **Client** | A view into memory. How the person sees and interacts with what they've built. |
-| **Agent engine** | The hands. Connects models to tools, executes operations on memory. |
+| **Agent loop** | The hands. Connects models to tools, executes operations on memory. |
 | **Intelligence (models)** | The reasoning applied to memory. Understands it, draws connections, generates from it. |
 | **Tools** | How memory gets read and written. The mechanism for interaction. |
 | **Auth** | Who can access memory. The gate that protects it. |
@@ -169,7 +169,7 @@ The structure emerges through conversation. The AI interviews you, produces a st
 
 Memory is accessed exclusively through tools — read, write, edit, delete, search, list. No component accesses memory storage directly. Tools are the contract.
 
-This enforces memory independence at the architecture level. The Engine never touches memory's internals — it calls tools. If memory moves from files to a database to cloud storage, only the tool implementations change. Everything else stays the same.
+This enforces memory independence at the architecture level. The Agent Loop never touches memory's internals — it calls tools. If memory moves from files to a database to cloud storage, only the tool implementations change. Everything else stays the same.
 
 BrainDrive uses MCP (Model Context Protocol) as the tool standard. But the architecture isn't locked to MCP itself — it depends on the pattern (tool discovery + tool execution), not the specific protocol.
 
@@ -180,14 +180,14 @@ BrainDrive has four components, two APIs, and three external dependencies (D64),
 | Component | BrainDrive Implementation |
 |-----------|--------------------------|
 | **Your Memory** | Markdown files on disk, git for version history |
-| **Engine** | Generic agent loop (conversation loop, tool execution) |
+| **Agent Loop** | Generic agent loop (conversation loop, tool execution) |
 | **Auth** | Owner-controlled access (cross-cutting layer) |
-| **Gateway** | Conversation management, routes interactions to the Engine |
+| **Gateway** | Conversation management, routes interactions to the Agent Loop |
 
 | API | What It Connects |
 |-----------|-----------------|
 | **Gateway API** | Clients ↔ Gateway (any client speaks this) |
-| **Model API** | Engine ↔ Models (any model connects through this) |
+| **Model API** | Agent Loop ↔ Models (any model connects through this) |
 
 | External | BrainDrive Implementation |
 |----------|--------------------------|
@@ -209,13 +209,13 @@ The architecture is designed so memory's storage can evolve without disrupting a
 
 | Stage | What Changes | What Stays the Same |
 |-------|--------------|-------------------|
-| **Files only** | — | Engine, Gateway, Auth, clients, models |
+| **Files only** | — | Agent Loop, Gateway, Auth, clients, models |
 | **+ database** | Add structured query tools | Everything above + existing file tools |
 | **+ vectors** | Add semantic search tools | Everything above + existing tools |
 | **+ multi-modal** | Add tools for non-text content | Everything above + existing tools |
 | **+ cloud storage** | New tool implementations behind same interface | Everything above |
 
-Each stage is additive. Existing tools keep working. New tools add capabilities. The Engine doesn't know what's behind the tools. Adoption of the next memory paradigm is a tool change — not a rewrite.
+Each stage is additive. Existing tools keep working. New tools add capabilities. The Agent Loop doesn't know what's behind the tools. Adoption of the next memory paradigm is a tool change — not a rewrite.
 
 ## Openness as BrainDrive's Moat
 

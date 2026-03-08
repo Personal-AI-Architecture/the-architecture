@@ -301,7 +301,7 @@ async function testAddTool(): Promise<boolean> {
     }
     console.log("  ✓ All memory tools still present");
 
-    // Engine works with expanded tool set
+    // Agent Loop works with expanded tool set
     const provider = createMockProvider({
       events: [
         { type: "text-delta", content: "Weather is sunny" },
@@ -319,10 +319,10 @@ async function testAddTool(): Promise<boolean> {
     const hasText = events.some((e) => e.type === "text-delta");
     const hasDone = events.some((e) => e.type === "done");
     if (!hasText || !hasDone) {
-      console.log("  FAIL  Engine doesn't work with expanded tool set.");
+      console.log("  FAIL  Agent Loop doesn't work with expanded tool set.");
       return false;
     }
-    console.log("  ✓ Engine works with expanded tool set");
+    console.log("  ✓ Agent Loop works with expanded tool set");
 
     // Remove tool, system still works
     await rm(newToolDir, { recursive: true, force: true });

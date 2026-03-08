@@ -32,7 +32,7 @@ The system must run on a computer the owner physically controls. No remote servi
 The system must be capable of operating with zero internet connectivity. This means:
 
 - The system starts without network access
-- The Engine connects to a model through the Model API — that model can be local
+- The Agent Loop connects to a model through the Model API — that model can be local
 - Tools execute without requiring external services (tools that call external APIs are optional additions, not requirements)
 - Your Memory is fully accessible
 - Auth works locally
@@ -60,7 +60,7 @@ Local models have their own hardware requirements (RAM, GPU) that are outside th
 
 ### 5. Single deployable unit by default
 
-All four components (Your Memory, Engine, Auth, Gateway) and both APIs (Gateway API, Model API) deploy together on one machine as a single unit. One install, one start command, one thing to manage.
+All four components (Your Memory, Agent Loop, Auth, Gateway) and both APIs (Gateway API, Model API) deploy together on one machine as a single unit. One install, one start command, one thing to manage.
 
 Splitting components across machines is allowed but not required — the single-unit deployment is the default. Split patterns are an implementation concern.
 

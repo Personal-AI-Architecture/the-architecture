@@ -2,9 +2,9 @@
  * Import Boundary Checker
  *
  * Enforces architectural boundaries by scanning import statements:
- * - src/engine/ must NOT import from src/gateway/ or src/auth/
+ * - src/engine/ (Agent Loop) must NOT import from src/gateway/ or src/auth/
  * - src/auth/ must NOT import from src/gateway/ or src/engine/
- * - src/gateway/ must NOT import from src/engine/ internals (only the interface)
+ * - src/gateway/ must NOT import from src/engine/ (Agent Loop) internals (only the interface)
  * - src/memory/ must NOT import from any other component
  *
  * Run: npm run check:imports
@@ -30,17 +30,17 @@ const RULES: Array<{
   {
     sourceDir: "engine",
     forbiddenDirs: ["gateway", "auth"],
-    description: "Engine must not import Gateway or Auth",
+    description: "Agent Loop must not import Gateway or Auth",
   },
   {
     sourceDir: "auth",
     forbiddenDirs: ["gateway", "engine"],
-    description: "Auth must not import Gateway or Engine",
+    description: "Auth must not import Gateway or Agent Loop",
   },
   {
     sourceDir: "gateway",
     forbiddenDirs: ["engine", "auth"],
-    description: "Gateway must not import Engine or Auth internals",
+    description: "Gateway must not import Agent Loop or Auth internals",
   },
   {
     sourceDir: "memory",

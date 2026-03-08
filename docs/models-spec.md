@@ -7,7 +7,7 @@ hide_table_of_contents: true
 
 Every AI system uses a model — ChatGPT runs GPT, Copilot runs its own models, agent frameworks wire up whatever LLM the developer chooses. So what's different here?
 
-Nothing about how the model is used. What's different is where it sits in the architecture. **Models are not a component of the system — they are external intelligence accessed through the Model API.** The system doesn't contain a model. It calls one. The system has four components (Your Memory, Engine, Auth, Gateway). Models aren't one of them.
+Nothing about how the model is used. What's different is where it sits in the architecture. **Models are not a component of the system — they are external intelligence accessed through the Model API.** The system doesn't contain a model. It calls one. The system has four components (Your Memory, Agent Loop, Auth, Gateway). Models aren't one of them.
 
 In the human analogy that runs through this architecture: Memory is the persistent half of the brain. The model is the other half — the intelligence, the reasoning, the processing. Memory + Model = the brain (D44). Neither is complete alone. Memory without the model is a filing cabinet nobody's reading. The model without memory is a genius with amnesia.
 
@@ -31,16 +31,16 @@ This is an **Architecture spec** — it defines what models are at the generic, 
 
 ## The Model API
 
-The Model API is one of the system's two APIs. It defines how the Engine calls models:
+The Model API is one of the system's two APIs. It defines how the Agent Loop calls models:
 
 | Direction | What flows |
 |-----------|-----------|
-| **Engine → Model** | Prompt (system instructions + conversation history + tool definitions + context) |
-| **Model → Engine** | Streamed completion (text + tool calls) |
+| **Agent Loop → Model** | Prompt (system instructions + conversation history + tool definitions + context) |
+| **Model → Agent Loop** | Streamed completion (text + tool calls) |
 
-Prompts in, completions out. The pattern is the same regardless of which model, which provider, or what capabilities the model has. Provider-specific API formats are abstracted behind the adapter — a thin translation layer between the Engine's internal interface and whatever format the provider expects. Switching models is a config change; switching providers is a config change plus an adapter swap. See [adapter-spec.md](./adapter-spec.md) §How Model Configuration Works in Practice for the concrete walkthrough.
+Prompts in, completions out. The pattern is the same regardless of which model, which provider, or what capabilities the model has. Provider-specific API formats are abstracted behind the adapter — a thin translation layer between the Agent Loop's internal interface and whatever format the provider expects. Switching models is a config change; switching providers is a config change plus an adapter swap. See [adapter-spec.md](./adapter-spec.md) §How Model Configuration Works in Practice for the concrete walkthrough.
 
-The Model API is a pass-through — it doesn't decide what goes into the prompt (Your Memory provides instructions and context), which tools to use (the model decides), or where responses are stored (Gateway manages conversations). It connects the Engine to whatever model is configured.
+The Model API is a pass-through — it doesn't decide what goes into the prompt (Your Memory provides instructions and context), which tools to use (the model decides), or where responses are stored (Gateway manages conversations). It connects the Agent Loop to whatever model is configured.
 
 ---
 
@@ -51,13 +51,13 @@ Every model-related concern maps to an existing component or configuration:
 | Concern | Where it lives | Why not a Models component |
 |---------|---------------|---------------------------|
 | Which model to call (including per-task selection) | Configuration | A config value, not a component |
-| Provider routing (OpenRouter vs Anthropic vs Ollama) | Engine implementation or SDK | How the Engine calls models is an implementation detail |
-| Fallback if a provider is down | Engine implementation | Error handling is the Engine's job |
-| Context window awareness | Engine or Model API | The Engine knows the limits of what it's calling |
+| Provider routing (OpenRouter vs Anthropic vs Ollama) | Agent Loop implementation or SDK | How the Agent Loop calls models is an implementation detail |
+| Fallback if a provider is down | Agent Loop implementation | Error handling is the Agent Loop's job |
+| Context window awareness | Agent Loop or Model API | The Agent Loop knows the limits of what it's calling |
 
 Nothing is left over. There is no gap that requires a dedicated component.
 
-This follows the same pattern as Tools (D51) and Client (D57). Tools dissolved into Memory + Engine + Auth. Client dissolved into Gateway + external clients. Models dissolves into the Model API + Engine implementation + configuration. No operational concern requires a dedicated component.
+This follows the same pattern as Tools (D51) and Client (D57). Tools dissolved into Memory + Agent Loop + Auth. Client dissolved into Gateway + external clients. Models dissolves into the Model API + Agent Loop implementation + configuration. No operational concern requires a dedicated component.
 
 But there's a harder question the architecture needs to answer.
 
@@ -65,7 +65,7 @@ But there's a harder question the architecture needs to answer.
 
 ## Why Models Don't Dissolve Into Memory + Tools
 
-The memory/tool binary says everything the system processes is either data (memory) or an operation (tool). Three proposed components were tested against this during the architecture interviews. Tools dissolved into Memory + Engine + Auth. Client dissolved into Gateway + external clients. Why don't models dissolve the same way?
+The memory/tool binary says everything the system processes is either data (memory) or an operation (tool). Three proposed components were tested against this during the architecture interviews. Tools dissolved into Memory + Agent Loop + Auth. Client dissolved into Gateway + external clients. Why don't models dissolve the same way?
 
 Conceptually, they do. Weights are the provider's memory — trained knowledge stored as parameters. Inference is a verb — the operation of generating a response. Noun and verb. The model decomposes.
 
@@ -73,13 +73,13 @@ But the architecture elevates it to an external dependency with its own API anyw
 
 ### Swappable intelligence needs its own boundary
 
-If models dissolved into memory + tools, model access would flow through whatever internal mechanism the Engine uses for tool execution — coupling it to Engine implementation details. The Model API exists as a clean, swappable boundary separate from tool execution. That's what makes "swap your intelligence" a config change instead of a rebuild.
+If models dissolved into memory + tools, model access would flow through whatever internal mechanism the Agent Loop uses for tool execution — coupling it to Agent Loop implementation details. The Model API exists as a clean, swappable boundary separate from tool execution. That's what makes "swap your intelligence" a config change instead of a rebuild.
 
 ### Storage is not computation
 
 Weights are data — store them wherever you want. But running inference isn't a storage operation. Memory's interface is read, write, search, version — data operations. Inference is fundamentally different: take a prompt, apply learned patterns across billions of parameters, generate a response token by token. Putting inference inside Memory would add an execution capability to a data substrate. Memory would need to know how to *run* a model, not just *store* one.
 
-Memory is inert. It sits there and waits to be read. The model is the opposite — it tells the Engine what to do, decides which tools to call, what to read, what to write. It's an active participant in the execution loop, not a passive data store being accessed.
+Memory is inert. It sits there and waits to be read. The model is the opposite — it tells the Agent Loop what to do, decides which tools to call, what to read, what to write. It's an active participant in the execution loop, not a passive data store being accessed.
 
 ### The sibling exception
 
@@ -111,17 +111,17 @@ The primary model can't be a tool — it *is* the intelligence making tool decis
 
 ## Open Questions
 
-None. Models is the thinnest spec because models are the most external thing in the system. The Model API handles the connection. Configuration handles the choices. The Engine handles the calling. There's nothing else to define.
+None. Models is the thinnest spec because models are the most external thing in the system. The Model API handles the connection. Configuration handles the choices. The Agent Loop handles the calling. There's nothing else to define.
 
 ---
 
 ## Success Criteria
 
 - [ ] Models are accessed exclusively through the Model API — no component depends on a specific model
-- [ ] Switching models requires only a configuration change — no code changes to Engine, Your Memory, Auth, Gateway, or any client
+- [ ] Switching models requires only a configuration change — no code changes to Agent Loop, Your Memory, Auth, Gateway, or any client
 - [ ] The system works with any model that accepts prompts and returns completions — cloud, local, future
 - [ ] The Model API absorbs model evolution — new capabilities, new providers, new paradigms are configuration changes
-- [ ] Local models (Ollama) and cloud models (OpenRouter) are interchangeable from the Engine's perspective
+- [ ] Local models (Ollama) and cloud models (OpenRouter) are interchangeable from the Agent Loop's perspective
 
 ---
 

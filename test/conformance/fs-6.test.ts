@@ -5,7 +5,7 @@
  *
  * Memory is the platform — it can evolve independently. Adding a new
  * search capability (e.g., semantic search alongside line-by-line search)
- * should not require changes to Engine, Gateway, or Auth.
+ * should not require changes to Agent Loop, Gateway, or Auth.
  */
 
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
@@ -112,7 +112,7 @@ describe("FS-6: Evolve Memory — add search implementation, no component change
     expect(semanticResults[0].context).toContain("[semantic]");
   });
 
-  it("Engine works with enhanced tool executor — no engine changes", async () => {
+  it("Agent Loop works with enhanced tool executor — no agent loop changes", async () => {
     const memoryTools = createMemoryTools(memoryRoot);
     await memoryTools.write({ path: "data.md", content: "Important information" });
 
@@ -123,12 +123,12 @@ describe("FS-6: Evolve Memory — add search implementation, no component change
       enhanced.semanticSearch.bind(enhanced),
     );
 
-    // Engine sees the new tool in its tool list
+    // Agent Loop sees the new tool in its tool list
     const toolNames = enhancedExecutor.listTools().map((t) => t.name);
     expect(toolNames).toContain("memory_semantic_search");
     expect(toolNames).toContain("memory_search"); // original still there
 
-    // Engine can use the enhanced executor — no engine code changes
+    // Agent Loop can use the enhanced executor — no agent loop code changes
     const provider = createMockProvider({
       events: [
         { type: "text-delta", content: "Using enhanced memory" },

@@ -4,7 +4,7 @@
  * Usage:
  *   OPENROUTER_API_KEY=sk-... npx tsx scripts/server-check.ts [memory_root]
  *
- * Starts the full server (auth → gateway → engine → provider), sends messages
+ * Starts the full server (auth → gateway → agent loop → provider), sends messages
  * via HTTP, and verifies: SSE streaming, tool calls, conversation resumption,
  * and conversation listing.
  *

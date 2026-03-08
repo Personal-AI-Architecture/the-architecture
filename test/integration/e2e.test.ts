@@ -1,9 +1,9 @@
 /**
  * End-to-End Integration Tests
  *
- * Full loop: message → auth → gateway → engine → mock provider → back to client.
+ * Full loop: message → auth → gateway → agent loop → mock provider → back to client.
  * Tests tool calls end-to-end, conversation resumption, auth blocking,
- * schema conformance (ARCH-4), and S-4 (engine not externally accessible).
+ * schema conformance (ARCH-4), and S-4 (agent loop not externally accessible).
  */
 
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
@@ -157,7 +157,7 @@ afterEach(async () => {
   await rm(tempDir, { recursive: true, force: true });
 });
 
-describe("Full loop: message → auth → gateway → engine → provider → response", () => {
+describe("Full loop: message → auth → gateway → agent loop → provider → response", () => {
   it("completes full request lifecycle with mock provider", async () => {
     app = await buildApp(createTextMockProvider("Hello, I'm your AI!"));
 
@@ -312,7 +312,7 @@ describe("Auth blocks unauthenticated (D22)", () => {
   });
 });
 
-describe("S-4: Engine not externally accessible (D137)", () => {
+describe("S-4: Agent Loop not externally accessible (D137)", () => {
   it("external HTTP request to /engine/chat gets 404", async () => {
     app = await buildApp(createTextMockProvider("Should not see this"));
 

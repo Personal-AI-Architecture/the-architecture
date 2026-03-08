@@ -80,7 +80,7 @@ describe("FS-8: Expand scope — add tool, no architecture changes", () => {
     expect(toolNames).toContain("memory_search");
   });
 
-  it("Engine works with expanded tool set — no engine changes", async () => {
+  it("Agent Loop works with expanded tool set — no agent loop changes", async () => {
     // Add an API tool (V3 scope — external APIs)
     const apiToolDir = join(toolSourcesDir, "weather-api");
     await mkdir(apiToolDir, { recursive: true });
@@ -105,7 +105,7 @@ describe("FS-8: Expand scope — add tool, no architecture changes", () => {
     const builtInExecutor = createMemoryToolExecutor(memoryTools);
     const executor = await createToolExecutor(builtInExecutor, [toolSourcesDir]);
 
-    // Engine sees the expanded tool set
+    // Agent Loop sees the expanded tool set
     const provider = createMockProvider({
       events: [
         { type: "text-delta", content: "Expanded scope works" },
@@ -121,7 +121,7 @@ describe("FS-8: Expand scope — add tool, no architecture changes", () => {
       events.push(event);
     }
 
-    // Engine works — it doesn't care what tools are available
+    // Agent Loop works — it doesn't care what tools are available
     expect(events.some((e) => e.type === "text-delta")).toBe(true);
     expect(events.some((e) => e.type === "done")).toBe(true);
   });

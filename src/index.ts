@@ -15,7 +15,7 @@ export { createGateway } from "./gateway/index.js";
 export { createGatewayRoutes } from "./gateway/routes.js";
 export { createServer, startServer } from "./gateway/server.js";
 
-// --- Engine ---
+// --- Agent Loop ---
 export { createEngine } from "./engine/index.js";
 export { createToolExecutor, discoverExternalTools } from "./engine/tool-executor.js";
 

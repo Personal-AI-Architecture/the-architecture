@@ -7,7 +7,7 @@ hide_table_of_contents: true
 
 Every AI system has an extension model — plugins, hooks, middleware, SDKs, custom code. So what's different here?
 
-Here, customization is **content, not code.** The Foundation is a runtime — you don't extend it with code, you write programs that run on it. Your "program" is Your Memory content + tools + configuration + client. The runtime executes it. Components (Your Memory, Engine, Auth, Gateway) stay generic and unmodified. Prompts are the code now — the behavior of the system emerges from what's in Your Memory and what tools are available, not from custom code in the Engine, Gateway, or Auth.
+Here, customization is **content, not code.** The Foundation is a runtime — you don't extend it with code, you write programs that run on it. Your "program" is Your Memory content + tools + configuration + client. The runtime executes it. Components (Your Memory, Agent Loop, Auth, Gateway) stay generic and unmodified. Prompts are the code now — the behavior of the system emerges from what's in Your Memory and what tools are available, not from custom code in the Agent Loop, Gateway, or Auth.
 
 An implementation is a dependency relationship, not a fork (D112). Your product repo imports the Architecture as a dependency. Architecture improvements flow to every implementation automatically. BrainDrive is the reference implementation.
 
@@ -30,10 +30,10 @@ The only fixed contracts are the two APIs:
 | Contract | Fixed? | Why |
 |----------|--------|-----|
 | **Gateway API** | Yes | This is how clients talk to the system. Without a stable contract, clients break when internals change. |
-| **Model API** | Yes | This is how the Engine talks to models. Without a stable contract, model swapping breaks. |
+| **Model API** | Yes | This is how the Agent Loop talks to models. Without a stable contract, model swapping breaks. |
 | **Everything else** | Defaults | Bootstrap mechanism, tool discovery, configuration — all overridable. |
 
-This is the same "drop-down menu" principle from the foundation spec (Principle 2) applied to the Foundation's own internals. Bootstrap via minimal Engine config? That's the default. Tool discovery via configured sources + self-description? That's the default. Change either if your product needs something different.
+This is the same "drop-down menu" principle from the foundation spec (Principle 2) applied to the Foundation's own internals. Bootstrap via minimal Agent Loop config? That's the default. Tool discovery via configured sources + self-description? That's the default. Change either if your product needs something different.
 
 ### What the Levels Mean (Working Model)
 
@@ -71,15 +71,15 @@ There are four ways to customize the Architecture. All implementation and Level 
 | Starter content | Pre-populated files the owner starts with | Starter library pages, templates, example projects |
 | Preference data | Product defaults stored as data in Your Memory | Default model preference, default tool policies, interaction style |
 
-**Architecture default:** The Architecture provides the bootstrap mechanism (minimal Engine bootstrap prompt/config). **The implementation provides the bootstrap target content** in Your Memory (for example, AGENT.md) and can override path/format conventions.
+**Architecture default:** The Architecture provides the bootstrap mechanism (minimal Agent Loop bootstrap prompt/config). **The implementation provides the bootstrap target content** in Your Memory (for example, AGENT.md) and can override path/format conventions.
 
 **What stays generic:** Your Memory itself has no opinions. It stores and retrieves. It doesn't know what AGENT.md means or why your folder structure exists. The model reads the content and acts on it.
 
 ### 2. Tools
 
-**What it is:** Capabilities in the environment that the Engine can execute.
+**What it is:** Capabilities in the environment that the Agent Loop can execute.
 
-**How it works:** Tools are data — definitions, code, instructions — that live in the environment (D51, D52). Your product ships the tools needed for its use case. The Engine executes tool calls without knowing what the tools do. Auth controls who can use which tools.
+**How it works:** Tools are data — definitions, code, instructions — that live in the environment (D51, D52). Your product ships the tools needed for its use case. The Agent Loop executes tool calls without knowing what the tools do. Auth controls who can use which tools.
 
 **What you provide:**
 
@@ -90,9 +90,9 @@ There are four ways to customize the Architecture. All implementation and Level 
 | Tool protocol | What protocol your tools use | MCP as default (D32), CLI for Git, native for approval gate |
 | Discoverable set | What's available on demand but not in every prompt | Future: marketplace tools, third-party integrations |
 
-**Architecture default:** The Architecture ships a tool discovery mechanism — runtime config declares `tool_sources`, the Engine scans those sources, and tools self-describe (MCP/manifest/code). Tool preferences (always-send, policies) live in Your Memory. Override the mechanism if your product needs different discovery.
+**Architecture default:** The Architecture ships a tool discovery mechanism — runtime config declares `tool_sources`, the Agent Loop scans those sources, and tools self-describe (MCP/manifest/code). Tool preferences (always-send, policies) live in Your Memory. Override the mechanism if your product needs different discovery.
 
-**What stays generic:** The Engine is a pass-through executor. It doesn't care what tools exist or what they do. It calls whatever the model asks for and returns the result.
+**What stays generic:** The Agent Loop is a pass-through executor. It doesn't care what tools exist or what they do. It calls whatever the model asks for and returns the result.
 
 ### 3. Config
 
@@ -155,7 +155,7 @@ As a product builder, I want to build a new product on the Architecture so that 
 4. Builder sets runtime/adapter configuration (provider adapter, auth mode, deployment config, `tool_sources`)
 5. Builder optionally creates a branded client that speaks the Gateway API
 6. Builder packages the product (repo for developers, Docker image for owners)
-7. System boots with minimal Engine bootstrap config, reads product entrypoint from Your Memory, discovers tools from configured sources, and is ready for use
+7. System boots with minimal Agent Loop bootstrap config, reads product entrypoint from Your Memory, discovers tools from configured sources, and is ready for use
 
 **Acceptance Criteria (Given-When-Then):**
 
@@ -191,13 +191,13 @@ As a product builder, I want to ship custom Your Memory content (bootstrap file,
 2. Builder creates a folder structure for the use case
 3. Builder creates skills as markdown files
 4. Builder creates starter content (templates, examples)
-5. System boots with minimal Engine bootstrap config that points to the target file, then model discovers the rest from Your Memory
+5. System boots with minimal Agent Loop bootstrap config that points to the target file, then model discovers the rest from Your Memory
 
 **Acceptance Criteria (Given-When-Then):**
 
 ```gherkin
 Given an implementation with custom Your Memory content
-When the Engine starts and applies bootstrap configuration
+When the Agent Loop starts and applies bootstrap configuration
 Then the model follows the product's methodology
 And the model discovers skills, folder structure, and starter content from Your Memory
 And Your Memory itself has zero knowledge of the product's conventions
@@ -228,23 +228,23 @@ As a product builder, I want to ship tools specific to my use case so that the s
 2. Builder configures which tools are in the always-send set (sent with every prompt)
 3. Builder configures which tools are in the discoverable set (available on demand)
 4. Builder configures tool plumbing in runtime config (`tool_sources`) and sets tool preferences in Your Memory
-5. Engine discovers tools from configured sources at startup, connects to available tools, and includes self-described definitions in prompts
+5. Agent Loop discovers tools from configured sources at startup, connects to available tools, and includes self-described definitions in prompts
 
 **Acceptance Criteria (Given-When-Then):**
 
 ```gherkin
 Given an implementation with custom tools configured
-When the Engine starts
+When the Agent Loop starts
 Then it discovers and connects to the configured tools
 And tool definitions appear in prompts sent to the model
-And the Engine has zero knowledge of what the tools do
+And the Agent Loop has zero knowledge of what the tools do
 ```
 
 ```gherkin
 Given an implementation that ships different tools than BrainDrive
 When the system runs
 Then the model uses the product's tools, not BrainDrive's
-And the Engine, Your Memory, Auth, and Gateway code is identical
+And the Agent Loop, Your Memory, Auth, and Gateway code is identical
 ```
 
 **Status:** Open
@@ -368,7 +368,7 @@ And the update applies cleanly because Level 3 content doesn't conflict with imp
 ### Properties That Must Always Hold
 
 - [ ] Architecture code is never modified by an implementation — all customization is through Your Memory, tools, config, and client
-- [ ] Any Engine that implements the architecture contract can boot any implementation — the product's behavior comes from Your Memory, not from Engine customization
+- [ ] Any Agent Loop that implements the architecture contract can boot any implementation — the product's behavior comes from Your Memory, not from Agent Loop customization
 - [ ] Removing all implementation customization leaves a working architecture system — the Architecture stands alone
 - [ ] Implementation and Level 3 customization use identical mechanisms — there is no technical difference between product builder customization and owner customization
 - [ ] Architecture updates can be adopted by implementations without merge conflicts — because an implementation is a dependency layer, not a fork
@@ -389,8 +389,8 @@ And the update applies cleanly because Level 3 content doesn't conflict with imp
 
 | Scenario | Expected Behavior |
 |----------|-------------------|
-| Implementation ships malformed bootstrap file | Engine reports error at startup — model can't load instructions. Clear error message pointing to the bootstrap file. |
-| Implementation ships tools that aren't available | Engine reports tool connection failure. Model informed of unavailable tools. System continues with available tools. |
+| Implementation ships malformed bootstrap file | Agent Loop reports error at startup — model can't load instructions. Clear error message pointing to the bootstrap file. |
+| Implementation ships tools that aren't available | Agent Loop reports tool connection failure. Model informed of unavailable tools. System continues with available tools. |
 | Architecture update changes a default that an implementation was relying on | Implementation's explicit override takes precedence. If the implementation relied on the old default implicitly, the change surfaces as different behavior — caught by the implementation's test suite. |
 | Owner tries to customize something the managed hosting deployment restricts | System rejects the customization with a clear message explaining the managed hosting constraint. |
 

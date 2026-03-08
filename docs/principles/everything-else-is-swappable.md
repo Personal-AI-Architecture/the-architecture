@@ -6,7 +6,7 @@ hide_table_of_contents: true
 
 # Everything Else Is Swappable
 
-> Engine, Auth, Gateway, clients, models, tools, contracts, hosting — all replaceable.
+> Agent Loop, Auth, Gateway, clients, models, tools, contracts, hosting — all replaceable.
 
 Memory via tools, components via contracts, contracts via adapters. Every piece is a drop-down menu, not a permanent choice.
 
@@ -18,7 +18,7 @@ The swappability chain is structurally complete:
 ## What This Means in Practice
 
 - **New model?** Config change. Next message uses the new model. Nothing else changes.
-- **Better engine?** Swap it. Your Memory, your clients, your tools — all unaffected.
+- **Better agent loop?** Swap it. Your Memory, your clients, your tools — all unaffected.
 - **New client?** Point it at the Gateway API. The system serves it identically.
 - **New standard emerges?** Swap the adapter. Your components never knew the difference.
 

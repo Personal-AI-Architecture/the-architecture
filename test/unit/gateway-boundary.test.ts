@@ -2,9 +2,9 @@
  * Gateway + Auth Import Boundary Tests
  *
  * Verifies architectural boundaries post-integration:
- * - Gateway imports engine interface only, not internals (S-2, PR-1)
- * - Auth remains independent of gateway/engine (D60, X-3)
- * - Engine remains independent of gateway/auth
+ * - Gateway imports agent loop interface only, not internals (S-2, PR-1)
+ * - Auth remains independent of gateway/agent loop (D60, X-3)
+ * - Agent Loop remains independent of gateway/auth
  */
 
 import { describe, it, expect } from "vitest";
@@ -57,7 +57,7 @@ function hasImportsFrom(dir: string, forbidden: string[]): string[] {
 }
 
 describe("Gateway import boundary (S-2, PR-1)", () => {
-  it("gateway/ does not import from engine/ internals", () => {
+  it("gateway/ does not import from agent loop internals", () => {
     const gatewayDir = join(SRC_ROOT, "gateway");
 
     try {
@@ -92,14 +92,14 @@ describe("Auth independence (D60, X-3)", () => {
     expect(violations).toEqual([]);
   });
 
-  it("auth/ does not import from engine/", () => {
+  it("auth/ does not import from agent loop", () => {
     const authDir = join(SRC_ROOT, "auth");
     const violations = hasImportsFrom(authDir, ["../engine/", "./engine/"]);
     expect(violations).toEqual([]);
   });
 });
 
-describe("Engine independence (D39)", () => {
+describe("Agent Loop independence (D39)", () => {
   it("engine/ does not import from gateway/", () => {
     const engineDir = join(SRC_ROOT, "engine");
     const violations = hasImportsFrom(engineDir, [
@@ -109,7 +109,7 @@ describe("Engine independence (D39)", () => {
     expect(violations).toEqual([]);
   });
 
-  it("engine/ does not import from auth/", () => {
+  it("engine/ does not import from auth/ (Agent Loop boundary)", () => {
     const engineDir = join(SRC_ROOT, "engine");
     const violations = hasImportsFrom(engineDir, ["../auth/", "./auth/"]);
     expect(violations).toEqual([]);

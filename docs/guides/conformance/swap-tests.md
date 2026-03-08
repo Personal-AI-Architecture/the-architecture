@@ -28,7 +28,7 @@
 
 **Failure indicators:**
 - Any source code file was modified
-- Any component other than the Engine's adapter needed changes
+- Any component other than the Agent Loop's adapter needed changes
 - The system required a rebuild or recompilation
 
 ---
@@ -52,7 +52,7 @@
 - [ ] Response format is identical from the Gateway's perspective (same SSE events)
 
 **Failure indicators:**
-- The Engine required modification to support the new model
+- The Agent Loop required modification to support the new model
 - The Gateway needed to know which model was in use
 - Tool definitions needed modification for the new model
 
@@ -70,13 +70,13 @@
 
 **Procedure:**
 1. Install the tool in a `tool_sources` path
-2. Restart the Engine (or trigger hot-reload if supported)
+2. Restart the Agent Loop (or trigger hot-reload if supported)
 3. Send a message that would benefit from the new tool
 
 **Pass criteria:**
-- [ ] Engine discovers the new tool at startup via self-description
+- [ ] Agent Loop discovers the new tool at startup via self-description
 - [ ] Model can see and use the new tool
-- [ ] Zero code changes to Engine, Gateway, Auth, or Your Memory
+- [ ] Zero code changes to Agent Loop, Gateway, Auth, or Your Memory
 - [ ] Only environment changes (tool installed) and optionally preferences updated (always-send set)
 
 ### SWAP-3b: Remove a Tool
@@ -87,7 +87,7 @@
 **Procedure:**
 1. Remove the tool from its `tool_sources` path
 2. Remove from always-send preferences if applicable
-3. Restart the Engine
+3. Restart the Agent Loop
 
 **Pass criteria:**
 - [ ] System functions normally without the removed tool
@@ -96,6 +96,6 @@
 - [ ] No errors — the system gracefully handles the tool's absence
 
 **Failure indicators:**
-- Engine has hardcoded references to specific tools
+- Agent Loop has hardcoded references to specific tools
 - Removing a tool causes component failures beyond "tool not available"
 - Code changes were required to add or remove the tool

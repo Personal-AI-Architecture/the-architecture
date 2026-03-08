@@ -6,7 +6,7 @@
 
 A generic, user-owned AI runtime. Zero lock-in by design.
 
-Four components (Your Memory, Engine, Auth, Gateway), two APIs (Gateway API, Model API), three externals (Clients, Models, Tools). Every piece is swappable. Your data stays on your machine.
+Four components (Your Memory, Agent Loop, Auth, Gateway), two APIs (Gateway API, Model API), three externals (Clients, Models, Tools). Every piece is swappable. Your data stays on your machine.
 
 ## What This Repository Is
 
@@ -135,9 +135,9 @@ Full architecture documentation lives in [`docs/`](docs/):
 ## Architecture
 
 ```
-Clients ──→ Gateway API ──→ Gateway ──→ Engine ──→ Model API ──→ Models
-                              │            │
-                              │            └── Tools (discovered from tool_sources)
+Clients ──→ Gateway API ──→ Gateway ──→ Agent Loop ──→ Model API ──→ Models
+                              │              │
+                              │              └── Tools (discovered from tool_sources)
                               │
                               └── Your Memory (files + git + SQLite)
                                      │
@@ -146,7 +146,7 @@ Clients ──→ Gateway API ──→ Gateway ──→ Engine ──→ Model
 
 **Your Memory** is the platform. Files are plain text, conversations are SQLite, history is git. When the system isn't running, you can read and modify everything with standard tools.
 
-**Engine** is a generic agent loop: message → model → tools → response → repeat. No opinions about what you build with it.
+**Agent Loop** is a generic loop: message → model → tools → response → repeat. No opinions about what you build with it.
 
 **Gateway** manages conversations, routes messages, serves HTTP. Any client that speaks the Gateway API works.
 
@@ -202,7 +202,7 @@ cp -r ~/old-memory ~/new-memory
 ```bash
 npx tsx scripts/server-check.ts      # Full server test with real model
 npx tsx scripts/acceptance-check.ts  # 3 acceptance tests (no API key needed)
-npx tsx scripts/engine-check.ts      # Engine loop verification
+npx tsx scripts/engine-check.ts      # Agent loop verification
 npx tsx scripts/memory-check.ts      # Memory tools verification
 npx tsx scripts/auth-check.ts        # Auth verification
 npx tsx scripts/provider-check.ts    # Provider connectivity test

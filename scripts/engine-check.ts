@@ -4,7 +4,7 @@
  * Usage:
  *   OPENROUTER_API_KEY=sk-... npx tsx scripts/engine-check.ts [memory_root]
  *
- * Runs the Engine with real memory tools and a real model provider.
+ * Runs the Agent Loop with real memory tools and a real model provider.
  * Sends a prompt that triggers tool calls: read a file, write a file, verify.
  *
  * Requires:
@@ -30,7 +30,7 @@ let memoryRoot: string;
 
 if (process.argv[2]) {
   memoryRoot = process.argv[2];
-  console.log(`Engine check (memory_root: ${memoryRoot}):\n`);
+  console.log(`Agent Loop check (memory_root: ${memoryRoot}):\n`);
 } else {
   tempDir = await mkdtemp(join(tmpdir(), "pai-engine-check-"));
   memoryRoot = tempDir;
@@ -43,7 +43,7 @@ if (process.argv[2]) {
     join(memoryRoot, "projects", "ideas.md"),
     "# Ideas\n\n- Build a weather dashboard\n- Write a short story generator\n",
   );
-  console.log(`Engine check (temp memory: ${memoryRoot}):\n`);
+  console.log(`Agent Loop check (temp memory: ${memoryRoot}):\n`);
 }
 
 // --- Load provider ---
@@ -66,7 +66,7 @@ try {
 
 console.log(`  Provider: ${config.name} (${config.default_model})`);
 
-// --- Create engine ---
+// --- Create agent loop ---
 
 const memoryTools = createMemoryTools(memoryRoot);
 const toolExecutor = createMemoryToolExecutor(memoryTools);
@@ -164,7 +164,7 @@ if (tempDir) {
 const passed = [readWorked, writeWorked && fileOnDisk].filter(Boolean).length;
 const total = 2;
 
-console.log(`\n  Engine check: ${passed}/${total} passed.`);
+console.log(`\n  Agent Loop check: ${passed}/${total} passed.`);
 
 if (passed < total) {
   process.exit(1);

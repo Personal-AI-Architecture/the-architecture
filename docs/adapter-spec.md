@@ -25,12 +25,12 @@ This is simple to own, simple to control, and simple to change. An adapter is a 
 
 ```
 WITHOUT ADAPTERS:
-  Client ──[external format]──→ Gateway ──[external format]──→ Engine ──[external format]──→ Model
+  Client ──[external format]──→ Gateway ──[external format]──→ Agent Loop ──[external format]──→ Model
   │                                                                                      │
   └── locked to standard ───────────────────────────────────────────── locked to standard─┘
 
 WITH ADAPTERS:
-  Client ──→ Gateway API Adapter ──→ Gateway ──→ Engine ──→ Model API Adapter ──→ Model
+  Client ──→ Gateway API Adapter ──→ Gateway ──→ Agent Loop ──→ Model API Adapter ──→ Model
              │                       │           │          │
              translates              speaks      speaks     translates
              external ↔ internal     internal    internal   internal ↔ external
@@ -51,20 +51,20 @@ WITH ADAPTERS:
 - Translates outbound Gateway responses from the internal interface into the external standard
 - This is the only place the external protocol lives
 
-**Swap scenario:** A new standard supersedes OpenAI Chat Completions. Write a new adapter that translates the new format to/from the same internal interface. Gateway doesn't change. Auth doesn't change. Engine doesn't change. Clients adopt the new standard at their own pace (or you run both adapters during transition).
+**Swap scenario:** A new standard supersedes OpenAI Chat Completions. Write a new adapter that translates the new format to/from the same internal interface. Gateway doesn't change. Auth doesn't change. Agent Loop doesn't change. Clients adopt the new standard at their own pace (or you run both adapters during transition).
 
-### Model API Adapter — Between Engine and Models
+### Model API Adapter — Between Agent Loop and Models
 
 **External standard (today):** Provider-specific formats (OpenAI, Anthropic, OpenRouter — all variations on prompt + tool definitions in, completion + tool calls out).
 
-**Internal interface:** Prompt in, completion out. The Engine sends a normalized request (system instructions, messages, tool definitions, context) and receives a normalized response stream (text, tool calls, done). It doesn't know what model or provider is behind the adapter.
+**Internal interface:** Prompt in, completion out. The Agent Loop sends a normalized request (system instructions, messages, tool definitions, context) and receives a normalized response stream (text, tool calls, done). It doesn't know what model or provider is behind the adapter.
 
 **What the adapter does:**
-- Translates outbound Engine requests from the internal interface into the provider's format
+- Translates outbound Agent Loop requests from the internal interface into the provider's format
 - Translates inbound model responses from the provider's format into the internal interface
 - Handles provider-specific details (auth headers, streaming formats, tool call schemas)
 
-**Swap scenario:** Switch from OpenRouter to a direct Anthropic integration, or to a local Ollama instance. Write (or select) an adapter for the new provider. Engine doesn't change. Gateway doesn't change. Your Memory doesn't change.
+**Swap scenario:** Switch from OpenRouter to a direct Anthropic integration, or to a local Ollama instance. Write (or select) an adapter for the new provider. Agent Loop doesn't change. Gateway doesn't change. Your Memory doesn't change.
 
 **Note:** Provider adapters are the more common swap — this is what happens every time you change model providers. The Gateway API adapter is the rare swap — it only changes if the industry standard shifts.
 
@@ -95,7 +95,7 @@ Three pieces of config control this:
 "I prefer anthropic/claude-sonnet-4-6 via OpenRouter"
 ```
 
-At boot, the system loads the adapter, reads your preference, and every request flows through the same path: Engine → Model API Adapter → model. Your client doesn't need to know which model is behind the system — it sends messages to the Gateway API and gets responses back.
+At boot, the system loads the adapter, reads your preference, and every request flows through the same path: Agent Loop → Model API Adapter → model. Your client doesn't need to know which model is behind the system — it sends messages to the Gateway API and gets responses back.
 
 ### Two kinds of change
 
@@ -113,7 +113,7 @@ At boot, the system loads the adapter, reads your preference, and every request 
 | `adapters/openrouter.json` | `adapters/ollama.json` | Adapter config (1 file) |
 | `$OPENROUTER_API_KEY` | *(not needed — Ollama is local)* | Environment variable |
 
-In both cases: Engine doesn't change. Gateway doesn't change. Auth doesn't change. Your Memory doesn't change (except the preference). Your client doesn't change. This is the D147 anti-lock-in test — if any swap requires code changes, lock-in has been introduced.
+In both cases: Agent Loop doesn't change. Gateway doesn't change. Auth doesn't change. Your Memory doesn't change (except the preference). Your client doesn't change. This is the D147 anti-lock-in test — if any swap requires code changes, lock-in has been introduced.
 
 See [configuration-spec.md](./configuration-spec.md) for runtime config details, boot sequence, and the full anti-lock-in test.
 

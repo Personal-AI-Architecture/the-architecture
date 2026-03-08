@@ -34,15 +34,15 @@ In a human brain, neither memory nor intelligence is swappable. You're stuck wit
 
 The fastest-changing part of AI is model capability. A biological brain can't upgrade its neurons. A digital brain with persistent memory can upgrade its intelligence every time a better model ships — different models for different tasks, from any provider, swapped with a config change. That's not a limitation to work around. It's the whole advantage.
 
-To wield that advantage, the model needs its own API. If it were classified as just another tool, model access would flow through whatever tool mechanism the Engine uses internally — coupling it to Engine implementation details. The Model API exists to keep model access as a clean, swappable boundary. That's what makes "swap your intelligence" a config change instead of a rebuild.
+To wield that advantage, the model needs its own API. If it were classified as just another tool, model access would flow through whatever tool mechanism the Agent Loop uses internally — coupling it to Agent Loop implementation details. The Model API exists to keep model access as a clean, swappable boundary. That's what makes "swap your intelligence" a config change instead of a rebuild.
 
 ### But what if you own the model and never want to swap it?
 
 The swappability argument doesn't hold for this person. The ownership argument doesn't hold either — the weights are their data. So why doesn't the model live in Your Memory even then?
 
-**Your Memory is inert.** It doesn't do anything. It sits there and waits to be read. The Engine reads it, the model reads it, tools read and write to it. Memory never initiates. That's the whole point — it's the substrate, the platform, the thing that has zero outward dependencies.
+**Your Memory is inert.** It doesn't do anything. It sits there and waits to be read. The Agent Loop reads it, the model reads it, tools read and write to it. Memory never initiates. That's the whole point — it's the substrate, the platform, the thing that has zero outward dependencies.
 
-**The model tells the Engine what to do.** It decides which tools to call, what to read, what to write, what questions to ask. It's the intelligence half of the brain. It's an active participant in the execution loop, not a passive data store being accessed.
+**The model tells the Agent Loop what to do.** It decides which tools to call, what to read, what to write, what questions to ask. It's the intelligence half of the brain. It's an active participant in the execution loop, not a passive data store being accessed.
 
 But if someone owns their model and never wants to swap it, coupling intelligence to memory is how biological brains work — and biological brains work fine. Your neurons don't live outside your memory. The dependency isn't a flaw for that person.
 
@@ -68,23 +68,23 @@ Both exceptions trace to the same root: the decision to make intelligence swappa
 
 ## 3. Systematic Decomposition
 
-Every concept people might think needs its own subsystem decomposes into memory + tools. The architecture's four components (Your Memory, Engine, Auth, Gateway) and two APIs (Gateway API, Model API) already cover every concern.
+Every concept people might think needs its own subsystem decomposes into memory + tools. The architecture's four components (Your Memory, Agent Loop, Auth, Gateway) and two APIs (Gateway API, Model API) already cover every concern.
 
 | What people call it | Memory (data/noun) | Tool (operation/verb) | Infrastructure concern |
 |---|---|---|---|
-| **Skills** | Skill definitions, prompts, instructions — data in Memory | Skill execution — the Engine reads skill data and follows it | Auth controls who can use which skills |
-| **RAG** | Vector store (indexed content) | `semantic_search(query)` — retrieval is an operation | Engine augments the prompt with results (its normal loop) |
-| **CAG** | Cached context — data pre-loaded or pre-processed | `retrieve_context(key)` — retrieval is an operation | Cache invalidation is a tool or Engine concern |
+| **Skills** | Skill definitions, prompts, instructions — data in Memory | Skill execution — the Agent Loop reads skill data and follows it | Auth controls who can use which skills |
+| **RAG** | Vector store (indexed content) | `semantic_search(query)` — retrieval is an operation | Agent Loop augments the prompt with results (its normal loop) |
+| **CAG** | Cached context — data pre-loaded or pre-processed | `retrieve_context(key)` — retrieval is an operation | Cache invalidation is a tool or Agent Loop concern |
 | **Databases (SQL, NoSQL, vector)** | Stored records — data | `sql_query(statement)`, `nosql_get(key)` — queries are operations | Auth controls database access permissions |
 | **Knowledge graphs** | Nodes and edges — data | `graph_traverse(start, relation)` — traversal is an operation | — |
 | **Search indexes** | Indexed content — derived data | `full_text_search(terms)` — searching is an operation | Index maintenance is a tool (rebuild, update) |
 | **External services (Salesforce, Stripe)** | CRM/payment data — your memory, externally hosted | `salesforce_query(filter)`, `stripe_charge(params)` — API calls are operations | Auth manages API keys and access |
 | **Email/messaging (Gmail, Slack)** | Message history — provider-hosted memory | `send_email`, `post_message` — tools calling provider APIs (tool calling tool) | Auth manages OAuth tokens |
-| **Caching** | Cached data — memory (ephemeral or persistent) | Cache get/set/invalidate — operations | Engine or tools decide what to cache |
+| **Caching** | Cached data — memory (ephemeral or persistent) | Cache get/set/invalidate — operations | Agent Loop or tools decide what to cache |
 | **Analytics/logging** | Collected metrics, log entries — data | `analyze(query)`, `aggregate(params)` — analysis is an operation | Log collection is a tool writing to memory |
-| **Workflows/orchestration** | Workflow definitions — data (skills, prompts, step descriptions) | Execution steps — tools; orchestration is the Engine's loop | Auth gates each step independently |
-| **Scheduling** | Schedule definitions, cron expressions — data | Triggering — a tool (cron tool triggers the Engine) | — |
-| **Configuration** | Three categories: preferences (Your Memory — personal data), runtime config (thin bootstrap — environment config), tool self-description (from the tools themselves, D146) | Applying config — Engine reads config at startup | Auth controls who can modify config |
+| **Workflows/orchestration** | Workflow definitions — data (skills, prompts, step descriptions) | Execution steps — tools; orchestration is the Agent Loop's loop | Auth gates each step independently |
+| **Scheduling** | Schedule definitions, cron expressions — data | Triggering — a tool (cron tool triggers the Agent Loop) | — |
+| **Configuration** | Three categories: preferences (Your Memory — personal data), runtime config (thin bootstrap — environment config), tool self-description (from the tools themselves, D146) | Applying config — Agent Loop reads config at startup | Auth controls who can modify config |
 | **Version history** | Historical states, diffs — data | `diff(v1, v2)`, `restore(version)` — operations | Memory's versioning guarantee (guarantee #6) |
 | **Notifications** | Notification rules, templates — data | `send_notification(target, content)` — sending is an operation | Auth controls who receives what |
 
@@ -110,11 +110,11 @@ This means:
 
 1. **Skill definitions (data/noun) live in Memory.** Today a skill is a markdown file with instructions. Tomorrow it could be a JSON schema, a DSL, a compiled prompt template, or whatever Anthropic invents. Memory doesn't care. It stores the bytes. Changing skill format is changing file content — no Memory change required.
 
-2. **Skill execution (operation/verb) is the Engine's job.** The Engine reads skill data from Memory, passes it to the model as part of the prompt, and the model follows the instructions. The Engine doesn't understand what a skill is either — it reads files and includes them in the context. How the model interprets skill instructions can change with every model upgrade. No Engine change required.
+2. **Skill execution (operation/verb) is the Agent Loop's job.** The Agent Loop reads skill data from Memory, passes it to the model as part of the prompt, and the model follows the instructions. The Agent Loop doesn't understand what a skill is either — it reads files and includes them in the context. How the model interprets skill instructions can change with every model upgrade. No Agent Loop change required.
 
-3. **Skill permissions are Auth's job.** Who can use which skills, which skills are available in which context — that's access control. Independent of both Memory and Engine.
+3. **Skill permissions are Auth's job.** Who can use which skills, which skills are available in which context — that's access control. Independent of both Memory and the Agent Loop.
 
-4. **A "skill node" in implementation is the Engine reading skill data from Memory.** That's what happens at runtime: the Engine reads a file (tool), gets instructions (memory), includes them in the prompt (Engine's loop), and the model acts on them. The "node" already exists — it's just expressed as component collaboration, not a separate architectural element.
+4. **A "skill node" in implementation is the Agent Loop reading skill data from Memory.** That's what happens at runtime: the Agent Loop reads a file (tool), gets instructions (memory), includes them in the prompt (the Agent Loop's loop), and the model acts on them. The "node" already exists — it's just expressed as component collaboration, not a separate architectural element.
 
 ### Why the decoupling already exists
 
@@ -124,11 +124,11 @@ The separation Dave J wants is real. It's just expressed through the existing ar
 |---|---|---|
 | Skill format (markdown, JSON, DSL) | Memory — it's file content | Yes — change files, nothing else changes |
 | Skill interpretation | The model — reads instructions, follows them | Yes — new model, new interpretation capability |
-| Skill execution | Engine — reads from Memory, passes to model | Yes — swap Engine implementation |
+| Skill execution | Agent Loop — reads from Memory, passes to model | Yes — swap Agent Loop implementation |
 | Skill permissions | Auth — gates access | Yes — change Auth rules |
 | Skill discovery | Memory — skills are files in known locations | Yes — change folder conventions |
 
-Five independent concerns, five independent change points. No coupling between them. The evolvability Dave J wants is already present — not because skills are a separate node, but because Memory is unopinionated and the Engine is generic.
+Five independent concerns, five independent change points. No coupling between them. The evolvability Dave J wants is already present — not because skills are a separate node, but because Memory is unopinionated and the Agent Loop is generic.
 
 Making skills a separate node would actually *reduce* evolvability by adding a new component boundary to maintain. Today, changing skill format means changing file content. With a dedicated skill node, changing skill format means changing file content *and* updating the skill node's schema, validation, and processing logic. The abstraction adds a layer without adding capability.
 
@@ -146,7 +146,7 @@ The binary classifies the water, not the plumbing. The infrastructure itself —
 
 **Components:**
 - **Memory** — the persistent substrate. Stores all data. Doesn't interpret it.
-- **Engine** — the agent loop. Connects models to tools. Executes operations.
+- **Agent Loop** — the agent loop. Connects models to tools. Executes operations.
 - **Auth** — access control. Cross-cutting. Gates every request. Decomposes into memory + tools but exists as a component because security can't depend on swappable intelligence (see §2, Exception 2).
 - **Gateway** — conversation management. Single entry point for all clients.
 
@@ -154,14 +154,14 @@ These are the system. They're not memory or tools — they're what processes mem
 
 **APIs:**
 - **Gateway API** — how clients talk to the Gateway.
-- **Model API** — how the Engine talks to models.
+- **Model API** — how the Agent Loop talks to models.
 
 These define the handshakes between parts of the system. They're contracts, not data or operations.
 
 **Externals:**
 - **Clients** — any interface that connects through the Gateway API.
 - **Models** — intelligence connected through the Model API.
-- **Tools** — capabilities in the environment the Engine can execute.
+- **Tools** — capabilities in the environment the Agent Loop can execute.
 
 All three were originally proposed as components. All three dissolved during the component interviews (D51, D57, D62) because every concern they covered already mapped to an existing component.
 
@@ -171,7 +171,7 @@ All three were originally proposed as components. All three dissolved during the
 
 ### The test
 
-Does this proposed subsystem have a distinct job not already covered by Your Memory (data), Engine (execution), Auth (permissions), or Gateway (routing)?
+Does this proposed subsystem have a distinct job not already covered by Your Memory (data), Agent Loop (execution), Auth (permissions), or Gateway (routing)?
 
 If every concern maps to an existing component, it's not a new component. It's a capability delivered through the existing architecture.
 
@@ -179,11 +179,11 @@ If every concern maps to an existing component, it's not a new component. It's a
 
 This is the same test that dissolved three proposed components during the architecture interviews:
 
-- **Tools (D51-D53):** Definitions are self-describing — tools declare what they can do via protocol or manifest (D146). Execution is the Engine's job. Permissions are Auth's job. Nothing left over. Not a component. Not even an API — the Model API and Engine internals already cover it.
+- **Tools (D51-D53):** Definitions are self-describing — tools declare what they can do via protocol or manifest (D146). Execution is the Agent Loop's job. Permissions are Auth's job. Nothing left over. Not a component. Not even an API — the Model API and Agent Loop internals already cover it.
 
 - **Interface/Client (D57-D58):** Clients are external. Managing conversations is the Gateway's job (new component created to fill an actual gap). The "Interface" didn't have a distinct job — it was an external connecting to the system. Dissolved into Gateway + external clients.
 
-- **Models (D62-D63):** Provider routing is the Engine's implementation. API keys are configuration. Model selection is configuration. Fallback is the Engine's concern. No distinct job. Not a component — an external dependency with its own API.
+- **Models (D62-D63):** Provider routing is the Agent Loop's implementation. API keys are configuration. Model selection is configuration. Fallback is the Agent Loop's concern. No distinct job. Not a component — an external dependency with its own API.
 
 Each time, the question was the same: is there a gap? Each time, the answer was no — existing components already covered every concern.
 
@@ -196,7 +196,7 @@ New capabilities arrive by adding tools and memory content, not by adding compon
 - Want RAG? Add a vector store (memory) and a semantic search tool. No new component.
 - Want scheduling? Add schedule definitions (memory) and a cron tool. No new component.
 - Want Salesforce integration? Add API credentials (memory) and a Salesforce query tool. No new component.
-- Want skills? Add skill files (memory). The Engine already reads files and the model already follows instructions. No new component.
+- Want skills? Add skill files (memory). The Agent Loop already reads files and the model already follows instructions. No new component.
 
 The four components, two APIs, and three externals are sufficient. The architecture is complete — not because it anticipated every capability, but because it decomposed to a level where new capabilities compose from existing primitives rather than requiring new infrastructure.
 

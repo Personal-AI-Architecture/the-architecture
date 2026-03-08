@@ -26,10 +26,10 @@ The D147 anti-lock-in CI test makes this concrete: three normal swaps (provider,
 | Layer | What It Is | Why There's No Lock-In |
 |-------|-----------|----------------------|
 | **Your Memory** | Unopinionated substrate accessed through tools | Zero outward dependencies. The contract is the tools, not the storage. Storage can evolve without anything else changing. Exportable in open formats. |
-| **Tools** | Capabilities in the environment | Tool protocol is internal to the Engine — not an architectural boundary. Swap the protocol without changing anything else. A tool is a tool (D54) regardless of mechanism. |
+| **Tools** | Capabilities in the environment | Tool protocol is internal to the Agent Loop — not an architectural boundary. Swap the protocol without changing anything else. A tool is a tool (D54) regardless of mechanism. |
 | **Intelligence** | Models via provider interface | Config change swaps the model. Config change swaps the router. |
-| **Interface** | Web app behind a contract | Talks to the Gateway API, not the Engine. Replace or multiply freely. |
-| **Engine** | Generic agent loop | A commodity component — intentionally thin, intentionally generic. Swap the whole thing. |
+| **Interface** | Web app behind a contract | Talks to the Gateway API, not the Agent Loop. Replace or multiply freely. |
+| **Agent Loop** | Generic agent loop | A commodity component — intentionally thin, intentionally generic. Swap the whole thing. |
 | **Auth** | Cross-cutting identity layer | Open standards (OAuth 2.1, OIDC). Exportable state. Independent of every other component. |
 | **Security** | Foundation mechanisms | Standard containers, open formats. No proprietary security protocols. |
 | **Gateway** | Conversation manager | Interface-agnostic. Conversations stored in Your Memory via tools. Clients swappable. |
@@ -57,7 +57,7 @@ The rest of this document walks through each component to confirm this holds and
 
 Your Memory has zero outward dependencies. Every other component depends on it — it depends on none of them. Remove any component, and Your Memory still works. Still readable. Still portable. Still yours.
 
-The contract is the tools, not the storage. Everything accesses Your Memory through tools — the model through the Engine's tool loop, infrastructure through dedicated internal tools. Storage mechanisms can evolve (files → databases → vector indexes → cloud storage) without changing any other component. Each evolution is additive — new tool implementations behind the same interface.
+The contract is the tools, not the storage. Everything accesses Your Memory through tools — the model through the Agent Loop's tool loop, infrastructure through dedicated internal tools. Storage mechanisms can evolve (files → databases → vector indexes → cloud storage) without changing any other component. Each evolution is additive — new tool implementations behind the same interface.
 
 The memory-spec reinforces this with the "robot test" (D43): bring your memory to a future robot without rebuilding. Your Memory is independently inspectable with standard tools (text editor, file browser, database viewer) even when the system is not running.
 
@@ -76,55 +76,55 @@ The memory-spec reinforces this with the "robot test" (D43): bring your memory t
 
 ---
 
-### 2. Engine (Generic Agent Loop)
+### 2. Agent Loop (Generic Agent Loop)
 
-**Spec claim:** The Engine is a commodity component (D39) — intentionally thin, intentionally generic, intentionally free of product-specific logic. Swappable because there's nothing to extract or migrate.
+**Spec claim:** The Agent Loop is a commodity component (D39) — intentionally thin, intentionally generic, intentionally free of product-specific logic. Swappable because there's nothing to extract or migrate.
 
 #### Lock-In Assessment
 
-**The architecture has zero Engine lock-in.** The interface talks to the Gateway API contract, not the Engine. Memory doesn't know what Engine reads it. Tools are external to the Engine — the tool protocol is an Engine implementation detail, not an architectural boundary. Auth sits at the edge. Swapping the Engine is invisible to everything else.
+**The architecture has zero Agent Loop lock-in.** The interface talks to the Gateway API contract, not the Agent Loop. Memory doesn't know what Agent Loop reads it. Tools are external to the Agent Loop — the tool protocol is an Agent Loop implementation detail, not an architectural boundary. Auth sits at the edge. Swapping the Agent Loop is invisible to everything else.
 
-Because the Engine is generic — zero product-specific logic — a swap means replacing one commodity implementation with another.
+Because the Agent Loop is generic — zero product-specific logic — a swap means replacing one commodity implementation with another.
 
-#### What an Engine Swap Actually Involves
+#### What an Agent Loop Swap Actually Involves
 
-| Integration Point | With Generic Engine (D39) | If Engine Accumulates Product Logic |
+| Integration Point | With Generic Agent Loop (D39) | If Agent Loop Accumulates Product Logic |
 |---|---|---|
-| **Gateway routing** | Gateway routes to new Engine the same way | Gateway coupled to Engine-specific internals |
-| **System prompts** | Live in Memory — Engine reads them through tools | Embedded in Engine code — must be extracted |
-| **Skill execution** | Skills are markdown in Memory — model reads and follows them (D40) | Coupled to engine-specific multi-turn behavior |
-| **Tool execution** | Tool protocol is internal to Engine — swappable implementation detail | Custom tool-calling quirks built into Engine code |
-| **Provider interface** | Adapter pattern — any Engine using it gets multiple providers | Coupled to specific provider handling |
+| **Gateway routing** | Gateway routes to new Agent Loop the same way | Gateway coupled to Agent Loop-specific internals |
+| **System prompts** | Live in Memory — Agent Loop reads them through tools | Embedded in Agent Loop code — must be extracted |
+| **Skill execution** | Skills are markdown in Memory — model reads and follows them (D40) | Coupled to Agent Loop-specific multi-turn behavior |
+| **Tool execution** | Tool protocol is internal to the Agent Loop — swappable implementation detail | Custom tool-calling quirks built into Agent Loop code |
+| **Provider interface** | Adapter pattern — any Agent Loop using it gets multiple providers | Coupled to specific provider handling |
 
-**With discipline (generic Engine):** Days — drop in a new Engine behind the Gateway.
-**Without discipline (Engine accumulates product logic):** 2-4 weeks — because logic that should live in Memory has leaked into the Engine and must be extracted.
+**With discipline (generic Agent Loop):** Days — drop in a new Agent Loop behind the Gateway.
+**Without discipline (Agent Loop accumulates product logic):** 2-4 weeks — because logic that should live in Memory has leaked into the Agent Loop and must be extracted.
 
 #### What the Gateway API Contract Protects
 
 The contract provides real, structural protection:
 
-- **The interface doesn't rebuild.** It speaks the Gateway API, not the Engine.
-- **Memory is untouched.** Files don't move, don't change, don't care which Engine reads them.
-- **Tools keep working.** They're external to the Engine — the tool protocol is an implementation detail, not an architectural boundary.
-- **Auth stays put.** It's a cross-cutting layer, independent of the Engine.
+- **The interface doesn't rebuild.** It speaks the Gateway API, not the Agent Loop.
+- **Memory is untouched.** Files don't move, don't change, don't care which Agent Loop reads them.
+- **Tools keep working.** They're external to the Agent Loop — the tool protocol is an implementation detail, not an architectural boundary.
+- **Auth stays put.** It's a cross-cutting layer, independent of the Agent Loop.
 
-An Engine swap is replacing one commodity agent loop with another while everything it connects stays in place.
+An Agent Loop swap is replacing one commodity agent loop with another while everything it connects stays in place.
 
 #### Exit Cost
 
-- **With generic Engine discipline (D39):** Days — commodity swap
-- **Without discipline (Engine accumulates logic):** 2-4 weeks
-- **Adopting an off-the-shelf Engine:** Days to ~1 week
+- **With generic Agent Loop discipline (D39):** Days — commodity swap
+- **Without discipline (Agent Loop accumulates logic):** 2-4 weeks
+- **Adopting an off-the-shelf Agent Loop:** Days to ~1 week
 
 #### Verdict
 
-**Zero architectural lock-in.** The Gateway API contract ensures the swap is contained — nothing outside the Engine is affected. The Engine being generic (D39) and having zero product-specific logic means the swap cost is inherently low. This is reinforced by implementation discipline, not dependent on it.
+**Zero architectural lock-in.** The Gateway API contract ensures the swap is contained — nothing outside the Agent Loop is affected. The Agent Loop being generic (D39) and having zero product-specific logic means the swap cost is inherently low. This is reinforced by implementation discipline, not dependent on it.
 
 #### Disciplines Required
 
-1. **Keep the Engine generic (D39).** Zero product-specific logic in the Engine. All behavior emerges from Memory (D40).
-2. **Skills and prompt assembly live in Memory, not the Engine (D40).** The model reads instructions from files — the Engine just runs the agent loop.
-3. **Document the Engine's interface surface.** Maintain a list of every point where the Gateway and tools connect to the Engine. This is the swap checklist.
+1. **Keep the Agent Loop generic (D39).** Zero product-specific logic in the Agent Loop. All behavior emerges from Memory (D40).
+2. **Skills and prompt assembly live in Memory, not the Agent Loop (D40).** The model reads instructions from files — the Agent Loop just runs the agent loop.
+3. **Document the Agent Loop's interface surface.** Maintain a list of every point where the Gateway and tools connect to the Agent Loop. This is the swap checklist.
 
 ---
 
@@ -181,12 +181,12 @@ D135 elevated models to an external dependency with a clean swappable boundary: 
 ```
 Client
   → Gateway API
-    → Engine
+    → Agent Loop
       → Model API Adapter
         → Model Provider (Anthropic / OpenAI / Google / Ollama)
 ```
 
-Each link is independently swappable, and the Gateway API contract means the provider chain is invisible to the interface. Cloud and local models (Ollama) are interchangeable from the Engine's perspective.
+Each link is independently swappable, and the Gateway API contract means the provider chain is invisible to the interface. Cloud and local models (Ollama) are interchangeable from the Agent Loop's perspective.
 
 #### Prompt Tuning Reality
 
@@ -201,7 +201,7 @@ This is ongoing maintenance, not lock-in. Every AI system has this characteristi
 
 - **Switching models (same provider):** Change one preference in Your Memory. Zero code changes.
 - **Switching providers:** Change `provider_adapter` in runtime config + new adapter config file. Still zero code changes.
-- **Switching provider abstraction entirely:** Only happens via an Engine swap.
+- **Switching provider abstraction entirely:** Only happens via an Agent Loop swap.
 
 #### Verdict
 
@@ -223,7 +223,7 @@ This is ongoing maintenance, not lock-in. Every AI system has this characteristi
 
 **Individual tool lock-in — zero:**
 
-Each tool is independent. Replace one without touching others. Add without modifying anything. This is the architecture's best feature. The tool protocol is internal to the Engine (D53) — not an architectural boundary — so the protocol itself is swappable without affecting anything else.
+Each tool is independent. Replace one without touching others. Add without modifying anything. This is the architecture's best feature. The tool protocol is internal to the Agent Loop (D53) — not an architectural boundary — so the protocol itself is swappable without affecting anything else.
 
 **Caught and corrected lock-in risk:** The original D141 would have made tool preferences part of deployment configuration — coupling personal tool choices to the environment. D141-refined corrected this with a three-way split: definitions are self-describing (D146), plumbing lives in environment config, preferences stay in Your Memory (D145). This keeps tool preferences portable with the owner, not locked to a deployment.
 
@@ -231,7 +231,7 @@ Each tool is independent. Replace one without touching others. Add without modif
 
 **Implementation default protocol (MCP) lock-in — effectively zero:**
 
-The architectural protection is structural: tool protocol is internal to the Engine, swappable without affecting other components. But the implementation default choice also matters practically:
+The architectural protection is structural: tool protocol is internal to the Agent Loop, swappable without affecting other components. But the implementation default choice also matters practically:
 
 | Mitigating Factor | Why It Matters |
 |-------------------|---------------|
@@ -265,13 +265,13 @@ The probability of needing to replace MCP is near zero. MCP is the default but n
 
 ### 6. Auth (Identity, Access, and Permissions)
 
-**Spec claim:** Auth is a first-class component of the architecture — a cross-cutting layer (D60) independent of the Gateway, the Engine, and the Model. Open standards. Exportable state. Swappable implementation.
+**Spec claim:** Auth is a first-class component of the architecture — a cross-cutting layer (D60) independent of the Gateway, the Agent Loop, and the Model. Open standards. Exportable state. Swappable implementation.
 
 #### Lock-In Assessment
 
 | Dimension | Risk Level | Detail |
 |-----------|-----------|--------|
-| **Architecture position** | None | Auth is a cross-cutting layer (D60), independent of Engine and Gateway. No other component knows about callers. |
+| **Architecture position** | None | Auth is a cross-cutting layer (D60), independent of the Agent Loop and Gateway. No other component knows about callers. |
 | **Auth contract** | None | Three operations: Authenticate, Authorize, Manage. Implementation-agnostic — any technology satisfying the contract is valid. |
 | **Standards** | None | OAuth 2.1, OpenID Connect, standard token formats. Not proprietary auth protocols. |
 | **Data format** | None | Product-owned, not provider-specific. Enables migration between auth providers without losing identities. |
@@ -336,7 +336,7 @@ The probability of needing to replace MCP is near zero. MCP is the default but n
 
 ### 8. Gateway (Conversation Management)
 
-**Spec claim:** The Gateway manages conversations and routes to the Engine (D58). It's generic, content-agnostic, and interface-agnostic in the architecture (D59).
+**Spec claim:** The Gateway manages conversations and routes to the Agent Loop (D58). It's generic, content-agnostic, and interface-agnostic in the architecture (D59).
 
 #### Lock-In Assessment
 
@@ -345,7 +345,7 @@ The probability of needing to replace MCP is near zero. MCP is the default but n
 | **Conversation storage** | None | Conversations stored via dedicated conversation store tool (D152) — not direct Memory access. Conversations are data in Your Memory, not locked in the Gateway. |
 | **Client binding** | None | Interface-agnostic: serves web, CLI, mobile, Discord identically (D59). Any client that can send a message and receive a streamed response works. |
 | **Auth coupling** | None | Auth and Gateway are fully independent (D60) — swapping either doesn't affect the other. |
-| **Engine coupling** | None | Gateway-Engine contract (D137) is a plain HTTP API. Swapping the Engine doesn't require Gateway changes. |
+| **Agent Loop coupling** | None | Gateway-Agent Loop contract (D137) is a plain HTTP API. Swapping the Agent Loop doesn't require Gateway changes. |
 
 **Conversations are portable.** Remove the Gateway, and conversations are still intact and readable in Your Memory. The Gateway depends on Your Memory, but Your Memory doesn't depend on the Gateway.
 
@@ -353,7 +353,7 @@ The probability of needing to replace MCP is near zero. MCP is the default but n
 
 #### Exit Cost
 
-- **Replacing the Gateway:** Implement the Gateway API contract and the Gateway-Engine contract. Conversations are in Memory, not in the Gateway.
+- **Replacing the Gateway:** Implement the Gateway API contract and the Gateway-Agent Loop contract. Conversations are in Memory, not in the Gateway.
 - **Adding a new client:** Only requires implementing the Gateway API contract. Clean.
 - **Switching from web to mobile to Discord:** Conversations persist regardless of which client connects (D61). Start on one, continue on another.
 
@@ -377,30 +377,30 @@ The probability of needing to replace MCP is near zero. MCP is the default but n
 | **Lock-in** | Zero. The product owns this entirely. Built on the prevailing industry standard (D16), currently OpenAI Chat Completions format, swappable via adapter (D139). |
 | **Contract lock-in** | Zero. If the industry standard shifts away from Chat Completions, a Gateway API adapter absorbs the change — components on either side stay untouched (D139). |
 | **Adapter detail** | The Gateway API adapter is a thin, stateless translation layer between the external client protocol and the internal message interface. Swap the standard → swap the adapter → nothing else changes. This is a rare swap — only when industry standards shift. |
-| **Discipline** | Design it from product needs, not shaped by the current Engine's patterns. This ensures the contract survives any Engine swap. |
+| **Discipline** | Design it from product needs, not shaped by the current Agent Loop's patterns. This ensures the contract survives any Agent Loop swap. |
 
-### Tool Protocol (Engine Implementation Detail)
+### Tool Protocol (Agent Loop Implementation Detail)
 
 | Dimension | Assessment |
 |-----------|-----------|
-| **Lock-in** | Zero. Tool protocol is internal to the Engine (D53) — not an API, not an architectural boundary. How the Engine communicates with tools is an implementation detail, swappable without affecting any other component. The implementation default (currently MCP) has open governance and massive adoption, but the architectural protection is structural: the protocol is contained within the Engine. |
+| **Lock-in** | Zero. Tool protocol is internal to the Agent Loop (D53) — not an API, not an architectural boundary. How the Agent Loop communicates with tools is an implementation detail, swappable without affecting any other component. The implementation default (currently MCP) has open governance and massive adoption, but the architectural protection is structural: the protocol is contained within the Agent Loop. |
 | **Discipline** | Track the chosen protocol's versions. Budget for periodic updates. Don't build abstraction layers on top. |
 
 ### Model API (Adapter → Provider)
 
 | Dimension | Assessment |
 |-----------|-----------|
-| **Lock-in** | Zero. Each link independently swappable. Model API adapter translates between the Engine's internal interface and whichever provider format is current — this is the most frequently swapped adapter (D139). |
+| **Lock-in** | Zero. Each link independently swappable. Model API adapter translates between the Agent Loop's internal interface and whichever provider format is current — this is the most frequently swapped adapter (D139). |
 | **Concrete swap costs** | Same provider, different model: change one preference in Your Memory — zero code changes. Different provider: change `provider_adapter` in runtime config (1 field) + provide new adapter config file (1 file) + update env variable if needed — still zero code changes. |
 | **Discipline** | Have a config-level fallback to at least one alternate provider. Test it before production. |
 
-### Gateway ↔ Engine Internal Contract (D137)
+### Gateway ↔ Agent Loop Internal Contract (D137)
 
 | Dimension | Assessment |
 |-----------|-----------|
 | **Lock-in** | Zero. Plain HTTP API contract — one endpoint, SSE streaming, auth on path. Not a third API — two components in the same deployment don't need the ceremony of an external API. |
 | **Standards** | HTTP, Server-Sent Events, industry-standard `role` + `content` message format (D16). |
-| **Success criteria** | Swapping the Engine does not require Gateway changes. Swapping the Gateway does not require Engine changes. Contract works as both HTTP endpoint and direct function call without shape changes. |
+| **Success criteria** | Swapping the Agent Loop does not require Gateway changes. Swapping the Gateway does not require Agent Loop changes. Contract works as both HTTP endpoint and direct function call without shape changes. |
 | **Discipline** | Keep the contract explicit and versioned. Auth middleware sits between them independently — authenticates without either component knowing how. |
 
 ### Contract Swappability (D139)
@@ -486,7 +486,7 @@ Implementations depend on the Architecture via npm package (D155) — clean semv
 The full path from user to capability:
 
 ```
-User → Interface → Gateway API → Engine → Model API Adapter → Model Provider
+User → Interface → Gateway API → Agent Loop → Model API Adapter → Model Provider
                                     ↓
                                Tool Protocol → Tool → Your Memory
 ```
@@ -505,13 +505,13 @@ Implementations build conventions on top of the Foundation — entry-point files
 
 - **Conventions live *in* Your Memory, not enforced *by* it.** They're content, not infrastructure. Your Memory is an unopinionated substrate (D43) — it stores them without depending on them.
 - **Open formats make them readable by anything.** A competing system could read everything an implementation wrote — because conventions are stored in open formats behind the tool interface. There's nothing to "export." It's already accessible.
-- **What doesn't travel is the agent.** The Engine that *acts on* the conventions is a generic commodity component — and that's swappable behind the Gateway API contract.
+- **What doesn't travel is the agent.** The Agent Loop that *acts on* the conventions is a generic commodity component — and that's swappable behind the Gateway API contract.
 
 The honest framing: **conventions are portable because Memory is portable — and Memory is portable because it has zero outward dependencies.**
 
 ### 3. Expertise Considerations
 
-The Engine's language becomes a team working language. The Engine is TypeScript/Node.js (D154), which is the best match for AI agent effectiveness and developer availability. If the Engine is ever swapped for an off-the-shelf alternative, the language may change — but this is a team capability consideration, not lock-in.
+The Agent Loop's language becomes a team working language. The Agent Loop is TypeScript/Node.js (D154), which is the best match for AI agent effectiveness and developer availability. If the Agent Loop is ever swapped for an off-the-shelf alternative, the language may change — but this is a team capability consideration, not lock-in.
 
 ---
 
@@ -520,23 +520,23 @@ The Engine's language becomes a team working language. The Engine is TypeScript/
 | Component | Architectural Lock-In | Discipline Required | If Discipline Lapses |
 |-----------|----------------------|--------------------|--------------------|
 | **Your Memory** | Zero | Define abstract version history contract before evolving the mechanism | Version history migration gets messy |
-| **Engine** | Zero | Keep generic (D39) — zero product-specific logic | Swap cost grows from days to weeks |
+| **Agent Loop** | Zero | Keep generic (D39) — zero product-specific logic | Swap cost grows from days to weeks |
 | **Interface** | Zero | Maintain thin client — no cached state or business logic | Interface becomes harder to replace or multiply |
 | **Intelligence** | Zero | Fallback path, test against 2+ models, pin versions | Single point of failure if provider goes down |
 | **Tools** | Zero | Track tool protocol versions, keep preferences in Memory (D145) | Tool config couples to deployment |
 | **Auth** | Zero | Maintain open-standard adherence (OAuth 2.1, OIDC) | Auth drifts to proprietary protocols |
 | **Security** | Zero | No proprietary security mechanisms | Security becomes a lock-in vector |
 | **Gateway** | Zero | Keep conversations in Memory via tools (D152) | Conversation data locked in Gateway |
-| **Gateway API** | Zero (we own it) | Design independently of current Engine | API becomes Engine-specific wrapper |
+| **Gateway API** | Zero (we own it) | Design independently of current Agent Loop | API becomes Agent Loop-specific wrapper |
 | **Model API** | Zero (adapter) | Concrete swap costs: same-provider = 1 change, cross-provider = 2 changes | Provider coupling |
-| **Gateway ↔ Engine** | Zero (internal) | Keep contract explicit and versioned | Components couple internally |
+| **Gateway ↔ Agent Loop** | Zero (internal) | Keep contract explicit and versioned | Components couple internally |
 | **Configuration** | Zero | Keep runtime config to 4 fields (D144) | Environment coupling |
 | **Deployment** | Zero | Local path always exists | Managed hosting becomes a dependency |
 | **Customization** | Zero | Four mechanisms only, no code modification | Customization surface becomes coupling surface |
 
 **Every element: zero architectural lock-in.** The architecture delivers on its promise.
 
-**The only risk is implementation drift** — letting the Engine accumulate product-specific logic (violating D39), letting the interface accumulate state, letting the Gateway API shape itself around one Engine. The disciplines below prevent that drift, and D147's CI test enforces it automatically.
+**The only risk is implementation drift** — letting the Agent Loop accumulate product-specific logic (violating D39), letting the interface accumulate state, letting the Gateway API shape itself around one Agent Loop. The disciplines below prevent that drift, and D147's CI test enforces it automatically.
 
 ---
 
@@ -546,8 +546,8 @@ The Engine's language becomes a team working language. The Engine is TypeScript/
 
 | # | Discipline | What It Protects | Component |
 |---|-----------|-----------------|-----------|
-| 1 | **Design the Gateway API independently of the Engine** | Ensures the contract survives any Engine swap | Gateway API |
-| 2 | **Keep the Engine generic (D39)** | Zero product-specific logic — keeps swap cost at days | Engine |
+| 1 | **Design the Gateway API independently of the Agent Loop** | Ensures the contract survives any Agent Loop swap | Gateway API |
+| 2 | **Keep the Agent Loop generic (D39)** | Zero product-specific logic — keeps swap cost at days | Agent Loop |
 | 3 | **Add a provider fallback path** | Reliability — config-level routing to at least one alternate provider | Intelligence |
 | 4 | **Maintain open-standard adherence in Auth** | OAuth 2.1/OIDC compliance — prevents proprietary protocol drift | Auth |
 | 5 | **Test skills against two models before launch** | Validates that model swapping actually works for your specific prompts | Intelligence |
@@ -563,7 +563,7 @@ The Engine's language becomes a team working language. The Engine is TypeScript/
 | 10 | **Version the Gateway API metadata schema** | Multiple clients can negotiate capabilities | Gateway |
 | 11 | **Define abstract version history contract** | Clean migration path if version history mechanism evolves | Memory |
 | 12 | **Monitor tool protocol spec changes** | Smooth version updates, no surprises | Tools |
-| 13 | **Document the Engine integration surface** | Swap checklist — every point where Gateway and tools connect to Engine | Engine |
+| 13 | **Document the Agent Loop integration surface** | Swap checklist — every point where Gateway and tools connect to the Agent Loop | Agent Loop |
 | 14 | **Test auth export/import across deployments** | Validates auth portability claim | Auth |
 | 15 | **Keep memory export functional regardless of security level** | Non-negotiable portability invariant | Security |
 
@@ -574,10 +574,10 @@ The Engine's language becomes a team working language. The Engine is TypeScript/
 The foundation architecture is designed for zero lock-in at every layer. This analysis confirms that claim holds:
 
 - **Your Memory** is fully portable — zero outward dependencies, accessed through tools, exportable in open formats. The contract is the tools, not the storage. Storage evolves without anything else changing.
-- **Tools** are capabilities in the environment — the tool protocol is internal to the Engine, not an architectural boundary. Swap the protocol without changing anything else. Tool preferences stay in Memory (D145), not the deployment.
+- **Tools** are capabilities in the environment — the tool protocol is internal to the Agent Loop, not an architectural boundary. Swap the protocol without changing anything else. Tool preferences stay in Memory (D145), not the deployment.
 - **Intelligence** is a config change — models, routers, and providers are all swappable via adapters. Same-provider swap = 1 change. Cross-provider swap = 2 changes.
 - **Interface** talks to a contract, not an implementation. Replace or multiply freely.
-- **Engine** is a generic commodity component. Swap the whole thing.
+- **Agent Loop** is a generic commodity component. Swap the whole thing.
 - **Auth** is a cross-cutting layer with open standards (OAuth 2.1, OIDC), exportable state, and an implementation-agnostic contract.
 - **Security** uses standard containers and open formats. No proprietary security mechanisms.
 - **Gateway** stores conversations in Your Memory via tools. Clients are swappable. Auth is independent.
@@ -598,7 +598,7 @@ The D147 anti-lock-in CI test is the concrete enforcement mechanism: three swaps
 | Document | Relationship |
 |----------|-------------|
 | [foundation-spec.md](../foundation-spec.md) | The architecture being analyzed |
-| [engine-spec.md](../engine-spec.md) | Engine component spec — generic agent loop |
+| [engine-spec.md](../engine-spec.md) | Agent Loop component spec — generic agent loop |
 | [memory-spec.md](../memory-spec.md) | Your Memory component spec — portable substrate |
 | [gateway-spec.md](../gateway-spec.md) | Gateway component spec — conversation management |
 | [auth-spec.md](../auth-spec.md) | Auth component spec — identity, access, permissions |
@@ -609,6 +609,6 @@ The D147 anti-lock-in CI test is the concrete enforcement mechanism: three swaps
 | [deployment-spec.md](../deployment-spec.md) | Deployment spec — local-first guarantees |
 | [customization-spec.md](../customization-spec.md) | Customization spec — Architecture/Implementation/Personalization ecosystem |
 | [adapter-spec.md](../adapter-spec.md) | How contracts are made swappable via adapters (D139) |
-| [gateway-engine-contract.md](../gateway-engine-contract.md) | Gateway ↔ Engine internal contract (D137) |
+| [gateway-engine-contract.md](../gateway-engine-contract.md) | Gateway ↔ Agent Loop internal contract (D137) |
 | [lockin-gate.md](../lockin-gate.md) | PR-level lock-in checklist — fast gate for every non-trivial PR |
 | [lockin-audit.md](../lockin-audit.md) | Deep architecture audit — milestone/release gate |

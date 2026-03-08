@@ -16,7 +16,7 @@
     },
     "provider_adapter": {
       "type": "string",
-      "description": "Which adapter connects the Engine to AI models. Points to an adapter config file that contains provider-specific settings (base URL, supported models, API key reference). Swapping a provider = swapping this value and providing a new adapter config file. Nothing else in the system changes.",
+      "description": "Which adapter connects the Agent Loop to AI models. Points to an adapter config file that contains provider-specific settings (base URL, supported models, API key reference). Swapping a provider = swapping this value and providing a new adapter config file. Nothing else in the system changes.",
       "examples": [
         "openrouter",
         "anthropic",
@@ -25,7 +25,7 @@
     },
     "auth_mode": {
       "type": "string",
-      "description": "How authentication works in this deployment. Architecture default is 'local' (auth on hardware the owner controls). Implementations may define additional modes. Auth is cross-cutting (D60) — independent of the Gateway and Engine.",
+      "description": "How authentication works in this deployment. Architecture default is 'local' (auth on hardware the owner controls). Implementations may define additional modes. Auth is cross-cutting (D60) — independent of the Gateway and Agent Loop.",
       "default": "local",
       "examples": [
         "local"
@@ -36,7 +36,7 @@
       "items": {
         "type": "string"
       },
-      "description": "Filesystem paths where the system finds installed tools. At startup, the Engine scans these paths: MCP servers announce their tools via protocol, manifest files are read, built-in tools are loaded from code. Tools self-describe (D146) — config only says where to find them, not what they are.",
+      "description": "Filesystem paths where the system finds installed tools. At startup, the Agent Loop scans these paths: MCP servers announce their tools via protocol, manifest files are read, built-in tools are loaded from code. Tools self-describe (D146) — config only says where to find them, not what they are.",
       "examples": [
         ["./tools/"],
         ["./tools/", "/usr/local/mcp-servers/"]

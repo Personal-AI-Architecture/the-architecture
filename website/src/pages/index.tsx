@@ -32,7 +32,7 @@ const components = [
     link: '/docs/memory-spec',
   },
   {
-    title: 'Engine',
+    title: 'Agent Loop',
     description:
       'The agent loop. Sends messages to the model, executes tool calls, repeats until done. New capabilities arrive by adding tools.',
     link: '/docs/engine-spec',
@@ -61,7 +61,7 @@ const apis = [
   {
     title: 'Model API',
     description:
-      'How the engine connects to AI models. Swap providers with a config change — no code changes required.',
+      'How the agent loop connects to AI models. Swap providers with a config change — no code changes required.',
     link: '/docs/models-spec',
   },
 ];

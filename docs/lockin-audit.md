@@ -15,7 +15,7 @@ hide_table_of_contents: true
 
 ### Boundaries and Contracts
 
-- [ ] Component boundaries remain contract-driven — Gateway API, Model API, Gateway-Engine contract (D64, D137).
+- [ ] Component boundaries remain contract-driven — Gateway API, Model API, Gateway-Agent Loop contract (D64, D137).
 - [ ] No new dependency on another component's internals has been introduced (Principle 3).
 - [ ] Framework/library choices remain internal implementation details (Principle 2).
 
@@ -44,22 +44,22 @@ hide_table_of_contents: true
 
 Run the sections that match changed areas.
 
-### Engine
+### Agent Loop
 
-- [ ] Engine remains generic — no product-specific behavior in core loop (D39).
-- [ ] Engine behavior continues to emerge from memory content + tools + config (D40).
-- [ ] Engine remains provider-agnostic behind Model API adapters (D139).
+- [ ] Agent Loop remains generic — no product-specific behavior in core loop (D39).
+- [ ] Agent Loop behavior continues to emerge from memory content + tools + config (D40).
+- [ ] Agent Loop remains provider-agnostic behind Model API adapters (D139).
 - [ ] Tool execution path remains protocol-agnostic in the architecture — MCP default is allowed, not mandatory (D32, D53).
 
 ### Gateway
 
 - [ ] Gateway remains client-agnostic and content-agnostic in the architecture (D57, D58).
-- [ ] Conversation lifecycle stays in Gateway without coupling Gateway to Engine internals (D58).
-- [ ] Gateway-Engine interaction remains within the internal contract scope (D137).
+- [ ] Conversation lifecycle stays in Gateway without coupling Gateway to Agent Loop internals (D58).
+- [ ] Gateway-Agent Loop interaction remains within the internal contract scope (D137).
 
 ### Auth
 
-- [ ] Auth remains a cross-cutting layer independent of Gateway/Engine implementation internals (D60).
+- [ ] Auth remains a cross-cutting layer independent of Gateway/Agent Loop implementation internals (D60).
 - [ ] Permission model changes remain additive and backward-compatible where practical.
 - [ ] Auth implementation choices do not create a single inescapable identity-provider dependency.
 
@@ -97,10 +97,10 @@ Run the sections that match changed areas.
 
 ### Model API
 
-- [ ] Model API remains stable for Engine-side usage.
-- [ ] Provider-specific quirks remain outside Engine core.
+- [ ] Model API remains stable for Agent Loop-side usage.
+- [ ] Provider-specific quirks remain outside Agent Loop core.
 
-### Gateway-Engine Contract
+### Gateway-Agent Loop Contract
 
 - [ ] Internal contract remains explicit and versioned as needed (D137).
 - [ ] New fields/behavior are backward-compatible or version-gated.

@@ -19,10 +19,10 @@ A person has a brain and a body. The brain holds memory, applies intelligence, a
 | Human | Architecture | Notes |
 |-------|-------------|-------|
 | **Brain** | Memory + Models (intelligence) + Auth | The brain remembers, reasons, and decides who to trust |
-| **Body** | Engine | Executes what the brain decides — the hands that do the work |
-| **You (the whole person)** | The 4 components together | Brain + body = a functioning person. Memory + Engine + Auth + Gateway = a functioning system |
+| **Body** | Agent Loop | Executes what the brain decides — the hands that do the work |
+| **You (the whole person)** | The 4 components together | Brain + body = a functioning person. Memory + Agent Loop + Auth + Gateway = a functioning system |
 
-**Where the analogy breaks — and that's an advantage.** In the human world, you can't swap your brain or upgrade your body. In the digital world, you can. Every component except Memory is swappable and upgradeable. Better intelligence? Swap the model. Better execution? Swap the Engine. Better access control? Swap Auth. The one thing you can't swap is the one thing that makes you *you* — Your Memory. Your Memory is Your Memory.
+**Where the analogy breaks — and that's an advantage.** In the human world, you can't swap your brain or upgrade your body. In the digital world, you can. Every component except Memory is swappable and upgradeable. Better intelligence? Swap the model. Better execution? Swap the Agent Loop. Better access control? Swap Auth. The one thing you can't swap is the one thing that makes you *you* — Your Memory. Your Memory is Your Memory.
 
 This is the digital advantage: everything that's infrastructure can improve without losing what's personal.
 
@@ -30,14 +30,14 @@ This is the digital advantage: everything that's infrastructure can improve with
 
 In a human, remembering and recalling aren't "tools you use" — they're just how your brain works. You don't think of reaching for a memory as picking up a tool.
 
-In the architecture, Memory access is mediated through tools (read, write, search) because of the zero-dependency principle — Memory can't depend on the Engine. The Engine accesses Memory through explicit interfaces. But functionally, these are internal operations, not tools you "hold." They're the nervous system — how the body accesses what the brain knows.
+In the architecture, Memory access is mediated through tools (read, write, search) because of the zero-dependency principle — Memory can't depend on the Agent Loop. The Agent Loop accesses Memory through explicit interfaces. But functionally, these are internal operations, not tools you "hold." They're the nervous system — how the body accesses what the brain knows.
 
 | Human | Architecture |
 |-------|-------------|
 | Remembering something | Memory read tool |
 | Learning / storing a new fact | Memory write tool |
 | Searching your memory for something relevant | Memory search tool |
-| Your nervous system (connects brain to body) | The tool interface between Engine and Memory |
+| Your nervous system (connects brain to body) | The tool interface between the Agent Loop and Memory |
 
 ### Personalization: External Tools — What Your Hands Hold
 
@@ -47,7 +47,7 @@ This is where the real tool analogy kicks in. Humans make tools, use tools made 
 |-------|-------------|
 | Tools you own (your hammer, your screwdriver) | Tools in your environment — installed locally, you control them |
 | Tools you pay to use (renting equipment, gym membership) | External tool services — third-party APIs, hosted MCP servers |
-| Paying someone to use tools for you (hiring a contractor) | Engine + Model — intelligence you pay for (Model API) that uses tools on your behalf |
+| Paying someone to use tools for you (hiring a contractor) | Agent Loop + Model — intelligence you pay for (Model API) that uses tools on your behalf |
 | Your workshop / toolshed | The tool environment — what's installed and available |
 | Buying a new tool | Installing a new tool in the environment |
 | Learning a new skill (how to use a tool) | A skill file in Your Memory — instructions that reference tools |
@@ -58,7 +58,7 @@ This is where the real tool analogy kicks in. Humans make tools, use tools made 
 
 ### The Hand Doesn't Care
 
-The hand doesn't know or need to know if the tool you're using is yours or someone else's — it just needs to use it. Same with the Engine. It grips and executes. It doesn't care about ownership, origin, or where the tool came from.
+The hand doesn't know or need to know if the tool you're using is yours or someone else's — it just needs to use it. Same with the Agent Loop. It grips and executes. It doesn't care about ownership, origin, or where the tool came from.
 
 That's Auth's job — deciding *whether* you can use a tool. That's Memory's job — knowing *which* tools you prefer. The hand just executes. A tool is a tool.
 
@@ -71,7 +71,7 @@ When you move to a new city:
 | What you do | What it maps to |
 |-------------|----------------|
 | **Take your stuff** (car, clothes, furniture) | **Take Your Memory** — your data, your preferences, your skills, your history |
-| **Leave the infrastructure** (roads, buildings, utilities) | **Leave the components** — the new system has its own Engine, Gateway, Auth |
+| **Leave the infrastructure** (roads, buildings, utilities) | **Leave the components** — the new system has its own Agent Loop, Gateway, Auth |
 | **Find equivalent services** (new grocery store, new doctor, new bank) | **Find equivalent tools** — the ecosystem has the same MCP servers, CLI tools, APIs |
 | **Reconfigure logistics** (new address, new routes, new accounts) | **Reconfigure plumbing** — server addresses, ports, API keys (environment config) |
 
@@ -121,7 +121,7 @@ The two-step discovery process is how humans naturally work. You don't inventory
 
 ## Gateway — Your Front Door
 
-The Gateway is how the outside world reaches you. It doesn't care who you are (Auth handles identity) or what you're carrying (the Engine handles processing). It manages the flow in and out.
+The Gateway is how the outside world reaches you. It doesn't care who you are (Auth handles identity) or what you're carrying (the Agent Loop handles processing). It manages the flow in and out.
 
 | Human | Architecture |
 |-------|-------------|
@@ -198,7 +198,7 @@ You don't wake up with your entire day loaded in your head. You check a note on 
 | The notepad is tiny and generic — it works regardless of what your day looks like | The bootstrap is minimal and generic — one line, works for any product built on the architecture |
 | Your knowledge lives in your brain, not on the notepad | Instructions live in Your Memory, not in the bootstrap — the bootstrap just says "look here" |
 
-This is D50 and the BIOS analogy from memory-spec. The bootstrap is Engine configuration, not Memory. Implementations choose what the note says. The Architecture just defines that there is a note.
+This is D50 and the BIOS analogy from memory-spec. The bootstrap is Agent Loop configuration, not Memory. Implementations choose what the note says. The Architecture just defines that there is a note.
 
 ---
 
@@ -246,7 +246,7 @@ Your capability grows in concentric circles. As a child, your world is your room
 | **Your neighborhood / city** — stores, services, other people | **External services** — APIs, third-party tools, remote data | V3 |
 | **The world** — travel, international connections, global access | **Inbound integrations** — other systems connecting to yours | V4 |
 
-At each expansion, you're still you. You didn't get a new brain or new memories — you gained access to more tools and more of the world's data. The architecture works the same way: each expansion is adding tools to the environment and permissions in Auth. The Engine doesn't change. Your Memory doesn't change. The system absorbs scope the way you absorb a bigger world — same person, wider reach.
+At each expansion, you're still you. You didn't get a new brain or new memories — you gained access to more tools and more of the world's data. The architecture works the same way: each expansion is adding tools to the environment and permissions in Auth. The Agent Loop doesn't change. Your Memory doesn't change. The system absorbs scope the way you absorb a bigger world — same person, wider reach.
 
 **Where the analogy breaks — and that's fine.** A child growing up takes years. Adding tools to the environment takes minutes. The architecture compresses what's naturally a developmental timeline into a configuration change.
 
@@ -276,7 +276,7 @@ Everyone has the same body plan — two arms, two legs, a brain, a heart. What y
 |-------|-------------|
 | **Human anatomy** — the universal body plan everyone shares | **Architecture** — 4 components, 2 APIs, 3 externals. Generic, unopinionated |
 | **Your lifestyle** — career, routines, preferences, personality | **Implementation** — specific tools, default content, methodology, personality, brand |
-| **Anatomy doesn't prescribe lifestyle** — having hands doesn't mean you must be a pianist | **Architecture doesn't prescribe product** — having an Engine doesn't mean you must build a chatbot |
+| **Anatomy doesn't prescribe lifestyle** — having hands doesn't mean you must be a pianist | **Architecture doesn't prescribe product** — having an Agent Loop doesn't mean you must build a chatbot |
 | **Two people with the same anatomy live very different lives** — same infrastructure, different choices | **Two products on the same Architecture look completely different** — same architecture, different Memory contents |
 | **Your lifestyle choices are yours to change** — switch careers, move cities, change routines | **Implementation opinions are swappable** — change the default tools, change the methodology, change the personality |
 

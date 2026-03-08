@@ -25,19 +25,19 @@ These criteria verify that the implementation matches the architectural topology
 
 ### S-1. Four components, no more, no fewer (D64)
 
-**Claim:** The system consists of exactly four components: Your Memory, Engine, Auth, and Gateway.
+**Claim:** The system consists of exactly four components: Your Memory, Agent Loop, Auth, and Gateway.
 
 **Verification:** Enumerate every deployed unit that contains business logic or state management. Map each to one of the four components. Identify any that don't map.
 
-**Fail condition:** A fifth component exists that is not classifiable as Your Memory, Engine, Auth, or Gateway — and is not an external dependency, an API, or an adapter.
+**Fail condition:** A fifth component exists that is not classifiable as Your Memory, Agent Loop, Auth, or Gateway — and is not an external dependency, an API, or an adapter.
 
 ### S-2. Two APIs (D64)
 
-**Claim:** Components communicate through exactly two APIs: the Gateway API (clients ↔ Gateway) and the Model API (Engine ↔ models).
+**Claim:** Components communicate through exactly two APIs: the Gateway API (clients ↔ Gateway) and the Model API (Agent Loop ↔ models).
 
-**Verification:** Trace every external integration point. Each must route through one of the two APIs, be internal (Gateway ↔ Engine contract), or be internal to the Engine (Engine ↔ Tools execution, which is not an architectural boundary — see [tools-spec.md](./tools-spec.md)).
+**Verification:** Trace every external integration point. Each must route through one of the two APIs, be internal (Gateway ↔ Agent Loop contract), or be internal to the Agent Loop (Agent Loop ↔ Tools execution, which is not an architectural boundary — see [tools-spec.md](./tools-spec.md)).
 
-**Fail condition:** A third API exists — an external-facing protocol boundary that is neither the Gateway API nor the Model API. (The Gateway ↔ Engine internal contract is explicitly not an API per D137. Engine ↔ Tool communication is internal to the Engine, not an API.)
+**Fail condition:** A third API exists — an external-facing protocol boundary that is neither the Gateway API nor the Model API. (The Gateway ↔ Agent Loop internal contract is explicitly not an API per D137. Agent Loop ↔ Tool communication is internal to the Agent Loop, not an API.)
 
 ### S-3. Three external dependencies (D64)
 
@@ -47,21 +47,21 @@ These criteria verify that the implementation matches the architectural topology
 
 **Fail condition:** An external dependency exists that cannot be classified into one of the three categories, or an external dependency has been internalized as a component.
 
-### S-4. Gateway ↔ Engine is internal, not an API (D137)
+### S-4. Gateway ↔ Agent Loop is internal, not an API (D137)
 
-**Claim:** The interface between Gateway and Engine is a plain HTTP API contract between two co-deployed components — not a third public API.
+**Claim:** The interface between Gateway and the Agent Loop is a plain HTTP API contract between two co-deployed components — not a third public API.
 
-**Verification:** Inspect the Gateway ↔ Engine interface. Confirm it is not documented or exposed as a public integration point. Confirm no external system connects through it.
+**Verification:** Inspect the Gateway ↔ Agent Loop interface. Confirm it is not documented or exposed as a public integration point. Confirm no external system connects through it.
 
-**Fail condition:** Third-party systems or clients connect directly to the Engine, bypassing the Gateway. Or the interface has been promoted to a public, versioned API with external consumers.
+**Fail condition:** Third-party systems or clients connect directly to the Agent Loop, bypassing the Gateway. Or the interface has been promoted to a public, versioned API with external consumers.
 
 ### S-5. Tools are not a component (D51)
 
-**Claim:** Tools are capabilities in the environment, not a component. Tool definitions live in Memory, tool execution lives in Engine, tool permissions live in Auth.
+**Claim:** Tools are capabilities in the environment, not a component. Tool definitions live in Memory, tool execution lives in the Agent Loop, tool permissions live in Auth.
 
 **Verification:** Confirm there is no standalone "tools service" or "tools component" that must be independently deployed or managed. Confirm tool concerns map to existing components.
 
-**Fail condition:** A separate tools component exists with its own lifecycle, configuration, and deployment independent of Engine/Memory/Auth.
+**Fail condition:** A separate tools component exists with its own lifecycle, configuration, and deployment independent of Agent Loop/Memory/Auth.
 
 ### S-6. Models are not a component (D63)
 
@@ -75,7 +75,7 @@ These criteria verify that the implementation matches the architectural topology
 
 **Claim:** Clients are external. The system is the four components. Clients connect through the Gateway API.
 
-**Verification:** Confirm the system functions identically regardless of which client connects. Confirm no client-specific logic exists in Gateway, Engine, Auth, or Memory.
+**Verification:** Confirm the system functions identically regardless of which client connects. Confirm no client-specific logic exists in Gateway, Agent Loop, Auth, or Memory.
 
 **Fail condition:** The system requires a specific client to function, or a component contains logic that only works with one particular client.
 
@@ -140,21 +140,21 @@ The four pillars are values, not code — but they produce observable properties
 **Claim:** Your Memory has zero outward dependencies. Every other component depends on it. It depends on none of them.
 
 **Verification:**
-- (a) **Zero outward dependencies:** Remove Engine, Auth, Gateway, all clients, all models. Your Memory is still intact, readable, and complete. No data is lost or orphaned.
-- (b) **Inward dependency direction:** Engine, Auth, and Gateway all depend on Memory (via tools or configuration). Memory does not import, call, or reference any of them.
-- (c) **Persistence across swaps:** Swap the Engine, swap the Gateway, swap Auth. Memory is unchanged.
+- (a) **Zero outward dependencies:** Remove the Agent Loop, Auth, Gateway, all clients, all models. Your Memory is still intact, readable, and complete. No data is lost or orphaned.
+- (b) **Inward dependency direction:** The Agent Loop, Auth, and Gateway all depend on Memory (via tools or configuration). Memory does not import, call, or reference any of them.
+- (c) **Persistence across swaps:** Swap the Agent Loop, swap the Gateway, swap Auth. Memory is unchanged.
 - (d) **Independent inspectability:** Memory can be browsed, searched, and read with standard tools (text editor, file browser, database viewer) while the system is not running.
 
-**Fail condition:** Memory contains references to specific component implementations. Or Memory requires a running component to be readable. Or removing a component makes Memory data inaccessible or corrupt. Or Memory has an import/dependency on Engine, Auth, or Gateway code.
+**Fail condition:** Memory contains references to specific component implementations. Or Memory requires a running component to be readable. Or removing a component makes Memory data inaccessible or corrupt. Or Memory has an import/dependency on Agent Loop, Auth, or Gateway code.
 
 ### PR-2. Everything Else Is Swappable (Principle 2)
 
-**Claim:** Engine, Auth, Gateway, clients, models, tools, contracts, hosting — all replaceable. The swappability chain is complete: Memory via tools, components via contracts, contracts via adapters.
+**Claim:** Agent Loop, Auth, Gateway, clients, models, tools, contracts, hosting — all replaceable. The swappability chain is complete: Memory via tools, components via contracts, contracts via adapters.
 
 **Verification:**
-- (a) **Component swap:** Replace the Engine with a different implementation. Gateway, Auth, Memory, clients, models — nothing else changes. (Repeat for Auth, Gateway.)
+- (a) **Component swap:** Replace the Agent Loop with a different implementation. Gateway, Auth, Memory, clients, models — nothing else changes. (Repeat for Auth, Gateway.)
 - (b) **Contract swap:** Change the Gateway API protocol (e.g., REST to GraphQL). Only the adapter changes. Components stay the same.
-- (c) **Memory swap:** Change the storage backend (e.g., files to database). Only the tool implementations change. Engine, Auth, Gateway — nothing else changes.
+- (c) **Memory swap:** Change the storage backend (e.g., files to database). Only the tool implementations change. Agent Loop, Auth, Gateway — nothing else changes.
 - (d) **Swappability chain completeness:** For every element in the system, identify the intermediary that absorbs change (tools, contracts, or adapters). If none exists, the element is a lock-in point.
 
 **Fail condition:** Swapping any element requires changes to more than one component. Or an element exists with no identifiable intermediary protecting it from change propagation.
@@ -164,10 +164,10 @@ The four pillars are values, not code — but they produce observable properties
 **Claim:** Every component is defined by what it does, not how it works. Components interact only through defined interfaces.
 
 **Verification:**
-- (a) Engine does not know Memory's storage format — it calls tools.
-- (b) Gateway does not know Engine's internal implementation — it uses the Gateway-Engine contract.
-- (c) Clients do not know what Engine is behind the Gateway API.
-- (d) Auth does not depend on Gateway or Engine internals.
+- (a) The Agent Loop does not know Memory's storage format — it calls tools.
+- (b) Gateway does not know the Agent Loop's internal implementation — it uses the Gateway-Agent Loop contract.
+- (c) Clients do not know what Agent Loop is behind the Gateway API.
+- (d) Auth does not depend on Gateway or Agent Loop internals.
 - (e) Swapping any component's implementation (while preserving its interface) requires zero changes to other components.
 
 **Fail condition:** Any component directly accesses another component's internals (imports, shared state, format assumptions). Or swapping an implementation requires changes in a component that shouldn't know about it.
@@ -204,7 +204,7 @@ The four pillars are values, not code — but they produce observable properties
 
 **Claim:** In: message content + conversation ID (optional) + metadata. Out: streamed response + conversation ID + message record.
 
-**Verification:** Inspect the Gateway API. Confirm the payload matches the spec. Confirm no component-internal state leaks through the API (engine configuration, auth tokens in responses, memory paths).
+**Verification:** Inspect the Gateway API. Confirm the payload matches the spec. Confirm no component-internal state leaks through the API (agent loop configuration, auth tokens in responses, memory paths).
 
 **Fail condition:** The Gateway API carries data not specified in the contract. Or internal implementation details are exposed to clients.
 
@@ -212,9 +212,9 @@ The four pillars are values, not code — but they produce observable properties
 
 **Claim:** In: prompt (system instructions + conversation + tool definitions + context). Out: streamed completion (text + tool calls).
 
-**Verification:** Inspect the Model API boundary. Confirm the Engine sends only what the spec defines. Confirm provider-specific details are in the adapter, not in the Engine.
+**Verification:** Inspect the Model API boundary. Confirm the Agent Loop sends only what the spec defines. Confirm provider-specific details are in the adapter, not in the Agent Loop.
 
-**Fail condition:** The Engine contains provider-specific logic outside the adapter. Or the Model API payload includes implementation-specific fields not in the contract.
+**Fail condition:** The Agent Loop contains provider-specific logic outside the adapter. Or the Model API payload includes implementation-specific fields not in the contract.
 
 ### C-3. APIs are hollow
 
@@ -232,13 +232,13 @@ The four pillars are values, not code — but they produce observable properties
 
 **Fail condition:** An adapter contains business logic, caching, routing, or policy decisions. Adapters that grow fat are becoming components.
 
-### C-5. Gateway ↔ Engine contract is bounded (D137)
+### C-5. Gateway ↔ Agent Loop contract is bounded (D137)
 
-**Claim:** Gateway POSTs a request (messages array + metadata) to Engine. Engine returns an SSE stream (text, tool calls, results, completion). Auth middleware sits on the path. Engine is pre-configured — tools and provider don't change per-request.
+**Claim:** Gateway POSTs a request (messages array + metadata) to the Agent Loop. The Agent Loop returns an SSE stream (text, tool calls, results, completion). Auth middleware sits on the path. The Agent Loop is pre-configured — tools and provider don't change per-request.
 
-**Verification:** Inspect the internal contract. Confirm the request/response format matches the spec. Confirm the Engine does not receive per-request configuration (tools, provider, model) from the Gateway.
+**Verification:** Inspect the internal contract. Confirm the request/response format matches the spec. Confirm the Agent Loop does not receive per-request configuration (tools, provider, model) from the Gateway.
 
-**Fail condition:** The Gateway sends per-request configuration that changes Engine behavior. Or the internal contract carries data not specified in [gateway-engine-contract.md](./gateway-engine-contract.md).
+**Fail condition:** The Gateway sends per-request configuration that changes Agent Loop behavior. Or the internal contract carries data not specified in [gateway-engine-contract.md](./gateway-engine-contract.md).
 
 ---
 
@@ -250,7 +250,7 @@ Memory is the platform. It gets its own section because so much of the architect
 
 **Claim:** Your Memory depends on no other component. Removing everything else leaves Memory intact.
 
-**Verification:** Shut down Engine, Gateway, Auth. Remove all client applications. Disconnect all model providers. Verify Memory is still present, complete, and readable.
+**Verification:** Shut down the Agent Loop, Gateway, Auth. Remove all client applications. Disconnect all model providers. Verify Memory is still present, complete, and readable.
 
 **Fail condition:** Any data in Memory is inaccessible, corrupt, or incomplete when no other component is running.
 
@@ -264,7 +264,7 @@ Memory is the platform. It gets its own section because so much of the architect
 
 ### M-3. Accessed exclusively through tools
 
-**Claim:** Every component accesses Memory exclusively through tools — the model through the Engine's tool loop, infrastructure components through dedicated internal tools (D152).
+**Claim:** Every component accesses Memory exclusively through tools — the model through the Agent Loop's tool loop, infrastructure components through dedicated internal tools (D152).
 
 **Verification:** Trace every read/write path to Memory from each component. Confirm each goes through a defined tool interface. Confirm no component directly accesses Memory's storage implementation.
 
@@ -274,7 +274,7 @@ Memory is the platform. It gets its own section because so much of the architect
 
 **Claim:** The contract is the tools, not the storage. Storage can evolve without anything else changing.
 
-**Verification:** Change the storage backend (e.g., files to SQLite, or flat files to a different directory structure). Confirm only tool implementations change. Confirm Engine, Auth, Gateway, and all clients are unaffected.
+**Verification:** Change the storage backend (e.g., files to SQLite, or flat files to a different directory structure). Confirm only tool implementations change. Confirm the Agent Loop, Auth, Gateway, and all clients are unaffected.
 
 **Fail condition:** Changing storage requires changes in any component other than the tool implementations.
 
@@ -290,7 +290,7 @@ Memory is the platform. It gets its own section because so much of the architect
 
 **Claim:** Every conversation, decision, and plan makes the system more powerful because it makes Memory richer. This value persists across component swaps.
 
-**Verification:** Use the system over time. Accumulate conversations, decisions, preferences. Swap the Engine. Confirm the new Engine benefits from the same Memory content — previous context is available, preferences are honored, skills work.
+**Verification:** Use the system over time. Accumulate conversations, decisions, preferences. Swap the Agent Loop. Confirm the new Agent Loop benefits from the same Memory content — previous context is available, preferences are honored, skills work.
 
 **Fail condition:** Swapping a component causes loss of accumulated value. Or accumulated Memory content is only useful with a specific component implementation.
 
@@ -306,21 +306,21 @@ For each row in the matrix, verify:
 
 | Responsibility | Owner | Verification | Fail condition |
 |---|---|---|---|
-| Persist, retrieve, search, version data | Your Memory (via tools) | Confirm no other component persists durable owner data | Engine, Auth, or Gateway stores owner data outside Memory |
-| Provide structure (paths, hierarchy) | Your Memory | Confirm Memory provides organizational structure | Engine or Gateway imposes structure on Memory |
-| Understand content, make meaning | Model | Confirm no component contains hardcoded content interpretation | Engine or Memory contains semantic logic |
-| Assemble prompts | Model reads from Memory | Confirm prompts are assembled from Memory content, not hardcoded in Engine | Engine contains hardcoded prompt templates |
-| Select context | Model | Confirm the model decides what to read, not the Engine | Engine pre-filters or selects context for the model |
-| Summarize, associate, consolidate | Model using Memory operations | Confirm the model performs synthesis, not Memory or Engine | Memory or Engine contains summarization/association logic |
-| Execute tools | Engine | Confirm only the Engine executes tools | Gateway or Auth executes tools (Auth may enforce permissions, but doesn't execute) |
-| Decide which tools to use | Model (via Engine loop) | Confirm the model selects tools, Engine executes them | Engine contains tool selection logic independent of the model |
-| Execute skills | Model + Engine | Confirm model reads skill files from Memory, Engine executes resulting tool calls | Skills are compiled code or hardcoded sequences in Engine |
-| Protect access / control permissions | Auth | Confirm Auth is the sole permission enforcer | Gateway or Engine contains access control logic independent of Auth |
-| Manage conversations | Gateway | Confirm conversation lifecycle (create, list, retrieve, store) lives in Gateway | Engine or Memory manages conversation state |
-| Route requests to Engine | Gateway | Confirm Gateway routes, Auth doesn't route | Auth contains routing logic |
-| Connect to AI models | Model API | Confirm model access goes through Model API | Engine calls models directly, bypassing the API |
-| Accept client connections | Gateway API | Confirm clients connect through Gateway API | Clients connect directly to Engine or other components |
-| Display content to owners | Clients (external) | Confirm no component contains display/rendering logic | Gateway or Engine contains client-specific UI logic |
+| Persist, retrieve, search, version data | Your Memory (via tools) | Confirm no other component persists durable owner data | Agent Loop, Auth, or Gateway stores owner data outside Memory |
+| Provide structure (paths, hierarchy) | Your Memory | Confirm Memory provides organizational structure | Agent Loop or Gateway imposes structure on Memory |
+| Understand content, make meaning | Model | Confirm no component contains hardcoded content interpretation | Agent Loop or Memory contains semantic logic |
+| Assemble prompts | Model reads from Memory | Confirm prompts are assembled from Memory content, not hardcoded in the Agent Loop | Agent Loop contains hardcoded prompt templates |
+| Select context | Model | Confirm the model decides what to read, not the Agent Loop | Agent Loop pre-filters or selects context for the model |
+| Summarize, associate, consolidate | Model using Memory operations | Confirm the model performs synthesis, not Memory or the Agent Loop | Memory or Agent Loop contains summarization/association logic |
+| Execute tools | Agent Loop | Confirm only the Agent Loop executes tools | Gateway or Auth executes tools (Auth may enforce permissions, but doesn't execute) |
+| Decide which tools to use | Model (via agent loop) | Confirm the model selects tools, the Agent Loop executes them | Agent Loop contains tool selection logic independent of the model |
+| Execute skills | Model + Agent Loop | Confirm model reads skill files from Memory, the Agent Loop executes resulting tool calls | Skills are compiled code or hardcoded sequences in the Agent Loop |
+| Protect access / control permissions | Auth | Confirm Auth is the sole permission enforcer | Gateway or Agent Loop contains access control logic independent of Auth |
+| Manage conversations | Gateway | Confirm conversation lifecycle (create, list, retrieve, store) lives in Gateway | Agent Loop or Memory manages conversation state |
+| Route requests to Agent Loop | Gateway | Confirm Gateway routes, Auth doesn't route | Auth contains routing logic |
+| Connect to AI models | Model API | Confirm model access goes through Model API | Agent Loop calls models directly, bypassing the API |
+| Accept client connections | Gateway API | Confirm clients connect through Gateway API | Clients connect directly to the Agent Loop or other components |
+| Display content to owners | Clients (external) | Confirm no component contains display/rendering logic | Gateway or Agent Loop contains client-specific UI logic |
 | Bootstrap the system | Runtime config | Confirm bootstrap is thin (4 fields per configuration-spec) | Bootstrap requires Memory content or complex configuration |
 | Resolve concurrent writes | Tool implementations | Confirm concurrency handling lives in tool implementations, not in Memory component | Memory component contains locking or conflict resolution logic |
 
@@ -342,17 +342,17 @@ Foundation decisions are architectural commitments. Each is verifiable.
 
 | Decision | Claim | Verification | Fail condition |
 |---|---|---|---|
-| D15 | Clients are product-owned, not coupled to Engine | No client imports Engine code or depends on Engine internals | Client contains Engine-specific logic |
+| D15 | Clients are product-owned, not coupled to the Agent Loop | No client imports Agent Loop code or depends on Agent Loop internals | Client contains Agent Loop-specific logic |
 | D16 | Zero custom protocols | Gateway API uses an industry standard protocol | A proprietary protocol was invented |
-| D20 | Client metadata flows through Gateway API | Client sends context, Gateway passes it, Engine uses it — no coupling | Gateway interprets or acts on client metadata |
+| D20 | Client metadata flows through Gateway API | Client sends context, Gateway passes it, the Agent Loop uses it — no coupling | Gateway interprets or acts on client metadata |
 | D22 | Auth on both local and managed | Auth works identically in both deployment modes (config differs, code doesn't) | Separate auth code paths for local vs managed |
 | D23 | Managed hosting = same code, stricter config | No code forks between local and managed | Managed hosting requires different code |
-| D24 | Engine ceiling matches best-in-class agents | Engine supports multi-turn tool use, parallel execution, context management at parity with leading agent frameworks | Engine caps below Claude Code / Open Claw capability level |
+| D24 | Agent Loop ceiling matches best-in-class agents | Agent Loop supports multi-turn tool use, parallel execution, context management at parity with leading agent frameworks | Agent Loop caps below Claude Code / Open Claw capability level |
 | D26 | Skills are multi-turn, adaptive, judgment-based | Skill execution supports real agentic behavior, not scripted sequences | Skills are hardcoded sequences that don't use model judgment |
-| D39 | Engine is generic — no product-specific logic | Engine contains no product-specific conditionals, feature flags, or domain logic | Engine contains product-specific behavior |
-| D40 | Prompts and skills live in Memory | Prompt assembly reads from files in Memory; skills are Memory content | Prompts are hardcoded in Engine source; skills are compiled code |
-| D51 | Tools = definitions in Memory + execution in Engine + permissions in Auth | No standalone tools component | A tools service exists outside these three |
-| D53 | No tool protocol API | Tool calls flow Engine → Provider API → Model, execution is internal to Engine | A third API exists for tool communication |
+| D39 | Agent Loop is generic — no product-specific logic | Agent Loop contains no product-specific conditionals, feature flags, or domain logic | Agent Loop contains product-specific behavior |
+| D40 | Prompts and skills live in Memory | Prompt assembly reads from files in Memory; skills are Memory content | Prompts are hardcoded in Agent Loop source; skills are compiled code |
+| D51 | Tools = definitions in Memory + execution in the Agent Loop + permissions in Auth | No standalone tools component | A tools service exists outside these three |
+| D53 | No tool protocol API | Tool calls flow Agent Loop → Provider API → Model, execution is internal to the Agent Loop | A third API exists for tool communication |
 | D60 | Auth is independent of Gateway | Auth and Gateway have no mutual dependencies; either can be swapped independently | Auth imports Gateway code or vice versa |
 | D135 | Memory/tool binary holds | Every new capability maps to memory (data) or tools (actions), not new infrastructure | A capability requires a new component or API |
 | D139 | Swappability chain is complete | For every element: Memory → tools, components → contracts, contracts → adapters | An element exists with no intermediary absorbing change |
@@ -411,7 +411,7 @@ Each story is an acceptance test for the architecture itself.
 
 **Pass criteria:** Only config/adapter changed. No component code changed. Conversation history preserved.
 
-**Fail criteria:** Provider swap required Engine, Gateway, Auth, or Memory code changes.
+**Fail criteria:** Provider swap required Agent Loop, Gateway, Auth, or Memory code changes.
 
 ### FS-5. Swap the client
 
@@ -431,14 +431,14 @@ Each story is an acceptance test for the architecture itself.
 2. Implement as new tools.
 3. Verify no other component changed.
 
-**Pass criteria:** New capability available. Engine, Auth, Gateway unchanged.
+**Pass criteria:** New capability available. Agent Loop, Auth, Gateway unchanged.
 
 **Fail criteria:** Storage evolution required changes outside tool implementations.
 
-### FS-7. Swap the Engine
+### FS-7. Swap the Agent Loop
 
 **Test procedure:**
-1. Replace the Engine with a different implementation that honors the same contracts.
+1. Replace the Agent Loop with a different implementation that honors the same contracts.
 2. Verify Gateway still routes to it.
 3. Verify tools still execute.
 4. Verify model communication still works.
@@ -476,7 +476,7 @@ Each story is an acceptance test for the architecture itself.
 
 **Claim:** The system functions without internet access when configured with local model and local tools.
 
-**Verification:** Disconnect from the network. Use a local model. Confirm the full loop works: send message → Engine processes → tools execute → response returned.
+**Verification:** Disconnect from the network. Use a local model. Confirm the full loop works: send message → Agent Loop processes → tools execute → response returned.
 
 **Fail condition:** Any part of the core loop fails without internet in the architecture (with local model configured).
 
@@ -526,11 +526,11 @@ Each story is an acceptance test for the architecture itself.
 
 ### X-3. Auth is cross-cutting and independent (D60)
 
-**Claim:** Auth applies to all requests, independent of Gateway and Engine. Auth and Gateway don't know about each other.
+**Claim:** Auth applies to all requests, independent of Gateway and the Agent Loop. Auth and Gateway don't know about each other.
 
-**Verification:** Confirm Auth middleware sits on the request path without being called by or calling Gateway/Engine directly. Confirm swapping Auth doesn't require Gateway or Engine changes. Confirm swapping Gateway doesn't require Auth changes.
+**Verification:** Confirm Auth middleware sits on the request path without being called by or calling Gateway/Agent Loop directly. Confirm swapping Auth doesn't require Gateway or Agent Loop changes. Confirm swapping Gateway doesn't require Auth changes.
 
-**Fail condition:** Auth is embedded in Gateway or Engine. Or Auth and Gateway have mutual dependencies.
+**Fail condition:** Auth is embedded in Gateway or the Agent Loop. Or Auth and Gateway have mutual dependencies.
 
 ### X-4. Memory/tool binary completeness (D135)
 

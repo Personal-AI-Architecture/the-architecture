@@ -15,7 +15,7 @@ It does this by making the one thing you *do* want to be locked into the foundat
 
 ### Your Memory is the Platform
 
-Everything else — the AI models you use, the engine that calls the tools, auth, the gateway, even the internal communication layer — is decoupled and swappable.
+Everything else — the AI models you use, the agent loop that calls the tools, auth, the gateway, even the internal communication layer — is decoupled and swappable.
 
 This matters for two reasons:
 
@@ -37,7 +37,7 @@ Here's how it works. Four components, two APIs, three external dependencies:
 flowchart LR
     C[Clients external] -->|Gateway API| G[Gateway component]
     G -->|Auth middleware check| A[Auth component]
-    A -->|POST engine chat and SSE stream internal contract D137| E[Engine component]
+    A -->|POST engine chat and SSE stream internal contract D137| E[Agent Loop component]
     E -->|Model API| M[Models external]
 
     G -->|Conversation store tool D152| CST[Conversation Store Tool internal]
@@ -56,11 +56,11 @@ The defining property of this architecture: Your Memory has zero outward depende
 
 This is what makes personal AI personal. Most AI systems are app-centric — your data lives inside the application, locked to its formats, its APIs, its business model. Remove the app, and your data is gone or useless.
 
-Here, Your Memory is the platform. Engine, Auth, Gateway, clients, models, tools — all built on top, all replaceable. Your Memory persists when everything else is swapped, upgraded, or removed. It stays independently inspectable with standard tools (text editor, file browser, database viewer) even when the system is not running.
+Here, Your Memory is the platform. Agent Loop, Auth, Gateway, clients, models, tools — all built on top, all replaceable. Your Memory persists when everything else is swapped, upgraded, or removed. It stays independently inspectable with standard tools (text editor, file browser, database viewer) even when the system is not running.
 
 This is also what compounds. Every conversation, every decision, every plan makes the system more powerful — because it makes your memory richer. As AI capabilities grow, the value of what it draws from grows with it. This is how you ride the AI wave, instead of being washed away by it.
 
-Nothing else creates lock-in. Every component accesses Your Memory exclusively through tools — the model through the Engine's tool loop, infrastructure components through dedicated internal tools for their operational needs. Storage can evolve without anything else changing. The contract is the tools, not the storage. This ensures your AI system remains yours.
+Nothing else creates lock-in. Every component accesses Your Memory exclusively through tools — the model through the agent loop's tool execution cycle, infrastructure components through dedicated internal tools for their operational needs. Storage can evolve without anything else changing. The contract is the tools, not the storage. This ensures your AI system remains yours.
 
 See [memory-spec.md](./memory-spec.md).
 
@@ -72,19 +72,19 @@ This is the superpower a digital brain has over a biological one. The fastest-ch
 
 See [models-spec.md](./models-spec.md).
 
-### Engine
+### Agent Loop
 
-A brain is a powerful thing, but give it hands that can hold tools and there's no limit to what it can do. The Engine is those hands — it connects AI models to tools, decides which to use, and executes them. Read a file, call an API, search a library, control a browser — anything the system can do.
+A brain is a powerful thing, but give it hands that can hold tools and there's no limit to what it can do. The Agent Loop is those hands — it connects AI models to tools, decides which to use, and executes them. Read a file, call an API, search a library, control a browser — anything the system can do.
 
-New capabilities arrive by adding tools, not by changing the engine. This means the system absorbs the pace of change, instead of chasing it.
+New capabilities arrive by adding tools, not by changing the agent loop. This means the system absorbs the pace of change, instead of chasing it.
 
-Everything that makes a product unique (methodology, personality, skills, folder structure) lives in Memory, not the Engine. The Engine is intentionally generic — a commodity component. Product behavior emerges from what's in the files.
+Everything that makes a product unique (methodology, personality, skills, folder structure) lives in Memory, not the Agent Loop. The Agent Loop is intentionally generic — a commodity component. Product behavior emerges from what's in the files.
 
 See [engine-spec.md](./engine-spec.md). For tools, see [tools-spec.md](./tools-spec.md).
 
 ### Auth
 
-Auth protects your memory. Every request passes through it, independent of the Gateway and Engine. You control who and what has access — today that's you, but the foundation is built for multi-actor access and AI agents acting on your behalf, each with exactly the permissions you grant.
+Auth protects your memory. Every request passes through it, independent of the Gateway and Agent Loop. You control who and what has access — today that's you, but the foundation is built for multi-actor access and AI agents acting on your behalf, each with exactly the permissions you grant.
 
 See [auth-spec.md](./auth-spec.md).
 
@@ -111,17 +111,17 @@ Two kinds of communication, two kinds of lock-in protection:
 Components connect to the outside world through two APIs:
 
 1. The Gateway API - how clients connect
-2. The Model API - how the Engine connects to models.
+2. The Model API - how the Agent Loop connects to models.
 
 Between each contract and the external world sits an adapter — a thin translation layer you own. Your components speak a stable internal interface. The adapter translates to whatever external standard is current. Standard changes? Swap the adapter. Your components never knew the difference. The internal interface isn't sacred either — you own it, you can change it too.
 
-New model? Config change. Better engine? Swap it. New client? Point it at the same API. New standard? Swap the adapter. The cost of adopting anything new is one swap, not a rebuild.
+New model? Config change. Better agent loop? Swap it. New client? Point it at the same API. New standard? Swap the adapter. The cost of adopting anything new is one swap, not a rebuild.
 
 See [gateway-spec.md](./gateway-spec.md), [models-spec.md](./models-spec.md), [adapter-spec.md](./adapter-spec.md).
 
 #### Internal
 
-Components also communicate internally — Gateway to Engine, Auth middleware on the request path, Engine to tools. These aren't APIs. They're internal interfaces between components in the same deployment.
+Components also communicate internally — Gateway to Agent Loop, Auth middleware on the request path, Agent Loop to tools. These aren't APIs. They're internal interfaces between components in the same deployment.
 
 To avoid lock-in, the communication layer must only carry, and not interpret signals. Memory holds state, the model makes semantic decisions, Auth controls access. Communication does none of those things. When a responsibility leaks from its owner into the communication layer, it recouples the system — swapping communication now means dealing with work that doesn't belong to it.
 
@@ -142,8 +142,8 @@ Managed hosting, VPS, and remote access are implementation extensions — same c
 Five principles enforce the architecture:
 
 1. **Memory Is the Platform** — Everything else exists to serve Memory. The most portable, most independent, most durable part of the system. No other component should create dependencies that make Memory hard to move.
-2. **Everything Else Is Swappable** — Engine, Auth, Gateway, clients, models, tools, contracts, hosting — all replaceable. Memory via tools, components via contracts, contracts via adapters. Every piece is a drop-down menu, not a permanent choice.
-3. **Interfaces Over Implementations** — Every component is defined by what it does, not how it works. The Engine calls tools — it doesn't know if Memory is files or a database. This is what makes one-component swaps possible.
+2. **Everything Else Is Swappable** — Agent Loop, Auth, Gateway, clients, models, tools, contracts, hosting — all replaceable. Memory via tools, components via contracts, contracts via adapters. Every piece is a drop-down menu, not a permanent choice.
+3. **Interfaces Over Implementations** — Every component is defined by what it does, not how it works. The Agent Loop calls tools — it doesn't know if Memory is files or a database. This is what makes one-component swaps possible.
 4. **Complexity Is Lock-In** — If the system requires a team of developers, you're locked in to that team. That's a dependency as real as any vendor. The entire system must be understandable and maintainable by one developer + AI coding agents. Four components and two APIs isn't minimalism — every additional component is a potential expertise dependency.
 5. **Start Constrained, Expand Deliberately** — Products built on this don't have to use all capabilities at once. Each expansion — broader scope, more tools, external integrations — is a deliberate step.
 
@@ -164,7 +164,7 @@ How the world interacts with the system. Built on whatever the best industry sta
 
 See [gateway-spec.md](./gateway-spec.md).
 
-### Model API — Engine ↔ Models
+### Model API — Agent Loop ↔ Models
 
 How the system thinks. Today that means model-native tool calling — tool definitions sent with prompts, tool calls returned in completions. But the Model API is a contract with an adapter, not a permanent commitment to this pattern. Better approach emerges? Swap the adapter.
 
@@ -173,15 +173,15 @@ How the system thinks. Today that means model-native tool calling — tool defin
 
 See [models-spec.md](./models-spec.md).
 
-**What about tools?** Tool calls flow through the Model API and are executed by the Engine. How the Engine communicates with tools — MCP today, something better tomorrow — is internal to the Engine, not an architectural boundary. No separate tool protocol API in the architecture. Memory tools are internal — the system can't function without reading and writing its own memory. External tools (Salesforce, weather, APIs) are additive — add or remove them without affecting the system. See [tools-spec.md](./tools-spec.md).
+**What about tools?** Tool calls flow through the Model API and are executed by the Agent Loop. How the Agent Loop communicates with tools — MCP today, something better tomorrow — is internal to the Agent Loop, not an architectural boundary. No separate tool protocol API in the architecture. Memory tools are internal — the system can't function without reading and writing its own memory. External tools (Salesforce, weather, APIs) are additive — add or remove them without affecting the system. See [tools-spec.md](./tools-spec.md).
 
 **The memory/tool binary.** Everything the system processes reduces to two things: memory and tools. If it's data, it's memory. If it's not data, it's a tool. New capabilities arrive by adding tools and memory content, not by adding infrastructure. See [research/memory-tool-completeness.md](./research/memory-tool-completeness.md).
 
-### Internal Interface: Gateway ↔ Engine
+### Internal Interface: Gateway ↔ Agent Loop
 
-The Gateway ↔ Engine handoff is the one internal interface that needed definition — not a third API, just a contract between two components in the same deployment.
+The Gateway ↔ Agent Loop handoff is the one internal interface that needed definition — not a third API, just a contract between two components in the same deployment.
 
-Gateway POSTs a request (messages + metadata) to the Engine, Engine returns an SSE stream (text, tool calls, results, completion). Auth middleware sits on the path. See [gateway-engine-contract.md](./gateway-engine-contract.md) for the full contract.
+Gateway POSTs a request (messages + metadata) to the Agent Loop, Agent Loop returns an SSE stream (text, tool calls, results, completion). Auth middleware sits on the path. See [gateway-engine-contract.md](./gateway-engine-contract.md) for the full contract.
 
 ```mermaid
 sequenceDiagram
@@ -191,7 +191,7 @@ sequenceDiagram
     participant Auth
     participant ConvTool as Conversation Store Tool
     participant Memory as Your Memory
-    participant Engine
+    participant Engine as Agent Loop
     participant Provider as Model API
     participant Model
     participant ToolRuntime as Tool Runtime
@@ -243,7 +243,7 @@ These stories validate the architecture itself. Product-level user stories are d
 | FS-4 | **Swap a model provider** — config change, next message uses new provider, nothing else changes |
 | FS-5 | **Swap the client** — new client speaks Gateway API, system serves it identically |
 | FS-6 | **Evolve Memory** — add semantic search alongside file search, no other component changes |
-| FS-7 | **Swap the Engine** — replace it, everything else unaffected |
+| FS-7 | **Swap the Agent Loop** — replace it, everything else unaffected |
 | FS-8 | **Expand scope via tools** — add tools to grow from library → filesystem → services |
 
 ---
@@ -306,19 +306,19 @@ Who does what — and who doesn't. Use this to verify that component specs don't
 |---|---|---|
 | Persist, retrieve, search, version data | **Your Memory** (via tools) | |
 | Provide structure (paths, hierarchy) | **Your Memory** provides it | Model/owner decides what goes where |
-| Understand content, make meaning | **Model** | Your Memory, Engine |
-| Assemble prompts (rich instructions) | **Model** reads from Your Memory | Engine, Your Memory |
-| Select context (decide what to read) | **Model** | Your Memory, Engine |
+| Understand content, make meaning | **Model** | Your Memory, Agent Loop |
+| Assemble prompts (rich instructions) | **Model** reads from Your Memory | Agent Loop, Your Memory |
+| Select context (decide what to read) | **Model** | Your Memory, Agent Loop |
 | Summarize, associate, consolidate | **Model** using Your Memory operations | Your Memory |
-| Execute tools | **Engine** | Your Memory |
-| Decide which tools to use | **Model** (via Engine loop) | Your Memory, Gateway |
-| Execute skills | **Model + Engine** (model reads skill files, Engine executes tool calls) | Your Memory |
+| Execute tools | **Agent Loop** | Your Memory |
+| Decide which tools to use | **Model** (via agent loop) | Your Memory, Gateway |
+| Execute skills | **Model + Agent Loop** (model reads skill files, Agent Loop executes tool calls) | Your Memory |
 | Protect access / control permissions | **Auth** | Your Memory, Gateway |
-| Manage conversations | **Gateway** | Engine, Your Memory |
-| Route requests to Engine | **Gateway** | Auth |
-| Connect to AI models | **Model API** | Engine internals |
-| Accept client connections | **Gateway API** | Engine |
-| Provide intelligence | **Models** (external) | Engine, Your Memory |
+| Manage conversations | **Gateway** | Agent Loop, Your Memory |
+| Route requests to Agent Loop | **Gateway** | Auth |
+| Connect to AI models | **Model API** | Agent Loop internals |
+| Accept client connections | **Gateway API** | Agent Loop |
+| Provide intelligence | **Models** (external) | Agent Loop, Your Memory |
 | Display content to owners | **Clients** (external) | Gateway |
 | Bootstrap the system | **Runtime config** (thin bootstrap — 4 fields, see [configuration-spec.md](./configuration-spec.md)) | Your Memory |
 | Resolve concurrent writes | **Tool implementations** | Your Memory component |
@@ -349,7 +349,7 @@ Who does what — and who doesn't. Use this to verify that component specs don't
 | Document | Relationship |
 |----------|-------------|
 | [memory-as-platform.md](./memory-as-platform.md) | Why memory is the architectural center |
-| [engine-spec.md](./engine-spec.md) | Engine — generic agent loop |
+| [engine-spec.md](./engine-spec.md) | Agent Loop — generic agent loop |
 | [memory-spec.md](./memory-spec.md) | Your Memory — unopinionated substrate |
 | [auth-spec.md](./auth-spec.md) | Auth — cross-cutting identity and access control |
 | [gateway-spec.md](./gateway-spec.md) | Gateway — conversations and routing |
@@ -357,7 +357,7 @@ Who does what — and who doesn't. Use this to verify that component specs don't
 | [models-spec.md](./models-spec.md) | Models — external intelligence |
 | [security-spec.md](./security-spec.md) | Security — threat model, enforcement, data protection |
 | [adapter-spec.md](./adapter-spec.md) | Adapters — swappable contracts |
-| [gateway-engine-contract.md](./gateway-engine-contract.md) | Gateway ↔ Engine internal contract |
+| [gateway-engine-contract.md](./gateway-engine-contract.md) | Gateway ↔ Agent Loop internal contract |
 | [communication-principles.md](./communication-principles.md) | Communication — six principles for lock-in-free internal communication |
 | [configuration-spec.md](./configuration-spec.md) | Configuration — preferences, runtime, tool self-description |
 | [deployment-spec.md](./deployment-spec.md) | Deployment — local-first contract |

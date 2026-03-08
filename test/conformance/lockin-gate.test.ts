@@ -73,7 +73,7 @@ describe("Lock-In Gate: 13 mandatory checks", () => {
   it("check 3: components interact only through defined interfaces", async () => {
     const sources = await allSourceContent();
 
-    // Engine must not import Gateway or Auth
+    // Agent Loop must not import Gateway or Auth
     const engineFiles = sources.filter((s) => s.file.startsWith("src/engine/"));
     for (const f of engineFiles) {
       expect(f.content, `${f.file} imports gateway`).not.toMatch(
@@ -84,7 +84,7 @@ describe("Lock-In Gate: 13 mandatory checks", () => {
       );
     }
 
-    // Auth must not import Gateway or Engine
+    // Auth must not import Gateway or Agent Loop
     const authFiles = sources.filter((s) => s.file.startsWith("src/auth/"));
     for (const f of authFiles) {
       expect(f.content, `${f.file} imports gateway`).not.toMatch(

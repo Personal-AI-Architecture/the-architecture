@@ -1,11 +1,11 @@
 /**
- * ARCH-2: Engine Swap (also satisfies FS-7)
+ * ARCH-2: Agent Loop Swap (also satisfies FS-7)
  *
- * "Replace engine with 'mirror engine' that echoes messages — Gateway still works."
+ * "Replace agent loop with 'mirror engine' that echoes messages — Gateway still works."
  *
- * This proves the Engine interface is real: any object implementing
+ * This proves the Agent Loop interface is real: any object implementing
  * { chat(request: EngineRequest): AsyncIterable<EngineEvent> }
- * can be used by the Gateway. The Engine is a drop-in swap.
+ * can be used by the Gateway. The Agent Loop is a drop-in swap.
  */
 
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
@@ -19,7 +19,7 @@ import type { EngineEvent, EngineRequest } from "../../src/types/index.js";
 /**
  * Mirror engine: echoes the last user message back as the response.
  * Implements the exact same interface as createEngine() but with
- * completely different logic. If Gateway works with this, Engine is swappable.
+ * completely different logic. If Gateway works with this, the Agent Loop is swappable.
  */
 function createMirrorEngine(): {
   chat(request: EngineRequest): AsyncIterable<EngineEvent>;
@@ -57,7 +57,7 @@ function extractText(events: Array<EngineEvent>): string {
     .join("");
 }
 
-describe("ARCH-2: Engine swap — replace engine, Gateway still works", () => {
+describe("ARCH-2: Agent Loop swap — replace agent loop, Gateway still works", () => {
   let memoryRoot: string;
 
   beforeEach(async () => {
@@ -68,7 +68,7 @@ describe("ARCH-2: Engine swap — replace engine, Gateway still works", () => {
     await rm(memoryRoot, { recursive: true, force: true });
   });
 
-  it("Gateway works with mirror engine (no real provider or tools needed)", async () => {
+  it("Gateway works with mirror agent loop (no real provider or tools needed)", async () => {
     const dbPath = join(memoryRoot, ".data", "conversations.db");
     const mirrorEngine = createMirrorEngine();
     const store = createConversationStore(dbPath);
@@ -77,7 +77,7 @@ describe("ARCH-2: Engine swap — replace engine, Gateway still works", () => {
       conversationStore: store,
     });
 
-    // Send a message — Gateway routes to mirror engine
+    // Send a message — Gateway routes to mirror agent loop
     const events = await collectEvents(
       gateway.sendMessage({
         message: { role: "user", content: "Hello, mirror!" },
@@ -98,7 +98,7 @@ describe("ARCH-2: Engine swap — replace engine, Gateway still works", () => {
     expect(conversation!.messages.length).toBe(2); // user + assistant
   });
 
-  it("multi-turn conversation works with swapped engine", async () => {
+  it("multi-turn conversation works with swapped agent loop", async () => {
     const dbPath = join(memoryRoot, ".data", "conversations.db");
     const mirrorEngine = createMirrorEngine();
     const store = createConversationStore(dbPath);
@@ -135,7 +135,7 @@ describe("ARCH-2: Engine swap — replace engine, Gateway still works", () => {
     expect(conversation!.messages.length).toBe(4); // user, assistant, user, assistant
   });
 
-  it("accumulated Memory is still valuable after engine swap", async () => {
+  it("accumulated Memory is still valuable after agent loop swap", async () => {
     // M-6: Compounding value across swaps
     const dbPath = join(memoryRoot, ".data", "conversations.db");
     const mirrorEngine = createMirrorEngine();
@@ -156,7 +156,7 @@ describe("ARCH-2: Engine swap — replace engine, Gateway still works", () => {
       events.find((e) => e.type === "done") as { conversation_id?: string } | undefined
     )?.conversation_id;
 
-    // Swap to a DIFFERENT mirror engine instance (simulates engine replacement)
+    // Swap to a DIFFERENT mirror engine instance (simulates agent loop replacement)
     const newMirrorEngine = createMirrorEngine();
     const store2 = createConversationStore(dbPath);
     const gateway2 = createGateway({

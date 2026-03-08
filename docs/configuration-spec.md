@@ -73,11 +73,11 @@ Tool definitions (name, description, parameters, capabilities) are not written b
 
 | Mechanism | How it works | Example |
 |-----------|-------------|---------|
-| **MCP discovery** | Engine connects to an MCP server and asks "what can you do?" | Filesystem tools, custom MCP servers |
+| **MCP discovery** | Agent Loop connects to an MCP server and asks "what can you do?" | Filesystem tools, custom MCP servers |
 | **Manifest file** | Tool ships with a JSON manifest describing its capabilities | CLI tool wrappers, native functions |
-| **Built-in** | Definition is part of the Engine or tool code | Approval gate, audit |
+| **Built-in** | Definition is part of the Agent Loop or tool code | Approval gate, audit |
 
-**Where definitions live:** With the tools. An MCP server knows its own tools. A CLI wrapper ships with a `tool.json`. A native function is defined in code. The Engine reads these at startup from the locations specified in `tool_sources`.
+**Where definitions live:** With the tools. An MCP server knows its own tools. A CLI wrapper ships with a `tool.json`. A native function is defined in code. The Agent Loop reads these at startup from the locations specified in `tool_sources`.
 
 **Why this matters:** Nobody manually writes "git tool: takes command and args parameters, returns stdout." The tool says that about itself. This means adding a tool is: install it, point `tool_sources` at it, done. No config editing beyond that. No definition to maintain. No drift between what the config says and what the tool actually does.
 
@@ -167,14 +167,14 @@ At startup, the system reads configuration in a strict sequence. Each phase depe
 2. **Load adapter config** — load the adapter file specified by `provider_adapter`. Now the system knows how to connect to models.
 3. **Discover tools** — scan `tool_sources` paths. For each tool found: MCP servers announce their tools via protocol, manifest files are read, built-in tools are loaded from code. Now the system knows what tools are available.
 4. **Mount Your Memory** — use `memory_root` to locate Your Memory on the filesystem. At this point Your Memory is accessible but no preferences have been read yet.
-5. **Read preferences** — read the preferences file from Your Memory (direct file read, not through the Engine — no tools required). Apply preference filters: always-send set, tool policies, approval requirements, model choice.
-6. **Ready** — the Engine has tools, a provider, and preferences. The Gateway starts accepting connections (see [gateway-engine-contract.md](./gateway-engine-contract.md) for request flow).
+5. **Read preferences** — read the preferences file from Your Memory (direct file read, not through the Agent Loop — no tools required). Apply preference filters: always-send set, tool policies, approval requirements, model choice.
+6. **Ready** — the Agent Loop has tools, a provider, and preferences. The Gateway starts accepting connections (see [gateway-engine-contract.md](./gateway-engine-contract.md) for request flow).
 
 **Phases 1-3 are environment.** They happen before Your Memory is involved. They describe the desk.
 **Phase 4-5 are personal.** They read from Your Memory. They describe you.
 **Phase 6 is operation.** The system is live.
 
-Note: Phase 5 reads preferences as a direct file read from `memory_root`, not through Engine tool calls. This avoids circularity — the Engine isn't running yet, so it can't call tools to read preferences that configure which tools it should load. Preferences are just a file at a known path within Your Memory.
+Note: Phase 5 reads preferences as a direct file read from `memory_root`, not through Agent Loop tool calls. This avoids circularity — the Agent Loop isn't running yet, so it can't call tools to read preferences that configure which tools it should load. Preferences are just a file at a known path within Your Memory.
 
 If any preference references a tool that doesn't exist in this environment (e.g., "always load web scraper" but no web scraper is installed), the system notes the mismatch and continues. The model will tell the owner "web scraper is configured as preferred but not available in this environment" when relevant. This is not an error — it's information.
 
@@ -252,7 +252,7 @@ This is a CI test, not a guideline. It makes the principle enforceable. Run it o
 ## Success Criteria
 
 - [ ] Swapping a model provider requires only changing `provider_adapter` and providing a new adapter config file — zero code changes
-- [ ] Swapping the Engine requires only changing the Engine binary/container — runtime config, preferences, and Your Memory are unaffected
+- [ ] Swapping the Agent Loop requires only changing the Agent Loop binary/container — runtime config, preferences, and Your Memory are unaffected
 - [ ] Adding a tool requires only installing it in a `tool_sources` path — the tool self-describes, no config editing beyond that
 - [ ] Moving Your Memory to a new system works: preferences travel, runtime config is provided by the new environment, tool mismatches are reported not errors
 - [ ] Secrets never appear in Your Memory or tracked config files

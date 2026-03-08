@@ -7,7 +7,7 @@ info:
     Web apps, CLIs, mobile apps, bots, voice assistants, other AI agents — any client
     that can send messages and receive streamed responses is valid.
 
-    The Gateway manages conversations and routes interactions to the Engine. It is
+    The Gateway manages conversations and routes interactions to the Agent Loop. It is
     content-agnostic (text, images, audio, video, files — all just data) and
     interface-agnostic (serves all clients identically).
 
@@ -45,15 +45,15 @@ paths:
       summary: Send a message — creates a new conversation
       description: |
         Send a message without a conversation ID to start a new conversation.
-        The Gateway creates the conversation, routes the message to the Engine,
+        The Gateway creates the conversation, routes the message to the Agent Loop,
         and streams the response back.
 
-        The Gateway assembles the messages array for the Engine:
+        The Gateway assembles the messages array for the Agent Loop:
         1. System message from configuration
         2. The current message from this request
         3. Metadata passed through
 
-        Returns an SSE stream of the Engine's response, plus the new conversation ID
+        Returns an SSE stream of the Agent Loop's response, plus the new conversation ID
         in the response headers.
       requestBody:
         required: true
@@ -71,7 +71,7 @@ paths:
       responses:
         '200':
           description: |
-            SSE stream of the Engine's response. The new conversation ID is returned
+            SSE stream of the Agent Loop's response. The new conversation ID is returned
             in the X-Conversation-ID response header.
           headers:
             X-Conversation-ID:
@@ -95,7 +95,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
         '503':
-          description: Engine unavailable
+          description: Agent Loop unavailable
           content:
             application/json:
               schema:
@@ -197,7 +197,7 @@ paths:
       description: |
         Resume an existing conversation by sending a new message. The Gateway retrieves
         the conversation history from Your Memory, assembles the full messages array
-        (system prompt + history + current message), and routes to the Engine.
+        (system prompt + history + current message), and routes to the Agent Loop.
 
         This is what enables seamless client switching — start on web, continue on
         mobile, pick up on CLI. The conversation persists.
@@ -224,7 +224,7 @@ paths:
       responses:
         '200':
           description: |
-            SSE stream of the Engine's response. The conversation ID is confirmed
+            SSE stream of the Agent Loop's response. The conversation ID is confirmed
             in the X-Conversation-ID response header.
           headers:
             X-Conversation-ID:
@@ -254,7 +254,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
         '503':
-          description: Engine unavailable
+          description: Agent Loop unavailable
           content:
             application/json:
               schema:
@@ -411,9 +411,9 @@ components:
     ClientSSEStream:
       description: |
         Server-Sent Events stream delivered to the client. The Gateway forwards
-        the Engine's stream to the calling client, adding conversation context.
+        the Agent Loop's stream to the calling client, adding conversation context.
 
-        Events mirror the Engine's SSE events (see gateway-engine.yaml) with the
+        Events mirror the Agent Loop's SSE events (see gateway-engine.yaml) with the
         same event types: text-delta, tool-call, tool-result, done, error.
       oneOf:
         - $ref: '#/components/schemas/TextDeltaEvent'
@@ -493,7 +493,7 @@ components:
     ErrorEvent:
       type: object
       description: |
-        Failure during processing. The Gateway translates Engine errors into
+        Failure during processing. The Gateway translates Agent Loop errors into
         client-appropriate messages.
       required:
         - code

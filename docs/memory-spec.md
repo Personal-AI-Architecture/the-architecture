@@ -17,7 +17,7 @@ This is an **Architecture spec** — it defines the generic Your Memory componen
 
 Every AI system has memory — ChatGPT remembers your preferences, Copilot retains conversation history, RAG systems store your documents in vector databases. In those systems, memory is a **feature of the application**. The app owns it, the app controls the format, and if you leave the app, your memory stays behind. Memory serves the application.
 
-Here, it's inverted. **Your Memory is the platform — the application serves it.** Your Memory has zero outward dependencies. Every other component (Engine, Auth, Gateway, clients, models, tools) depends on Your Memory. Your Memory depends on none of them. Remove any component, and Your Memory still works. Still readable. Still portable. Still yours. You can open it in a text editor with no system running and it still makes sense.
+Here, it's inverted. **Your Memory is the platform — the application serves it.** Your Memory has zero outward dependencies. Every other component (Agent Loop, Auth, Gateway, clients, models, tools) depends on Your Memory. Your Memory depends on none of them. Remove any component, and Your Memory still works. Still readable. Still portable. Still yours. You can open it in a text editor with no system running and it still makes sense.
 
 ```
                               ┌───────────────────────────────────────────────┐
@@ -27,8 +27,8 @@ Here, it's inverted. **Your Memory is the platform — the application serves it
                                                       │
                                              tools (read/write)
                                                       │
-      Clients  ──→  Gateway API  ──→  Gateway  ──→  Engine  ──→  Model API  ──→  Models
-    (external)        (API)       (component)  (component)       (API)          (external)
+      Clients  ──→  Gateway API  ──→  Gateway  ──→  Agent Loop  ──→  Model API  ──→  Models
+    (external)        (API)       (component)   (component)        (API)          (external)
                                                       │
                         ─── Auth ───                  └──→ Tools (verbs)  ──→  External Memory (nouns)
                         (cross-cutting                     ├── MCP servers      ├── Salesforce data
@@ -49,7 +49,7 @@ That superpower only works if memory is the persistent, independent platform tha
 
 And memory is the one asset that's irreplaceable — you can download a new model in minutes, swap a client in seconds, but your structured memory took your actual life to build. Everything else is commodity.
 
-In an app-centric model, that compounding value belongs to the vendor. Here, it belongs to you — and it stays with you regardless of which engine, model, or client you use tomorrow.
+In an app-centric model, that compounding value belongs to the vendor. Here, it belongs to you — and it stays with you regardless of which agent loop, model, or client you use tomorrow.
 
 This is also why the architecture only needs four components, and can evolve at the speed of AI.
 
@@ -65,7 +65,7 @@ No new components needed.
 
 | Thing | Why it's not Memory |
 |-------|-------------------|
-| The Engine process | Runtime, not persistent — starts fresh each time |
+| The Agent Loop process | Runtime, not persistent — starts fresh each time |
 | The model weights | Intelligence, not memory — the model is the intelligence half of the brain, Your Memory is the persistent half |
 | Active session tokens | Ephemeral auth state, not persistent |
 | Cached/derived data (regenerable) | Derived from Memory content — if lost, rebuild from source |
@@ -131,9 +131,9 @@ The specific export format is an implementation choice. The architecture require
 
 ### Operations
 
-Memory's contract is a small set of operations exposed as tools. These are internal tools — the system's own interface to its platform. Unlike external tools (Salesforce queries, weather feeds, API calls), which are additive capabilities, Memory tools must always exist in some form — the system can't function without a way to read and write its own memory. If a better interface emerges, swap the Engine — Memory itself doesn't change.
+Memory's contract is a small set of operations exposed as tools. These are internal tools — the system's own interface to its platform. Unlike external tools (Salesforce queries, weather feeds, API calls), which are additive capabilities, Memory tools must always exist in some form — the system can't function without a way to read and write its own memory. If a better interface emerges, swap the Agent Loop — Memory itself doesn't change.
 
-Not all callers use tools the same way. The model accesses Your Memory through the Engine's tool loop — flexible, exploratory, judgment-based. Infrastructure components access Your Memory through dedicated internal tools scoped to their operational needs — fixed, mechanical, no judgment. The Gateway, for example, uses a conversation store tool for conversation management (D152). Both callers use the tool interface. Neither bypasses it.
+Not all callers use tools the same way. The model accesses Your Memory through the agent loop's tool loop — flexible, exploratory, judgment-based. Infrastructure components access Your Memory through dedicated internal tools scoped to their operational needs — fixed, mechanical, no judgment. The Gateway, for example, uses a conversation store tool for conversation management (D152). Both callers use the tool interface. Neither bypasses it.
 
 The specific operation names and signatures are implementation choices — the architecture requirement is that they map to the guarantees above.
 
@@ -172,8 +172,8 @@ The core operation set is intentionally small. Adding a new operation requires p
 | `summarize` | Content — requires understanding meaning | No — model reads and summarizes |
 | `associate` | Content — requires understanding relationships | No — model reads and creates links by writing |
 | `consolidate` | Content — requires judgment about what matters | No — model reads, decides, writes |
-| Skill execution | Content — the model reads skill files and follows them | No — model + Engine |
-| Prompt assembly | Content — the model reads instructions from Memory | No — model + Engine |
+| Skill execution | Content — the model reads skill files and follows them | No — model + Agent Loop |
+| Prompt assembly | Content — the model reads instructions from Memory | No — model + Agent Loop |
 | Context selection | Content — the model decides what to read | No — model decides |
 | Access control | Cross-cutting — gates requests before they reach Memory | No — Auth |
 | Conflict resolution | Implementation — concurrent access coordination | No — tool implementations |
@@ -201,13 +201,13 @@ Adding a new storage mechanism is adding tool implementations, not changing the 
 
 Prompt assembly lives in Memory — skills, context, personality, instructions are all files. But the model needs instructions before it can read Memory. This creates a chicken-and-egg.
 
-The solution: a **minimal bootstrap prompt** in Engine configuration — the BIOS. Tiny, generic, just enough to tell the model where to look. The specific bootstrap content is an implementation choice. Example:
+The solution: a **minimal bootstrap prompt** in Agent Loop configuration — the BIOS. Tiny, generic, just enough to tell the model where to look. The specific bootstrap content is an implementation choice. Example:
 
 > "You are the owner's assistant. Read the AGENT.md in the current folder for your instructions."
 
 Everything else — personality, skills, methodology, context — the model discovers by following that instruction.
 
-The bootstrap is Engine configuration, not Memory. One line. Generic. Implementation-specific. Prompt assembly still lives in Memory. The bootstrap is just "look here."
+The bootstrap is Agent Loop configuration, not Memory. One line. Generic. Implementation-specific. Prompt assembly still lives in Memory. The bootstrap is just "look here."
 
 ---
 
@@ -276,7 +276,7 @@ None. Memory is a substrate — it stores and retrieves. If a question arises ab
 - [ ] Memory can be exported completely in open formats
 - [ ] Memory passes the independence test — remove any other component, Memory still works, still readable, still portable
 - [ ] Memory passes the robot test — take it to a completely different system and it works without rebuilding (for the human-readable portions)
-- [ ] Swapping Memory's storage backend requires changing only tool implementations — Engine, Client, Auth, and Models are unaffected
+- [ ] Swapping Memory's storage backend requires changing only tool implementations — Agent Loop, Client, Auth, and Models are unaffected
 - [ ] Adding a new storage mechanism (vector index, cloud storage) is additive — existing tools keep working
 
 ---
@@ -316,4 +316,4 @@ Per-component requirements from [security-spec.md](./security-spec.md). Security
 
 ---
 
-*Your Memory is the platform — the only component that can exist completely on its own. The Engine brings it alive. The model gives it intelligence. The tools give it access. Auth protects it. The client reveals it. But Your Memory is what persists when everything else is swapped, upgraded, or replaced. It's what makes the system yours.*
+*Your Memory is the platform — the only component that can exist completely on its own. The Agent Loop brings it alive. The model gives it intelligence. The tools give it access. Auth protects it. The client reveals it. But Your Memory is what persists when everything else is swapped, upgraded, or replaced. It's what makes the system yours.*

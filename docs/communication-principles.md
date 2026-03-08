@@ -7,7 +7,7 @@ hide_table_of_contents: true
 
 This architecture says everything except Your Memory is swappable (Foundation Principle 2). Communication is no different.
 
-The communication layer is just another replaceable piece — like the Engine, like the Gateway, like the contracts and their adapters.
+The communication layer is just another replaceable piece — like the Agent Loop, like the Gateway, like the contracts and their adapters.
 
 Here's why:
 
@@ -28,7 +28,7 @@ The unifying idea behind all six: **responsibilities stay where they belong.** T
 * **The model** provides intelligence
 * **Memory** holds state
 * **Auth** controls access
-* **The Engine** executes tools
+* **The Agent Loop** executes tools
 
 When a responsibility leaks from its owner into another part of the system, it recouples the system — swapping that part now means dealing with work that doesn't belong to it.
 
@@ -38,7 +38,7 @@ Every principle in this document is a specific case of the same rule: don't do a
 
 Pain from your hand and pain from your foot travel the same pathways using the same signal structure — your brain doesn't need a different protocol for each organ. The nervous system is consistent, observable, and dumb — it carries signals, it doesn't interpret them. The brain does the thinking.
 
-This document covers communication **between internal components** — Gateway, Engine, Auth, and the tools/services they interact with. It does not cover the Gateway API (client boundary — see [gateway-spec.md](./gateway-spec.md)), the Model API (external model boundary — see [models-spec.md](./models-spec.md)), or client-side communication. Those have their own specs.
+This document covers communication **between internal components** — Gateway, Agent Loop, Auth, and the tools/services they interact with. It does not cover the Gateway API (client boundary — see [gateway-spec.md](./gateway-spec.md)), the Model API (external model boundary — see [models-spec.md](./models-spec.md)), or client-side communication. Those have their own specs.
 
 **Related documents:** [foundation-spec.md](./foundation-spec.md) (architecture overview, links to all component specs)
 
@@ -48,15 +48,15 @@ This document covers communication **between internal components** — Gateway, 
 
 ### P1. Components Don't Embed Communication
 
-Communication is a layer between components, not inside them. If the Gateway has serialization logic baked into its code, or the Engine hard-codes a message envelope format, swapping the communication approach means rewriting the components. That's coupling, not swappability.
+Communication is a layer between components, not inside them. If the Gateway has serialization logic baked into its code, or the Agent Loop hard-codes a message envelope format, swapping the communication approach means rewriting the components. That's coupling, not swappability.
 
-Components speak to an interface. The communication layer implements that interface. Swap the implementation, components don't know the difference. This is Foundation Principle 3 (Interfaces Over Implementations) applied to communication. Same principle that makes the Engine swappable — it's defined by what it does, not how it talks.
+Components speak to an interface. The communication layer implements that interface. Swap the implementation, components don't know the difference. This is Foundation Principle 3 (Interfaces Over Implementations) applied to communication. Same principle that makes the Agent Loop swappable — it's defined by what it does, not how it talks.
 
 Can you change how components communicate without changing the component code? If no, you've embedded communication and created lock-in.
 
 ### P2. Consistent Structure Across Interfaces
 
-If every internal interface has its own message shape, field names, and type conventions, you're not swapping one communication layer — you're swapping N different ones. A developer reading a Gateway-to-Engine message shouldn't have to learn a different vocabulary than an Engine-to-tool message. Same base fields. Same field names — don't call it `correlation_id` in one place and `trace_id` in another. Same type conventions — if timestamps are ISO 8601 in one message, they're ISO 8601 everywhere.
+If every internal interface has its own message shape, field names, and type conventions, you're not swapping one communication layer — you're swapping N different ones. A developer reading a Gateway-to-Agent-Loop message shouldn't have to learn a different vocabulary than an Agent-Loop-to-tool message. Same base fields. Same field names — don't call it `correlation_id` in one place and `trace_id` in another. Same type conventions — if timestamps are ISO 8601 in one message, they're ISO 8601 everywhere.
 
 This applies to errors too. When every interface invents its own error shape, error handling becomes per-interface custom code. Errors are part of the contract, not an afterthought — machine-readable codes, correlation context, no leaked internals. Same structural conventions as normal messages.
 
@@ -78,7 +78,7 @@ The smarter the communication layer, the harder it is to swap. If it routes by i
 
 Intelligence improves. Deterministic code doesn't. Every time a better model ships, every semantic decision the model makes gets better for free. Every semantic decision hardcoded in the communication layer stays exactly as good as the day it was written. Put decisions where improvement happens.
 
-Infrastructure handles structural concerns — "this HTTP request goes to the Engine," "this request is authenticated," "this SSE stream connects to this client." Deterministic, no judgment. The model handles semantic concerns — "this user needs information from their docs, not the web," "this request is ambiguous, I should ask for clarification." Judgment, context, nuance.
+Infrastructure handles structural concerns — "this HTTP request goes to the Agent Loop," "this request is authenticated," "this SSE stream connects to this client." Deterministic, no judgment. The model handles semantic concerns — "this user needs information from their docs, not the web," "this request is ambiguous, I should ask for clarification." Judgment, context, nuance.
 
 A router that matches intents to handlers is infrastructure pretending to be intelligence — it caps the system below what the model can do. That's D24: the architecture must never be the bottleneck. Does the communication layer make decisions that get better when the model gets better? If yes, that intelligence is in the wrong place.
 
@@ -94,7 +94,7 @@ After swapping the communication layer, can you still reconstruct exactly what h
 
 ### P6. Evolution Without Coordination
 
-Components evolve at different speeds. The Gateway might update while the Engine stays unchanged. A new tool might attach metadata that older components have never seen. If any of these changes break communication, every update becomes a coordinated deployment — and coordination is lock-in to a release schedule.
+Components evolve at different speeds. The Gateway might update while the Agent Loop stays unchanged. A new tool might attach metadata that older components have never seen. If any of these changes break communication, every update becomes a coordinated deployment — and coordination is lock-in to a release schedule.
 
 New fields are additive — alongside existing fields, never replacing them. Unknown fields are ignored by receivers, not rejected. Optional metadata lives in a designated area of the message (a `metadata` or `extensions` object) separate from core operational fields. Removing or renaming a required field is a breaking change that requires coordinated updates — the exception, not the norm.
 

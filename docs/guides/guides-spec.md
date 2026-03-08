@@ -54,7 +54,7 @@ A single document (~300 lines) containing *only* what you need to build against:
 
 - The 4 components, what each must do (not why)
 - The 2 API contracts (referencing the canonical schemas)
-- The Gateway-Engine contract
+- The Gateway-Agent Loop contract
 - The responsibility matrix (distilled from foundation-spec)
 - Conformance criteria (test IDs, pass/fail)
 
@@ -67,7 +67,7 @@ The contracts expressed as language-neutral schemas (OpenAPI for HTTP contracts,
 **Canonical (language-neutral):**
 - `gateway-api.yaml` — OpenAPI spec for Gateway API
 - `model-api.yaml` — OpenAPI spec for Model API
-- `gateway-engine.yaml` — OpenAPI spec for Gateway ↔ Engine internal contract
+- `gateway-engine.yaml` — OpenAPI spec for Gateway ↔ Agent Loop internal contract
 - `schemas/` — JSON Schema definitions for shared types (messages, tool definitions, configuration, SSE events)
 
 **Generated outputs (language-specific, derived from canonical schemas):**
@@ -116,14 +116,14 @@ A runnable test suite that validates *any* implementation against the architectu
 |---------|------|---------------|-----------|
 | SWAP-1 | Provider swap | Change provider config → next message uses new provider → no code changes | Model API contract, Principle 2 |
 | SWAP-2 | Model swap | Change model config → next message uses new model → no code changes | Model API contract |
-| SWAP-3 | Tool swap | Add/remove a tool → system functions → no code changes to Engine/Gateway/Auth | D51, Principle 3 |
+| SWAP-3 | Tool swap | Add/remove a tool → system functions → no code changes to Agent Loop/Gateway/Auth | D51, Principle 3 |
 
 **Architectural invariant tests:**
 
 | Test ID | Test | Pass Criteria | Validates |
 |---------|------|---------------|-----------|
 | ARCH-1 | Memory zero dependencies | Stop all components except Memory storage → Memory is still readable with standard tools (text editor, file browser, DB viewer) | Principle 1, foundation-spec §Your Memory |
-| ARCH-2 | Engine swap | Replace Engine implementation → Gateway/Memory/Auth/tools unaffected → system functions | D39, FS-7 |
+| ARCH-2 | Agent Loop swap | Replace Agent Loop implementation → Gateway/Memory/Auth/tools unaffected → system functions | D39, FS-7 |
 | ARCH-3 | Client swap | New client speaks Gateway API → system serves it identically | D57, FS-5 |
 | ARCH-4 | Schema conformance | All API payloads validate against canonical schemas in `specs/` | D16, Principle 3 |
 
@@ -146,7 +146,7 @@ A runnable test suite that validates *any* implementation against the architectu
 | FS-4 | Swap provider | = SWAP-1 | Model API |
 | FS-5 | Swap client | = ARCH-3 | Gateway API |
 | FS-6 | Evolve Memory | Add search capability → no other component changes | Principle 1 |
-| FS-7 | Swap Engine | = ARCH-2 | D39, Principle 2 |
+| FS-7 | Swap Agent Loop | = ARCH-2 | D39, Principle 2 |
 | FS-8 | Expand scope via tools | Add tools → broader capability → no architectural changes | D55, Principle 5 |
 
 Some FS tests overlap with SWAP/ARCH/DEPLOY tests — noted with `=` references above. Fixtures and evidence format (CI output, artifacts) to be defined when the reference implementation exists.

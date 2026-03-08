@@ -10,7 +10,7 @@ Every instance of a product built on this architecture has up to three levels:
 
 | Level | What it is | Always present? |
 |-------|-----------|-----------------|
-| **Architecture** | The generic architecture: 4 components (Your Memory, Engine, Auth, Gateway), 2 APIs (Gateway API, Model API), 3 externals (Clients, Models, Tools). No opinions. | Yes |
+| **Architecture** | The generic architecture: 4 components (Your Memory, Agent Loop, Auth, Gateway), 2 APIs (Gateway API, Model API), 3 externals (Clients, Models, Tools). No opinions. | Yes |
 | **Implementation** | The Architecture + a product's shipped opinions and defaults. For BrainDrive: AGENT.md bootstrap, starter library, skills as markdown, OpenRouter default, MCP as default tool protocol, methodology, folder structure, web interface. | Yes |
 | **Personalization** | What the owner adds to make it theirs: life pages, custom skills, projects, profile, model preferences, tool choices. | Optional |
 

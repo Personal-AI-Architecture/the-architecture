@@ -18,7 +18,7 @@ export type {
 
 // --- Manual types from OpenAPI contracts and component stubs ---
 
-/** Metadata passed through from the Gateway to the Engine */
+/** Metadata passed through from the Gateway to the Agent Loop */
 export interface RequestMetadata {
   conversation_id?: string;
   correlation_id: string;
@@ -26,13 +26,13 @@ export interface RequestMetadata {
   client_context?: Record<string, unknown>;
 }
 
-/** The request the Engine receives from the Gateway */
+/** The request the Agent Loop receives from the Gateway */
 export interface EngineRequest {
   messages: import("./generated.js").Message[];
   metadata?: RequestMetadata;
 }
 
-/** SSE events streamed from Engine to Gateway */
+/** SSE events streamed from Agent Loop to Gateway */
 export type EngineEvent =
   | { type: "text-delta"; content: string }
   | {
