@@ -1,5 +1,5 @@
 ---
-displayed_sidebar: null
+displayed_sidebar: architectureSidebar
 hide_table_of_contents: true
 ---
 

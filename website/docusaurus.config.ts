@@ -69,13 +69,7 @@ const config: Config = {
           type: 'docSidebar',
           sidebarId: 'architectureSidebar',
           position: 'left',
-          label: 'Architecture',
-        },
-        {
-          type: 'docSidebar',
-          sidebarId: 'specsSidebar',
-          position: 'left',
-          label: 'Specs',
+          label: 'The Architecture',
         },
         {
           to: '/about',
@@ -107,10 +101,6 @@ const config: Config = {
             {
               label: 'Principles',
               to: '/docs/principles',
-            },
-            {
-              label: 'Foundation Spec',
-              to: '/docs/foundation-spec',
             },
           ],
         },

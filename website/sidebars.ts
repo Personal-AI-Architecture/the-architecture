@@ -42,30 +42,6 @@ const sidebars: SidebarsConfig = {
         'deployment-spec',
       ],
     },
-  ],
-
-  specsSidebar: [
-    'foundation-spec',
-    {
-      type: 'category',
-      label: 'Core Specs',
-      collapsed: false,
-      items: [
-        'memory-spec',
-        'engine-spec',
-        'gateway-spec',
-        'auth-spec',
-        'gateway-engine-contract',
-        'models-spec',
-        'adapter-spec',
-        'tools-spec',
-        'security-spec',
-        'communication-principles',
-        'configuration-spec',
-        'customization-spec',
-        'deployment-spec',
-      ],
-    },
     {
       type: 'category',
       label: 'Verification & Auditing',
