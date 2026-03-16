@@ -53,14 +53,14 @@ flowchart LR
 
 **Core operations:** read, write, edit, delete, search, list, history
 
-**Storage mechanisms:**
+**Storage mechanisms (out of the box):**
 
 | Mechanism | Implementation |
 |-----------|---------------|
 | Files | Markdown, plain text |
-| Database | SQLite |
 | Version control | Git |
-| Index | Vector (future) |
+
+Implementations can add storage mechanisms as needed (SQLite for structured queries, vector indexes for semantic search, etc.). Adding a mechanism means adding tool implementations — it doesn't change the contract. See `memory-spec.md` §Evolution.
 
 **Substrate test:** If it stores/retrieves/searches/versions data, it belongs to Your Memory. If it interprets or produces content, it belongs to the model.
 
