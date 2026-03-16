@@ -36,11 +36,12 @@ See [Implementer's Reference](./implementers-reference.md) for full contracts an
 
 ## Minimal Working Example
 
-Wire up the foundation and send a message — ~20 lines:
+Wire up the foundation and send a message — ~25 lines:
 
 ```typescript
 import {
   createEngine,
+  createGateway,
   createMemoryTools,
   createMemoryToolExecutor,
   createOpenAICompatibleAdapter,
@@ -57,21 +58,22 @@ const provider = createOpenAICompatibleAdapter({
 });
 
 const engine = createEngine(provider, toolExecutor);
+const gateway = createGateway({
+  engine,
+  systemPrompt: "You are a helpful assistant. Use memory tools to manage files.",
+});
 
-// Send a message — engine returns an async iterable of events
-const messages = [
-  { role: "system", content: "You are a helpful assistant. Use memory tools to manage files." },
-  { role: "user", content: "Create a folder called finances with an overview document." },
-];
-
-for await (const event of engine.run(messages)) {
+// Send a message — Gateway manages conversation, Engine executes tools
+for await (const event of gateway.sendMessage({
+  message: { role: "user", content: "Create a folder called finances with an overview document." },
+})) {
   if (event.type === "text-delta") process.stdout.write(event.content);
   if (event.type === "tool-call") console.log(`[tool] ${event.name}`);
   if (event.type === "error") console.error(event.message);
 }
 ```
 
-That's a working AI agent with memory. Everything after this is your implementation decisions.
+That's a working AI agent with memory, conversation management, and proper architecture boundaries. Everything after this is your implementation decisions.
 
 ---
 
@@ -92,7 +94,7 @@ The architecture doesn't care what your client is. It just needs to send message
 | Voice | Voice-to-text → agent → text-to-speech |
 | Embedded | Inside VS Code, Obsidian, another tool |
 
-**Out of the box:** The foundation includes a Gateway with HTTP routes (`createGatewayRoutes`, `createServer`) if your client talks HTTP. For terminal or embedded clients, you can call the Engine directly.
+**Out of the box:** The foundation includes a Gateway with HTTP routes (`createGatewayRoutes`, `createServer`) if your client talks HTTP. For terminal or embedded clients, use the Gateway programmatically (`gateway.sendMessage()`) — it manages conversation state and preserves architecture boundaries. Calling the Engine directly is possible but collapses the Gateway responsibility into your client.
 
 ### 2. System Prompt — What does your agent do?
 
