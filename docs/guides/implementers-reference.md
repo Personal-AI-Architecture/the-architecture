@@ -13,22 +13,21 @@ hide_table_of_contents: true
 
 **4 components**, **2 APIs**, **3 externals**.
 
-```
-                              +-----------------------------------------------+
-                              |                  YOUR MEMORY                  |
-                              |                 (the platform)                |
-                              +-----------------------^-----------------------+
-                                                      |
-                                             tools (read/write)
-                                                      |
-      Clients  -->  Gateway API  -->  Gateway  -->  Agent Loop  -->  Model API  -->  Models
-    (external)        (API)        (component)  (component)       (API)          (external)
-                                                      |
-                        --- Auth ---                  +--> Tools (verbs)  -->  External Memory (nouns)
-                        (cross-cutting                     |-- MCP servers      |-- Salesforce data
-                         component,                        |-- CLI tools        |-- Weather services
-                         applies to all                    +-- Native functions +-- The internet
-                         requests)
+```mermaid
+flowchart LR
+    C[Clients external] -->|Gateway API| G[Gateway component]
+    G -->|Auth middleware check| A[Auth component]
+    A -->|POST engine chat and SSE stream internal contract D137| E[Agent Loop component]
+    E -->|Model API| M[Models external]
+
+    G -->|Conversation store tool D152| CST[Conversation Store Tool internal]
+    CST -->|Read and write conversations| YM[Your Memory platform]
+
+    E -->|Model-driven tool calls| TR[Tool Runtime MCP CLI Native]
+    TR -->|Memory tools read write edit delete search list history| YM
+    TR -->|External tools| EX[External services and external memory]
+
+    A -.->|Authorizes tool actions by actor policy| TR
 ```
 
 | Layer | Elements |
