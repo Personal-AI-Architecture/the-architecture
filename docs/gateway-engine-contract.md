@@ -68,6 +68,7 @@ Client → Gateway API → Gateway → [Auth] → POST /engine/chat → Agent Lo
 
 - **Tool definitions** — which tool sources (MCP servers, CLI tools, native functions), which tools are always-send (D109)
 - **Provider configuration** — model, API key, base URL
+- **Optional implementation bounds** — implementations MAY pass a `maxIterations` safety bound. This is an optional, implementation-provided parameter with no default. The Agent Loop itself does not impose an iteration cap — it loops until the model signals completion. If an implementation provides `maxIterations`, that is the implementation's deployment choice, not an architectural constraint.
 
 These are Agent Loop startup configuration, not per-request data. They don't change between requests.
 
@@ -148,6 +149,10 @@ The stream started, then something failed.
 | `provider_error` | Model unreachable or timeout |
 | `tool_error` | Tool failed and model cannot recover |
 | `context_overflow` | Messages exceed model context window |
+
+The Agent Loop must classify errors correctly — no catch-all error code. Recoverable tool failures (a tool returns an error result) go back to the model as `tool-result` events for the model to decide what to do. Only unrecoverable tool infrastructure failures emit `tool_error` and close the stream.
+
+**Error message safety:** The `message` field in error events must be safe for client display. Never forward raw `Error.message`, stack traces, or file paths. Map each error code to a fixed safe message. Log raw diagnostic detail to structured stdout only. See Security Requirements below.
 
 After an `error` event, the stream closes. The Gateway decides how to communicate the failure to the client.
 
@@ -254,6 +259,7 @@ Per-component requirements from [security-spec.md](./security-spec.md). Security
 | 2026-03-01 | Cross-doc consistency: Implementation Notes labeled "Level 2 Reference", genericized SDK references (Hono/Vercel AI SDK → generic same-process option and SSE event mapping). | Cross-doc review (Dave W + Claude) |
 | 2026-03-01 | D152: Conversation history source clarified — "from Your Memory, via the Gateway's conversation store tool." Structural alignment with component specs: narrative opener, Success Criteria, Security Requirements. | Doc consistency pass + architecture review (Dave W + Claude) |
 | 2026-02-26 | Initial contract created — one endpoint, SSE stream, auth middleware, conventions | Design session (Dave W + Claude) |
+| 2026-03-17 | maxIterations clarified as optional implementation-provided parameter with no default. Error taxonomy: classification guidance added (no catch-all codes, recoverable vs unrecoverable tool failures). Error message safety: explicit requirement added inline (safe for client display, no raw Error.message). | Drift remediation — MVP Build Review (Dave W + Dave J + Claude) |
 
 ---
 

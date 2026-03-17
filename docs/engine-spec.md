@@ -59,7 +59,8 @@ That's the complete behavior. Five steps.
 - Messages sent to the Agent Loop reach the model
 - Tool calls the model makes get executed
 - Responses stream back to the caller
-- The loop continues until the model signals completion
+- The loop continues until the model signals completion. The Agent Loop MUST NOT impose a default iteration cap. Implementations MAY configure a safety bound as a deployment choice, but the Agent Loop itself never terminates the loop before the model signals done.
+- When the model emits text and tool calls in the same turn, the Agent Loop preserves the text in the assistant message for the next loop iteration. Streamed text is never silently discarded on tool continuation.
 - The model can dispatch multiple tool calls in parallel within a single loop — the Agent Loop executes them concurrently and returns all results
 
 ---
@@ -175,6 +176,7 @@ Per-component requirements from [security-spec.md](./security-spec.md). Security
 | 2026-02-23 | Initial Engine spec created from interview | Engine interview session (Dave W + Claude) |
 | 2026-02-23 | Consistency pass — added V1 Implementation section (Build Our Own with Vercel AI SDK + MCP TypeScript SDK), aligned selection criteria with foundation-spec.md (added Must-Have Architecture #8/#11, Nice-to-Have #12/#13, Does NOT Need #6), updated stale D30 reference to D39-D42, replaced stale "updates deferred" note with reconciliation confirmation | Cross-doc consistency audit (Dave W + Claude) |
 | 2026-02-25 | Restructured section order — what it is → how it fits → what it does → why it's thin. Removed Selection Criteria (decision made — Build Our Own, documented in V1 Implementation). Removed Harness rename history (rename complete, all docs updated). | Spec cleanup (Dave W + Claude) |
+| 2026-03-17 | Guarantees updated: Agent Loop MUST NOT impose default iteration cap (implementations MAY configure a safety bound). Text preservation on tool continuation added as guarantee. | Drift remediation — MVP Build Review (Dave W + Dave J + Claude) |
 
 ---
 
