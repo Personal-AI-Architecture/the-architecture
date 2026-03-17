@@ -49,9 +49,12 @@ flowchart LR
 | Dependencies | None -- readable with standard tools when all components are stopped |
 | Exposure | Through tools only (internal tools = the system's own interface to its platform) |
 | Inspectability | Must be inspectable without the system running (text editor, file browser, database viewer) |
-| Export | Must support full export in open formats |
+| Export | Must support full export in open formats from day one. Even if the implementation is a simple archive of the memory root, export is non-negotiable. |
+| Version history | Must be reliably established at startup. If version history cannot be initialized, fail startup -- do not degrade to a warning. |
 
 **Core operations:** read, write, edit, delete, search, list, history
+
+`history` must return change records **and** previous states, not just metadata. Accept an optional commit/version identifier to retrieve file content at that point in time.
 
 **Storage mechanisms (out of the box):**
 
@@ -70,13 +73,15 @@ Implementations can add storage mechanisms as needed (SQLite for structured quer
 
 Generic, commodity, no product-specific logic.
 
-**Loop:** accept message -> send to model -> execute tool calls -> stream response -> repeat until done.
+**Loop:** accept message -> send to model -> execute tool calls -> stream response -> repeat until the model signals completion.
 
 | Property | Requirement |
 |----------|-------------|
 | Configuration | Pre-configured at boot with tool definitions and provider config (not per-request) |
 | Concurrency | Must handle multiple concurrent loops independently |
 | Scope | Connects models to tools -- nothing else |
+| Iteration cap | The Agent Loop MUST NOT impose a default iteration cap. Implementations MAY configure a safety bound as a deployment choice. |
+| Text preservation | When the model emits text and tool calls in the same turn, the Agent Loop must preserve the text in the assistant message for the next loop iteration. Do not discard streamed text on tool continuation. |
 
 **The Agent Loop does NOT:**
 
@@ -108,6 +113,14 @@ Independent of Gateway -- both are swappable independently.
 **Actor types:** owner, collaborator, system agent, background agent, external agent, service, economic actor, federated
 
 **Policy model:** `(subject, resource, action) -> effect`
+
+**Minimal tool surface (required from day one):**
+
+| Tool | Returns |
+|------|---------|
+| `auth_whoami` | Current actor identity |
+| `auth_check` | Permission decision for a given resource/action |
+| `auth_export` | Auth configuration minus credentials |
 
 Data format is product-owned, not provider-specific.
 
@@ -214,6 +227,8 @@ One HTTP endpoint. Not a third API.
 
 **Mid-stream error codes:** `provider_error`, `tool_error`, `context_overflow`
 
+**Error message safety:** SSE error event messages must be safe for client display. Never forward raw `Error.message`, stack traces, or file paths into the stream. Map each error code to a fixed safe message; log raw diagnostic detail to structured stdout only.
+
 **Auth middleware path:** validate request -> attach `X-Actor-ID` + `X-Actor-Permissions` headers -> reject with 401 on failure.
 
 ---
@@ -262,6 +277,7 @@ One HTTP endpoint. Not a third API.
 | Secrets | Environment variables only (never in files) |
 | Skills | Prompts in Your Memory |
 | Bootstrap prompt | One line in Agent Loop config: "Read AGENT.md for your instructions" |
+| Bind address | Default `127.0.0.1` (localhost only). Network binding (`0.0.0.0`) requires explicit configuration. See DEPLOY-3, DEPLOY-5. |
 
 ### Boot Sequence
 
@@ -269,8 +285,9 @@ One HTTP endpoint. Not a third API.
 2. Load adapter config
 3. Discover tools
 4. Mount Your Memory
-5. Read preferences
-6. Ready
+5. Verify version history (git init or equivalent). Fail if version history cannot be established.
+6. Read preferences
+7. Ready
 
 ---
 
@@ -292,6 +309,11 @@ One HTTP endpoint. Not a third API.
 | ARCH-2 | Agent Loop swap | Replace Agent Loop -> Gateway/Memory/Auth/tools unaffected |
 | ARCH-3 | Client swap | New client speaks Gateway API -> system serves identically |
 | ARCH-4 | Schema conformance | All API payloads validate against canonical schemas |
+| ARCH-5 | Error taxonomy compliance | Engine emits correct error codes per failure type -> no catch-all code |
+| ARCH-6 | Error message sanitization | No SSE error event contains paths, stack traces, or credentials |
+| ARCH-7 | Memory export | `memory_export` produces complete archive in open formats -> readable without system |
+| ARCH-8 | Auth tool surface | `auth_whoami`, `auth_check`, `auth_export` exist and return correct results |
+| ARCH-9 | Version history reliability | System fails to start if version history cannot be initialized -> `memory_history` returns previous states |
 
 ### Deployment Invariant Tests
 
@@ -301,6 +323,7 @@ One HTTP endpoint. Not a third API.
 | DEPLOY-2 | Local data storage | All owner data on owner-controlled storage -> no silent external writes |
 | DEPLOY-3 | Default localhost | Fresh install binds to localhost only |
 | DEPLOY-4 | No silent outbound | No network calls except explicit provider/tool requests |
+| DEPLOY-5 | Default bind address | Gateway binds to `127.0.0.1` only -> network binding requires explicit config change |
 
 ### Foundation User Story Tests
 
