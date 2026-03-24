@@ -208,7 +208,7 @@ sequenceDiagram
     ConvTool-->>Gateway: Conversation history
 
     Gateway->>Engine: POST /engine/chat (messages + metadata)
-    Engine->>Provider: Prompt + tool definitions
+    Engine->>Provider: Messages array + tool definitions
     Provider->>Model: Inference request
 
     loop Agent loop

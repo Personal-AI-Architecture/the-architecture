@@ -74,7 +74,7 @@ The Gateway sits between clients and the Agent Loop. Their relationship:
 
 The Gateway knows about conversations. The Agent Loop doesn't. The Agent Loop knows about models and tools. The Gateway doesn't. Clean separation.
 
-The Gateway ↔ Agent Loop interface is defined in [gateway-engine-contract.md](./gateway-engine-contract.md) (D137). The Gateway assembles the messages array (system prompt from config + conversation history + current message + metadata) and POSTs to the Agent Loop. The Agent Loop returns an SSE stream. Auth middleware sits on the path.
+The Gateway ↔ Agent Loop interface is defined in [gateway-engine-contract.md](./gateway-engine-contract.md) (D137). The Gateway packages the messages array (bootstrap message from config + conversation history + current message + metadata) and POSTs to the Agent Loop. The Agent Loop returns an SSE stream. Auth middleware sits on the path.
 
 ---
 

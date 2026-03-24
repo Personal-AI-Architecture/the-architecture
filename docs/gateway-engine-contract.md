@@ -48,7 +48,7 @@ Client → Gateway API → Gateway → [Auth] → POST /engine/chat → Agent Lo
 }
 ```
 
-**Messages** follow the industry-standard `role` + `content` format (consistent with D16: use the prevailing standard, not a custom protocol). The Gateway assembles this array from three sources:
+**Messages** follow the industry-standard `role` + `content` format (consistent with D16: use the prevailing standard, not a custom protocol). The Gateway packages this array from three sources:
 
 1. **System message** — from configuration (the bootstrap prompt that tells the model to read Your Memory)
 2. **Conversation history** — from Your Memory, via the Gateway's conversation store tool (D152)

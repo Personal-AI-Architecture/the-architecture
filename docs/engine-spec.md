@@ -27,7 +27,7 @@ These are explicit boundaries. They exist to prevent product-specific logic from
 
 | Responsibility | Where It Lives | NOT in the Agent Loop |
 |---------------|---------------|-------------------|
-| Prompt assembly | Your Memory (context files read by the model through tools) | Agent Loop does not construct product-specific prompts |
+| Prompt assembly | **The model** reads context files from Your Memory through tools | Agent Loop does not construct product-specific prompts |
 | Skill execution | Your Memory (skill files read and followed by the model) | Agent Loop does not have a skill framework |
 | Approval flow | Tools (write tools require confirmation) + model instructions | Agent Loop does not manage approval state |
 | Scope constraints | Tool configuration (which tools are available) | Agent Loop does not enforce boundaries |
@@ -90,7 +90,7 @@ This is the only concurrency the Agent Loop needs to handle: **parallel tool exe
 | Field | Description | Required |
 |-------|-------------|----------|
 | Message | The owner's message (or system trigger) | Yes |
-| System prompt | Instructions for the model | Yes |
+| Bootstrap message | Minimal startup instructions for the model (e.g., "Read AGENT.md for your instructions"). The model constructs its working context by reading Memory through tools. | Yes |
 | Conversation history | Prior messages in this conversation | No (first message has none) |
 
 ### Boot-Time Configuration (via runtime config)
