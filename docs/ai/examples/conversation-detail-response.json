@@ -1,0 +1,20 @@
+{
+  "id": "conv_123",
+  "title": null,
+  "created_at": "2026-03-17T12:00:00Z",
+  "updated_at": "2026-03-17T12:05:00Z",
+  "messages": [
+    {
+      "id": "msg_1",
+      "role": "user",
+      "content": "hello",
+      "timestamp": "2026-03-17T12:00:00Z"
+    },
+    {
+      "id": "msg_2",
+      "role": "assistant",
+      "content": "Hi - what would you like to build?",
+      "timestamp": "2026-03-17T12:00:05Z"
+    }
+  ]
+}

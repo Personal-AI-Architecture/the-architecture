@@ -1,0 +1,358 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://paa/deconstruction/contracts/Adapter.schema.json",
+  "title": "Adapter Boundary Contract Pack",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "adapter_boundary_profile",
+    "adapter_registry_entry",
+    "adapter_selection_policy",
+    "gateway_api_adapter_profile",
+    "model_api_adapter_profile",
+    "adapter_translation_policy",
+    "adapter_config_profile",
+    "adapter_swap_policy",
+    "adapter_error_policy",
+    "adapter_runtime_constraints"
+  ],
+  "properties": {
+    "adapter_boundary_profile": {
+      "$ref": "#/$defs/AdapterBoundaryProfile"
+    },
+    "adapter_registry_entry": {
+      "$ref": "#/$defs/AdapterRegistryEntry"
+    },
+    "adapter_selection_policy": {
+      "$ref": "#/$defs/AdapterSelectionPolicy"
+    },
+    "gateway_api_adapter_profile": {
+      "$ref": "#/$defs/GatewayApiAdapterProfile"
+    },
+    "model_api_adapter_profile": {
+      "$ref": "#/$defs/ModelApiAdapterProfile"
+    },
+    "adapter_translation_policy": {
+      "$ref": "#/$defs/AdapterTranslationPolicy"
+    },
+    "adapter_config_profile": {
+      "$ref": "#/$defs/AdapterConfigProfile"
+    },
+    "adapter_swap_policy": {
+      "$ref": "#/$defs/AdapterSwapPolicy"
+    },
+    "adapter_error_policy": {
+      "$ref": "#/$defs/AdapterErrorPolicy"
+    },
+    "adapter_runtime_constraints": {
+      "$ref": "#/$defs/AdapterRuntimeConstraints"
+    }
+  },
+  "$defs": {
+    "NonEmptyString": {
+      "type": "string",
+      "minLength": 1
+    },
+    "AdapterBoundaryProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "is_component",
+        "is_api",
+        "pattern_scope",
+        "supported_adapter_domains"
+      ],
+      "properties": {
+        "is_component": {
+          "const": false
+        },
+        "is_api": {
+          "const": false
+        },
+        "pattern_scope": {
+          "const": "within_existing_apis"
+        },
+        "supported_adapter_domains": {
+          "type": "array",
+          "uniqueItems": true,
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "enum": [
+              "gateway_api",
+              "model_api"
+            ]
+          }
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "AdapterRegistryEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "adapter_key",
+        "adapter_domain",
+        "enabled"
+      ],
+      "properties": {
+        "adapter_key": {
+          "$ref": "#/$defs/NonEmptyString"
+        },
+        "adapter_domain": {
+          "type": "string",
+          "enum": [
+            "gateway_api",
+            "model_api"
+          ]
+        },
+        "enabled": {
+          "type": "boolean",
+          "default": true
+        },
+        "implementation_ref": {
+          "type": "string"
+        },
+        "trust_level": {
+          "type": "string",
+          "enum": [
+            "system_shipped",
+            "owner_installed"
+          ],
+          "default": "system_shipped"
+        }
+      }
+    },
+    "AdapterSelectionPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "selection_source",
+        "silent_fallback_allowed",
+        "unsupported_adapter_behavior"
+      ],
+      "properties": {
+        "selection_source": {
+          "const": "runtime_config"
+        },
+        "silent_fallback_allowed": {
+          "const": false
+        },
+        "unsupported_adapter_behavior": {
+          "const": "fail_clearly"
+        },
+        "startup_selection_only": {
+          "type": "boolean",
+          "default": true
+        }
+      }
+    },
+    "GatewayApiAdapterProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "inbound_translation",
+        "outbound_translation",
+        "component_logic_embedded"
+      ],
+      "properties": {
+        "inbound_translation": {
+          "const": "external_client_shape_to_gateway_contract"
+        },
+        "outbound_translation": {
+          "const": "gateway_stream_to_external_client_shape"
+        },
+        "component_logic_embedded": {
+          "const": false
+        },
+        "standard_family": {
+          "type": "string"
+        }
+      }
+    },
+    "ModelApiAdapterProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "inbound_translation",
+        "outbound_translation",
+        "provider_logic_outside_adapter",
+        "supports_tool_call_normalization"
+      ],
+      "properties": {
+        "inbound_translation": {
+          "const": "engine_contract_to_provider_payload"
+        },
+        "outbound_translation": {
+          "const": "provider_payload_to_engine_contract"
+        },
+        "provider_logic_outside_adapter": {
+          "const": false
+        },
+        "supports_tool_call_normalization": {
+          "const": true
+        },
+        "transport_modes": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "streaming",
+              "non_streaming"
+            ]
+          }
+        }
+      }
+    },
+    "AdapterTranslationPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "internal_contract_stable",
+        "external_standard_change_absorbed_by_adapter",
+        "translation_scope_only"
+      ],
+      "properties": {
+        "internal_contract_stable": {
+          "const": true
+        },
+        "external_standard_change_absorbed_by_adapter": {
+          "const": true
+        },
+        "translation_scope_only": {
+          "const": true
+        },
+        "stateless_preferred": {
+          "type": "boolean",
+          "default": true
+        }
+      }
+    },
+    "AdapterConfigProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "adapter_config_separate_from_runtime",
+        "adapter_config_separate_from_preferences",
+        "secret_reference_key",
+        "raw_secret_values_allowed"
+      ],
+      "properties": {
+        "adapter_config_separate_from_runtime": {
+          "const": true
+        },
+        "adapter_config_separate_from_preferences": {
+          "const": true
+        },
+        "secret_reference_key": {
+          "const": "api_key_env"
+        },
+        "raw_secret_values_allowed": {
+          "const": false
+        },
+        "config_fields": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "base_url",
+              "model",
+              "api_key_env"
+            ]
+          }
+        }
+      }
+    },
+    "AdapterSwapPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "same_provider_model_swap",
+        "provider_swap",
+        "unrelated_component_code_change_required"
+      ],
+      "properties": {
+        "same_provider_model_swap": {
+          "const": "preference_change_only"
+        },
+        "provider_swap": {
+          "const": "runtime_adapter_plus_adapter_config_change"
+        },
+        "unrelated_component_code_change_required": {
+          "const": false
+        },
+        "gateway_standard_swap_supported": {
+          "type": "boolean",
+          "default": true
+        }
+      }
+    },
+    "AdapterErrorPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "safe_error_messages_required",
+        "raw_external_error_passthrough",
+        "classified_error_mapping_required"
+      ],
+      "properties": {
+        "safe_error_messages_required": {
+          "const": true
+        },
+        "raw_external_error_passthrough": {
+          "const": false
+        },
+        "classified_error_mapping_required": {
+          "const": true
+        },
+        "allowed_error_codes": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "provider_error",
+              "context_overflow",
+              "invalid_provider_response",
+              "adapter_misconfigured",
+              "provider_unavailable"
+            ]
+          }
+        }
+      }
+    },
+    "AdapterRuntimeConstraints": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "request_time_reconfiguration_allowed",
+        "startup_selection_required",
+        "unsupported_adapter_fails_startup",
+        "deterministic_boot_phase_includes_adapter_config"
+      ],
+      "properties": {
+        "request_time_reconfiguration_allowed": {
+          "const": false
+        },
+        "startup_selection_required": {
+          "const": true
+        },
+        "unsupported_adapter_fails_startup": {
+          "const": true
+        },
+        "deterministic_boot_phase_includes_adapter_config": {
+          "const": true
+        },
+        "gateway_adapter_runtime_form": {
+          "type": "string",
+          "enum": [
+            "explicit_module",
+            "integrated_normalizer"
+          ],
+          "default": "integrated_normalizer"
+        }
+      }
+    }
+  }
+}

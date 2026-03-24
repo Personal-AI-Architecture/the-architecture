@@ -1,0 +1,16 @@
+{
+  "messages": [
+    {
+      "role": "user",
+      "content": "Write a spec."
+    }
+  ],
+  "metadata": {
+    "correlation_id": "req_123",
+    "provider": "openrouter",
+    "api_key": "secret",
+    "tool_sources": [
+      "/tmp/tools"
+    ]
+  }
+}

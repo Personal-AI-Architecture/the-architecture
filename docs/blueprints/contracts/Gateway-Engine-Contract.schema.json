@@ -1,0 +1,474 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://paa/deconstruction/contracts/Gateway-Engine-Contract.schema.json",
+  "title": "Gateway-Engine Internal Contract Pack",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "gateway_engine_request",
+    "gateway_message",
+    "gateway_tool_call",
+    "auth_context",
+    "stream_event",
+    "pre_stream_error_response"
+  ],
+  "properties": {
+    "gateway_engine_request": {
+      "$ref": "#/$defs/GatewayEngineRequest"
+    },
+    "gateway_message": {
+      "$ref": "#/$defs/GatewayMessage"
+    },
+    "gateway_tool_call": {
+      "$ref": "#/$defs/GatewayToolCall"
+    },
+    "auth_context": {
+      "$ref": "#/$defs/AuthContext"
+    },
+    "stream_event": {
+      "$ref": "#/$defs/StreamEvent"
+    },
+    "pre_stream_error_response": {
+      "$ref": "#/$defs/PreStreamErrorResponse"
+    }
+  },
+  "$defs": {
+    "Identifier": {
+      "type": "string",
+      "minLength": 1
+    },
+    "MessageRole": {
+      "type": "string",
+      "enum": [
+        "system",
+        "user",
+        "assistant",
+        "tool"
+      ]
+    },
+    "PermissionSet": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "memory_access",
+        "tool_access",
+        "system_actions",
+        "delegation",
+        "approval_authority",
+        "administration"
+      ],
+      "properties": {
+        "memory_access": {
+          "type": "boolean"
+        },
+        "tool_access": {
+          "type": "boolean"
+        },
+        "system_actions": {
+          "type": "boolean"
+        },
+        "delegation": {
+          "type": "boolean"
+        },
+        "approval_authority": {
+          "type": "boolean"
+        },
+        "administration": {
+          "type": "boolean"
+        }
+      }
+    },
+    "GatewayToolCall": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "input"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "input": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "GatewayMessage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "role",
+        "content"
+      ],
+      "properties": {
+        "role": {
+          "$ref": "#/$defs/MessageRole"
+        },
+        "content": {
+          "type": "string"
+        },
+        "tool_call_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "tool_calls": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/GatewayToolCall"
+          }
+        }
+      }
+    },
+    "GatewayMetadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "correlation_id"
+      ],
+      "properties": {
+        "correlation_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "conversation_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "trigger": {
+          "type": "string",
+          "enum": [
+            "message",
+            "webhook",
+            "schedule"
+          ]
+        },
+        "client_context": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "GatewayEngineRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "messages",
+        "metadata"
+      ],
+      "properties": {
+        "messages": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/GatewayMessage"
+          }
+        },
+        "metadata": {
+          "$ref": "#/$defs/GatewayMetadata"
+        }
+      },
+      "not": {
+        "anyOf": [
+          {
+            "required": [
+              "provider"
+            ]
+          },
+          {
+            "required": [
+              "provider_adapter"
+            ]
+          },
+          {
+            "required": [
+              "model"
+            ]
+          },
+          {
+            "required": [
+              "base_url"
+            ]
+          },
+          {
+            "required": [
+              "api_key"
+            ]
+          },
+          {
+            "required": [
+              "api_key_env"
+            ]
+          },
+          {
+            "required": [
+              "tools"
+            ]
+          },
+          {
+            "required": [
+              "tool_sources"
+            ]
+          }
+        ]
+      }
+    },
+    "AuthContext": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "actorId",
+        "actorType",
+        "permissions",
+        "mode"
+      ],
+      "properties": {
+        "actorId": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "actorType": {
+          "type": "string",
+          "enum": [
+            "owner"
+          ]
+        },
+        "permissions": {
+          "$ref": "#/$defs/PermissionSet"
+        },
+        "mode": {
+          "type": "string",
+          "enum": [
+            "local-owner"
+          ]
+        }
+      }
+    },
+    "StreamEventTextDelta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "delta"
+      ],
+      "properties": {
+        "type": {
+          "const": "text-delta"
+        },
+        "delta": {
+          "type": "string"
+        }
+      }
+    },
+    "StreamEventToolCall": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "id",
+        "name",
+        "input"
+      ],
+      "properties": {
+        "type": {
+          "const": "tool-call"
+        },
+        "id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "input": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "StreamEventToolResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "id",
+        "status",
+        "output"
+      ],
+      "properties": {
+        "type": {
+          "const": "tool-result"
+        },
+        "id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "ok",
+            "denied",
+            "error"
+          ]
+        },
+        "output": {}
+      }
+    },
+    "StreamEventApprovalRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "request_id",
+        "tool_name",
+        "summary"
+      ],
+      "properties": {
+        "type": {
+          "const": "approval-request"
+        },
+        "request_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "tool_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "StreamEventApprovalResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "request_id",
+        "decision"
+      ],
+      "properties": {
+        "type": {
+          "const": "approval-result"
+        },
+        "request_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "decision": {
+          "type": "string",
+          "enum": [
+            "approved",
+            "denied"
+          ]
+        }
+      }
+    },
+    "StreamEventDone": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "conversation_id",
+        "message_id",
+        "finish_reason"
+      ],
+      "properties": {
+        "type": {
+          "const": "done"
+        },
+        "conversation_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "message_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "finish_reason": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "StreamEventError": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "code",
+        "message"
+      ],
+      "properties": {
+        "type": {
+          "const": "error"
+        },
+        "code": {
+          "type": "string",
+          "enum": [
+            "provider_error",
+            "tool_error",
+            "context_overflow"
+          ]
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "StreamEvent": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/StreamEventTextDelta"
+        },
+        {
+          "$ref": "#/$defs/StreamEventToolCall"
+        },
+        {
+          "$ref": "#/$defs/StreamEventToolResult"
+        },
+        {
+          "$ref": "#/$defs/StreamEventApprovalRequest"
+        },
+        {
+          "$ref": "#/$defs/StreamEventApprovalResult"
+        },
+        {
+          "$ref": "#/$defs/StreamEventDone"
+        },
+        {
+          "$ref": "#/$defs/StreamEventError"
+        }
+      ]
+    },
+    "PreStreamErrorResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "code",
+        "message"
+      ],
+      "properties": {
+        "code": {
+          "type": "string",
+          "enum": [
+            "invalid_request",
+            "unauthorized",
+            "forbidden",
+            "service_unavailable",
+            "not_found"
+          ]
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "type": "integer",
+          "minimum": 400,
+          "maximum": 599
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,616 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://paa/deconstruction/contracts/Memory.schema.json",
+  "title": "Memory Component Contract Pack",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "memory_read_request",
+    "memory_read_response",
+    "memory_write_request",
+    "memory_write_response",
+    "memory_edit_request",
+    "memory_edit_response",
+    "memory_delete_request",
+    "memory_delete_response",
+    "memory_list_request",
+    "memory_list_response",
+    "memory_search_request",
+    "memory_search_response",
+    "memory_history_request",
+    "memory_history_response",
+    "memory_export_response",
+    "conversation_create_request",
+    "conversation_append_request",
+    "conversation_list_response",
+    "conversation_detail_response",
+    "memory_error"
+  ],
+  "properties": {
+    "memory_read_request": {
+      "$ref": "#/$defs/MemoryReadRequest"
+    },
+    "memory_read_response": {
+      "$ref": "#/$defs/MemoryReadResponse"
+    },
+    "memory_write_request": {
+      "$ref": "#/$defs/MemoryWriteRequest"
+    },
+    "memory_write_response": {
+      "$ref": "#/$defs/MemoryWriteResponse"
+    },
+    "memory_edit_request": {
+      "$ref": "#/$defs/MemoryEditRequest"
+    },
+    "memory_edit_response": {
+      "$ref": "#/$defs/MemoryEditResponse"
+    },
+    "memory_delete_request": {
+      "$ref": "#/$defs/MemoryDeleteRequest"
+    },
+    "memory_delete_response": {
+      "$ref": "#/$defs/MemoryDeleteResponse"
+    },
+    "memory_list_request": {
+      "$ref": "#/$defs/MemoryListRequest"
+    },
+    "memory_list_response": {
+      "$ref": "#/$defs/MemoryListResponse"
+    },
+    "memory_search_request": {
+      "$ref": "#/$defs/MemorySearchRequest"
+    },
+    "memory_search_response": {
+      "$ref": "#/$defs/MemorySearchResponse"
+    },
+    "memory_history_request": {
+      "$ref": "#/$defs/MemoryHistoryRequest"
+    },
+    "memory_history_response": {
+      "$ref": "#/$defs/MemoryHistoryResponse"
+    },
+    "memory_export_response": {
+      "$ref": "#/$defs/MemoryExportResponse"
+    },
+    "conversation_create_request": {
+      "$ref": "#/$defs/ConversationCreateRequest"
+    },
+    "conversation_append_request": {
+      "$ref": "#/$defs/ConversationAppendRequest"
+    },
+    "conversation_list_response": {
+      "$ref": "#/$defs/ConversationListResponse"
+    },
+    "conversation_detail_response": {
+      "$ref": "#/$defs/ConversationDetailResponse"
+    },
+    "memory_error": {
+      "$ref": "#/$defs/MemoryError"
+    }
+  },
+  "$defs": {
+    "Identifier": {
+      "type": "string",
+      "minLength": 1
+    },
+    "Timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "Path": {
+      "type": "string",
+      "minLength": 1
+    },
+    "MessageRole": {
+      "type": "string",
+      "enum": [
+        "system",
+        "user",
+        "assistant",
+        "tool"
+      ]
+    },
+    "MemoryError": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "code",
+        "message"
+      ],
+      "properties": {
+        "code": {
+          "type": "string",
+          "enum": [
+            "path_invalid",
+            "reserved_path",
+            "not_found",
+            "invalid_input",
+            "write_failed",
+            "history_unavailable",
+            "export_failed",
+            "concurrency_conflict",
+            "storage_unavailable"
+          ]
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "MemoryReadRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path"
+      ],
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/Path"
+        }
+      }
+    },
+    "MemoryReadResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "content"
+      ],
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/Path"
+        },
+        "content": {
+          "type": "string"
+        }
+      }
+    },
+    "MemoryWriteRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "content"
+      ],
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/Path"
+        },
+        "content": {
+          "type": "string"
+        }
+      }
+    },
+    "MemoryWriteResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "bytes_written"
+      ],
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/Path"
+        },
+        "bytes_written": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "MemoryEditRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "find",
+        "replace"
+      ],
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/Path"
+        },
+        "find": {
+          "type": "string",
+          "minLength": 1
+        },
+        "replace": {
+          "type": "string"
+        }
+      }
+    },
+    "MemoryEditResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "updated"
+      ],
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/Path"
+        },
+        "updated": {
+          "type": "boolean"
+        }
+      }
+    },
+    "MemoryDeleteRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path"
+      ],
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/Path"
+        }
+      }
+    },
+    "MemoryDeleteResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "deleted"
+      ],
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/Path"
+        },
+        "deleted": {
+          "type": "boolean"
+        }
+      }
+    },
+    "MemoryListRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "type": "string",
+          "default": "."
+        }
+      }
+    },
+    "MemoryListResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "entries"
+      ],
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/Path"
+        },
+        "entries": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "SearchMatch": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "line",
+        "content"
+      ],
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/Path"
+        },
+        "line": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "content": {
+          "type": "string"
+        }
+      }
+    },
+    "MemorySearchRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "query"
+      ],
+      "properties": {
+        "query": {
+          "type": "string",
+          "minLength": 1
+        },
+        "path": {
+          "type": "string",
+          "default": "."
+        },
+        "include_conversations": {
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
+    "MemorySearchResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "query",
+        "include_conversations",
+        "matches"
+      ],
+      "properties": {
+        "query": {
+          "type": "string",
+          "minLength": 1
+        },
+        "include_conversations": {
+          "type": "boolean"
+        },
+        "matches": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SearchMatch"
+          }
+        }
+      }
+    },
+    "MemoryHistoryRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path"
+      ],
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/Path"
+        },
+        "commit": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "HistoryEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "commit",
+        "message",
+        "timestamp",
+        "path"
+      ],
+      "properties": {
+        "commit": {
+          "type": "string",
+          "minLength": 1
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        },
+        "timestamp": {
+          "$ref": "#/$defs/Timestamp"
+        },
+        "path": {
+          "$ref": "#/$defs/Path"
+        },
+        "previous_state": {
+          "type": "string"
+        }
+      }
+    },
+    "MemoryHistoryResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "entries"
+      ],
+      "properties": {
+        "entries": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/HistoryEntry"
+          }
+        }
+      }
+    },
+    "MemoryExportResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "archive_path"
+      ],
+      "properties": {
+        "archive_path": {
+          "$ref": "#/$defs/Path"
+        },
+        "format": {
+          "type": "string",
+          "default": "tar.gz"
+        }
+      },
+      "not": {
+        "anyOf": [
+          {
+            "required": [
+              "api_key"
+            ]
+          },
+          {
+            "required": [
+              "token"
+            ]
+          },
+          {
+            "required": [
+              "password_hash"
+            ]
+          },
+          {
+            "required": [
+              "private_key"
+            ]
+          }
+        ]
+      }
+    },
+    "ConversationMessage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "role",
+        "content",
+        "timestamp"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "role": {
+          "$ref": "#/$defs/MessageRole"
+        },
+        "content": {
+          "type": "string"
+        },
+        "timestamp": {
+          "$ref": "#/$defs/Timestamp"
+        }
+      }
+    },
+    "ConversationSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "title",
+        "created_at",
+        "updated_at",
+        "message_count"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "title": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "created_at": {
+          "$ref": "#/$defs/Timestamp"
+        },
+        "updated_at": {
+          "$ref": "#/$defs/Timestamp"
+        },
+        "message_count": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "ConversationCreateRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "initial_message"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "initial_message": {
+          "$ref": "#/$defs/ConversationMessage"
+        }
+      }
+    },
+    "ConversationAppendRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "conversation_id",
+        "message"
+      ],
+      "properties": {
+        "conversation_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "message": {
+          "$ref": "#/$defs/ConversationMessage"
+        }
+      }
+    },
+    "ConversationListResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "conversations",
+        "total",
+        "limit",
+        "offset"
+      ],
+      "properties": {
+        "conversations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ConversationSummary"
+          }
+        },
+        "total": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "offset": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "ConversationDetailResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "title",
+        "created_at",
+        "updated_at",
+        "messages"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "title": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "created_at": {
+          "$ref": "#/$defs/Timestamp"
+        },
+        "updated_at": {
+          "$ref": "#/$defs/Timestamp"
+        },
+        "messages": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ConversationMessage"
+          }
+        }
+      }
+    }
+  }
+}

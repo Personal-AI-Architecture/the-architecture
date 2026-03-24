@@ -1,0 +1,432 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://paa/deconstruction/contracts/Auth.schema.json",
+  "title": "Auth Component Contract Pack",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "permission_set",
+    "auth_state",
+    "auth_context",
+    "authenticate_request",
+    "authenticate_response",
+    "authorize_request",
+    "authorize_decision",
+    "auth_whoami_response",
+    "auth_check_response",
+    "auth_export_response",
+    "auth_headers"
+  ],
+  "properties": {
+    "permission_set": {
+      "$ref": "#/$defs/PermissionSet"
+    },
+    "auth_state": {
+      "$ref": "#/$defs/AuthState"
+    },
+    "auth_context": {
+      "$ref": "#/$defs/AuthContext"
+    },
+    "authenticate_request": {
+      "$ref": "#/$defs/AuthenticateRequest"
+    },
+    "authenticate_response": {
+      "$ref": "#/$defs/AuthenticateResponse"
+    },
+    "authorize_request": {
+      "$ref": "#/$defs/AuthorizeRequest"
+    },
+    "authorize_decision": {
+      "$ref": "#/$defs/AuthorizeDecision"
+    },
+    "auth_whoami_response": {
+      "$ref": "#/$defs/AuthWhoamiResponse"
+    },
+    "auth_check_response": {
+      "$ref": "#/$defs/AuthCheckResponse"
+    },
+    "auth_export_response": {
+      "$ref": "#/$defs/AuthExportResponse"
+    },
+    "auth_headers": {
+      "$ref": "#/$defs/AuthHeaders"
+    }
+  },
+  "$defs": {
+    "Identifier": {
+      "type": "string",
+      "minLength": 1
+    },
+    "Timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "ActorType": {
+      "type": "string",
+      "enum": [
+        "owner",
+        "collaborator",
+        "system_agent",
+        "background_agent",
+        "external_agent",
+        "service",
+        "economic_actor",
+        "federated_instance"
+      ]
+    },
+    "ActorStatus": {
+      "type": "string",
+      "enum": [
+        "active",
+        "suspended",
+        "revoked"
+      ]
+    },
+    "AuthMode": {
+      "type": "string",
+      "enum": [
+        "local-owner",
+        "multi-actor",
+        "federated"
+      ]
+    },
+    "PermissionSet": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "memory_access",
+        "tool_access",
+        "system_actions",
+        "delegation",
+        "approval_authority",
+        "administration"
+      ],
+      "properties": {
+        "memory_access": {
+          "type": "boolean",
+          "default": false
+        },
+        "tool_access": {
+          "type": "boolean",
+          "default": false
+        },
+        "system_actions": {
+          "type": "boolean",
+          "default": false
+        },
+        "delegation": {
+          "type": "boolean",
+          "default": false
+        },
+        "approval_authority": {
+          "type": "boolean",
+          "default": false
+        },
+        "administration": {
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
+    "AuthState": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "actor_id",
+        "actor_type",
+        "mode",
+        "permissions",
+        "created_at",
+        "updated_at"
+      ],
+      "properties": {
+        "actor_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "actor_type": {
+          "$ref": "#/$defs/ActorType"
+        },
+        "mode": {
+          "$ref": "#/$defs/AuthMode"
+        },
+        "permissions": {
+          "$ref": "#/$defs/PermissionSet"
+        },
+        "created_at": {
+          "$ref": "#/$defs/Timestamp"
+        },
+        "updated_at": {
+          "$ref": "#/$defs/Timestamp"
+        }
+      }
+    },
+    "AuthContext": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "actorId",
+        "actorType",
+        "mode",
+        "permissions"
+      ],
+      "properties": {
+        "actorId": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "actorType": {
+          "$ref": "#/$defs/ActorType"
+        },
+        "mode": {
+          "$ref": "#/$defs/AuthMode"
+        },
+        "permissions": {
+          "$ref": "#/$defs/PermissionSet"
+        }
+      }
+    },
+    "AuthHeaders": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "x-actor-id",
+        "x-actor-type",
+        "x-auth-mode",
+        "x-actor-permissions"
+      ],
+      "properties": {
+        "x-actor-id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "x-actor-type": {
+          "$ref": "#/$defs/ActorType"
+        },
+        "x-auth-mode": {
+          "$ref": "#/$defs/AuthMode"
+        },
+        "x-actor-permissions": {
+          "type": "string",
+          "minLength": 2
+        }
+      }
+    },
+    "AuthenticateRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "headers"
+      ],
+      "properties": {
+        "headers": {
+          "$ref": "#/$defs/AuthHeaders"
+        }
+      }
+    },
+    "AuthenticateResponse": {
+      "$ref": "#/$defs/AuthContext"
+    },
+    "AuthorizeRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "auth_context",
+        "resource",
+        "action"
+      ],
+      "properties": {
+        "auth_context": {
+          "$ref": "#/$defs/AuthContext"
+        },
+        "resource": {
+          "type": "string",
+          "minLength": 1
+        },
+        "action": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "AuthorizeDecision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "allowed"
+      ],
+      "properties": {
+        "allowed": {
+          "type": "boolean"
+        },
+        "reason": {
+          "type": "string"
+        }
+      }
+    },
+    "AuthWhoamiResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "actor_id",
+        "actor_type",
+        "mode"
+      ],
+      "properties": {
+        "actor_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "actor_type": {
+          "$ref": "#/$defs/ActorType"
+        },
+        "mode": {
+          "$ref": "#/$defs/AuthMode"
+        }
+      }
+    },
+    "AuthCheckResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "allowed",
+        "permissions"
+      ],
+      "properties": {
+        "allowed": {
+          "type": "boolean"
+        },
+        "permissions": {
+          "$ref": "#/$defs/PermissionSet"
+        }
+      }
+    },
+    "IdentityRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "type",
+        "status",
+        "created_at"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "type": {
+          "$ref": "#/$defs/ActorType"
+        },
+        "status": {
+          "$ref": "#/$defs/ActorStatus"
+        },
+        "display_name": {
+          "type": "string"
+        },
+        "created_at": {
+          "$ref": "#/$defs/Timestamp"
+        }
+      }
+    },
+    "PolicyRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "subject",
+        "resource",
+        "action",
+        "effect"
+      ],
+      "properties": {
+        "subject": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "resource": {
+          "type": "string",
+          "minLength": 1
+        },
+        "action": {
+          "type": "string",
+          "minLength": 1
+        },
+        "effect": {
+          "type": "string",
+          "enum": [
+            "allow",
+            "deny"
+          ]
+        }
+      }
+    },
+    "AuthExportResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "actor_id",
+        "actor_type",
+        "mode",
+        "permissions",
+        "created_at",
+        "updated_at"
+      ],
+      "properties": {
+        "actor_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "actor_type": {
+          "$ref": "#/$defs/ActorType"
+        },
+        "mode": {
+          "$ref": "#/$defs/AuthMode"
+        },
+        "permissions": {
+          "$ref": "#/$defs/PermissionSet"
+        },
+        "created_at": {
+          "$ref": "#/$defs/Timestamp"
+        },
+        "updated_at": {
+          "$ref": "#/$defs/Timestamp"
+        },
+        "identities": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/IdentityRecord"
+          }
+        },
+        "policies": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/PolicyRule"
+          }
+        }
+      },
+      "not": {
+        "anyOf": [
+          {
+            "required": [
+              "password_hash"
+            ]
+          },
+          {
+            "required": [
+              "token"
+            ]
+          },
+          {
+            "required": [
+              "api_key"
+            ]
+          },
+          {
+            "required": [
+              "session_secret"
+            ]
+          },
+          {
+            "required": [
+              "private_key"
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,5 @@
+{
+  "base_url": "http://127.0.0.1:11434/v1",
+  "model": "llama3.1",
+  "api_key_env": "BRAINDRIVE_API_KEY"
+}

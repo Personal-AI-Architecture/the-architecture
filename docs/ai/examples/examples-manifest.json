@@ -1,0 +1,328 @@
+{
+  "version": "1.0",
+  "traceability_source": "docs/ai/traceability-map.md",
+  "examples": [
+    {
+      "file": "docs/ai/examples/client-message-request.json",
+      "kind": "valid",
+      "owning_docs": [
+        "docs/ai/client-gateway-contract.md"
+      ],
+      "matrix_ids": [
+        "G-05"
+      ],
+      "related_checklists": [
+        "docs/ai/review-checklists/gateway-review.md"
+      ],
+      "glossary_terms": [
+        "client contract",
+        "internal contract"
+      ]
+    },
+    {
+      "file": "docs/ai/examples/invalid-client-message-request.json",
+      "kind": "invalid",
+      "owning_docs": [
+        "docs/ai/client-gateway-contract.md"
+      ],
+      "matrix_ids": [
+        "G-05"
+      ],
+      "related_checklists": [
+        "docs/ai/review-checklists/gateway-review.md"
+      ],
+      "glossary_terms": [
+        "client contract",
+        "internal contract",
+        "drift"
+      ]
+    },
+    {
+      "file": "docs/ai/examples/conversation-list-response.json",
+      "kind": "valid",
+      "owning_docs": [
+        "docs/ai/client-gateway-contract.md"
+      ],
+      "matrix_ids": [
+        "G-06",
+        "G-07"
+      ],
+      "related_checklists": [
+        "docs/ai/review-checklists/gateway-review.md"
+      ],
+      "glossary_terms": [
+        "client contract",
+        "contract-visible"
+      ]
+    },
+    {
+      "file": "docs/ai/examples/invalid-conversation-list-response.json",
+      "kind": "invalid",
+      "owning_docs": [
+        "docs/ai/client-gateway-contract.md"
+      ],
+      "matrix_ids": [
+        "G-06"
+      ],
+      "related_checklists": [
+        "docs/ai/review-checklists/gateway-review.md"
+      ],
+      "glossary_terms": [
+        "client contract",
+        "drift"
+      ]
+    },
+    {
+      "file": "docs/ai/examples/conversation-detail-response.json",
+      "kind": "valid",
+      "owning_docs": [
+        "docs/ai/client-gateway-contract.md"
+      ],
+      "matrix_ids": [
+        "G-06",
+        "G-07"
+      ],
+      "related_checklists": [
+        "docs/ai/review-checklists/gateway-review.md"
+      ],
+      "glossary_terms": [
+        "client contract",
+        "contract-visible"
+      ]
+    },
+    {
+      "file": "docs/ai/examples/invalid-conversation-detail-response.json",
+      "kind": "invalid",
+      "owning_docs": [
+        "docs/ai/client-gateway-contract.md"
+      ],
+      "matrix_ids": [
+        "G-06"
+      ],
+      "related_checklists": [
+        "docs/ai/review-checklists/gateway-review.md"
+      ],
+      "glossary_terms": [
+        "client contract",
+        "drift"
+      ]
+    },
+    {
+      "file": "docs/ai/examples/approval-request-event.json",
+      "kind": "valid",
+      "owning_docs": [
+        "docs/ai/client-gateway-contract.md",
+        "docs/ai/gateway-engine-contract.md"
+      ],
+      "matrix_ids": [
+        "S-05",
+        "GC-06"
+      ],
+      "related_checklists": [
+        "docs/ai/review-checklists/gateway-review.md",
+        "docs/ai/review-checklists/security-review.md",
+        "docs/ai/review-checklists/engine-review.md"
+      ],
+      "glossary_terms": [
+        "contract-visible",
+        "client contract"
+      ]
+    },
+    {
+      "file": "docs/ai/examples/invalid-approval-request-event.json",
+      "kind": "invalid",
+      "owning_docs": [
+        "docs/ai/client-gateway-contract.md",
+        "docs/ai/gateway-engine-contract.md"
+      ],
+      "matrix_ids": [
+        "S-05",
+        "GC-06"
+      ],
+      "related_checklists": [
+        "docs/ai/review-checklists/gateway-review.md",
+        "docs/ai/review-checklists/security-review.md",
+        "docs/ai/review-checklists/engine-review.md"
+      ],
+      "glossary_terms": [
+        "contract-visible",
+        "client contract",
+        "drift"
+      ]
+    },
+    {
+      "file": "docs/ai/examples/approval-result-event.json",
+      "kind": "valid",
+      "owning_docs": [
+        "docs/ai/client-gateway-contract.md",
+        "docs/ai/gateway-engine-contract.md"
+      ],
+      "matrix_ids": [
+        "S-05",
+        "GC-06"
+      ],
+      "related_checklists": [
+        "docs/ai/review-checklists/gateway-review.md",
+        "docs/ai/review-checklists/security-review.md",
+        "docs/ai/review-checklists/engine-review.md"
+      ],
+      "glossary_terms": [
+        "contract-visible",
+        "client contract"
+      ]
+    },
+    {
+      "file": "docs/ai/examples/invalid-approval-result-event.json",
+      "kind": "invalid",
+      "owning_docs": [
+        "docs/ai/client-gateway-contract.md",
+        "docs/ai/gateway-engine-contract.md"
+      ],
+      "matrix_ids": [
+        "S-05",
+        "GC-06"
+      ],
+      "related_checklists": [
+        "docs/ai/review-checklists/gateway-review.md",
+        "docs/ai/review-checklists/security-review.md",
+        "docs/ai/review-checklists/engine-review.md"
+      ],
+      "glossary_terms": [
+        "contract-visible",
+        "client contract",
+        "drift"
+      ]
+    },
+    {
+      "file": "docs/ai/examples/gateway-engine-request.json",
+      "kind": "valid",
+      "owning_docs": [
+        "docs/ai/gateway-engine-contract.md",
+        "docs/ai/configuration.md"
+      ],
+      "matrix_ids": [
+        "GC-01",
+        "GC-02",
+        "C-02"
+      ],
+      "related_checklists": [
+        "docs/ai/review-checklists/engine-review.md",
+        "docs/ai/review-checklists/configuration-review.md"
+      ],
+      "glossary_terms": [
+        "internal contract",
+        "contract-visible"
+      ]
+    },
+    {
+      "file": "docs/ai/examples/invalid-gateway-engine-request.json",
+      "kind": "invalid",
+      "owning_docs": [
+        "docs/ai/gateway-engine-contract.md",
+        "docs/ai/configuration.md",
+        "docs/ai/security.md"
+      ],
+      "matrix_ids": [
+        "GC-01",
+        "GC-03",
+        "GC-05",
+        "C-02",
+        "S-01"
+      ],
+      "related_checklists": [
+        "docs/ai/review-checklists/engine-review.md",
+        "docs/ai/review-checklists/configuration-review.md",
+        "docs/ai/review-checklists/security-review.md"
+      ],
+      "glossary_terms": [
+        "internal contract",
+        "contract-visible",
+        "drift"
+      ]
+    },
+    {
+      "file": "docs/ai/examples/runtime-config.json",
+      "kind": "valid",
+      "owning_docs": [
+        "docs/ai/configuration.md",
+        "docs/ai/models.md"
+      ],
+      "matrix_ids": [
+        "C-01",
+        "C-02",
+        "C-03",
+        "MO-02"
+      ],
+      "related_checklists": [
+        "docs/ai/review-checklists/configuration-review.md"
+      ],
+      "glossary_terms": [
+        "startup readiness",
+        "product-owned state"
+      ]
+    },
+    {
+      "file": "docs/ai/examples/invalid-runtime-config.json",
+      "kind": "invalid",
+      "owning_docs": [
+        "docs/ai/configuration.md",
+        "docs/ai/security.md"
+      ],
+      "matrix_ids": [
+        "C-01",
+        "C-02",
+        "C-03"
+      ],
+      "related_checklists": [
+        "docs/ai/review-checklists/configuration-review.md",
+        "docs/ai/review-checklists/security-review.md"
+      ],
+      "glossary_terms": [
+        "startup readiness",
+        "product-owned state",
+        "drift"
+      ]
+    },
+    {
+      "file": "docs/ai/examples/adapter-config.json",
+      "kind": "valid",
+      "owning_docs": [
+        "docs/ai/configuration.md",
+        "docs/ai/models.md"
+      ],
+      "matrix_ids": [
+        "C-01",
+        "C-03",
+        "MO-02"
+      ],
+      "related_checklists": [
+        "docs/ai/review-checklists/configuration-review.md"
+      ],
+      "glossary_terms": [
+        "startup readiness",
+        "product-owned state"
+      ]
+    },
+    {
+      "file": "docs/ai/examples/invalid-adapter-config.json",
+      "kind": "invalid",
+      "owning_docs": [
+        "docs/ai/configuration.md",
+        "docs/ai/security.md"
+      ],
+      "matrix_ids": [
+        "C-01",
+        "C-03"
+      ],
+      "related_checklists": [
+        "docs/ai/review-checklists/configuration-review.md",
+        "docs/ai/review-checklists/security-review.md"
+      ],
+      "glossary_terms": [
+        "startup readiness",
+        "product-owned state",
+        "drift"
+      ]
+    }
+  ]
+}

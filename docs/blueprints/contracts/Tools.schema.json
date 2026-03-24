@@ -1,0 +1,629 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://paa/deconstruction/contracts/Tools.schema.json",
+  "title": "Tools Capability Boundary Contract Pack",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "tool_source_entry",
+    "tool_definition",
+    "tool_visibility_policy",
+    "tool_availability_context",
+    "tool_call",
+    "tool_execution_result",
+    "tool_failure",
+    "approval_request_event",
+    "approval_result_event",
+    "tool_isolation_profile",
+    "tool_discovery_query",
+    "tool_discovery_match"
+  ],
+  "properties": {
+    "tool_source_entry": {
+      "$ref": "#/$defs/ToolSourceEntry"
+    },
+    "tool_definition": {
+      "$ref": "#/$defs/ToolDefinition"
+    },
+    "tool_visibility_policy": {
+      "$ref": "#/$defs/ToolVisibilityPolicy"
+    },
+    "tool_availability_context": {
+      "$ref": "#/$defs/ToolAvailabilityContext"
+    },
+    "tool_call": {
+      "$ref": "#/$defs/ToolCall"
+    },
+    "tool_execution_result": {
+      "$ref": "#/$defs/ToolExecutionResult"
+    },
+    "tool_failure": {
+      "$ref": "#/$defs/ToolFailure"
+    },
+    "approval_request_event": {
+      "$ref": "#/$defs/ApprovalRequestEvent"
+    },
+    "approval_result_event": {
+      "$ref": "#/$defs/ApprovalResultEvent"
+    },
+    "tool_isolation_profile": {
+      "$ref": "#/$defs/ToolIsolationProfile"
+    },
+    "tool_discovery_query": {
+      "$ref": "#/$defs/ToolDiscoveryQuery"
+    },
+    "tool_discovery_match": {
+      "$ref": "#/$defs/ToolDiscoveryMatch"
+    }
+  },
+  "$defs": {
+    "Identifier": {
+      "type": "string",
+      "minLength": 1
+    },
+    "ToolFailureCode": {
+      "type": "string",
+      "enum": [
+        "not_found",
+        "path_invalid",
+        "reserved_path",
+        "invalid_input",
+        "permission_denied",
+        "execution_failed",
+        "invalid_source",
+        "invalid_definition",
+        "invalid_policy",
+        "invalid_availability_context",
+        "unavailable",
+        "timeout"
+      ]
+    },
+    "ToolSourceEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_id",
+        "source_kind",
+        "enabled"
+      ],
+      "properties": {
+        "source_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source_kind": {
+          "type": "string",
+          "enum": [
+            "mcp",
+            "cli",
+            "native",
+            "manifest"
+          ]
+        },
+        "enabled": {
+          "type": "boolean",
+          "default": true
+        },
+        "trust_level": {
+          "type": "string",
+          "enum": [
+            "system_shipped",
+            "owner_installed",
+            "untrusted"
+          ],
+          "default": "owner_installed"
+        },
+        "endpoint_ref": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "not": {
+        "anyOf": [
+          {
+            "required": [
+              "api_key"
+            ]
+          },
+          {
+            "required": [
+              "token"
+            ]
+          },
+          {
+            "required": [
+              "password"
+            ]
+          },
+          {
+            "required": [
+              "secret_value"
+            ]
+          }
+        ]
+      }
+    },
+    "ToolDefinition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "description",
+        "input_schema",
+        "read_only",
+        "requires_approval"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "input_schema": {
+          "type": "object"
+        },
+        "read_only": {
+          "type": "boolean"
+        },
+        "requires_approval": {
+          "type": "boolean"
+        },
+        "source_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "availability": {
+          "type": "string",
+          "enum": [
+            "always_send",
+            "discoverable"
+          ],
+          "default": "discoverable"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "timeout_ms": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "not": {
+        "anyOf": [
+          {
+            "required": [
+              "provider"
+            ]
+          },
+          {
+            "required": [
+              "model"
+            ]
+          },
+          {
+            "required": [
+              "auth_policy"
+            ]
+          },
+          {
+            "required": [
+              "execute_code"
+            ]
+          },
+          {
+            "required": [
+              "api_key"
+            ]
+          }
+        ]
+      }
+    },
+    "ToolVisibilityPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "always_send_tools",
+        "discoverable_tools"
+      ],
+      "properties": {
+        "always_send_tools": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "discoverable_tools": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "expose_unavailable_tools_to_model": {
+          "type": "boolean",
+          "default": true
+        }
+      }
+    },
+    "ToolAvailabilityContext": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "environment_tools",
+        "auth_permitted_tools",
+        "granularity_mode"
+      ],
+      "properties": {
+        "environment_tools": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "auth_permitted_tools": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "granularity_mode": {
+          "type": "string",
+          "enum": [
+            "coarse",
+            "granular"
+          ]
+        },
+        "denied_tools": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "uniqueItems": true
+        },
+        "reason_by_tool": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "not": {
+        "anyOf": [
+          {
+            "required": [
+              "provider"
+            ]
+          },
+          {
+            "required": [
+              "model"
+            ]
+          },
+          {
+            "required": [
+              "base_url"
+            ]
+          }
+        ]
+      }
+    },
+    "ToolCall": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "input"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "input": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "correlation_id": {
+          "$ref": "#/$defs/Identifier"
+        }
+      }
+    },
+    "ToolFailure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "code",
+        "message",
+        "recoverable"
+      ],
+      "properties": {
+        "code": {
+          "$ref": "#/$defs/ToolFailureCode"
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 240
+        },
+        "recoverable": {
+          "type": "boolean"
+        },
+        "details": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "ToolExecutionResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "output"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "ok",
+            "denied",
+            "error"
+          ]
+        },
+        "output": {},
+        "recoverable": {
+          "type": "boolean"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "error"
+              }
+            },
+            "required": [
+              "status"
+            ]
+          },
+          "then": {
+            "required": [
+              "recoverable"
+            ],
+            "properties": {
+              "output": {
+                "$ref": "#/$defs/ToolFailure"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "ApprovalRequestEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "request_id",
+        "tool_name",
+        "summary"
+      ],
+      "properties": {
+        "type": {
+          "const": "approval-request"
+        },
+        "request_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "tool_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "ApprovalResultEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "request_id",
+        "decision"
+      ],
+      "properties": {
+        "type": {
+          "const": "approval-result"
+        },
+        "request_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "decision": {
+          "type": "string",
+          "enum": [
+            "approved",
+            "denied"
+          ]
+        }
+      }
+    },
+    "ToolIsolationProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "trust_level",
+        "isolation_mode",
+        "filesystem_scope",
+        "network_scope",
+        "resource_limits"
+      ],
+      "properties": {
+        "trust_level": {
+          "type": "string",
+          "enum": [
+            "system_shipped",
+            "owner_installed",
+            "untrusted"
+          ]
+        },
+        "isolation_mode": {
+          "type": "string",
+          "enum": [
+            "in_process",
+            "shared_container",
+            "dedicated_container"
+          ]
+        },
+        "filesystem_scope": {
+          "type": "string",
+          "enum": [
+            "restricted",
+            "full"
+          ]
+        },
+        "network_scope": {
+          "type": "string",
+          "enum": [
+            "none",
+            "restricted",
+            "open"
+          ]
+        },
+        "warning_on_unverified": {
+          "type": "boolean",
+          "default": true
+        },
+        "resource_limits": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "cpu_cores",
+            "memory_mb",
+            "timeout_ms"
+          ],
+          "properties": {
+            "cpu_cores": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "memory_mb": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "timeout_ms": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "trust_level": {
+                "const": "untrusted"
+              }
+            },
+            "required": [
+              "trust_level"
+            ]
+          },
+          "then": {
+            "properties": {
+              "isolation_mode": {
+                "const": "dedicated_container"
+              },
+              "filesystem_scope": {
+                "const": "restricted"
+              },
+              "network_scope": {
+                "enum": [
+                  "none",
+                  "restricted"
+                ]
+              },
+              "warning_on_unverified": {
+                "const": true
+              }
+            }
+          }
+        }
+      ]
+    },
+    "ToolDiscoveryQuery": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "capability"
+      ],
+      "properties": {
+        "capability": {
+          "type": "string",
+          "minLength": 1
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 50,
+          "default": 10
+        },
+        "source_filter": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "ToolDiscoveryMatch": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_id",
+        "tool_name",
+        "description"
+      ],
+      "properties": {
+        "source_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "tool_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    }
+  }
+}

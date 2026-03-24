@@ -1,0 +1,7 @@
+{
+  "base_url": "https://api.openrouter.ai/v1",
+  "model": "gpt-4.1",
+  "memory_root": "/library",
+  "approval_mode": "ask-on-write",
+  "bind_address": "0.0.0.0"
+}

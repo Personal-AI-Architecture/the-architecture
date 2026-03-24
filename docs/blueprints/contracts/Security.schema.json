@@ -1,0 +1,463 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://paa/deconstruction/contracts/Security.schema.json",
+  "title": "Security Cross-Cutting Contract Pack",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "security_policy_profile",
+    "audit_log_event",
+    "safe_stream_error_event",
+    "pre_stream_error_response",
+    "approval_request_event",
+    "approval_result_event",
+    "approval_decision_request",
+    "secret_reference",
+    "tool_isolation_policy",
+    "security_violation_record"
+  ],
+  "properties": {
+    "security_policy_profile": {
+      "$ref": "#/$defs/SecurityPolicyProfile"
+    },
+    "audit_log_event": {
+      "$ref": "#/$defs/AuditLogEvent"
+    },
+    "safe_stream_error_event": {
+      "$ref": "#/$defs/SafeStreamErrorEvent"
+    },
+    "pre_stream_error_response": {
+      "$ref": "#/$defs/PreStreamErrorResponse"
+    },
+    "approval_request_event": {
+      "$ref": "#/$defs/ApprovalRequestEvent"
+    },
+    "approval_result_event": {
+      "$ref": "#/$defs/ApprovalResultEvent"
+    },
+    "approval_decision_request": {
+      "$ref": "#/$defs/ApprovalDecisionRequest"
+    },
+    "secret_reference": {
+      "$ref": "#/$defs/SecretReference"
+    },
+    "tool_isolation_policy": {
+      "$ref": "#/$defs/ToolIsolationPolicy"
+    },
+    "security_violation_record": {
+      "$ref": "#/$defs/SecurityViolationRecord"
+    }
+  },
+  "$defs": {
+    "Identifier": {
+      "type": "string",
+      "minLength": 1
+    },
+    "Timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "SecurityPolicyProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "approval_mode",
+        "audit_level",
+        "secrets_in_memory_forbidden",
+        "require_auth_on_protected_routes",
+        "require_safe_error_surfaces",
+        "require_contract_visible_approval",
+        "require_tool_scope_enforcement"
+      ],
+      "properties": {
+        "approval_mode": {
+          "type": "string",
+          "enum": [
+            "ask_everything",
+            "ask_some",
+            "ask_nothing"
+          ]
+        },
+        "audit_level": {
+          "type": "string",
+          "enum": [
+            "minimal",
+            "standard",
+            "verbose"
+          ]
+        },
+        "secrets_in_memory_forbidden": {
+          "const": true
+        },
+        "require_auth_on_protected_routes": {
+          "const": true
+        },
+        "require_safe_error_surfaces": {
+          "const": true
+        },
+        "require_contract_visible_approval": {
+          "const": true
+        },
+        "require_tool_scope_enforcement": {
+          "const": true
+        }
+      }
+    },
+    "AuditLogEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "timestamp",
+        "event",
+        "details"
+      ],
+      "properties": {
+        "timestamp": {
+          "$ref": "#/$defs/Timestamp"
+        },
+        "event": {
+          "type": "string",
+          "minLength": 1
+        },
+        "details": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "severity": {
+          "type": "string",
+          "enum": [
+            "info",
+            "warn",
+            "error"
+          ]
+        },
+        "correlation_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "actor_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "component": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "SafeStreamErrorEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "code",
+        "message"
+      ],
+      "properties": {
+        "type": {
+          "const": "error"
+        },
+        "code": {
+          "type": "string",
+          "enum": [
+            "provider_error",
+            "tool_error",
+            "context_overflow",
+            "security_error"
+          ]
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 240
+        },
+        "correlation_id": {
+          "$ref": "#/$defs/Identifier"
+        }
+      }
+    },
+    "PreStreamErrorResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "code",
+        "message"
+      ],
+      "properties": {
+        "code": {
+          "type": "string",
+          "enum": [
+            "invalid_request",
+            "unauthorized",
+            "forbidden",
+            "service_unavailable",
+            "not_found"
+          ]
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 240
+        },
+        "status": {
+          "type": "integer",
+          "minimum": 400,
+          "maximum": 599
+        }
+      }
+    },
+    "ApprovalRequestEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "request_id",
+        "tool_name",
+        "summary"
+      ],
+      "properties": {
+        "type": {
+          "const": "approval-request"
+        },
+        "request_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "tool_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "ApprovalResultEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "request_id",
+        "decision"
+      ],
+      "properties": {
+        "type": {
+          "const": "approval-result"
+        },
+        "request_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "decision": {
+          "type": "string",
+          "enum": [
+            "approved",
+            "denied"
+          ]
+        }
+      }
+    },
+    "ApprovalDecisionRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "decision"
+      ],
+      "properties": {
+        "decision": {
+          "type": "string",
+          "enum": [
+            "approved",
+            "denied"
+          ]
+        }
+      }
+    },
+    "SecretReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source",
+        "ref"
+      ],
+      "properties": {
+        "source": {
+          "type": "string",
+          "enum": [
+            "env_var",
+            "secret_manager"
+          ]
+        },
+        "ref": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9_]*$"
+        }
+      },
+      "not": {
+        "anyOf": [
+          {
+            "required": [
+              "api_key"
+            ]
+          },
+          {
+            "required": [
+              "token"
+            ]
+          },
+          {
+            "required": [
+              "password"
+            ]
+          },
+          {
+            "required": [
+              "secret_value"
+            ]
+          }
+        ]
+      }
+    },
+    "ToolIsolationPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "trust_level",
+        "isolation_mode",
+        "filesystem_scope",
+        "network_scope",
+        "auth_independent_boundary"
+      ],
+      "properties": {
+        "trust_level": {
+          "type": "string",
+          "enum": [
+            "system_shipped",
+            "owner_installed",
+            "untrusted"
+          ]
+        },
+        "isolation_mode": {
+          "type": "string",
+          "enum": [
+            "in_process",
+            "shared_container",
+            "dedicated_container"
+          ]
+        },
+        "filesystem_scope": {
+          "type": "string",
+          "enum": [
+            "restricted",
+            "full"
+          ]
+        },
+        "network_scope": {
+          "type": "string",
+          "enum": [
+            "none",
+            "restricted",
+            "open"
+          ]
+        },
+        "auth_independent_boundary": {
+          "type": "boolean"
+        },
+        "warning_on_unverified": {
+          "type": "boolean",
+          "default": true
+        },
+        "resource_limits": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "cpu_cores": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "memory_mb": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "timeout_ms": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "trust_level": {
+                "const": "untrusted"
+              }
+            },
+            "required": [
+              "trust_level"
+            ]
+          },
+          "then": {
+            "properties": {
+              "isolation_mode": {
+                "const": "dedicated_container"
+              },
+              "auth_independent_boundary": {
+                "const": true
+              },
+              "warning_on_unverified": {
+                "const": true
+              }
+            }
+          }
+        }
+      ]
+    },
+    "SecurityViolationRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "control_id",
+        "severity",
+        "description",
+        "detected_by",
+        "timestamp"
+      ],
+      "properties": {
+        "control_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "severity": {
+          "type": "string",
+          "enum": [
+            "low",
+            "medium",
+            "high",
+            "critical"
+          ]
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "detected_by": {
+          "type": "string",
+          "minLength": 1
+        },
+        "timestamp": {
+          "$ref": "#/$defs/Timestamp"
+        },
+        "evidence_ref": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "open",
+            "mitigated",
+            "accepted"
+          ]
+        }
+      }
+    }
+  }
+}

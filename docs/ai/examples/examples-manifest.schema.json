@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "docs/ai/examples/examples-manifest.schema.json",
+  "title": "Examples Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "traceability_source",
+    "examples"
+  ],
+  "properties": {
+    "version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "traceability_source": {
+      "type": "string",
+      "pattern": "^docs/ai/.+"
+    },
+    "examples": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "file",
+          "kind",
+          "owning_docs",
+          "matrix_ids",
+          "related_checklists",
+          "glossary_terms"
+        ],
+        "properties": {
+          "file": {
+            "type": "string",
+            "pattern": "^docs/ai/examples/.+\\.json$"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "valid",
+              "invalid"
+            ]
+          },
+          "owning_docs": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "pattern": "^docs/ai/.+"
+            }
+          },
+          "matrix_ids": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Z]+-\\d+$"
+            }
+          },
+          "related_checklists": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "pattern": "^docs/ai/review-checklists/.+\\.md$"
+            }
+          },
+          "glossary_terms": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    }
+  }
+}

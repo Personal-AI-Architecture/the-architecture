@@ -1,0 +1,565 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://paa/deconstruction/contracts/Memory-Tools.schema.json",
+  "title": "Memory Tool Surface Contract Pack",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "memory_tool_definition",
+    "memory_path_policy",
+    "memory_tool_failure",
+    "memory_read_input",
+    "memory_read_output",
+    "memory_write_input",
+    "memory_write_output",
+    "memory_edit_input",
+    "memory_edit_output",
+    "memory_delete_input",
+    "memory_delete_output",
+    "memory_list_input",
+    "memory_list_output",
+    "memory_search_input",
+    "memory_search_output",
+    "memory_history_input",
+    "memory_history_output",
+    "memory_export_input",
+    "memory_export_output"
+  ],
+  "properties": {
+    "memory_tool_definition": {
+      "$ref": "#/$defs/MemoryToolDefinition"
+    },
+    "memory_path_policy": {
+      "$ref": "#/$defs/MemoryPathPolicy"
+    },
+    "memory_tool_failure": {
+      "$ref": "#/$defs/MemoryToolFailure"
+    },
+    "memory_read_input": {
+      "$ref": "#/$defs/MemoryReadInput"
+    },
+    "memory_read_output": {
+      "$ref": "#/$defs/MemoryReadOutput"
+    },
+    "memory_write_input": {
+      "$ref": "#/$defs/MemoryWriteInput"
+    },
+    "memory_write_output": {
+      "$ref": "#/$defs/MemoryWriteOutput"
+    },
+    "memory_edit_input": {
+      "$ref": "#/$defs/MemoryEditInput"
+    },
+    "memory_edit_output": {
+      "$ref": "#/$defs/MemoryEditOutput"
+    },
+    "memory_delete_input": {
+      "$ref": "#/$defs/MemoryDeleteInput"
+    },
+    "memory_delete_output": {
+      "$ref": "#/$defs/MemoryDeleteOutput"
+    },
+    "memory_list_input": {
+      "$ref": "#/$defs/MemoryListInput"
+    },
+    "memory_list_output": {
+      "$ref": "#/$defs/MemoryListOutput"
+    },
+    "memory_search_input": {
+      "$ref": "#/$defs/MemorySearchInput"
+    },
+    "memory_search_output": {
+      "$ref": "#/$defs/MemorySearchOutput"
+    },
+    "memory_history_input": {
+      "$ref": "#/$defs/MemoryHistoryInput"
+    },
+    "memory_history_output": {
+      "$ref": "#/$defs/MemoryHistoryOutput"
+    },
+    "memory_export_input": {
+      "$ref": "#/$defs/MemoryExportInput"
+    },
+    "memory_export_output": {
+      "$ref": "#/$defs/MemoryExportOutput"
+    }
+  },
+  "$defs": {
+    "Identifier": {
+      "type": "string",
+      "minLength": 1
+    },
+    "MemoryPath": {
+      "type": "string",
+      "minLength": 1
+    },
+    "Timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "MemoryToolFailureCode": {
+      "type": "string",
+      "enum": [
+        "not_found",
+        "path_invalid",
+        "reserved_path",
+        "invalid_input",
+        "permission_denied",
+        "execution_failed",
+        "invalid_definition",
+        "invalid_policy"
+      ]
+    },
+    "MemoryToolDefinition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "description",
+        "read_only",
+        "requires_approval",
+        "input_schema"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "enum": [
+            "memory_read",
+            "memory_write",
+            "memory_edit",
+            "memory_delete",
+            "memory_list",
+            "memory_search",
+            "memory_history",
+            "memory_export"
+          ]
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "read_only": {
+          "type": "boolean"
+        },
+        "requires_approval": {
+          "type": "boolean"
+        },
+        "input_schema": {
+          "type": "object"
+        },
+        "source_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "timeout_ms": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "not": {
+        "anyOf": [
+          {
+            "required": [
+              "provider"
+            ]
+          },
+          {
+            "required": [
+              "model"
+            ]
+          },
+          {
+            "required": [
+              "api_key"
+            ]
+          },
+          {
+            "required": [
+              "token"
+            ]
+          },
+          {
+            "required": [
+              "auth_policy_override"
+            ]
+          }
+        ]
+      }
+    },
+    "MemoryPathPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "memory_root",
+        "reserved_roots",
+        "block_escape"
+      ],
+      "properties": {
+        "memory_root": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reserved_roots": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "contains": {
+            "const": ".git"
+          }
+        },
+        "block_escape": {
+          "const": true
+        },
+        "allow_absolute_in_root": {
+          "type": "boolean",
+          "default": true
+        }
+      }
+    },
+    "MemoryToolFailure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "code",
+        "message",
+        "recoverable"
+      ],
+      "properties": {
+        "code": {
+          "$ref": "#/$defs/MemoryToolFailureCode"
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 240
+        },
+        "recoverable": {
+          "type": "boolean"
+        },
+        "details": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "MemoryReadInput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path"
+      ],
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/MemoryPath"
+        }
+      },
+      "not": {
+        "anyOf": [
+          {
+            "required": [
+              "memory_root"
+            ]
+          },
+          {
+            "required": [
+              "provider"
+            ]
+          },
+          {
+            "required": [
+              "tool_sources"
+            ]
+          }
+        ]
+      }
+    },
+    "MemoryReadOutput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "content"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "content": {
+          "type": "string"
+        }
+      }
+    },
+    "MemoryWriteInput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "content"
+      ],
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/MemoryPath"
+        },
+        "content": {
+          "type": "string"
+        }
+      }
+    },
+    "MemoryWriteOutput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "bytes_written"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "bytes_written": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "MemoryEditInput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "find",
+        "replace"
+      ],
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/MemoryPath"
+        },
+        "find": {
+          "type": "string",
+          "minLength": 1
+        },
+        "replace": {
+          "type": "string"
+        }
+      }
+    },
+    "MemoryEditOutput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "updated"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "updated": {
+          "type": "boolean"
+        }
+      }
+    },
+    "MemoryDeleteInput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path"
+      ],
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/MemoryPath"
+        }
+      }
+    },
+    "MemoryDeleteOutput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "deleted"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "deleted": {
+          "type": "boolean"
+        }
+      }
+    },
+    "MemoryListInput": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "type": "string",
+          "default": "."
+        }
+      }
+    },
+    "MemoryListOutput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "entries"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "entries": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "MemorySearchInput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "query"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "default": "."
+        },
+        "query": {
+          "type": "string",
+          "minLength": 1
+        },
+        "include_conversations": {
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
+    "MemorySearchMatch": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "line",
+        "content"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "line": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "content": {
+          "type": "string"
+        }
+      }
+    },
+    "MemorySearchOutput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "query",
+        "include_conversations",
+        "matches"
+      ],
+      "properties": {
+        "query": {
+          "type": "string",
+          "minLength": 1
+        },
+        "include_conversations": {
+          "type": "boolean"
+        },
+        "matches": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/MemorySearchMatch"
+          }
+        }
+      }
+    },
+    "MemoryHistoryInput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path"
+      ],
+      "properties": {
+        "path": {
+          "$ref": "#/$defs/MemoryPath"
+        },
+        "commit": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "MemoryHistoryEntry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "commit",
+        "message",
+        "timestamp",
+        "path"
+      ],
+      "properties": {
+        "commit": {
+          "type": "string",
+          "minLength": 1
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        },
+        "timestamp": {
+          "$ref": "#/$defs/Timestamp"
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "previous_state": {
+          "type": "string"
+        }
+      }
+    },
+    "MemoryHistoryOutput": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/MemoryHistoryEntry"
+      }
+    },
+    "MemoryExportInput": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {}
+    },
+    "MemoryExportOutput": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "archive_path"
+      ],
+      "properties": {
+        "archive_path": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

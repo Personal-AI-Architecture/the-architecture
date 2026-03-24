@@ -1,0 +1,546 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://paa/deconstruction/contracts/Gateway.schema.json",
+  "title": "Gateway Component Contract Pack",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "client_message_request",
+    "conversation_list_response",
+    "conversation_detail_response",
+    "approval_decision_request",
+    "approval_decision_response",
+    "gateway_engine_request",
+    "stream_event"
+  ],
+  "properties": {
+    "client_message_request": {
+      "$ref": "#/$defs/ClientMessageRequest"
+    },
+    "conversation_list_response": {
+      "$ref": "#/$defs/ConversationListResponse"
+    },
+    "conversation_detail_response": {
+      "$ref": "#/$defs/ConversationDetailResponse"
+    },
+    "approval_decision_request": {
+      "$ref": "#/$defs/ApprovalDecisionRequest"
+    },
+    "approval_decision_response": {
+      "$ref": "#/$defs/ApprovalDecisionResponse"
+    },
+    "gateway_engine_request": {
+      "$ref": "#/$defs/GatewayEngineRequest"
+    },
+    "stream_event": {
+      "$ref": "#/$defs/StreamEvent"
+    }
+  },
+  "$defs": {
+    "Timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "Identifier": {
+      "type": "string",
+      "minLength": 1
+    },
+    "MessageRole": {
+      "type": "string",
+      "enum": [
+        "system",
+        "user",
+        "assistant",
+        "tool"
+      ]
+    },
+    "ClientMessageRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "content"
+      ],
+      "properties": {
+        "content": {
+          "type": "string",
+          "minLength": 1
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": true,
+          "not": {
+            "anyOf": [
+              {
+                "required": [
+                  "provider"
+                ]
+              },
+              {
+                "required": [
+                  "model"
+                ]
+              },
+              {
+                "required": [
+                  "api_key"
+                ]
+              },
+              {
+                "required": [
+                  "tool_sources"
+                ]
+              },
+              {
+                "required": [
+                  "tool_definitions"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    "ConversationSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "title",
+        "created_at",
+        "updated_at",
+        "message_count"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "title": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "created_at": {
+          "$ref": "#/$defs/Timestamp"
+        },
+        "updated_at": {
+          "$ref": "#/$defs/Timestamp"
+        },
+        "message_count": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "ConversationListResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "conversations",
+        "total",
+        "limit",
+        "offset"
+      ],
+      "properties": {
+        "conversations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ConversationSummary"
+          }
+        },
+        "total": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "offset": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "ConversationMessage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "role",
+        "content",
+        "timestamp"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "role": {
+          "$ref": "#/$defs/MessageRole"
+        },
+        "content": {
+          "type": "string"
+        },
+        "timestamp": {
+          "$ref": "#/$defs/Timestamp"
+        }
+      }
+    },
+    "ConversationDetailResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "title",
+        "created_at",
+        "updated_at",
+        "messages"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "title": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "created_at": {
+          "$ref": "#/$defs/Timestamp"
+        },
+        "updated_at": {
+          "$ref": "#/$defs/Timestamp"
+        },
+        "messages": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ConversationMessage"
+          }
+        }
+      }
+    },
+    "ApprovalDecisionRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "decision"
+      ],
+      "properties": {
+        "decision": {
+          "type": "string",
+          "enum": [
+            "approved",
+            "denied"
+          ]
+        }
+      }
+    },
+    "ApprovalDecisionResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "request_id",
+        "decision"
+      ],
+      "properties": {
+        "request_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "decision": {
+          "type": "string",
+          "enum": [
+            "approved",
+            "denied"
+          ]
+        }
+      }
+    },
+    "GatewayToolCall": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "input"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "input": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "GatewayMessage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "role",
+        "content"
+      ],
+      "properties": {
+        "role": {
+          "$ref": "#/$defs/MessageRole"
+        },
+        "content": {
+          "type": "string"
+        },
+        "tool_call_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "tool_calls": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/GatewayToolCall"
+          }
+        }
+      }
+    },
+    "GatewayEngineMetadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "correlation_id"
+      ],
+      "properties": {
+        "correlation_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "conversation_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "trigger": {
+          "type": "string",
+          "enum": [
+            "message",
+            "webhook",
+            "schedule"
+          ]
+        },
+        "client_context": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "GatewayEngineRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "messages",
+        "metadata"
+      ],
+      "properties": {
+        "messages": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/GatewayMessage"
+          }
+        },
+        "metadata": {
+          "$ref": "#/$defs/GatewayEngineMetadata"
+        }
+      }
+    },
+    "StreamEventTextDelta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "delta"
+      ],
+      "properties": {
+        "type": {
+          "const": "text-delta"
+        },
+        "delta": {
+          "type": "string"
+        }
+      }
+    },
+    "StreamEventToolCall": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "id",
+        "name",
+        "input"
+      ],
+      "properties": {
+        "type": {
+          "const": "tool-call"
+        },
+        "id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "name": {
+          "type": "string"
+        },
+        "input": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "StreamEventToolResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "id",
+        "status",
+        "output"
+      ],
+      "properties": {
+        "type": {
+          "const": "tool-result"
+        },
+        "id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "ok",
+            "denied",
+            "error"
+          ]
+        },
+        "output": {}
+      }
+    },
+    "StreamEventApprovalRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "request_id",
+        "tool_name",
+        "summary"
+      ],
+      "properties": {
+        "type": {
+          "const": "approval-request"
+        },
+        "request_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "tool_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "StreamEventApprovalResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "request_id",
+        "decision"
+      ],
+      "properties": {
+        "type": {
+          "const": "approval-result"
+        },
+        "request_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "decision": {
+          "type": "string",
+          "enum": [
+            "approved",
+            "denied"
+          ]
+        }
+      }
+    },
+    "StreamEventDone": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "conversation_id",
+        "message_id"
+      ],
+      "properties": {
+        "type": {
+          "const": "done"
+        },
+        "conversation_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "message_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "finish_reason": {
+          "type": "string"
+        }
+      }
+    },
+    "StreamEventError": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "code",
+        "message"
+      ],
+      "properties": {
+        "type": {
+          "const": "error"
+        },
+        "code": {
+          "type": "string",
+          "enum": [
+            "provider_error",
+            "tool_error",
+            "context_overflow"
+          ]
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "StreamEvent": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/StreamEventTextDelta"
+        },
+        {
+          "$ref": "#/$defs/StreamEventToolCall"
+        },
+        {
+          "$ref": "#/$defs/StreamEventToolResult"
+        },
+        {
+          "$ref": "#/$defs/StreamEventApprovalRequest"
+        },
+        {
+          "$ref": "#/$defs/StreamEventApprovalResult"
+        },
+        {
+          "$ref": "#/$defs/StreamEventDone"
+        },
+        {
+          "$ref": "#/$defs/StreamEventError"
+        }
+      ]
+    }
+  }
+}

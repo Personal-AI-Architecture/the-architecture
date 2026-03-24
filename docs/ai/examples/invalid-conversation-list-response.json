@@ -1,0 +1,12 @@
+{
+  "rows": [
+    {
+      "conversation_id": "conv_123",
+      "raw_title": null,
+      "created": 1742212800,
+      "updated": 1742213100,
+      "count": 4,
+      "sqlite_internal_id": 42
+    }
+  ]
+}

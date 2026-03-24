@@ -1,0 +1,413 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://paa/deconstruction/contracts/Deployment.schema.json",
+  "title": "Deployment Boundary Contract Pack",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "deployment_boundary_profile",
+    "owner_control_posture",
+    "offline_function_profile",
+    "network_exposure_policy",
+    "single_unit_deployment_profile",
+    "hardware_support_profile",
+    "storage_locality_policy",
+    "dependency_escape_profile",
+    "update_safety_policy",
+    "startup_readiness_profile"
+  ],
+  "properties": {
+    "deployment_boundary_profile": {
+      "$ref": "#/$defs/DeploymentBoundaryProfile"
+    },
+    "owner_control_posture": {
+      "$ref": "#/$defs/OwnerControlPosture"
+    },
+    "offline_function_profile": {
+      "$ref": "#/$defs/OfflineFunctionProfile"
+    },
+    "network_exposure_policy": {
+      "$ref": "#/$defs/NetworkExposurePolicy"
+    },
+    "single_unit_deployment_profile": {
+      "$ref": "#/$defs/SingleUnitDeploymentProfile"
+    },
+    "hardware_support_profile": {
+      "$ref": "#/$defs/HardwareSupportProfile"
+    },
+    "storage_locality_policy": {
+      "$ref": "#/$defs/StorageLocalityPolicy"
+    },
+    "dependency_escape_profile": {
+      "$ref": "#/$defs/DependencyEscapeProfile"
+    },
+    "update_safety_policy": {
+      "$ref": "#/$defs/UpdateSafetyPolicy"
+    },
+    "startup_readiness_profile": {
+      "$ref": "#/$defs/StartupReadinessProfile"
+    }
+  },
+  "$defs": {
+    "NonEmptyString": {
+      "type": "string",
+      "minLength": 1
+    },
+    "DeploymentBoundaryProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "boundary_type",
+        "is_component",
+        "is_api",
+        "default_deployment_mode",
+        "optional_extensions"
+      ],
+      "properties": {
+        "boundary_type": {
+          "const": "operational_boundary"
+        },
+        "is_component": {
+          "const": false
+        },
+        "is_api": {
+          "const": false
+        },
+        "default_deployment_mode": {
+          "const": "local_owner_controlled"
+        },
+        "optional_extensions": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "managed_hosting",
+              "vps_hosting",
+              "remote_access"
+            ]
+          }
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "OwnerControlPosture": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "owner_hardware_required",
+        "root_or_admin_control_required",
+        "local_run_path_required",
+        "remote_infra_required_by_default"
+      ],
+      "properties": {
+        "owner_hardware_required": {
+          "const": true
+        },
+        "root_or_admin_control_required": {
+          "const": true
+        },
+        "local_run_path_required": {
+          "const": true
+        },
+        "remote_infra_required_by_default": {
+          "const": false
+        },
+        "owner_inspection_capabilities": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "inspect",
+              "modify",
+              "disconnect",
+              "shutdown"
+            ]
+          }
+        }
+      }
+    },
+    "OfflineFunctionProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "offline_path_required",
+        "internet_required_for_basic_loop",
+        "local_model_path_supported",
+        "offline_loop_scope"
+      ],
+      "properties": {
+        "offline_path_required": {
+          "const": true
+        },
+        "internet_required_for_basic_loop": {
+          "const": false
+        },
+        "local_model_path_supported": {
+          "const": true
+        },
+        "offline_loop_scope": {
+          "const": "message_model_tools_response"
+        },
+        "documented_docker_local_option": {
+          "type": "boolean",
+          "default": true
+        }
+      }
+    },
+    "NetworkExposurePolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "default_bind_scope",
+        "network_exposed_by_default",
+        "explicit_owner_action_required_for_exposure",
+        "auto_port_forwarding_enabled"
+      ],
+      "properties": {
+        "default_bind_scope": {
+          "const": "localhost_only"
+        },
+        "network_exposed_by_default": {
+          "const": false
+        },
+        "explicit_owner_action_required_for_exposure": {
+          "const": true
+        },
+        "auto_port_forwarding_enabled": {
+          "const": false
+        },
+        "allow_bind_override": {
+          "type": "boolean",
+          "default": true
+        },
+        "override_requires_explicit_config": {
+          "type": "boolean",
+          "default": true
+        }
+      }
+    },
+    "SingleUnitDeploymentProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "single_unit_default",
+        "includes_core_components",
+        "separate_services_required_for_baseline"
+      ],
+      "properties": {
+        "single_unit_default": {
+          "const": true
+        },
+        "includes_core_components": {
+          "const": [
+            "gateway",
+            "engine",
+            "auth",
+            "memory"
+          ]
+        },
+        "separate_services_required_for_baseline": {
+          "const": false
+        },
+        "split_deployment_allowed": {
+          "type": "boolean",
+          "default": true
+        }
+      }
+    },
+    "HardwareSupportProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "supported_cpu_arch",
+        "min_ram_gb",
+        "min_storage_gb",
+        "supported_os"
+      ],
+      "properties": {
+        "supported_cpu_arch": {
+          "type": "array",
+          "uniqueItems": true,
+          "minItems": 2,
+          "items": {
+            "enum": [
+              "x86_64",
+              "arm64"
+            ]
+          }
+        },
+        "min_ram_gb": {
+          "type": "integer",
+          "minimum": 8
+        },
+        "min_storage_gb": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "supported_os": {
+          "type": "array",
+          "uniqueItems": true,
+          "minItems": 3,
+          "items": {
+            "enum": [
+              "linux",
+              "macos",
+              "windows"
+            ]
+          }
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "StorageLocalityPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "owner_data_local_by_default",
+        "outbound_network_for_owner_data_default",
+        "explicit_owner_configuration_required_for_data_egress",
+        "memory_inspectable_without_runtime",
+        "required_storage_capabilities"
+      ],
+      "properties": {
+        "owner_data_local_by_default": {
+          "const": true
+        },
+        "outbound_network_for_owner_data_default": {
+          "const": false
+        },
+        "explicit_owner_configuration_required_for_data_egress": {
+          "const": true
+        },
+        "memory_inspectable_without_runtime": {
+          "const": true
+        },
+        "required_storage_capabilities": {
+          "const": [
+            "read",
+            "write",
+            "search",
+            "version"
+          ]
+        },
+        "open_format_preferred": {
+          "type": "boolean",
+          "default": true
+        }
+      }
+    },
+    "DependencyEscapeProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "critical_dependencies",
+        "escape_paths_defined",
+        "dependency_lockin_classification"
+      ],
+      "properties": {
+        "critical_dependencies": {
+          "type": "array",
+          "uniqueItems": true,
+          "minItems": 2,
+          "items": {
+            "enum": [
+              "model_provider",
+              "container_runtime"
+            ]
+          }
+        },
+        "escape_paths_defined": {
+          "const": true
+        },
+        "dependency_lockin_classification": {
+          "const": "dependency_present_but_escapable"
+        },
+        "non_critical_dependencies": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "internet_connectivity",
+              "tool_protocol",
+              "implementation_runtime"
+            ]
+          }
+        }
+      }
+    },
+    "UpdateSafetyPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "owner_data_must_survive_updates",
+        "rollback_path_required",
+        "update_can_delete_owner_data"
+      ],
+      "properties": {
+        "owner_data_must_survive_updates": {
+          "const": true
+        },
+        "rollback_path_required": {
+          "const": true
+        },
+        "update_can_delete_owner_data": {
+          "const": false
+        },
+        "artifact_integrity_verification_supported": {
+          "type": "boolean",
+          "default": true
+        },
+        "verification_methods": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "signature",
+              "checksum",
+              "reproducible_build"
+            ]
+          }
+        }
+      }
+    },
+    "StartupReadinessProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "deterministic_startup_order_required",
+        "required_startup_phases",
+        "critical_startup_fail_fast",
+        "day_one_export_and_persistence_required"
+      ],
+      "properties": {
+        "deterministic_startup_order_required": {
+          "const": true
+        },
+        "required_startup_phases": {
+          "const": [
+            "runtime_config",
+            "adapter_config",
+            "tools",
+            "memory",
+            "preferences",
+            "ready"
+          ]
+        },
+        "critical_startup_fail_fast": {
+          "const": true
+        },
+        "day_one_export_and_persistence_required": {
+          "const": true
+        },
+        "localhost_default_bind_expected": {
+          "type": "boolean",
+          "default": true
+        }
+      }
+    }
+  }
+}

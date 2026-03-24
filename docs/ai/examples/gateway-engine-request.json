@@ -1,0 +1,19 @@
+{
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are BrainDrive."
+    },
+    {
+      "role": "user",
+      "content": "Write a project spec."
+    }
+  ],
+  "metadata": {
+    "correlation_id": "req_123",
+    "conversation_id": "conv_123",
+    "client_context": {
+      "client": "braindrive-cli"
+    }
+  }
+}

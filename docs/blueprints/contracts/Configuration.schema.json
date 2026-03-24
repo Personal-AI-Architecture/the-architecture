@@ -1,0 +1,438 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://paa/deconstruction/contracts/Configuration.schema.json",
+  "title": "Configuration Boundary Contract Pack",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "runtime_config",
+    "adapter_config",
+    "preferences",
+    "tool_source_entry",
+    "startup_phase_event",
+    "gateway_message_metadata",
+    "model_binding_resolution",
+    "configuration_error"
+  ],
+  "properties": {
+    "runtime_config": {
+      "$ref": "#/$defs/RuntimeConfig"
+    },
+    "adapter_config": {
+      "$ref": "#/$defs/AdapterConfig"
+    },
+    "preferences": {
+      "$ref": "#/$defs/Preferences"
+    },
+    "tool_source_entry": {
+      "$ref": "#/$defs/ToolSourceEntry"
+    },
+    "startup_phase_event": {
+      "$ref": "#/$defs/StartupPhaseEvent"
+    },
+    "gateway_message_metadata": {
+      "$ref": "#/$defs/GatewayMessageMetadata"
+    },
+    "model_binding_resolution": {
+      "$ref": "#/$defs/ModelBindingResolution"
+    },
+    "configuration_error": {
+      "$ref": "#/$defs/ConfigurationError"
+    }
+  },
+  "$defs": {
+    "Identifier": {
+      "type": "string",
+      "minLength": 1
+    },
+    "Timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "ToolSourceEntry": {
+      "type": "string",
+      "minLength": 1
+    },
+    "RuntimeConfig": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "memory_root",
+        "provider_adapter",
+        "auth_mode",
+        "tool_sources"
+      ],
+      "properties": {
+        "memory_root": {
+          "type": "string",
+          "minLength": 1
+        },
+        "provider_adapter": {
+          "type": "string",
+          "minLength": 1
+        },
+        "auth_mode": {
+          "type": "string",
+          "enum": [
+            "local-owner",
+            "local",
+            "managed"
+          ]
+        },
+        "tool_sources": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/ToolSourceEntry"
+          }
+        },
+        "conversation_store": {
+          "type": "string",
+          "enum": [
+            "markdown"
+          ],
+          "default": "markdown"
+        },
+        "bind_address": {
+          "type": "string",
+          "minLength": 1,
+          "default": "127.0.0.1"
+        },
+        "port": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65535,
+          "default": 8787
+        },
+        "safety_iteration_limit": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "not": {
+        "anyOf": [
+          {
+            "required": [
+              "model"
+            ]
+          },
+          {
+            "required": [
+              "default_model"
+            ]
+          },
+          {
+            "required": [
+              "api_key"
+            ]
+          },
+          {
+            "required": [
+              "api_key_env"
+            ]
+          },
+          {
+            "required": [
+              "approval_mode"
+            ]
+          },
+          {
+            "required": [
+              "base_url"
+            ]
+          }
+        ]
+      }
+    },
+    "AdapterConfig": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "base_url",
+        "model",
+        "api_key_env"
+      ],
+      "properties": {
+        "base_url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "model": {
+          "type": "string",
+          "minLength": 1
+        },
+        "api_key_env": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9_]*$"
+        },
+        "request_timeout_ms": {
+          "type": "integer",
+          "minimum": 1
+        }
+      },
+      "not": {
+        "anyOf": [
+          {
+            "required": [
+              "api_key"
+            ]
+          },
+          {
+            "required": [
+              "token"
+            ]
+          },
+          {
+            "required": [
+              "password"
+            ]
+          },
+          {
+            "required": [
+              "secret_value"
+            ]
+          }
+        ]
+      }
+    },
+    "Preferences": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "default_model",
+        "approval_mode"
+      ],
+      "properties": {
+        "default_model": {
+          "type": "string",
+          "minLength": 1
+        },
+        "approval_mode": {
+          "type": "string",
+          "enum": [
+            "ask-on-write"
+          ]
+        },
+        "always_send_tools": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "verbose_logging": {
+          "type": "boolean"
+        }
+      },
+      "not": {
+        "anyOf": [
+          {
+            "required": [
+              "provider_adapter"
+            ]
+          },
+          {
+            "required": [
+              "base_url"
+            ]
+          },
+          {
+            "required": [
+              "api_key_env"
+            ]
+          },
+          {
+            "required": [
+              "memory_root"
+            ]
+          },
+          {
+            "required": [
+              "tool_sources"
+            ]
+          },
+          {
+            "required": [
+              "auth_mode"
+            ]
+          }
+        ]
+      }
+    },
+    "StartupPhase": {
+      "type": "string",
+      "enum": [
+        "runtime-config",
+        "adapter-config",
+        "tools",
+        "memory",
+        "preferences",
+        "ready"
+      ]
+    },
+    "StartupPhaseEvent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "event",
+        "phase",
+        "timestamp"
+      ],
+      "properties": {
+        "event": {
+          "const": "startup.phase"
+        },
+        "phase": {
+          "$ref": "#/$defs/StartupPhase"
+        },
+        "timestamp": {
+          "$ref": "#/$defs/Timestamp"
+        },
+        "correlation_id": {
+          "$ref": "#/$defs/Identifier"
+        }
+      }
+    },
+    "GatewayMessageMetadata": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "client": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "not": {
+        "anyOf": [
+          {
+            "required": [
+              "provider"
+            ]
+          },
+          {
+            "required": [
+              "provider_adapter"
+            ]
+          },
+          {
+            "required": [
+              "model"
+            ]
+          },
+          {
+            "required": [
+              "base_url"
+            ]
+          },
+          {
+            "required": [
+              "api_key"
+            ]
+          },
+          {
+            "required": [
+              "api_key_env"
+            ]
+          },
+          {
+            "required": [
+              "tool_sources"
+            ]
+          },
+          {
+            "required": [
+              "tool_definitions"
+            ]
+          },
+          {
+            "required": [
+              "auth_mode"
+            ]
+          },
+          {
+            "required": [
+              "memory_root"
+            ]
+          },
+          {
+            "required": [
+              "safety_iteration_limit"
+            ]
+          }
+        ]
+      }
+    },
+    "ModelBindingResolution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "adapter_name",
+        "adapter_model",
+        "preference_model",
+        "resolved_model",
+        "resolution_reason"
+      ],
+      "properties": {
+        "adapter_name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "adapter_model": {
+          "type": "string",
+          "minLength": 1
+        },
+        "preference_model": {
+          "type": "string",
+          "minLength": 1
+        },
+        "resolved_model": {
+          "type": "string",
+          "minLength": 1
+        },
+        "resolution_reason": {
+          "type": "string",
+          "enum": [
+            "use_preference",
+            "use_adapter_default",
+            "legacy_bootstrap_fallback"
+          ]
+        }
+      }
+    },
+    "ConfigurationError": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "code",
+        "message"
+      ],
+      "properties": {
+        "code": {
+          "type": "string",
+          "enum": [
+            "invalid_runtime_config",
+            "invalid_adapter_config",
+            "invalid_preferences",
+            "unsupported_provider_adapter",
+            "startup_sequence_error",
+            "forbidden_request_metadata",
+            "secret_in_config"
+          ]
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        },
+        "field": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "type": "integer",
+          "minimum": 400,
+          "maximum": 599
+        }
+      }
+    }
+  }
+}

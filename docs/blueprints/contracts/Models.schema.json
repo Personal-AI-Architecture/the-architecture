@@ -1,0 +1,440 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://paa/deconstruction/contracts/Models.schema.json",
+  "title": "Models Boundary Contract Pack",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "model_boundary_profile",
+    "model_access_policy",
+    "model_configuration_layers",
+    "model_binding_policy",
+    "model_request_guard",
+    "model_swap_rules",
+    "provider_swap_rules",
+    "adapter_contract",
+    "model_failure_taxonomy",
+    "model_readiness_profile"
+  ],
+  "properties": {
+    "model_boundary_profile": {
+      "$ref": "#/$defs/ModelBoundaryProfile"
+    },
+    "model_access_policy": {
+      "$ref": "#/$defs/ModelAccessPolicy"
+    },
+    "model_configuration_layers": {
+      "$ref": "#/$defs/ModelConfigurationLayers"
+    },
+    "model_binding_policy": {
+      "$ref": "#/$defs/ModelBindingPolicy"
+    },
+    "model_request_guard": {
+      "$ref": "#/$defs/ModelRequestGuard"
+    },
+    "model_swap_rules": {
+      "$ref": "#/$defs/ModelSwapRules"
+    },
+    "provider_swap_rules": {
+      "$ref": "#/$defs/ProviderSwapRules"
+    },
+    "adapter_contract": {
+      "$ref": "#/$defs/AdapterContract"
+    },
+    "model_failure_taxonomy": {
+      "$ref": "#/$defs/ModelFailureTaxonomy"
+    },
+    "model_readiness_profile": {
+      "$ref": "#/$defs/ModelReadinessProfile"
+    }
+  },
+  "$defs": {
+    "NonEmptyString": {
+      "type": "string",
+      "minLength": 1
+    },
+    "ModelBoundaryProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "boundary_type",
+        "component_classification",
+        "primary_api",
+        "external_api_set",
+        "models_are_component"
+      ],
+      "properties": {
+        "boundary_type": {
+          "const": "external_dependency"
+        },
+        "component_classification": {
+          "const": "not_a_component"
+        },
+        "primary_api": {
+          "const": "Model API"
+        },
+        "external_api_set": {
+          "type": "array",
+          "uniqueItems": true,
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "enum": [
+              "Gateway API",
+              "Model API"
+            ]
+          }
+        },
+        "models_are_component": {
+          "const": false
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    },
+    "ModelAccessPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "primary_access_path",
+        "provider_logic_outside_adapters",
+        "primary_model_as_tool",
+        "gateway_owns_model_selection"
+      ],
+      "properties": {
+        "primary_access_path": {
+          "const": "engine_to_model_api_to_adapter_to_external_model"
+        },
+        "provider_logic_outside_adapters": {
+          "const": false
+        },
+        "primary_model_as_tool": {
+          "const": false
+        },
+        "gateway_owns_model_selection": {
+          "const": false
+        },
+        "subagent_model_tool_allowed": {
+          "type": "boolean",
+          "default": true
+        }
+      }
+    },
+    "ModelConfigurationLayers": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "runtime_config_layer",
+        "adapter_config_layer",
+        "preference_layer",
+        "collapsed_layers"
+      ],
+      "properties": {
+        "runtime_config_layer": {
+          "const": "runtime_config"
+        },
+        "adapter_config_layer": {
+          "const": "adapter_config"
+        },
+        "preference_layer": {
+          "const": "preferences"
+        },
+        "collapsed_layers": {
+          "const": false
+        },
+        "startup_order": {
+          "type": "array",
+          "minItems": 6,
+          "maxItems": 6,
+          "items": {
+            "enum": [
+              "runtime_config",
+              "adapter_config",
+              "tools",
+              "memory",
+              "preferences",
+              "ready"
+            ]
+          }
+        }
+      }
+    },
+    "ModelBindingPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "runtime_provider_adapter",
+        "adapter_default_model",
+        "preference_default_model",
+        "resolution_mode"
+      ],
+      "properties": {
+        "runtime_provider_adapter": {
+          "$ref": "#/$defs/NonEmptyString"
+        },
+        "adapter_default_model": {
+          "$ref": "#/$defs/NonEmptyString"
+        },
+        "preference_default_model": {
+          "$ref": "#/$defs/NonEmptyString"
+        },
+        "resolution_mode": {
+          "const": "preference_first_with_adapter_fallback"
+        },
+        "legacy_bootstrap_default": {
+          "type": "string"
+        }
+      }
+    },
+    "ModelRequestGuard": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "forbidden_request_fields",
+        "allow_hidden_config_channel"
+      ],
+      "properties": {
+        "forbidden_request_fields": {
+          "type": "array",
+          "uniqueItems": true,
+          "minItems": 6,
+          "maxItems": 6,
+          "items": {
+            "enum": [
+              "provider_adapter",
+              "provider",
+              "base_url",
+              "api_key",
+              "api_key_env",
+              "model"
+            ]
+          }
+        },
+        "allow_hidden_config_channel": {
+          "const": false
+        },
+        "max_metadata_bytes": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "ModelSwapRules": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "same_provider_swap_unit",
+        "requires_component_code_changes",
+        "forbidden_change_units"
+      ],
+      "properties": {
+        "same_provider_swap_unit": {
+          "const": "preference_change_only"
+        },
+        "requires_component_code_changes": {
+          "const": false
+        },
+        "allowed_change_units": {
+          "type": "array",
+          "default": [
+            "preferences"
+          ],
+          "minItems": 1,
+          "maxItems": 1,
+          "items": {
+            "const": "preferences"
+          }
+        },
+        "forbidden_change_units": {
+          "type": "array",
+          "uniqueItems": true,
+          "minItems": 4,
+          "maxItems": 4,
+          "items": {
+            "enum": [
+              "gateway_code",
+              "engine_core_code",
+              "auth_code",
+              "memory_code"
+            ]
+          }
+        }
+      }
+    },
+    "ProviderSwapRules": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "required_change_units",
+        "requires_unrelated_component_code_changes",
+        "forbidden_change_units"
+      ],
+      "properties": {
+        "required_change_units": {
+          "type": "array",
+          "uniqueItems": true,
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "enum": [
+              "runtime_config_provider_adapter",
+              "adapter_config"
+            ]
+          }
+        },
+        "recommended_change_units": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "const": "secret_env_reference"
+          }
+        },
+        "requires_unrelated_component_code_changes": {
+          "const": false
+        },
+        "forbidden_change_units": {
+          "type": "array",
+          "uniqueItems": true,
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {
+            "enum": [
+              "gateway_code",
+              "auth_code",
+              "memory_code"
+            ]
+          }
+        }
+      }
+    },
+    "AdapterContract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "provider_specific_logic_isolated",
+        "generic_contract_exposed",
+        "secret_reference_field",
+        "forbidden_secret_fields",
+        "supports_cloud_endpoints",
+        "supports_local_endpoints"
+      ],
+      "properties": {
+        "provider_specific_logic_isolated": {
+          "const": true
+        },
+        "generic_contract_exposed": {
+          "const": true
+        },
+        "secret_reference_field": {
+          "const": "api_key_env"
+        },
+        "forbidden_secret_fields": {
+          "type": "array",
+          "uniqueItems": true,
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {
+            "enum": [
+              "api_key",
+              "token",
+              "password"
+            ]
+          }
+        },
+        "supports_cloud_endpoints": {
+          "type": "boolean"
+        },
+        "supports_local_endpoints": {
+          "type": "boolean"
+        },
+        "stream_mode": {
+          "type": "string",
+          "enum": [
+            "streaming",
+            "non_streaming",
+            "both"
+          ],
+          "default": "non_streaming"
+        }
+      }
+    },
+    "ModelFailureTaxonomy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "allowed_codes",
+        "safe_message_required",
+        "raw_provider_error_passthrough"
+      ],
+      "properties": {
+        "allowed_codes": {
+          "type": "array",
+          "uniqueItems": true,
+          "minItems": 5,
+          "maxItems": 5,
+          "items": {
+            "enum": [
+              "provider_error",
+              "context_overflow",
+              "invalid_provider_response",
+              "adapter_misconfigured",
+              "provider_unavailable"
+            ]
+          }
+        },
+        "safe_message_required": {
+          "const": true
+        },
+        "raw_provider_error_passthrough": {
+          "const": false
+        },
+        "max_message_length": {
+          "type": "integer",
+          "minimum": 1,
+          "default": 240
+        }
+      }
+    },
+    "ModelReadinessProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "startup_order_enforced",
+        "required_startup_phases",
+        "unsupported_adapter_fails_startup",
+        "offline_path_supported"
+      ],
+      "properties": {
+        "startup_order_enforced": {
+          "const": true
+        },
+        "required_startup_phases": {
+          "type": "array",
+          "uniqueItems": true,
+          "minItems": 6,
+          "maxItems": 6,
+          "items": {
+            "enum": [
+              "runtime_config",
+              "adapter_config",
+              "tools",
+              "memory",
+              "preferences",
+              "ready"
+            ]
+          }
+        },
+        "unsupported_adapter_fails_startup": {
+          "const": true
+        },
+        "offline_path_supported": {
+          "const": true
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

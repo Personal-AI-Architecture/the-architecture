@@ -1,0 +1,328 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://paa/deconstruction/contracts/Model-API.schema.json",
+  "title": "Model API Boundary Contract Pack",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "model_completion_request",
+    "model_completion_response",
+    "model_tool_definition",
+    "model_tool_call",
+    "adapter_config",
+    "runtime_model_binding",
+    "provider_error_surface"
+  ],
+  "properties": {
+    "model_completion_request": {
+      "$ref": "#/$defs/ModelCompletionRequest"
+    },
+    "model_completion_response": {
+      "$ref": "#/$defs/ModelCompletionResponse"
+    },
+    "model_tool_definition": {
+      "$ref": "#/$defs/ModelToolDefinition"
+    },
+    "model_tool_call": {
+      "$ref": "#/$defs/ModelToolCall"
+    },
+    "adapter_config": {
+      "$ref": "#/$defs/AdapterConfig"
+    },
+    "runtime_model_binding": {
+      "$ref": "#/$defs/RuntimeModelBinding"
+    },
+    "provider_error_surface": {
+      "$ref": "#/$defs/ProviderErrorSurface"
+    }
+  },
+  "$defs": {
+    "Identifier": {
+      "type": "string",
+      "minLength": 1
+    },
+    "MessageRole": {
+      "type": "string",
+      "enum": [
+        "system",
+        "user",
+        "assistant",
+        "tool"
+      ]
+    },
+    "GatewayToolCall": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "input"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "input": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "CompletionMessage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "role",
+        "content"
+      ],
+      "properties": {
+        "role": {
+          "$ref": "#/$defs/MessageRole"
+        },
+        "content": {
+          "type": "string"
+        },
+        "tool_call_id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "tool_calls": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/GatewayToolCall"
+          }
+        }
+      }
+    },
+    "ModelToolDefinition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "description",
+        "input_schema"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "input_schema": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "ModelCompletionRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "messages",
+        "tools"
+      ],
+      "properties": {
+        "messages": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/CompletionMessage"
+          }
+        },
+        "tools": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ModelToolDefinition"
+          }
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "correlation_id": {
+              "$ref": "#/$defs/Identifier"
+            }
+          }
+        }
+      },
+      "not": {
+        "anyOf": [
+          {
+            "required": [
+              "provider_adapter"
+            ]
+          },
+          {
+            "required": [
+              "provider"
+            ]
+          },
+          {
+            "required": [
+              "base_url"
+            ]
+          },
+          {
+            "required": [
+              "api_key"
+            ]
+          },
+          {
+            "required": [
+              "api_key_env"
+            ]
+          },
+          {
+            "required": [
+              "model"
+            ]
+          }
+        ]
+      }
+    },
+    "ModelToolCall": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "input"
+      ],
+      "properties": {
+        "id": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1
+        },
+        "input": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "ModelCompletionResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "assistantText",
+        "toolCalls",
+        "finishReason"
+      ],
+      "properties": {
+        "assistantText": {
+          "type": "string"
+        },
+        "toolCalls": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ModelToolCall"
+          }
+        },
+        "finishReason": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "AdapterConfig": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "base_url",
+        "model",
+        "api_key_env"
+      ],
+      "properties": {
+        "base_url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "model": {
+          "type": "string",
+          "minLength": 1
+        },
+        "api_key_env": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "not": {
+        "anyOf": [
+          {
+            "required": [
+              "api_key"
+            ]
+          },
+          {
+            "required": [
+              "token"
+            ]
+          },
+          {
+            "required": [
+              "password"
+            ]
+          }
+        ]
+      }
+    },
+    "RuntimeModelBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "provider_adapter",
+        "default_model"
+      ],
+      "properties": {
+        "provider_adapter": {
+          "type": "string",
+          "minLength": 1
+        },
+        "default_model": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "ProviderErrorSurface": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "code",
+        "message"
+      ],
+      "properties": {
+        "code": {
+          "type": "string",
+          "enum": [
+            "provider_error",
+            "context_overflow",
+            "invalid_provider_response",
+            "adapter_misconfigured",
+            "provider_unavailable"
+          ]
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "type": "integer",
+          "minimum": 400,
+          "maximum": 599
+        },
+        "provider": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
