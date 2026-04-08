@@ -2,7 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-An open architecture for personal AI systems. Your data, your models, your rules — zero lock-in by design.
+An open architecture for personal AI systems. Your data, your models, your rules. Zero lock-in by design, even to the system itself.
 
 <p align="center">
   <a href="https://personalaiarchitecture.org">Website</a> · <a href="https://github.com/BrainDriveAI/braindrive">BrainDrive (built on this)</a> · <a href="docs/foundation-spec.md">Foundation Spec</a>
@@ -10,13 +10,13 @@ An open architecture for personal AI systems. Your data, your models, your rules
 
 ## Why This Exists
 
-Every AI tool today owns your data. Your conversations, your context, your preferences — trapped inside systems you don't control. Switching costs are the business model.
+Every AI tool today owns your data. Your conversations, your context, your preferences, all trapped inside systems you don't control. Switching costs are the business model.
 
 The Personal AI Architecture is designed so there are no users. Only owners.
 
 - **Your Memory is the platform** — it depends on nothing; everything else depends on it. When the system isn't running, you can read and modify everything with standard tools.
 - **Everything else is swappable** — models, tools, interfaces, auth, even the agent loop. Change your provider with a config edit. No code changes, no migrations, no lock-in.
-- **Zero lock-in is enforced, not promised** — 8 architectural invariants, tested in CI, gated on every PR. Not marketing. Engineering.
+- **Zero lock-in is enforced, not promised** — 8 architectural invariants, tested in CI, gated on every PR. 
 
 ## Architecture
 
