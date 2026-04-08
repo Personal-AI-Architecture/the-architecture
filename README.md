@@ -1,51 +1,91 @@
 # Personal AI Architecture
 
-**What:** Use any interface, any model, any tool. Even the system itself is swappable.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-**Why:** You're never locked into anyone's system, and you can upgrade yours at the speed of AI.
+An open architecture for personal AI systems. Your data, your models, your rules — zero lock-in by design.
 
-A generic, user-owned AI runtime. Zero lock-in by design.
+<p align="center">
+  <a href="https://personalaiarchitecture.org">Website</a> · <a href="https://github.com/BrainDriveAI/braindrive">BrainDrive (built on this)</a> · <a href="docs/foundation-spec.md">Foundation Spec</a>
+</p>
 
-Four components (Your Memory, Agent Loop, Auth, Gateway), two APIs (Gateway API, Model API), three externals (Clients, Models, Tools). Every piece is swappable. Your data stays on your machine.
+## Why This Exists
 
-## What This Repository Is
+Every AI tool today owns your data. Your conversations, your context, your preferences — trapped inside systems you don't control. Switching costs are the business model.
 
-This repository is both:
+The Personal AI Architecture is designed so there are no users. Only owners.
 
-- A reference implementation of the foundation architecture
-- A validation suite that proves architectural promises (swappability, local-first operation, zero lock-in, clear boundaries)
+- **Your Memory is the platform** — it depends on nothing; everything else depends on it. When the system isn't running, you can read and modify everything with standard tools.
+- **Everything else is swappable** — models, tools, interfaces, auth, even the agent loop. Change your provider with a config edit. No code changes, no migrations, no lock-in.
+- **Zero lock-in is enforced, not promised** — 8 architectural invariants, tested in CI, gated on every PR. Not marketing. Engineering.
 
-It is not intended to be a full product application. The default validation path is mock-first and can run without external model services.
+## Architecture
 
-## Built On This
+Four components, two APIs, three externals. Every piece is independently replaceable.
 
-[BrainDrive](https://github.com/BrainDriveAI/braindrive) is the first full implementation of the Personal AI Architecture — a self-hosted personal AI system with a web interface, Docker install, and goal-oriented methodology. MIT-licensed and ready to use.
+```mermaid
+flowchart LR
+    C[Clients] -->|Gateway API| G[Gateway]
+    G -->|Auth check| A[Auth]
+    A -->|Internal contract| E[Agent Loop]
+    E -->|Model API| M[Models]
 
-If you want to see the architecture in production, start there. If you want to build your own implementation, stay here.
+    E -->|Tool calls| T[Tools]
+    T -->|Read/write| YM[Your Memory]
 
-## Install
+    A -.->|Policy enforcement| T
+
+    style YM fill:#f9f,stroke:#333,stroke-width:2px
+```
+
+| Layer | What | Role |
+|-------|------|------|
+| **Your Memory** | Files, conversations, history | The platform. Zero outward dependencies. |
+| **Agent Loop** | Message → model → tools → response → repeat | Generic loop. No product logic. |
+| **Gateway** | HTTP server, conversation management | Routes requests. Content-agnostic. |
+| **Auth** | Identity, access control, policy | Cross-cutting. Independent of Gateway. |
+| **Gateway API** | Clients ↔ Gateway | External contract. Any client that speaks it works. |
+| **Model API** | Agent Loop ↔ Models | External contract. Any compatible model works. |
+| **Clients** | Web, CLI, mobile, voice, bots | Anything that speaks the Gateway API. |
+| **Models** | Cloud or local AI models | Accessed through adapters. Swappable by config. |
+| **Tools** | MCP servers, CLI tools, native functions | Self-describing. Discovered at runtime. |
+
+## See It In Action
+
+[BrainDrive](https://github.com/BrainDriveAI/braindrive) is the first full implementation — a self-hosted personal AI system with a web interface, Docker install, and goal-oriented methodology. One-line install, MIT-licensed, ready to use.
+
+If you want to see the architecture in production, start there. If you want to build your own, stay here.
+
+## What You Get
+
+This repository is a reference implementation and a validation suite that proves the architectural promises are real.
+
+| Resource | What it is |
+|----------|------------|
+| [Foundation spec](docs/foundation-spec.md) | The complete architecture: components, contracts, principles, responsibility matrix |
+| [Component specs](docs/) | Detailed specs for every component — Memory, Agent Loop, Gateway, Auth, Tools, Models |
+| [OpenAPI + JSON Schema](specs/) | Machine-verifiable contracts for every API boundary |
+| [Conformance tests](test/) | 212 tests proving swappability, local-first operation, and zero lock-in |
+| [Blueprints](docs/blueprints/) | Execution-ready packages for every component: spec, schema, conformance tests, drift guard, implementation prompt |
+| [Architecture primer](docs/ai/) | Token-optimized reference files for AI-assisted development — hand them to your AI agent and build |
+| [Lock-in gate](docs/lockin-gate.md) | 8 checks enforced on every PR. If it creates lock-in, it doesn't merge. |
+
+## Quick Start
+
+### Use as a dependency
 
 ```bash
 npm install personal-ai-architecture
 ```
 
-## Quick Start
-
-### As a dependency
-
 ```typescript
 import {
   boot,
-  createServer,
   createMemoryTools,
   createMemoryToolExecutor,
   createOpenAICompatibleAdapter,
   createEngine,
-  createConversationStore,
-  createGateway,
 } from "personal-ai-architecture";
 
-// Boot loads config, adapter, tools, and validates memory
 const { config, adapterConfig } = await boot();
 
 // Or compose manually
@@ -60,60 +100,40 @@ const provider = createOpenAICompatibleAdapter({
 const engine = createEngine(provider, toolExecutor);
 ```
 
-### Standalone
-
-Create a `config.json`:
-
-```json
-{
-  "memory_root": "/path/to/your/memory",
-  "provider_adapter": "openrouter",
-  "auth_mode": "local",
-  "tool_sources": []
-}
-```
-
-Set your API key and start:
+### Run standalone
 
 ```bash
 export OPENROUTER_API_KEY=sk-or-v1-...
 npx personal-ai
-# optional sanity check:
-npx personal-ai boot-check
 ```
 
-## Validate Architecture (Mock-First, No API Key)
-
-From this repository root:
+### Validate the architecture (no API key needed)
 
 ```bash
 npm install
-npx tsx scripts/acceptance-check.ts
-npm run test:conformance
-npm test
+npx tsx scripts/acceptance-check.ts   # Swap provider, move memory, add tool
+npm run test:conformance              # Architecture invariants + lock-in gate
+npm test                              # Full suite (unit + integration + conformance)
 ```
 
-What these validate:
+The runtime falls back to mock mode when no API key is available, so local validation always works.
 
-- `acceptance-check.ts`: owner outcomes (swap provider, move memory, add tool) with mock providers
-- `test:conformance`: architecture invariants and lock-in gate tests
-- `npm test`: full suite (unit + integration + conformance)
+## Documentation
 
-The runtime boot path is intentionally lenient. If adapter config or API key is unavailable, the system falls back to mock/degraded mode so local validation still works.
+| I want to... | Start here |
+|--------------|------------|
+| **Understand the architecture** | [Foundation spec](docs/foundation-spec.md) — the complete architecture in one document |
+| **Know what to build** | [Implementer's reference](docs/guides/implementers-reference.md) — distilled contract, no rationale |
+| **Build with AI assistance** | [Architecture primer](docs/ai/) — token-optimized files to hand your AI agent. Compliance matrix, component primers, audit playbooks, canonical examples. |
+| **Build a component** | [Blueprints](docs/blueprints/) — spec, schema, conformance tests, drift guard, and implementation prompt per component |
+| **Verify conformance** | [Conformance guide](docs/guides/conformance/) — architectural invariant test suite |
+| **Check for lock-in** | [Lock-in gate](docs/lockin-gate.md) (PR checks) · [Lock-in audit](docs/lockin-audit.md) (milestone checks) |
 
-## Validate With Real Providers (Optional)
-
-Use this when you want to validate network model connectivity in addition to architecture behavior:
-
-```bash
-export OPENROUTER_API_KEY=sk-or-v1-...
-npx tsx scripts/provider-check.ts
-npx tsx scripts/server-check.ts
-```
+For AI agents: start with [AGENT.md](AGENT.md) — architecture overview, lock-in checks, vocabulary, and file map in one machine-readable document.
 
 ## Configuration
 
-The runtime config has four fields:
+Four fields:
 
 | Field | Description |
 |-------|-------------|
@@ -122,51 +142,19 @@ The runtime config has four fields:
 | `auth_mode` | `"local"` for V1 owner-only auth |
 | `tool_sources` | Directories to scan for `tool.json` manifests |
 
-Adapter configs live in `adapters/`. Two are included:
+Two adapters included: **openrouter** (cloud models via [OpenRouter](https://openrouter.ai)) and **ollama** (local models via [Ollama](https://ollama.com)). Both use the OpenAI-compatible format, so any compatible endpoint works.
 
-- **openrouter** — Works with any model via [OpenRouter](https://openrouter.ai)
-- **ollama** — Local models via [Ollama](https://ollama.com)
+### Swap your provider
 
-Both use the OpenAI-compatible format, so any compatible endpoint works.
+Change `provider_adapter` in config. Set the API key. No code changes.
 
-## Documentation
+### Move your memory
 
-Full architecture documentation lives in [`docs/`](docs/):
+Copy the folder. Update `memory_root`. Everything works — files, conversations, history.
 
-- **[AGENT.md](AGENT.md)** — AI-friendly entry point: architecture overview, lock-in checks, conformance criteria
-- **[docs/foundation-spec.md](docs/foundation-spec.md)** — Core architecture: components, contracts, principles, responsibility matrix
-- **[docs/guides/implementers-reference.md](docs/guides/implementers-reference.md)** — Distilled implementation contract (what to build, no rationale)
-- **[docs/guides/conformance/](docs/guides/conformance/)** — Architectural invariant test suite
-- **[docs/ai/](docs/ai/)** — Architecture primer: token-optimized reference files for AI-assisted development. Component primers, compliance matrix, audit playbooks, canonical examples, and review checklists. Hand these to your AI agent to build on the architecture without drift.
-- **[docs/blueprints/](docs/blueprints/)** — Execution-ready packages for every component: blueprint, contract schema, conformance tests, drift guard, and implementation prompt
+### Add a tool
 
-## Architecture
-
-```
-Clients ──→ Gateway API ──→ Gateway ──→ Agent Loop ──→ Model API ──→ Models
-                              │              │
-                              │              └── Tools (discovered from tool_sources)
-                              │
-                              └── Your Memory (files + git + SQLite)
-                                     │
-                                     └── Auth (cross-cutting)
-```
-
-**Your Memory** is the platform. Files are plain text, conversations are SQLite, history is git. When the system isn't running, you can read and modify everything with standard tools.
-
-**Agent Loop** is a generic loop: message → model → tools → response → repeat. No opinions about what you build with it.
-
-**Gateway** manages conversations, routes messages, serves HTTP. Any client that speaks the Gateway API works.
-
-**Auth** is V1 owner-only. Token from `PAI_AUTH_TOKEN` env var or auto-generated at first boot (`{memory_root}/.data/auth-token`, mode 0600).
-
-## Adding Tools
-
-Drop a `tool.json` manifest into any directory listed in `tool_sources`:
-
-```
-my-memory/tools/weather/tool.json
-```
+Drop a `tool.json` in any `tool_sources` directory:
 
 ```json
 {
@@ -174,84 +162,35 @@ my-memory/tools/weather/tool.json
   "description": "Get current weather for a city",
   "parameters": {
     "type": "object",
-    "properties": {
-      "city": { "type": "string" }
-    },
+    "properties": { "city": { "type": "string" } },
     "required": ["city"]
   }
 }
 ```
 
-Restart and the tool is discovered alongside the built-in memory tools.
-
-## Swapping Providers
-
-Change `provider_adapter` in your config and set the corresponding API key. No code changes.
-
-```bash
-# OpenRouter (cloud models)
-export OPENROUTER_API_KEY=sk-or-v1-...
-
-# Ollama (local models)
-# No API key needed — just run ollama serve
-```
-
-## Moving Your Memory
-
-Copy the folder. Point config to the new location. Everything works — files, conversations, history.
-
-```bash
-cp -r ~/old-memory ~/new-memory
-# Update config.json: "memory_root": "~/new-memory"
-```
-
-## Scripts
-
-```bash
-npx tsx scripts/server-check.ts      # Full server test with real model
-npx tsx scripts/acceptance-check.ts  # 3 acceptance tests (no API key needed)
-npx tsx scripts/engine-check.ts      # Agent loop verification
-npx tsx scripts/memory-check.ts      # Memory tools verification
-npx tsx scripts/auth-check.ts        # Auth verification
-npx tsx scripts/provider-check.ts    # Provider connectivity test
-```
+Restart. The tool is discovered automatically.
 
 ## Testing
 
 ```bash
-npm test                    # Full test suite (unit + integration + conformance)
-npm run test:conformance    # Conformance suite + lock-in gate checks
+npm test                    # Full suite (unit + integration + conformance)
+npm run test:conformance    # Conformance + lock-in gate
 npm run check:imports       # Import boundary verification
 npm run check:lockin        # Zero lock-in grep check
-npm run baseline            # Build + tests + lint + imports + lock-in + docs checks
+npm run baseline            # Build + tests + lint + imports + lock-in + docs
 ```
 
-## Writing Your Own Tests
-
-Add tests under:
-
-- `test/unit/` for component-level behavior
-- `test/integration/` for end-to-end stack behavior
-- `test/conformance/` for architecture contract/invariant checks
-
-Run only your test file during development:
+Validation scripts for individual components:
 
 ```bash
-npx vitest run test/integration/my-feature.test.ts --reporter=verbose
-```
-
-Run a folder while iterating:
-
-```bash
-npx vitest run test/unit/ --reporter=verbose
-```
-
-When done, run:
-
-```bash
-npm test
+npx tsx scripts/acceptance-check.ts  # 3 acceptance tests (no API key needed)
+npx tsx scripts/server-check.ts      # Full server test with real model
+npx tsx scripts/engine-check.ts      # Agent loop
+npx tsx scripts/memory-check.ts      # Memory tools
+npx tsx scripts/auth-check.ts        # Auth
+npx tsx scripts/provider-check.ts    # Provider connectivity
 ```
 
 ## License
 
-MIT
+MIT — see [LICENSE](LICENSE).
