@@ -17,6 +17,12 @@ This repository is both:
 
 It is not intended to be a full product application. The default validation path is mock-first and can run without external model services.
 
+## Built On This
+
+[BrainDrive](https://github.com/BrainDriveAI/braindrive) is the first full implementation of the Personal AI Architecture — a self-hosted personal AI system with a web interface, Docker install, and goal-oriented methodology. MIT-licensed and ready to use.
+
+If you want to see the architecture in production, start there. If you want to build your own implementation, stay here.
+
 ## Install
 
 ```bash
@@ -131,6 +137,8 @@ Full architecture documentation lives in [`docs/`](docs/):
 - **[docs/foundation-spec.md](docs/foundation-spec.md)** — Core architecture: components, contracts, principles, responsibility matrix
 - **[docs/guides/implementers-reference.md](docs/guides/implementers-reference.md)** — Distilled implementation contract (what to build, no rationale)
 - **[docs/guides/conformance/](docs/guides/conformance/)** — Architectural invariant test suite
+- **[docs/ai/](docs/ai/)** — Architecture primer: token-optimized reference files for AI-assisted development. Component primers, compliance matrix, audit playbooks, canonical examples, and review checklists. Hand these to your AI agent to build on the architecture without drift.
+- **[docs/blueprints/](docs/blueprints/)** — Execution-ready packages for every component: blueprint, contract schema, conformance tests, drift guard, and implementation prompt
 
 ## Architecture
 
