@@ -1,10 +1,20 @@
-# AI Primer Index
+# AI Architecture Primer
+
+> Token-optimized architecture files you can hand directly to your AI agent.
+
+## What Is This?
+
+These files are compressed, AI-friendly versions of the [full architecture specs](../). Use them when you want your AI agent to build on the architecture, review an implementation, or run a compliance audit — without burning tokens on the full human-oriented prose.
+
+**How to use:** Copy the files you need into your AI's context. Start with `foundation.md`, add the component primer for what you're working on, and include `compliance-matrix.md` if you want the AI to check its work against the spec.
+
+**Not an AI agent?** Start with the [Documentation Guide](../README.md) instead — it routes you to the right depth for humans.
+
+---
+
+## Routing (for AI agents)
 
 > Fast routing layer for architecture questions and code-vs-spec audits.
-
-## What This Set Is
-
-This folder is the AI-facing compression layer for the architecture docs. It is derived from the authoritative docs and is meant to answer most architecture review questions without reading the full human-oriented prose first.
 
 ## Core Shape
 
