@@ -129,7 +129,7 @@ function CTA(): ReactNode {
             <p>What worked, what broke, what's missing — we want to hear it.</p>
             <Link
               className="button button--outline"
-              to="https://discuss.personalaiarchitecture.org"
+              to="https://community.braindrive.ai/c/personal-ai-architecture/39"
             >
               Join the Forum
             </Link>

@@ -81,7 +81,7 @@ const config: Config = {
           position: 'left',
         },
         {
-          href: 'https://discuss.personalaiarchitecture.org',
+          href: 'https://community.braindrive.ai/c/personal-ai-architecture/39',
           label: 'Forum',
           position: 'right',
         },
@@ -112,8 +112,8 @@ const config: Config = {
           title: 'Community',
           items: [
             {
-              label: 'GitHub Discussions',
-              href: 'https://discuss.personalaiarchitecture.org',
+              label: 'Forum',
+              href: 'https://community.braindrive.ai/c/personal-ai-architecture/39',
             },
             {
               label: 'GitHub Issues',

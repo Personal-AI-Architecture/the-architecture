@@ -26,7 +26,7 @@ We'll be sharing our learnings as we move towards implementing BrainDrive on top
 This architecture shouldn't be finished by one team.
 
 - **[Read the specs](/docs/foundation-spec)** — start with the Foundation Spec
-- **[Discuss](https://discuss.personalaiarchitecture.org)** — join the forum
+- **[Discuss](https://community.braindrive.ai/c/personal-ai-architecture/39)** — join the forum
 - **[Report issues](https://github.com/Personal-AI-Architecture/the-architecture/issues)** — help us improve
 - **[Build on it](https://github.com/Personal-AI-Architecture/the-architecture)** — MIT-licensed, build whatever you want
 - **[Contribute](https://github.com/Personal-AI-Architecture/the-architecture/blob/main/CONTRIBUTING.md)** — ideas, feedback, code

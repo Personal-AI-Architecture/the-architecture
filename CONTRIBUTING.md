@@ -9,7 +9,7 @@ Thank you for your interest in the Personal AI Architecture.
 The easiest way to contribute is to engage with the architecture — read the specs, challenge the principles, propose changes, ask questions.
 
 - **Issues** — Report problems, ask questions, or propose changes via [GitHub Issues](https://github.com/Personal-AI-Architecture/the-architecture/issues)
-- **Forum** — Join the discussion on our [Discourse forum](https://discuss.personalaiarchitecture.org)
+- **Forum** — Join the discussion on the [Personal AI Architecture category of the BrainDrive Community](https://community.braindrive.ai/c/personal-ai-architecture/39)
 
 ### Code and Documentation
 
