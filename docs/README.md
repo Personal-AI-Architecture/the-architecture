@@ -1,6 +1,6 @@
 # Documentation Guide
 
-> **New here?** Start with the [project README](../README.md) for a quick overview, then come back here to go deeper.
+> **New here?** Start with the [project README](https://github.com/Personal-AI-Architecture/the-architecture#readme) for a quick overview, then come back here to go deeper.
 
 The Personal AI Architecture is thoroughly documented — specs, primers, blueprints, conformance tests, and more. This guide helps you find what you need without getting lost.
 
@@ -12,7 +12,7 @@ Understand what this is and why it exists.
 
 | Document | What you'll learn |
 |----------|-------------------|
-| [README](../README.md) | What PAA is, quick start, architecture diagram |
+| [README](https://github.com/Personal-AI-Architecture/the-architecture#readme) | What PAA is, quick start, architecture diagram |
 | [Principles](principles.md) | The 5 rules everything follows — memory independence, swappability, zero lock-in |
 | [About](about.md) | Origin story — why we built this and what problem it solves |
 
@@ -28,7 +28,7 @@ Understand the architecture well enough to implement it.
 | [Implementer's Reference](guides/implementers-reference.md) | Condensed version — just the contracts, no rationale. "Tell me what to build." |
 | [Gateway-Engine Contract](gateway-engine-contract.md) | The internal handoff between Gateway and Agent Loop — the key boundary |
 
-**Formal specs** (OpenAPI + JSON Schema) are in [`specs/`](../specs/):
+**Formal specs** (OpenAPI + JSON Schema) are in [`specs/`](https://github.com/Personal-AI-Architecture/the-architecture/tree/main/specs):
 - `openapi/gateway-api.yaml` — client-facing API
 - `openapi/gateway-engine.yaml` — internal contract
 - `openapi/model-api.yaml` — model provider API
