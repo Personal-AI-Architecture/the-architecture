@@ -6,3 +6,4 @@ dist/
 !.env.example
 coverage/
 src/types/generated.ts
+.codex
