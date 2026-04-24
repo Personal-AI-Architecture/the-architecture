@@ -1,34 +1,38 @@
 # Contributing to the Personal AI Architecture
 
-Thank you for your interest in the Personal AI Architecture.
+Thank you for helping improve the Personal AI Architecture documentation and standards.
+
+## Scope
+
+This repository is documentation-first.
+
+Contributions are most useful when they improve:
+
+- Architecture specs and principles
+- Contracts (OpenAPI and JSON Schema)
+- Blueprint guidance and drift guards
+- Explanatory docs and examples
+
+Implementation/runtime code now lives in a separate template repository.
 
 ## How to Contribute
 
-### Discussion and Feedback
+1. Fork the repository.
+2. Create a branch from `main`.
+3. Make focused documentation/spec changes.
+4. Ensure links, formatting, and referenced files are valid.
+5. Open a pull request with a clear summary of what changed and why.
 
-The easiest way to contribute is to engage with the architecture — read the specs, challenge the principles, propose changes, ask questions.
+For larger architectural changes, open an issue first so we can align on intent and scope.
 
-- **Issues** — Report problems, ask questions, or propose changes via [GitHub Issues](https://github.com/Personal-AI-Architecture/the-architecture/issues)
-- **Forum** — Join the discussion on the [Personal AI Architecture category of the BrainDrive Community](https://community.braindrive.ai/c/personal-ai-architecture/39)
+## Discussion and Feedback
 
-### Code and Documentation
-
-We welcome pull requests for bug fixes, test improvements, documentation clarifications, and spec enhancements.
-
-1. Fork the repository
-2. Create a branch from `main`
-3. Make your changes
-4. Run the test suite: `npm test`
-5. Submit a pull request with a clear description of what you changed and why
-
-For larger changes (new specs, architectural modifications, principle changes), please open an issue first to discuss the approach.
-
-### Build on It
-
-The architecture is MIT-licensed. You can use it, extend it, and build products on it without waiting for permission.
+- **Issues** — [GitHub Issues](https://github.com/Personal-AI-Architecture/the-architecture/issues)
+- **Forum** — [BrainDrive Community: Personal AI Architecture](https://community.braindrive.ai/c/personal-ai-architecture/39)
 
 ## License
 
-By contributing, you agree that your contributions will be licensed under:
+By contributing, you agree your contributions are licensed under:
+
 - **Code:** MIT License
 - **Documentation:** CC BY 4.0
