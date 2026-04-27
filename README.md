@@ -30,7 +30,7 @@ Use the implementation template repository for runnable code and execution tooli
 | Resource | What it is |
 |----------|------------|
 | [Foundation spec](docs/foundation-spec.md) | Complete architecture: components, contracts, principles, responsibility matrix |
-| [Component specs](docs/) | Detailed specs for Memory, Engine, Gateway, Auth, Tools, Models |
+| [Component specs](docs/) | Detailed specs for Memory, Agent Loop, Gateway, Auth, Tools, Models |
 | [OpenAPI + JSON Schema](specs/) | Machine-verifiable boundary contracts |
 | [Blueprints](docs/blueprints/) | Spec, schema, conformance guidance, drift guard, implementation prompts |
 | [Architecture primer](docs/ai/) | Token-optimized references for AI-assisted development |
