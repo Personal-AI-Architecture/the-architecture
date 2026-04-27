@@ -120,8 +120,13 @@ function CTA(): ReactNode {
           <div className={styles.ctaStep}>
             <div className={styles.stepNumber}>2</div>
             <h3>Build a System</h3>
-            <p>Use the reference implementation as a starting point.</p>
-            <code>npm install @personalaiarchitecture/core</code>
+            <p>Start from the TypeScript template. Running locally in about 5 minutes, with conformance tests that flag any change that breaks an architectural boundary.</p>
+            <Link
+              className="button button--primary"
+              to="https://github.com/Personal-AI-Architecture/ts-architecture-template"
+            >
+              Get the Template
+            </Link>
           </div>
           <div className={styles.ctaStep}>
             <div className={styles.stepNumber}>3</div>

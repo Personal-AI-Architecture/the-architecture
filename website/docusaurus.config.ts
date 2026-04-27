@@ -130,7 +130,11 @@ const config: Config = {
             },
             {
               label: 'npm',
-              href: 'https://www.npmjs.com/package/@personalaiarchitecture/core',
+              href: 'https://www.npmjs.com/package/personal-ai-architecture',
+            },
+            {
+              label: 'TypeScript Template',
+              href: 'https://github.com/Personal-AI-Architecture/ts-architecture-template',
             },
           ],
         },
