@@ -64,21 +64,9 @@ const config: Config = {
       },
       items: [
         {
-          type: 'docSidebar',
-          sidebarId: 'principlesSidebar',
-          position: 'left',
-          label: 'Principles',
-        },
-        {
-          type: 'docSidebar',
-          sidebarId: 'architectureSidebar',
-          position: 'left',
-          label: 'The Architecture',
-        },
-        {
           to: '/docs/about',
           label: 'About Us',
-          position: 'left',
+          position: 'right',
         },
         {
           href: 'https://community.braindrive.ai/c/personal-ai-architecture/39',
@@ -94,51 +82,7 @@ const config: Config = {
     },
     footer: {
       style: 'dark',
-      links: [
-        {
-          title: 'Architecture',
-          items: [
-            {
-              label: 'The Architecture',
-              to: '/docs/foundation-spec',
-            },
-            {
-              label: 'Principles',
-              to: '/docs/principles',
-            },
-          ],
-        },
-        {
-          title: 'Community',
-          items: [
-            {
-              label: 'Forum',
-              href: 'https://community.braindrive.ai/c/personal-ai-architecture/39',
-            },
-            {
-              label: 'GitHub Issues',
-              href: 'https://github.com/Personal-AI-Architecture/the-architecture/issues',
-            },
-          ],
-        },
-        {
-          title: 'More',
-          items: [
-            {
-              label: 'GitHub',
-              href: 'https://github.com/Personal-AI-Architecture/the-architecture',
-            },
-            {
-              label: 'npm',
-              href: 'https://www.npmjs.com/package/personal-ai-architecture',
-            },
-            {
-              label: 'TypeScript Template',
-              href: 'https://github.com/Personal-AI-Architecture/ts-architecture-template',
-            },
-          ],
-        },
-      ],
+      links: [],
       copyright: `Created by <a href="https://braindrive.ai" target="_blank" rel="noopener noreferrer">BrainDrive</a>. Code licensed MIT. Docs licensed CC BY 4.0.`,
     },
     prism: {
