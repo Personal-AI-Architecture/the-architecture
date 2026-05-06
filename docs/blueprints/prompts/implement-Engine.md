@@ -21,21 +21,21 @@ Implement the **Engine (Agent Loop)** component in **{{TARGET_LANGUAGE}}** so it
 
 ## Supporting Inputs (Authoritative for contracts/audit)
 
-- `/home/hex/Project/PAA-MVP-Prod/docs/ai/engine.md`
-- `/home/hex/Project/PAA-MVP-Prod/docs/ai/gateway-engine-contract.md`
-- `/home/hex/Project/PAA-MVP-Prod/docs/ai/compliance-matrix.md`
-- `/home/hex/Project/PAA-MVP-Prod/docs/ai/traceability-map.md`
-- `/home/hex/Project/PAA-MVP-Prod/docs/ai/review-checklists/engine-review.md`
+- `/home/hex/Project/PAA-MVP-Prod/docs/ai-agent-docs/engine.md`
+- `/home/hex/Project/PAA-MVP-Prod/docs/ai-agent-docs/gateway-engine-contract.md`
+- `/home/hex/Project/PAA-MVP-Prod/docs/ai-agent-docs/compliance-matrix.md`
+- `/home/hex/Project/PAA-MVP-Prod/docs/ai-agent-docs/traceability-map.md`
+- `/home/hex/Project/PAA-MVP-Prod/docs/ai-agent-docs/review-checklists/engine-review.md`
 
 ## Human Architecture Inputs (Authoritative for ownership boundaries)
 
-- `/home/hex/Reference/the-architecture/docs/engine-spec.md`
-- `/home/hex/Reference/the-architecture/docs/gateway-engine-contract.md`
-- `/home/hex/Reference/the-architecture/docs/foundation-spec.md`
-- `/home/hex/Reference/the-architecture/docs/models-spec.md`
-- `/home/hex/Reference/the-architecture/docs/tools-spec.md`
-- `/home/hex/Reference/the-architecture/docs/security-spec.md`
-- `/home/hex/Reference/the-architecture/docs/auth-spec.md`
+- `/home/hex/Reference/the-architecture/docs/in-depth-overview/engine-spec.md`
+- `/home/hex/Reference/the-architecture/docs/in-depth-overview/gateway-engine-contract.md`
+- `/home/hex/Reference/the-architecture/docs/in-depth-overview/foundation-spec.md`
+- `/home/hex/Reference/the-architecture/docs/in-depth-overview/models-spec.md`
+- `/home/hex/Reference/the-architecture/docs/in-depth-overview/tools-spec.md`
+- `/home/hex/Reference/the-architecture/docs/in-depth-overview/security-spec.md`
+- `/home/hex/Reference/the-architecture/docs/in-depth-overview/auth-spec.md`
 
 ## Source Precedence (Mandatory)
 

@@ -25,22 +25,22 @@ Important: Adapter is a pattern within existing APIs, not a standalone component
 
 ## Supporting Inputs (Authoritative for contracts/audit)
 
-- `/home/hex/Project/PAA-MVP-Prod/docs/ai/models.md`
-- `/home/hex/Project/PAA-MVP-Prod/docs/ai/configuration.md`
-- `/home/hex/Project/PAA-MVP-Prod/docs/ai/gateway.md`
-- `/home/hex/Project/PAA-MVP-Prod/docs/ai/client-gateway-contract.md`
-- `/home/hex/Project/PAA-MVP-Prod/docs/ai/compliance-matrix.md`
-- `/home/hex/Project/PAA-MVP-Prod/docs/ai/traceability-map.md`
-- `/home/hex/Project/PAA-MVP-Prod/docs/ai/failure-patterns.md`
+- `/home/hex/Project/PAA-MVP-Prod/docs/ai-agent-docs/models.md`
+- `/home/hex/Project/PAA-MVP-Prod/docs/ai-agent-docs/configuration.md`
+- `/home/hex/Project/PAA-MVP-Prod/docs/ai-agent-docs/gateway.md`
+- `/home/hex/Project/PAA-MVP-Prod/docs/ai-agent-docs/client-gateway-contract.md`
+- `/home/hex/Project/PAA-MVP-Prod/docs/ai-agent-docs/compliance-matrix.md`
+- `/home/hex/Project/PAA-MVP-Prod/docs/ai-agent-docs/traceability-map.md`
+- `/home/hex/Project/PAA-MVP-Prod/docs/ai-agent-docs/failure-patterns.md`
 
 ## Human Architecture Inputs (Authoritative for ownership boundaries)
 
-- `/home/hex/Reference/the-architecture/docs/adapter-spec.md`
-- `/home/hex/Reference/the-architecture/docs/models-spec.md`
-- `/home/hex/Reference/the-architecture/docs/configuration-spec.md`
-- `/home/hex/Reference/the-architecture/docs/gateway-spec.md`
-- `/home/hex/Reference/the-architecture/docs/foundation-spec.md`
-- `/home/hex/Reference/the-architecture/docs/security-spec.md`
+- `/home/hex/Reference/the-architecture/docs/in-depth-overview/adapter-spec.md`
+- `/home/hex/Reference/the-architecture/docs/in-depth-overview/models-spec.md`
+- `/home/hex/Reference/the-architecture/docs/in-depth-overview/configuration-spec.md`
+- `/home/hex/Reference/the-architecture/docs/in-depth-overview/gateway-spec.md`
+- `/home/hex/Reference/the-architecture/docs/in-depth-overview/foundation-spec.md`
+- `/home/hex/Reference/the-architecture/docs/in-depth-overview/security-spec.md`
 
 ## Source Precedence (Mandatory)
 

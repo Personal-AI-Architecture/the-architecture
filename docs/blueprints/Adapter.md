@@ -612,15 +612,15 @@ Adapters are translation boundaries that keep internal contracts stable while ex
 ## 10. Validation Against AI Primer (`/docs/ai`)
 
 ### Confirmed Alignments
-- `docs/ai/models.md`:
+- `docs/ai-agent-docs/models.md`:
   - provider-specific details stay in adapters.
   - provider/model swaps are config and preference driven.
-- `docs/ai/configuration.md`:
+- `docs/ai-agent-docs/configuration.md`:
   - runtime config, adapter config, preferences remain distinct.
   - startup includes adapter-config phase.
-- `docs/ai/compliance-matrix.md`:
+- `docs/ai-agent-docs/compliance-matrix.md`:
   - `E-03`, `MO-02`, `MO-03`, `C-01`, `C-02`, `C-03`, `D-06` are captured.
-- `docs/ai/failure-patterns.md`:
+- `docs/ai-agent-docs/failure-patterns.md`:
   - config-layer collapse and provider logic leakage are represented as drift categories.
 
 ### Documented Discrepancies To Reconcile

@@ -21,18 +21,18 @@ Implement the **Auth** component in **{{TARGET_LANGUAGE}}** so it is architectur
 
 ## Supporting Inputs (Authoritative for contracts/audit)
 
-- `/home/hex/Project/PAA-MVP-Prod/docs/ai/auth.md`
-- `/home/hex/Project/PAA-MVP-Prod/docs/ai/compliance-matrix.md`
-- `/home/hex/Project/PAA-MVP-Prod/docs/ai/traceability-map.md`
-- `/home/hex/Project/PAA-MVP-Prod/docs/ai/review-checklists/auth-review.md`
-- `/home/hex/Project/PAA-MVP-Prod/docs/ai/security.md`
+- `/home/hex/Project/PAA-MVP-Prod/docs/ai-agent-docs/auth.md`
+- `/home/hex/Project/PAA-MVP-Prod/docs/ai-agent-docs/compliance-matrix.md`
+- `/home/hex/Project/PAA-MVP-Prod/docs/ai-agent-docs/traceability-map.md`
+- `/home/hex/Project/PAA-MVP-Prod/docs/ai-agent-docs/review-checklists/auth-review.md`
+- `/home/hex/Project/PAA-MVP-Prod/docs/ai-agent-docs/security.md`
 
 ## Human Architecture Inputs (Authoritative for ownership boundaries)
 
-- `/home/hex/Reference/the-architecture/docs/auth-spec.md`
-- `/home/hex/Reference/the-architecture/docs/security-spec.md`
-- `/home/hex/Reference/the-architecture/docs/foundation-spec.md`
-- `/home/hex/Reference/the-architecture/docs/gateway-engine-contract.md`
+- `/home/hex/Reference/the-architecture/docs/in-depth-overview/auth-spec.md`
+- `/home/hex/Reference/the-architecture/docs/in-depth-overview/security-spec.md`
+- `/home/hex/Reference/the-architecture/docs/in-depth-overview/foundation-spec.md`
+- `/home/hex/Reference/the-architecture/docs/in-depth-overview/gateway-engine-contract.md`
 
 ## Source Precedence (Mandatory)
 

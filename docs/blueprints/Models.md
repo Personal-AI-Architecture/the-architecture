@@ -661,14 +661,14 @@ Models define the external-intelligence boundary of the architecture. The system
 ## 10. Validation Against AI Primer (`/docs/ai`)
 
 ### Confirmed Alignments
-- `docs/ai/models.md`:
+- `docs/ai-agent-docs/models.md`:
   - models are external boundary; provider details remain in adapters.
   - model and provider swap rules are boundary-defining behavior.
-- `docs/ai/compliance-matrix.md`:
+- `docs/ai-agent-docs/compliance-matrix.md`:
   - `MO-01`, `MO-02`, `MO-03` captured as MUST-level invariants.
   - `C-01`, `C-02`, `C-03` captured for configuration/secret integrity.
   - `E-03` captured for adapter-isolation ownership.
-- `docs/ai/review-checklists/configuration-review.md`:
+- `docs/ai-agent-docs/review-checklists/configuration-review.md`:
   - deterministic startup order and offline model path retained.
 
 ### Documented Discrepancies To Reconcile

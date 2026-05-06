@@ -26,22 +26,22 @@ Implement **Memory-Tools** in **{{TARGET_LANGUAGE}}** so memory operations are a
 
 ## Supporting Inputs (Authoritative for contracts/audit)
 
-- `/home/hex/Project/PAA-MVP-Prod/docs/ai/memory.md`
-- `/home/hex/Project/PAA-MVP-Prod/docs/ai/tools.md`
-- `/home/hex/Project/PAA-MVP-Prod/docs/ai/compliance-matrix.md`
-- `/home/hex/Project/PAA-MVP-Prod/docs/ai/traceability-map.md`
-- `/home/hex/Project/PAA-MVP-Prod/docs/ai/review-checklists/memory-review.md`
-- `/home/hex/Project/PAA-MVP-Prod/docs/ai/review-checklists/security-review.md`
-- `/home/hex/Project/PAA-MVP-Prod/docs/ai/failure-patterns.md`
+- `/home/hex/Project/PAA-MVP-Prod/docs/ai-agent-docs/memory.md`
+- `/home/hex/Project/PAA-MVP-Prod/docs/ai-agent-docs/tools.md`
+- `/home/hex/Project/PAA-MVP-Prod/docs/ai-agent-docs/compliance-matrix.md`
+- `/home/hex/Project/PAA-MVP-Prod/docs/ai-agent-docs/traceability-map.md`
+- `/home/hex/Project/PAA-MVP-Prod/docs/ai-agent-docs/review-checklists/memory-review.md`
+- `/home/hex/Project/PAA-MVP-Prod/docs/ai-agent-docs/review-checklists/security-review.md`
+- `/home/hex/Project/PAA-MVP-Prod/docs/ai-agent-docs/failure-patterns.md`
 
 ## Human Architecture Inputs (Authoritative for ownership boundaries)
 
-- `/home/hex/Reference/the-architecture/docs/memory-spec.md`
-- `/home/hex/Reference/the-architecture/docs/tools-spec.md`
-- `/home/hex/Reference/the-architecture/docs/security-spec.md`
-- `/home/hex/Reference/the-architecture/docs/configuration-spec.md`
-- `/home/hex/Reference/the-architecture/docs/gateway-engine-contract.md`
-- `/home/hex/Reference/the-architecture/docs/foundation-spec.md`
+- `/home/hex/Reference/the-architecture/docs/in-depth-overview/memory-spec.md`
+- `/home/hex/Reference/the-architecture/docs/in-depth-overview/tools-spec.md`
+- `/home/hex/Reference/the-architecture/docs/in-depth-overview/security-spec.md`
+- `/home/hex/Reference/the-architecture/docs/in-depth-overview/configuration-spec.md`
+- `/home/hex/Reference/the-architecture/docs/in-depth-overview/gateway-engine-contract.md`
+- `/home/hex/Reference/the-architecture/docs/in-depth-overview/foundation-spec.md`
 
 ## Source Precedence (Mandatory)
 

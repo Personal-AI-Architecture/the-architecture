@@ -66,7 +66,7 @@ Before merging any non-trivial change, verify:
 7. **Gateway doesn't interpret content** -- it passes through, it doesn't understand
 8. **Auth is independent of Gateway** -- swapping either doesn't affect the other
 
-Full gate: `docs/lockin-gate.md` (PR checks). Full audit: `docs/lockin-audit.md` (milestone/release).
+Full gate: `docs/in-depth-overview/lockin-gate.md` (PR checks). Full audit: `docs/in-depth-overview/lockin-audit.md` (milestone/release).
 
 ## Configuration
 
@@ -86,32 +86,18 @@ An implementation is valid if it passes these tests:
 - **ARCH-3:** New client connects through Gateway API identically
 - **ARCH-4:** All payloads validate against canonical schemas in `specs/`
 
-See `docs/guides/conformance/` for full test suite. See `docs/guides/implementers-reference.md` for the complete implementation contract.
+See `docs/in-depth-overview/conformance/` for full test suite. See `docs/in-depth-overview/implementers-reference.md` for the complete implementation contract.
 
 ## File Map
 
 ```
 ├── AGENT.md                              <- you are here
 ├── docs/
-│   ├── foundation-spec.md                <- architecture: components, contracts, principles
-│   ├── engine-spec.md                    <- Agent Loop component
-│   ├── memory-spec.md                    <- Your Memory component
-│   ├── gateway-spec.md                   <- Gateway component
-│   ├── auth-spec.md                      <- Auth component
-│   ├── tools-spec.md                     <- why tools are not a component
-│   ├── models-spec.md                    <- why models are external
-│   ├── adapter-spec.md                   <- swappable contracts via adapters
-│   ├── gateway-engine-contract.md        <- the one internal interface
-│   ├── configuration-spec.md             <- runtime config, preferences, tool self-description
-│   ├── deployment-spec.md                <- runs locally, functions offline
-│   ├── security-spec.md                  <- threat model, enforcement
-│   ├── customization-spec.md             <- how implementations build on this
-│   ├── lockin-gate.md                    <- PR gate: 13 no-lock-in checks
-│   ├── lockin-audit.md                   <- milestone audit: deep verification
-│   ├── guides/
-│   │   ├── implementers-reference.md     <- what each component must do (no rationale)
-│   │   └── conformance/                  <- architectural invariant tests
-│   └── research/                         <- evaluations and analysis
+│   ├── README.md                         <- docs landing page
+│   ├── doc-registry.json                 <- doc-maintenance tooling state
+│   ├── in-depth-overview/                <- full human-readable specs, principles, lockin, conformance
+│   ├── ai-agent-docs/                    <- condensed primers for AI agents
+│   └── blueprints/                       <- per-component blueprints + contracts + tests + prompts
 ├── specs/
 │   ├── schemas/                          <- JSON Schema shared types
 │   └── openapi/                          <- canonical OpenAPI specs

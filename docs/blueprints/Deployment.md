@@ -635,17 +635,17 @@ Deployment defines where and how the system runs, with owner control as the defa
 ## 10. Validation Against AI Primer (`/docs/ai`)
 
 ### Confirmed Alignments
-- `docs/ai/deployment.md`:
+- `docs/ai-agent-docs/deployment.md`:
   - local-owner deployment posture.
   - offline functional path.
   - localhost-only default network posture.
   - single-unit default deployment.
-- `docs/ai/compliance-matrix.md`:
+- `docs/ai-agent-docs/compliance-matrix.md`:
   - `D-01`, `D-02`, `D-03`, `D-04` captured as MUST-level deployment constraints.
   - startup-readiness alignment via `D-05`, `D-06`, `D-07`.
-- `docs/ai/build-sequence.md`:
+- `docs/ai-agent-docs/build-sequence.md`:
   - startup-readiness and localhost/offline guarantees required before feature claims.
-- `docs/ai/accepted-mvp-limits.md`:
+- `docs/ai-agent-docs/accepted-mvp-limits.md`:
   - local docker deployment accepted in MVP.
   - internet-required runtime explicitly disallowed.
 

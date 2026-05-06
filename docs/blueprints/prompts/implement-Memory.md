@@ -21,19 +21,19 @@ Implement the **Memory** component in **{{TARGET_LANGUAGE}}** so it is architect
 
 ## Supporting Inputs (Authoritative for contracts/audit)
 
-- `/home/hex/Project/PAA-MVP-Prod/docs/ai/memory.md`
-- `/home/hex/Project/PAA-MVP-Prod/docs/ai/compliance-matrix.md`
-- `/home/hex/Project/PAA-MVP-Prod/docs/ai/traceability-map.md`
-- `/home/hex/Project/PAA-MVP-Prod/docs/ai/review-checklists/memory-review.md`
-- `/home/hex/Project/PAA-MVP-Prod/docs/ai/accepted-mvp-limits.md`
+- `/home/hex/Project/PAA-MVP-Prod/docs/ai-agent-docs/memory.md`
+- `/home/hex/Project/PAA-MVP-Prod/docs/ai-agent-docs/compliance-matrix.md`
+- `/home/hex/Project/PAA-MVP-Prod/docs/ai-agent-docs/traceability-map.md`
+- `/home/hex/Project/PAA-MVP-Prod/docs/ai-agent-docs/review-checklists/memory-review.md`
+- `/home/hex/Project/PAA-MVP-Prod/docs/ai-agent-docs/accepted-mvp-limits.md`
 
 ## Human Architecture Inputs (Authoritative for ownership boundaries)
 
-- `/home/hex/Reference/the-architecture/docs/memory-spec.md`
-- `/home/hex/Reference/the-architecture/docs/memory-as-platform.md`
-- `/home/hex/Reference/the-architecture/docs/foundation-spec.md`
-- `/home/hex/Reference/the-architecture/docs/security-spec.md`
-- `/home/hex/Reference/the-architecture/docs/gateway-spec.md`
+- `/home/hex/Reference/the-architecture/docs/in-depth-overview/memory-spec.md`
+- `/home/hex/Reference/the-architecture/docs/in-depth-overview/memory-as-platform.md`
+- `/home/hex/Reference/the-architecture/docs/in-depth-overview/foundation-spec.md`
+- `/home/hex/Reference/the-architecture/docs/in-depth-overview/security-spec.md`
+- `/home/hex/Reference/the-architecture/docs/in-depth-overview/gateway-spec.md`
 
 ## Source Precedence (Mandatory)
 
