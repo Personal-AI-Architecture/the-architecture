@@ -48,14 +48,6 @@ Use the implementation template repository for runnable code and execution tooli
 
 For AI agents: start with [AGENT.md](AGENT.md).
 
-## Worked Examples
-
-End-to-end apps built on the architecture using the template.
-
-| Example | What it shows |
-|---------|---------------|
-| [Chat with documents](https://github.com/Personal-AI-Architecture/ts-architecture-template/tree/main/projects/chat-with-docs) | A small RAG-free document-chat app built from the template via the interview → spec → build-plan → execute → test → loop process. Ships with the prompts used to generate it. Will move to its own repo (`Personal-AI-Architecture/chat-with-docs-example`) — see Library decision PAA D34. |
-
 ## Contributing
 
 We welcome pull requests for documentation, contracts, and specification improvements.
