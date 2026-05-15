@@ -5,7 +5,7 @@
 An open architecture for personal AI systems. This repository is now the documentation and standards source of truth.
 
 <p align="center">
-  <a href="https://personalaiarchitecture.org">Website</a> · <a href="https://github.com/Personal-AI-Architecture/ts-architecture-template">TypeScript Template</a> · <a href="https://github.com/BrainDriveAI/braindrive">BrainDrive (built on this)</a> · <a href="docs/in-depth-overview/foundation-spec.md">Foundation Spec</a>
+  <a href="https://personalaiarchitecture.org">Website</a> · <a href="https://github.com/Personal-AI-Architecture/ts-architecture-template">TypeScript Template</a> · <a href="https://github.com/BrainDriveAI/braindrive">BrainDrive (built on this)</a> · <a href="docs/in-depth-overview/foundation-spec.md">Foundation Spec</a> · <a href="https://youtube.com/playlist?list=PL_rTgQnnMXsVkg29Lm9syjUyVQmRG_4y_">Free Course</a>
 </p>
 
 ## Repository Focus
