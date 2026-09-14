@@ -7,9 +7,9 @@ hide_table_of_contents: true
 
 Every AI system has an extension model — plugins, hooks, middleware, SDKs, custom code. So what's different here?
 
-Here, customization is **content, not code.** The Foundation is a runtime — you don't extend it with code, you write programs that run on it. Your "program" is Your Memory content + tools + configuration + client. The runtime executes it. Components (Your Memory, Agent Loop, Auth, Gateway) stay generic and unmodified. Prompts are the code now — the behavior of the system emerges from what's in Your Memory and what tools are available, not from custom code in the Agent Loop, Gateway, or Auth.
+Here, customization is primarily **content, not changes to the architecture.** An implementation combines Your Memory content, tools, configuration, and a client while keeping the four architecture components generic. The behavior of the system emerges from what is in Your Memory and which tools are available, rather than from product-specific logic in the Agent Loop, Gateway, or Auth.
 
-An implementation is a dependency relationship, not a fork (D112). Your product repo imports the Architecture as a dependency. Architecture improvements flow to every implementation automatically. BrainDrive is the reference implementation.
+An implementation follows the Architecture's specifications and contracts. Runnable code and implementation tooling live in separate repositories, including the TypeScript architecture template. BrainDrive is one implementation of the Architecture.
 
 The audience is builders — product developers, AI agents, or product team members who want to know what ships by default, what's customizable, and how. Without this doc, every builder has to reverse-engineer the customization model from six component specs.
 
@@ -399,9 +399,9 @@ And the update applies cleanly because Level 3 content doesn't conflict with imp
 ## Open Questions
 
 - [x] **OQ-1: What exactly are the architecture defaults?** **Partially resolved (D153, D158).** Runtime config: `memory_root: ./your-memory`, `provider_adapter: openai-compatible`, `auth_mode: local`, `tool_sources: [built-in memory tools]`. Bootstrap: minimal generic system prompt, implementations override via `bootstrapTarget`. Memory tools: native read/write/edit/delete/search/list/history. Default `your-memory/` is empty on first boot. Remaining defaults will emerge during implementation.
-- [x] **OQ-2: How does an implementation depend on the Architecture technically?** **Resolved (D155).** npm package. The Architecture publishes as a package, implementations `npm install` it, import components, configure, add opinions, run. Standard semver versioning.
+- [x] **OQ-2: How does an implementation depend on the Architecture technically?** **Superseded by the documentation-first repository split.** Implementations follow the published specifications and contracts; the separate TypeScript template supplies runnable starting code.
 - ~~**OQ-3: How do implementation and Level 3 content coexist without conflicts?**~~ Partially answered: [configuration-spec.md](./configuration-spec.md) defines layered overrides (Architecture → Implementation → Level 3, owner wins). Remaining conventions (file-level coexistence) deferred to implementation.
-- [x] **OQ-4: Does the Architecture repo ship runnable code or specs + contracts?** **Resolved (D153):** Runnable code. The Architecture is a working runtime — `npm install`, provide Your Memory content + tools + config + client, and it runs. Ships sensible defaults (generic OpenAI-compatible provider adapter, local auth, `./your-memory` filesystem, built-in memory tools). All defaults overridable. Specs, schemas, conformance tests ship alongside as documentation and validation.
+- [x] **OQ-4: Does the Architecture repo ship runnable code or specs + contracts?** **Superseded by the documentation-first repository split.** This repository ships specifications, contracts, blueprints, and conformance guidance. Runnable code lives in implementation repositories such as the TypeScript architecture template.
 - ~~**OQ-5: How do we handle versioning across two repos?**~~ Deferred to implementation. Depends on delivery mechanism (see OQ-2).
 
 ---
@@ -410,9 +410,9 @@ And the update applies cleanly because Level 3 content doesn't conflict with imp
 
 - [ ] Builders can understand the customization model — Foundation is a runtime, defaults not contracts, four mechanisms
 - [ ] Builders know what to provide to build an implementation — Your Memory content, tools, config, client
-- [ ] BrainDrive serves as the reference implementation
-- [ ] An implementation boots correctly on the Architecture with custom Your Memory content, tools, and config — no architecture code modified
-- [ ] Implementations ship as their own repo (dependency on the Architecture) and as Docker images for owners
+- [ ] BrainDrive serves as an example implementation
+- [ ] A conforming implementation boots with custom Your Memory content, tools, and config without changing the Architecture's contracts
+- [ ] Implementations ship from their own repositories and declare which Architecture contracts they follow
 - [ ] An AI agent can read this spec and build a working implementation without additional guidance
 
 ---

@@ -101,8 +101,7 @@ See `docs/in-depth-overview/conformance/` for full test suite. See `docs/in-dept
 ├── specs/
 │   ├── schemas/                          <- JSON Schema shared types
 │   └── openapi/                          <- canonical OpenAPI specs
-├── src/                                  <- implementation
-└── test/                                 <- tests
+└── README.md                             <- repository orientation and implementation-template route
 ```
 
 ## Vocabulary
@@ -114,9 +113,10 @@ Use these terms consistently. The "Don't Use" column lists old terms that should
 | **Agent Loop** | Engine | Describes what it does: send to model, get tool calls, execute, loop |
 | **APIs** | Connectors | Gateway API, Model API — just call them what they are |
 | **Model API** | Provider API | "Model API" is immediately clear |
-| **Clients** or **Apps** | External clients | Web app, CLI, mobile app, Discord bot — concrete terms |
-| **Architecture** | Level 1 | The specs, contracts, and reference implementation |
-| **Implementation** | Level 2 | What you build on the architecture (e.g., BrainDrive) |
+| **Clients** | External clients | Interfaces that communicate with a system through the Gateway API |
+| **Apps** | — | Compositions of instructions, tools, context, configuration, and optional client resources for a bounded outcome |
+| **Architecture** | Level 1 | The product-independent specifications, contracts, guidance, and requirements |
+| **Implementation** | Level 2 | A product or system that follows the Architecture (e.g., BrainDrive) |
 
 Terms that are correct as-is: **Gateway**, **Auth**, **Your Memory**, **Tools**, **Adapters**, **Contracts**.
 

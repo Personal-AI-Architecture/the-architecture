@@ -36,7 +36,7 @@ Each audience has a "start here" flow — the minimal set of files and first act
 1. Read `AGENT.md` (repo root) — architecture overview
 2. Read [customization-spec.md](../customization-spec.md) — extension points and constraints
 3. Read `specs/openapi/` and `specs/schemas/` — the API shapes your product uses
-4. Start from the component stubs or reference implementation
+4. Start from the separate implementation template or your own conforming implementation
 
 **System Extender** — adding tools, skills, or clients:
 1. Read `AGENT.md` (repo root) — architecture overview
@@ -149,7 +149,7 @@ A runnable test suite that validates *any* implementation against the architectu
 | FS-7 | Swap Agent Loop | = ARCH-2 | D39, Principle 2 |
 | FS-8 | Expand scope via tools | Add tools → broader capability → no architectural changes | D55, Principle 5 |
 
-Some FS tests overlap with SWAP/ARCH/DEPLOY tests — noted with `=` references above. Fixtures and evidence format (CI output, artifacts) to be defined when the reference implementation exists.
+Some FS tests overlap with SWAP/ARCH/DEPLOY tests — noted with `=` references above. Fixtures and evidence format (CI output, artifacts) belong with the conformance suite and implementation template.
 
 ---
 
