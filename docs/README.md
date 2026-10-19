@@ -34,7 +34,7 @@ Understand the architecture well enough to implement it.
 
 | Document | What you'll learn |
 |----------|-------------------|
-| [Foundation Spec](in-depth-overview/foundation-spec.md) | **Start here.** The complete architecture — four components, two APIs, memory as platform, invariants |
+| [Architecture Overview](in-depth-overview/foundation-spec.md) | **Start here.** How it works in six steps, the four components and two APIs, and who does what |
 | [Implementer's Reference](in-depth-overview/implementers-reference.md) | Condensed contracts — "tell me what to build," no rationale |
 | [Gateway-Engine Contract](in-depth-overview/gateway-engine-contract.md) | The internal handoff between Gateway and Agent Loop — the key boundary |
 
@@ -127,6 +127,7 @@ Deeper thinking behind the design decisions.
 | [Lock-In Analysis](in-depth-overview/lock-in-analysis.md) | How each component avoids lock-in |
 | [Memory-Tool Completeness](in-depth-overview/memory-tool-completeness.md) | Proof that memory + tools covers all system needs |
 | [Communication Principles](in-depth-overview/communication-principles.md) | Communication as a replaceable component |
+| [Foundation Decisions](in-depth-overview/decisions.md) | The decisions that define the architecture, and why |
 
 ---
 
