@@ -127,13 +127,27 @@ Between the Gateway and the Agent Loop there is one internal contract, not a thi
 
 ## What keeps it swappable
 
-**Adapters.** Between each API and the outside world sits an adapter, a thin translation layer you own. Your components speak a stable interface, and the adapter translates to whatever standard is current. When the standard changes, swap the adapter. New model? Config change. Better agent loop? Swap it. New client? Point it at the same API. The cost of adopting anything new is one swap, not a rebuild. See [adapter-spec.md](./adapter-spec.md).
+**Adapters.** 
 
-**Communication carries, it doesn't interpret.** Inside the system, the connections between components only carry messages. Your Memory holds state, the model makes decisions, Auth controls access. When one of those jobs leaks into the communication layer, swapping it means dealing with work that doesn't belong to it. See [communication-principles.md](./communication-principles.md).
+Between each API and the outside world sits an adapter, a thin translation layer you own. Your components speak a stable interface, and the adapter translates to whatever standard is current. When the standard changes, swap the adapter. New model? Config change. Better agent loop? Swap it. New client? Point it at the same API. The cost of adopting anything new is one swap, not a rebuild. See [adapter-spec.md](./adapter-spec.md).
 
-**Five principles.** Your Memory has no outbound dependencies. Keep everything else swappable. Keep responsibilities where they belong. Keep it simple enough for one developer and AI coding agents to understand and maintain. Start constrained and expand deliberately: add tools, don't change the architecture. Nothing enforces these principles, and the system still runs if you break one, but every violation is lock-in you've chosen to accept. See [principles.md](./principles.md).
+**Communication carries, it doesn't interpret.** 
 
-**Configuration.** Preferences live in Your Memory. The system starts from a thin runtime config, and tools describe themselves. See [configuration-spec.md](./configuration-spec.md).
+Inside the system, the connections between components only carry messages. Your Memory holds state, the model makes decisions, Auth controls access. When one of those jobs leaks into the communication layer, swapping it means dealing with work that doesn't belong to it. See [communication-principles.md](./communication-principles.md).
+
+**Five principles.** 
+
+1. Your Memory has no outbound dependencies
+2. Keep everything else swappable
+3. Keep responsibilities where they belong.
+4. Keep it simple enough for one developer and AI coding agents to understand and maintain.
+5. Start constrained and expand deliberately: add tools, don't change the architecture.
+
+Nothing enforces these principles, and the system still runs if you break one, but every violation is lock-in you've chosen to accept. See [principles.md](./principles.md).
+
+**Configuration.** 
+
+Preferences live in Your Memory. The system starts from a thin runtime config, and tools describe themselves. See [configuration-spec.md](./configuration-spec.md).
 
 ---
 
