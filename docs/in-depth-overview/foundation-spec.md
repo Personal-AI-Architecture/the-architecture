@@ -51,6 +51,10 @@ See [models-spec.md](./models-spec.md).
 
 Your Memory and the models you use with it are the brain. The Agent Loop is the hands. It sends your request to the model, runs the tools the model asks for, and repeats until the job is done.
 
+<p align="center">
+  <img src="../assets/agent-loop.svg" alt="You send a request to the Agent Loop. It asks the AI model what to do next; the model replies with a tool to use or the answer. The Agent Loop runs the tool (Your Memory, APIs, browsers and more) and sends the result back to the model. It repeats until the model has what it needs, then returns the answer to you." width="860" />
+</p>
+
 The Agent Loop is deliberately generic. Everything that makes a product unique (methodology, personality, skills, folder structure) lives in Your Memory, not in the loop. So the Agent Loop isn't part of a platform you're locked into. It's another swappable component.
 
 See [engine-spec.md](./engine-spec.md).

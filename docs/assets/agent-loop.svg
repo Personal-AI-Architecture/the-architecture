@@ -1,0 +1,23 @@
+<svg viewBox="0 0 860 330" xmlns="http://www.w3.org/2000/svg" font-family="Inter, Helvetica, Arial, sans-serif">
+<rect x="0" y="0" width="100%" height="100%" rx="16" fill="#141920"/>
+<defs><marker id="a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#94A3B8"/></marker></defs>
+<rect x="320" y="50" width="200" height="80" rx="10" fill="none" stroke="#FFFFFF" stroke-width="2.5"/>
+<g fill="none" stroke="#94A3B8" stroke-width="1.5" stroke-dasharray="5 4"><rect x="670" y="50" width="170" height="80" rx="8"/><rect x="320" y="210" width="200" height="70" rx="8"/></g>
+<g fill="#FFFFFF" text-anchor="middle">
+<text x="420" y="87" font-weight="700" font-size="17">Agent Loop</text><text x="420" y="110" font-size="12" fill="#94A3B8">the hands</text>
+<text x="755" y="87" font-weight="600" font-size="15">AI model</text><text x="755" y="110" font-size="12" fill="#94A3B8">the brain</text>
+<text x="420" y="242" font-weight="600" font-size="15">Tools</text><text x="420" y="263" font-size="12" fill="#94A3B8">Your Memory, APIs, browsers…</text>
+</g>
+<g stroke="#94A3B8" stroke-width="1.5" fill="none">
+<line x1="110" y1="78" x2="316" y2="78" marker-end="url(#a)"/><line x1="320" y1="104" x2="114" y2="104" marker-end="url(#a)"/>
+<line x1="520" y1="78" x2="666" y2="78" marker-end="url(#a)"/><line x1="670" y1="104" x2="524" y2="104" marker-end="url(#a)"/>
+<line x1="395" y1="130" x2="395" y2="206" marker-end="url(#a)"/><line x1="445" y1="210" x2="445" y2="134" marker-end="url(#a)"/>
+</g>
+<g fill="#FFFFFF" font-size="12">
+<text x="40" y="96" font-weight="600" font-size="14">You</text>
+<text x="213" y="70" text-anchor="middle">your request</text><text x="213" y="122" text-anchor="middle">the answer</text>
+<text x="595" y="70" text-anchor="middle">what next?</text><text x="595" y="122" text-anchor="middle">a tool, or the answer</text>
+<text x="387" y="172" text-anchor="end">runs the tool</text><text x="453" y="172">sends back the result</text>
+</g>
+<text x="430" y="312" text-anchor="middle" fill="#94A3B8" font-size="13">Repeats until the model has what it needs, then returns the answer.</text>
+</svg>
