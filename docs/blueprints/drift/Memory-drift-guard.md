@@ -13,13 +13,16 @@ This document defines anti-drift controls for Memory implementations.
 - Path sandbox protections are weakened.
 - Secrets appear in inspectable owner data surfaces.
 - Backend swap forces contract changes in other components.
+- History exists but there is no way to restore an earlier state.
+- Conflicting writes are resolved silently (for example, last-write-wins).
+- Conversations drop tool calls, tool results or non-text content parts.
 
 ## 2. Prohibited Implementation Shortcuts
 
 - Adding imports/dependencies from Memory to Gateway, Agent Loop, or Auth.
 - Direct external component writes into Memory internals bypassing tools/boundary interfaces.
 - Using ephemeral in-process conversation stores as source of truth.
-- Treating export/history as optional post-MVP features.
+- Treating export, history or restore as optional post-MVP features.
 - Allowing path traversal outside memory root or into reserved internals.
 - Storing secret-bearing values in normal owner content areas.
 - Coupling storage backend specifics to consumer-facing contracts.
@@ -42,6 +45,9 @@ This document defines anti-drift controls for Memory implementations.
 | MEMD-CHK-012 | Secret leakage absent in inspectable surfaces | Security/content scan tests | Critical |
 | MEMD-CHK-013 | Offline inspectability preserved | Runtime-off inspectability tests | High |
 | MEMD-CHK-014 | Backend swap contract stability | Compatibility tests across alternate backends | High |
+| MEMD-CHK-015 | Restore makes an earlier state current | Restore round-trip tests | Critical |
+| MEMD-CHK-016 | Failed or conflicting writes are reported | Concurrent-write tests | Critical |
+| MEMD-CHK-017 | Conversations keep tool calls, tool results and content parts | Conversation round-trip tests | Critical |
 
 ## 4. Contract-Break Indicators
 
@@ -54,12 +60,15 @@ This document defines anti-drift controls for Memory implementations.
 - Path traversal and reserved path access succeed.
 - Secrets appear in normal Memory content or export surfaces.
 - Storage backend replacement forces Gateway/Agent Loop contract changes.
+- Restore is missing or does not record itself in history.
+- A concurrent write overwrites another with no error.
+- Conversation detail lacks tool calls or non-text parts that were sent.
 
 ## 5. Fail Build If
 
 - Any Critical auto-check fails.
 - Any `MEM-MUST-*` conformance vector fails.
-- Export/history/startup readiness guarantees are unmet.
+- Export, history, restore or startup readiness guarantees are unmet.
 - Direct storage bypass paths are detected.
 - Secret leakage is detected in inspectable Memory surfaces.
 - Conflict register contains unresolved High-risk boundary/portability conflicts.
@@ -80,3 +89,6 @@ This document defines anti-drift controls for Memory implementations.
 - [ ] Secrets are absent from normal inspectable Memory surfaces.
 - [ ] Owner data is inspectable offline with standard tools.
 - [ ] Backend swaps preserve consumer contract stability.
+- [ ] Restore makes an earlier state current again.
+- [ ] Failed or conflicting writes are reported, never silently resolved.
+- [ ] Conversations keep tool calls, tool results and every content part.

@@ -5,13 +5,15 @@ hide_table_of_contents: true
 
 # Configuration: The Thin Bootstrap
 
+**Serves stories:** US-5, US-10, US-11 in the [PAA spec](../spec/personal-ai-architecture-spec.md).
+
 Every system has configuration — Docker Compose files, .env files, settings.json, config.yaml. Every AI system has settings for which model to use, what tools are available, how to connect to services. So what's different here?
 
 In most systems, configuration is a grab bag. User preferences, server addresses, API keys, feature flags, tool definitions, behavioral settings — all dumped into the same place. Move to a new environment and half of it breaks. Change a provider and you're editing files across the system. Configuration becomes a quiet source of lock-in that nobody notices until they try to leave.
 
 Here, configuration is split by what it actually is. **Preferences are personal data — they live in Your Memory and travel with you. Runtime config is a thin bootstrap — it tells the system what's here, not what you want. Tools describe themselves — you don't write their definitions, they do.** Three categories, each with a natural home. Nothing bleeds across.
 
-Why this matters: configuration is where lock-in hides. The architecture promises zero lock-in at every level — components via contracts, contracts via adapters, Your Memory via tools. But if swapping a provider means editing five config files across the system, the architecture's promise is hollow. Configuration must be as swappable as everything else. The anti-lock-in principle applies here: **if a normal swap requires more than one config change, you've introduced lock-in.**
+Why this matters: configuration is where lock-in hides. The architecture promises zero lock-in at every level — components via contracts, contracts via adapters, Your Memory via tools. But if swapping a provider means editing code, the architecture's promise is hollow. Configuration must be as swappable as everything else. The anti-lock-in principle applies here: **a normal swap is a configuration change, never a code change.**
 
 This is an **Architecture** document — it defines how configuration works at the generic, unopinionated level. Product-specific defaults (which provider, which tools ship, what starter content) are Implementation opinions.
 
@@ -21,7 +23,7 @@ This is an **Architecture** document — it defines how configuration works at t
 
 ## The Three Categories
 
-Configuration looks like one thing but is actually three things, each with a different owner and a different home.
+Configuration looks like one thing but is actually three things, each with a different owner and a different home. Two other things are often mistaken for configuration and live elsewhere: **permissions** (who may do what) live only in Auth, and **secrets** live outside Your Memory in places git never tracks (see [Secrets](#secrets)).
 
 ### 1. Preferences — what you want
 
@@ -29,43 +31,46 @@ Your choices about how the system behaves. These are personal data. They describ
 
 | Example | Why it's a preference |
 |---------|----------------------|
-| "Always load git and filesystem tools" (D109 always-send set) | Your workflow — meaningful anywhere |
+| "Always load git and filesystem tools" (always-send set) | Your workflow — meaningful anywhere |
 | "I prefer Claude via OpenRouter" | Your model choice — honored wherever possible |
-| "Require approval before writing files" | Your policy — travels with you |
 | "Verbose logging" | Your preference — not environment-specific |
-| "Allow web scraper, deny system access tools" | Your tool policy — about how you work |
+| "Answer briefly, in British English" | Your interaction style — about how you work |
 
 **Where they live:** Your Memory. They're data about you — no different from your documents, skills, or decisions. When you move to a new system, your preferences travel. The new environment tries to honor them. If it can't (tool not available, model not supported), the system tells you.
 
 **What format:** Files in Your Memory. A config file in your library (e.g., `config/preferences.md` or `config/preferences.json`) — human-readable, editable, portable. The format is an implementation decision. The principle is architectural: preferences are personal data.
 
+**What preferences are not:** permissions. "Allow the web scraper" or "deny system access tools" decides what an actor may do, so it lives in Auth and nowhere else ([auth-spec.md](./auth-spec.md)). Auth stores its records in its own way and manages them through Auth tools. Configuration never stores, reads, or applies permissions, and a preference never widens or narrows access.
+
 ### 2. Runtime config — what's here
 
-The thin bootstrap that tells the system what exists in this environment. Four fields. This is the "desk setup" — it describes the desk, not the person sitting at it.
+The thin bootstrap that tells the system what exists in this environment. Exactly four fields. This is the "desk setup" — it describes the desk, not the person sitting at it.
 
 | Field | What it is | Example |
 |-------|-----------|---------|
-| `memory_root` | Where Your Memory lives on this system | `./your-memory` |
-| `provider_adapter` | Which adapter connects to AI models | `openai-compatible` (generic default — works with OpenRouter, Ollama, OpenAI, Anthropic). Implementations may ship a specific adapter (e.g., BrainDrive ships `openrouter`). |
-| `auth_mode` | How authentication works in this deployment | `local` (architecture default). Implementations may define additional modes (e.g., `managed`). |
-| `tool_sources` | Where the system finds installed tools | `["./tools/", "/usr/local/mcp-servers/"]` |
+| `memory_root` | Where Your Memory lives on this system | `/home/owner/your-memory` |
+| `provider_adapter` | Which adapter connects to AI models | `openai-compatible` (generic default — works with OpenRouter, Ollama, OpenAI, Anthropic). Implementations may ship a provider-specific adapter instead. |
+| `auth_mode` | How authentication works in this deployment | `local` (architecture default). Implementations may define other modes. |
+| `tool_sources` | Where the system finds installed tools | `["/opt/your-ai/tools/", "/usr/local/mcp-servers/"]` |
 
-`model_default` is intentionally not here — which model to use is a preference (implementation default or owner choice), not an environment fact. It lives in preferences or adapter config.
+Which model to use is intentionally not here — it is a preference (a product default or the owner's choice), not an environment fact. It lives in preferences in Your Memory.
 
 **Example runtime config:**
 
 ```json
 {
-  "memory_root": "./your-memory",
+  "memory_root": "/home/owner/your-memory",
   "provider_adapter": "openai-compatible",
   "auth_mode": "local",
-  "tool_sources": ["./tools/"]
+  "tool_sources": ["/opt/your-ai/tools/"]
 }
 ```
 
 **Where it lives:** With the deployment, not in Your Memory. A single file at a well-known path (e.g., `config.json` in the system root, or an environment variable pointing to it). When you move to a new system, the new system provides its own runtime config. You never carry it.
 
 **Why it's thin:** Every field that goes in runtime config is a field that can't travel with you. The thinner this file is, the less environment-specific your system becomes. Four fields is enough to bootstrap. Everything else is either a preference (in Your Memory) or discovered from the environment.
+
+**The bootstrap prompt is not runtime config.** The one-line seed that tells the model where to start reading Your Memory (e.g., "Read AGENT.md for your instructions") belongs to the Agent Loop's own configuration — see [memory-spec.md](./memory-spec.md) §The Bootstrap and [agent-loop-spec.md](./agent-loop-spec.md). It is not one of the four fields and not a preference. Everything the model learns after that seed comes from Your Memory.
 
 ### 3. Tool self-description — what tools can do
 
@@ -75,11 +80,11 @@ Tool definitions (name, description, parameters, capabilities) are not written b
 |-----------|-------------|---------|
 | **MCP discovery** | Agent Loop connects to an MCP server and asks "what can you do?" | Filesystem tools, custom MCP servers |
 | **Manifest file** | Tool ships with a JSON manifest describing its capabilities | CLI tool wrappers, native functions |
-| **Built-in** | Definition is part of the Agent Loop or tool code | Approval gate, audit |
+| **Built-in** | Definition is part of the Agent Loop or tool code | Memory tools |
 
 **Where definitions live:** With the tools. An MCP server knows its own tools. A CLI wrapper ships with a `tool.json`. A native function is defined in code. The Agent Loop reads these at startup from the locations specified in `tool_sources`.
 
-**Why this matters:** Nobody manually writes "git tool: takes command and args parameters, returns stdout." The tool says that about itself. This means adding a tool is: install it, point `tool_sources` at it, done. No config editing beyond that. No definition to maintain. No drift between what the config says and what the tool actually does.
+**Why this matters:** The tool says what it does. Adding a tool is: install it, point `tool_sources` at it, done. No definition to maintain, and no drift between config and tool.
 
 ---
 
@@ -89,47 +94,43 @@ Tool definitions (name, description, parameters, capabilities) are not written b
 |-------------|---------------|-------------------|
 | Store tool definitions in config | Duplicates what the tool already knows about itself. Creates drift. | Let tools self-describe. Config just points to where tools are. |
 | Store owner preferences in runtime config | Preferences are personal data. Putting them in runtime config means they don't travel with you. | Put preferences in Your Memory. |
-| Store secrets in tracked config or Memory files | Secrets in tracked files get committed, shared, leaked. | Use environment variables or a `.env` file (gitignored). Config references secrets by name (`$OPENROUTER_API_KEY`), never by value. |
+| Store permissions in config or preferences | A second permission store can drift from Auth or bypass it. | Permissions live only in Auth. |
+| Store secrets in Your Memory or tracked files | Secrets in tracked files get committed, shared, leaked. | Keep them outside Your Memory, somewhere git never tracks. Config references secrets by name (`$PROVIDER_API_KEY`), never by value. |
 | Require config changes for normal operations | If using a new tool or starting a new project requires editing config, the system is too rigid. | Normal operations flow through Your Memory and tools. Config only changes when the environment changes. |
 | Couple config to a specific implementation | Config that references internal service names, proprietary formats, or implementation details creates lock-in. | Config fields must be generic. `provider_adapter: "openrouter"` not `openrouter_v2_internal_bridge: true`. |
 
 ---
 
-## Layered Overrides (D110)
+## Layered Overrides
 
 Configuration is layered: the architecture, then the implementation, then the owner. Each layer can override the one below it. Last layer wins.
 
 | Layer | What it provides | Example |
 |-------|-----------------|---------|
 | **Architecture — Foundation defaults** | Sensible defaults that make the system work out of the box | `auth_mode: "local"`, no tools pre-configured |
-| **Implementation — Product defaults** | Opinionated defaults from the product built on the architecture | BrainDrive sets `provider_adapter: "openrouter"`, ships starter tools, sets `model_default` |
-| **Owner overrides** | The owner's choices, always final | Owner changes model, adds tools, sets policies |
+| **Implementation — Product defaults** | Opinionated defaults from the product built on the architecture | A product picks a provider adapter, ships starter tools, sets a default model |
+| **Owner overrides** | The owner's choices, always final | Owner changes model, adds tools, changes the always-send set |
 
-**Merge order is deterministic:** Architecture → Implementation → Owner preferences. An owner override always wins. An implementation default applies unless the owner overrides it. An architecture default applies unless the product or owner overrides it.
+**Merge order is deterministic:** Architecture → Implementation → Owner. An owner override always wins. An implementation default applies unless the owner overrides it. An architecture default applies unless the product or owner overrides it.
 
-**One exception: environment safety constraints always win.** An implementation may enforce security boundaries (D23) — tool allow lists, network restrictions, auth requirements — that override owner preferences. The full precedence chain:
+**There is no layer above the owner.** On the owner's own hardware, no product rule beats the owner's choice. A product ships defaults, including safety-minded ones, and the owner can change every one of them. Rules the owner cannot change only make sense where someone else runs the hardware (hosting), which this architecture does not cover.
 
-> **Environment safety constraints (Implementation-enforced)** > **Owner preferences** > **Product defaults (Implementation)** > **Foundation defaults (Architecture)**
+**Owner changes survive updates.** Product defaults and owner overrides are kept apart, so a product update replaces its own defaults without touching the owner's choices. Where an update conflicts with an owner change, the owner is told; the change is never overwritten silently. How a product keeps the two apart is an implementation choice.
 
-An owner can override a product default. An owner cannot override a product-enforced safety constraint. On local deployment in the architecture, the owner is the final authority — there are no provider-enforced constraints.
-
-**Preferences use the same layering:** The Architecture has no preferences (the foundation is unopinionated). Implementations ship product defaults ("require approval for writes"). Owner preferences are the owner's choices ("don't require approval, I trust the model"). Preferences merge the same way — owner wins, safety constraints aside.
-
-This means a product built on the foundation (like BrainDrive) ships with opinions that the owner can always override. The foundation itself ships with no opinions — just the mechanism.
+**Preferences use the same layering:** The Architecture has no preferences (the foundation is unopinionated). Implementations ship product defaults ("default to a fast model"). Owner preferences are the owner's choices ("use the larger model"). The owner wins.
 
 ---
 
 ## Secrets
 
-Secrets (API keys, tokens, credentials) never appear in Your Memory or tracked config files.
+Secrets (API keys, tokens, credentials) live anywhere outside Your Memory that git never tracks: environment variables, an untracked config file (such as a gitignored `.env`), or a secret store. Which one is an implementation choice.
 
 | Principle | Detail |
 |-----------|--------|
-| **Reference, never value** | Config refers to secrets by name: `$OPENROUTER_API_KEY`. The value comes from the environment (env var, secret store, or implementation platform). |
-| **Never in Your Memory** | Your Memory is portable, shareable, git-committed. Secrets in Your Memory are secrets leaked. |
-| **Never in runtime config** | Runtime config may be shared across deployments or checked into a repo. |
-| **Implementations may provide secrets** | A managed hosting product (Implementation) may supply API keys on behalf of the owner. |
-| **Local deployment: owner's responsibility** | On local (Architecture), the owner sets env vars or uses a `.env` file (gitignored). Standard practice. |
+| **Reference, never value** | Config refers to secrets by name: `$PROVIDER_API_KEY`. The value comes from wherever the deployment keeps secrets. |
+| **Never in Your Memory** | Your Memory is portable, shareable, versioned. Secrets in Your Memory are secrets leaked. |
+| **Never in tracked config** | Runtime config and adapter config may be shared across deployments or checked into a repo. They hold references only. |
+| **Not portable** | Secrets do not travel with Your Memory. On a new system, the owner sets them up again. |
 
 ---
 
@@ -161,22 +162,33 @@ This is the same pattern as the architecture's contracts: components speak a gen
 
 ## How the System Boots
 
-At startup, the system reads configuration in a strict sequence. Each phase depends only on the previous phase — no circular dependencies.
+Configuration is read at two different times. **Environment facts are read once, at startup.** **The owner's model choice is read on every message.** Everything else in this section follows from that split.
+
+### At startup
+
+The system reads environment configuration in a strict sequence. Each phase depends only on the previous phase — no circular dependencies.
 
 1. **Load runtime config** — find the config file (well-known path or env var), read the four fields. Now the system knows: where's Your Memory, which adapter, what auth mode, where are tools.
 2. **Load adapter config** — load the adapter file specified by `provider_adapter`. Now the system knows how to connect to models.
-3. **Discover tools** — scan `tool_sources` paths. For each tool found: MCP servers announce their tools via protocol, manifest files are read, built-in tools are loaded from code. Now the system knows what tools are available.
-4. **Mount Your Memory** — use `memory_root` to locate Your Memory on the filesystem. At this point Your Memory is accessible but no preferences have been read yet.
-5. **Read preferences** — read the preferences file from Your Memory (direct file read, not through the Agent Loop — no tools required). Apply preference filters: always-send set, tool policies, approval requirements, model choice.
-6. **Ready** — the Agent Loop has tools, a provider, and preferences. The Gateway starts accepting connections (see [gateway-agent-loop-contract.md](./gateway-agent-loop-contract.md) for request flow).
+3. **Discover tools** — scan `tool_sources` paths. For each tool found: MCP servers announce their tools via protocol, manifest files are read, built-in tools are loaded from code. Now the system knows what tools are available, including the Memory tools.
+4. **Mount Your Memory** — use `memory_root` to locate Your Memory. Components reach it only through the Memory tools, like every other read and write. No component reads Memory files directly.
+5. **Ready** — the Gateway starts accepting connections (see [gateway-agent-loop-contract.md](./gateway-agent-loop-contract.md) for request flow).
 
-**Phases 1-3 are environment.** They happen before Your Memory is involved. They describe the desk.
-**Phase 4-5 are personal.** They read from Your Memory. They describe you.
-**Phase 6 is operation.** The system is live.
+Changing runtime config, adapter config, or installed tools changes the environment. A system may need a restart (or a hot-reload, if it supports one) to pick these up. That is still a config-only change.
 
-Note: Phase 5 reads preferences as a direct file read from `memory_root`, not through Agent Loop tool calls. This avoids circularity — the Agent Loop isn't running yet, so it can't call tools to read preferences that configure which tools it should load. Preferences are just a file at a known path within Your Memory.
+### On every message
+
+1. **Gateway reads the owner's current model choice** from preferences in Your Memory, through the Memory tools.
+2. **Gateway passes it to the Agent Loop** with the request, after Auth has checked the request.
+3. **Agent Loop calls the model** through the Model API using that choice and the loaded adapter.
+
+Because the model choice travels with each request, a change takes effect on the next message — no restart, no code change. If the chosen model isn't available through the loaded adapter, the owner is told rather than silently switched.
+
+Other preferences are also read through the Memory tools; how often to re-read them is the implementation's choice.
 
 If any preference references a tool that doesn't exist in this environment (e.g., "always load web scraper" but no web scraper is installed), the system notes the mismatch and continues. The model will tell the owner "web scraper is configured as preferred but not available in this environment" when relevant. This is not an error — it's information.
+
+Permissions are not part of either sequence. The Gateway asks Auth on every request, and the Agent Loop asks Auth before each tool call ([auth-spec.md](./auth-spec.md)). Configuration never applies access rules.
 
 ---
 
@@ -188,19 +200,19 @@ Three swap types constitute "normal":
 
 | Swap | What changes | Config changes required |
 |------|-------------|----------------------|
-| **Provider swap** | OpenRouter → Anthropic direct (or Ollama) | 1. `provider_adapter` in runtime config. 2. New adapter config file. 3. API key env var. |
-| **Model swap** (within adapter) | Claude → Gemini (both on OpenRouter) | 1. Model preference in Your Memory (or adapter's model list). |
-| **Tool swap** | Add/remove a tool | 1. Install/uninstall the tool in a `tool_sources` path. 2. Update preferences if it was in always-send set. |
+| **Provider swap** | OpenRouter → Anthropic direct (or Ollama) | 1. `provider_adapter` in runtime config. 2. New adapter config file. 3. API key secret. A restart is allowed. |
+| **Model swap** (within adapter) | Claude → Gemini (both on OpenRouter) | 1. Model preference in Your Memory. Next message uses the new model; no restart. |
+| **Tool swap** | Add/remove a tool | 1. Install/uninstall the tool in a `tool_sources` path. 2. Update preferences if it was in the always-send set. |
 
 **The test, concretely (CI-ready):**
 
 1. Start the system with provider A (e.g., OpenRouter)
 2. Run a standard conversation + tool-call test suite — verify pass
-3. Change `provider_adapter` to provider B, provide adapter config, set env var
+3. Change `provider_adapter` to provider B, provide adapter config, set the secret
 4. Run the same test suite — verify pass
 5. **If any code change was required between steps 2 and 4, the test fails.** Lock-in has been introduced.
 
-This is a CI test, not a guideline. It makes the principle enforceable. Run it on every release.
+This is a CI test, not a guideline. Run it on every release.
 
 ---
 
@@ -212,9 +224,9 @@ This is a CI test, not a guideline. It makes the principle enforceable. Run it o
 - "Claude is available at this API endpoint" → about this desk → runtime/adapter config
 - "Always load git tools" → about you → Your Memory
 - "Git tools are installed at /usr/local/bin/git" → about this desk → tool self-description
-- "Require approval for writes" → about you → Your Memory
 - "Auth uses local mode" → about this desk → runtime config
-- "sk-abc123..." → a secret → env var, never written anywhere
+- "This actor may write files" → a permission → Auth, nowhere else
+- "sk-abc123..." → a secret → outside Your Memory, never tracked by git
 
 **Your Memory stays clean of environment-specific references.** When you move, your preferences come with you. The new environment provides its own runtime config, its own adapter config, its own installed tools. The system matches your preferences against what's available and tells you about any gaps.
 
@@ -224,39 +236,21 @@ This is a CI test, not a guideline. It makes the principle enforceable. Run it o
 
 | # | Decision | Rationale |
 |---|----------|-----------|
-| D143 | Configuration is a cross-cutting concern — not owned by any single component, defined in its own spec | Every component has configuration. Burying it in the Agent Loop spec understates its importance and its lock-in risk. Same pattern as tools (not a component, but important enough for its own spec) and security (cross-cutting, peer to auth). |
-| D144 | Runtime config is a thin bootstrap — four fields, one file, describes the environment not the owner | Every field in runtime config is a field that can't travel with you. Thinner = more portable. Four fields is enough to bootstrap: where's Your Memory, which adapter, what auth mode, where are tools. Model choice is a preference, not an environment fact. Everything else is either a preference (in Your Memory) or discovered from the environment. |
-| D145 | Preferences live in Your Memory — they're personal data, not environment configuration | "Always load git tools" is about how you work, not about this desk. Preferences travel with you. The new environment tries to honor them. If it can't, it tells you. This is what makes local ↔ managed hosting migration real. |
-| D146 | Tools self-describe — config points to tool sources, not tool definitions | Tool definitions come from the tools themselves (MCP discovery, manifest files, code). Config only says where to find tools. This prevents drift between what config says and what tools actually do, and means adding a tool is install + point, not install + write definition + update config. |
-| D147 | Anti-lock-in test: three normal swaps (provider, model, tool) must succeed with config-only changes | Provider swap = change adapter + env var. Model swap = change preference. Tool swap = install/uninstall + update preferences. If any requires code changes, lock-in has been introduced. CI-testable on every release. |
-| D141-refined | D141 scope narrowed: only plumbing is excluded from Your Memory, not preferences | The original D141 moved all tool config out of Your Memory. The interview revealed that preferences (always-send set, tool policies, model choices) are personal data — they should be in Your Memory. Only plumbing (server addresses, ports, API keys) belongs in environment config. Tool definitions belong to the tools themselves, not to either place. |
-
----
-
-## Open Questions
-
-### ~~OQ-1: Preference file format~~ — DEFERRED to Implementation
-
-**Resolution:** Implementation decision. The foundation requires "human-readable file in Your Memory" — the specific format (JSON, YAML, Markdown) is a product opinion.
-
-### ~~OQ-2: Tool manifest convention~~ — DEFERRED to implementation
-
-**Resolution:** Owned by [tools-spec.md](./tools-spec.md). Tools self-describe via MCP protocol, manifest files, or built-in definitions (D146). The manifest convention is a tools implementation detail, not a configuration concern.
-
-### ~~OQ-3: Runtime config location convention~~ — DEFERRED to implementation
-
-**Resolution:** Implementation decision. The foundation requires a single config file at a well-known path or pointed to by an environment variable. The specific convention is chosen during the build phase.
+| D143 | Configuration is a cross-cutting concern — not owned by any single component, defined in its own spec | Every component has configuration, and it is where lock-in hides. Three categories: preferences (Your Memory), runtime config (thin bootstrap), tool self-description. |
+| D147 | Anti-lock-in test: three normal swaps (provider, model, tool) must succeed with config-only changes | Provider swap = change adapter + secret. Model swap = change preference. Tool swap = install/uninstall + update preferences. If any requires code changes, lock-in has been introduced. CI-testable on every release. |
 
 ---
 
 ## Success Criteria
 
-- [ ] Swapping a model provider requires only changing `provider_adapter` and providing a new adapter config file — zero code changes
+- [ ] Swapping a model provider requires only changing `provider_adapter`, providing a new adapter config file, and setting the secret — zero code changes
+- [ ] Changing the model preference takes effect on the next message — no restart, no code change
 - [ ] Swapping the Agent Loop requires only changing the Agent Loop binary/container — runtime config, preferences, and Your Memory are unaffected
 - [ ] Adding a tool requires only installing it in a `tool_sources` path — the tool self-describes, no config editing beyond that
 - [ ] Moving Your Memory to a new system works: preferences travel, runtime config is provided by the new environment, tool mismatches are reported not errors
-- [ ] Secrets never appear in Your Memory or tracked config files
-- [ ] Runtime config has four or fewer fields
+- [ ] The owner can override every product default on their own hardware, and an update never silently overwrites an owner change
+- [ ] Runtime config has exactly four fields
+- [ ] No permission is stored in or applied from configuration or preferences
 - [ ] An AI agent can read and understand every config file without documentation
 
 ---
@@ -265,11 +259,23 @@ This is a CI test, not a guideline. It makes the principle enforceable. Run it o
 
 Per-component requirements from [security-spec.md](./security-spec.md). Security-spec owns the "why"; this section owns the "what" for Configuration.
 
-- [ ] Secrets (API keys, tokens, credentials) must never be stored in Your Memory or tracked config files — environment variables or gitignored `.env` files only
-- [ ] Runtime config must not contain secrets by value — only references (`$OPENROUTER_API_KEY`)
+- [ ] Secrets (API keys, tokens, credentials) must never be stored in Your Memory or in any file git tracks — environment variables, untracked config files, or a secret store only
+- [ ] Runtime and adapter config must not contain secrets by value — only references (`$PROVIDER_API_KEY`)
 - [ ] Preferences in Your Memory must not contain environment-specific references (server addresses, ports, paths) — only personal choices
 - [ ] Adapter config files must not leak across deployments — provider-specific settings stay with the deployment, not with Your Memory
-- [ ] The boot sequence must not require network access — Phases 1-5 complete without any outbound calls
+- [ ] Startup must not require network access — the startup phases complete without any outbound calls
+
+---
+
+## Contract alignment
+
+The text above is ahead of these contract files:
+
+- `specs/openapi/gateway-engine.yaml` (and [gateway-agent-loop-contract.md](./gateway-agent-loop-contract.md) "Provider configuration"): the Gateway–Agent Loop request needs to carry the owner's current model choice on every request, instead of the model being fixed at startup.
+- `specs/schemas/configuration.json`: examples use product-specific paths; they should use neutral paths like the ones above.
+- `specs/schemas/tool-definition.json`: the always-send `category` is declared by the tool, while this spec makes the always-send set an owner preference.
+- `specs/schemas/`: there is no adapter config schema yet.
+- `specs/openapi/gateway-api.yaml`, `gateway-engine.yaml`, `specs/schemas/message.json`: describe the system message as coming "from configuration"; the bootstrap prompt belongs to the Agent Loop's configuration, not runtime config.
 
 ---
 

@@ -5,13 +5,15 @@ hide_table_of_contents: true
 
 # Customization: How Implementations Build on the Architecture
 
+**Serves stories:** US-11, US-17 in the [PAA spec](../spec/personal-ai-architecture-spec.md).
+
 Every AI system has an extension model — plugins, hooks, middleware, SDKs, custom code. So what's different here?
 
 Here, customization is primarily **content, not changes to the architecture.** An implementation combines Your Memory content, tools, configuration, and a client while keeping the four architecture components generic. The behavior of the system emerges from what is in Your Memory and which tools are available, rather than from product-specific logic in the Agent Loop, Gateway, or Auth.
 
 An implementation follows the Architecture's specifications and contracts. Runnable code and implementation tooling live in separate repositories, including the TypeScript architecture template. BrainDrive is one implementation of the Architecture.
 
-The audience is builders — product developers, AI agents, or product team members who want to know what ships by default, what's customizable, and how. Without this doc, every builder has to reverse-engineer the customization model from six component specs.
+The audience is builders — product developers, AI agents, or product team members who want to know what ships by default, what's customizable, and how. Without this doc, every builder has to reverse-engineer the customization model from the component specs.
 
 > **Architecture:** This spec defines customization mechanisms that apply to any system built on the Architecture — the same mechanisms implementers and owners both use.
 
@@ -23,15 +25,16 @@ The audience is builders — product developers, AI agents, or product team memb
 
 ### Defaults, Not Fixed Contracts
 
-The Foundation ships sensible defaults for everything a working system needs — runtime config shape, tool discovery mechanism, basic configuration behavior. **These are defaults, not fixed contracts.** Override any of them.
+The Foundation ships sensible defaults for everything a working system needs — runtime config shape, tool discovery mechanism, basic configuration behavior. **These are defaults, not fixed contracts.** Override any of them, as long as the result still meets the published contracts.
 
-The only fixed contracts are the two APIs:
+The fixed contracts are the two APIs, plus the internal Gateway ↔ Agent Loop contract and the shared shapes in `specs/` (such as the four-field runtime config):
 
 | Contract | Fixed? | Why |
 |----------|--------|-----|
 | **Gateway API** | Yes | This is how clients talk to the system. Without a stable contract, clients break when internals change. |
 | **Model API** | Yes | This is how the Agent Loop talks to models. Without a stable contract, model swapping breaks. |
-| **Everything else** | Defaults | Bootstrap mechanism, tool discovery, configuration — all overridable. |
+| **Internal contract and shared schemas** | Yes | A replacement Agent Loop or Gateway must keep working with the other side; `specs/` is authoritative for every shape. |
+| **Everything else** | Defaults | Bootstrap content, tool discovery, configuration values — all overridable. |
 
 This is the same "drop-down menu" principle from the foundation spec (Principle 2) applied to the Foundation's own internals. Bootstrap via minimal Agent Loop config? That's the default. Tool discovery via configured sources + self-description? That's the default. Change either if your product needs something different.
 
@@ -137,229 +140,24 @@ There are four ways to customize the Architecture. All implementation and owner 
 
 ---
 
-## User Stories
+## User stories
 
-### CS-1: Build an Implementation from Scratch — **Open**
+The user stories for building a product on the Architecture are [US-17 in the PAA spec](../spec/personal-ai-architecture-spec.md#us-17-build-a-product-on-the-architecture--confirmed): a builder's own content, tools and configuration make the system behave as their product with no architecture contract changes (AC-17.1); two products with different content run on the same architecture (AC-17.2); custom tools work with the Agent Loop unchanged (AC-17.3); a branded client connects through the Gateway API like any other (AC-17.4); and builders start from the published contracts and a template, not from a package (AC-17.5). Owner changes surviving product updates are [US-11](../spec/personal-ai-architecture-spec.md#us-11-owner-changes-survive-updates-and-updates-can-be-undone--confirmed). This spec explains the mechanisms those stories rely on; it does not define its own stories.
 
-As a product builder, I want to build a new product on the Architecture so that I get a working AI system without building the infrastructure myself.
+### Example: a coaching product
 
-<details>
-<summary>Details — source, steps, acceptance criteria</summary>
+This example illustrates the four mechanisms; it is not a requirement.
 
-**Source:** Customization interview (Dave W + Claude, 2026-02-26)
+A coach wants to ship personal AI systems to their clients without building the infrastructure.
 
-**Steps:**
-1. Builder adds the Architecture as a dependency (package, not fork)
-2. Builder creates Your Memory content for their use case (bootstrap target file, folder structure, skills, starter content)
-3. Builder configures tools for their use case (which tools ship, always-send set, tool protocols)
-4. Builder sets runtime/adapter configuration (provider adapter, auth mode, deployment config, `tool_sources`)
-5. Builder optionally creates a branded client that speaks the Gateway API
-6. Builder packages the product (repo for developers, Docker image for owners)
-7. System boots with minimal Agent Loop bootstrap config, reads product entrypoint from Your Memory, discovers tools from configured sources, and is ready for use
+1. The coach starts from the published contracts and an architecture template (or builds from the specs in any language).
+2. The coach creates coaching-specific Your Memory content: client intake templates, a session notes structure, goal tracking, coaching frameworks.
+3. The coach writes coaching skills: intake interview, session summary, progress review.
+4. The coach optionally adds coaching tools, such as a scheduling integration.
+5. The coach builds a branded client that speaks the Gateway API.
+6. The coach packages the product however they choose.
 
-**Acceptance Criteria (Given-When-Then):**
-
-```gherkin
-Given the Architecture installed as a dependency
-When a builder provides Your Memory content, tool preferences, and runtime/adapter config
-Then the system boots and functions as the builder's product
-And no architecture code has been modified
-```
-
-```gherkin
-Given an implementation built on the Architecture
-When the Architecture repo ships an update (bug fix, new capability)
-Then the implementation can adopt the update without conflict
-Because it depends on the Architecture as a package, not a fork
-```
-
-**Status:** Open
-
-</details>
-
-### CS-2: Customize Your Memory Content — **Open**
-
-As a product builder, I want to ship custom Your Memory content (bootstrap file, folder structure, skills) so that my product has a specific methodology and personality.
-
-<details>
-<summary>Details — source, steps, acceptance criteria</summary>
-
-**Source:** Customization interview, Your Memory spec (D40, D43, D50)
-
-**Steps:**
-1. Builder creates a bootstrap target file (e.g., AGENT.md) with product-specific instructions
-2. Builder creates a folder structure for the use case
-3. Builder creates skills as markdown files
-4. Builder creates starter content (templates, examples)
-5. System boots with minimal Agent Loop bootstrap config that points to the target file, then model discovers the rest from Your Memory
-
-**Acceptance Criteria (Given-When-Then):**
-
-```gherkin
-Given an implementation with custom Your Memory content
-When the Agent Loop starts and applies bootstrap configuration
-Then the model follows the product's methodology
-And the model discovers skills, folder structure, and starter content from Your Memory
-And Your Memory itself has zero knowledge of the product's conventions
-```
-
-```gherkin
-Given two different implementations with different Your Memory content
-When both run on the same Architecture
-Then each behaves according to its own Your Memory content
-And the architecture code is identical in both cases
-```
-
-**Status:** Open
-
-</details>
-
-### CS-3: Ship Custom Tools — **Open**
-
-As a product builder, I want to ship tools specific to my use case so that the system has the capabilities owners need.
-
-<details>
-<summary>Details — source, steps, acceptance criteria</summary>
-
-**Source:** Customization interview, Tools spec (D51, D104, D109)
-
-**Steps:**
-1. Builder creates or selects tools for the use case (MCP servers, CLI tools, native functions)
-2. Builder configures which tools are in the always-send set (sent with every prompt)
-3. Builder configures which tools are in the discoverable set (available on demand)
-4. Builder configures tool plumbing in runtime config (`tool_sources`) and sets tool preferences in Your Memory
-5. Agent Loop discovers tools from configured sources at startup, connects to available tools, and includes self-described definitions in prompts
-
-**Acceptance Criteria (Given-When-Then):**
-
-```gherkin
-Given an implementation with custom tools configured
-When the Agent Loop starts
-Then it discovers and connects to the configured tools
-And tool definitions appear in prompts sent to the model
-And the Agent Loop has zero knowledge of what the tools do
-```
-
-```gherkin
-Given an implementation that ships different tools than BrainDrive
-When the system runs
-Then the model uses the product's tools, not BrainDrive's
-And the Agent Loop, Your Memory, Auth, and Gateway code is identical
-```
-
-**Status:** Open
-
-</details>
-
-### CS-4: Create a Branded Client — **Open**
-
-As a product builder, I want to create my own branded client so that my product has its own identity and experience.
-
-<details>
-<summary>Details — source, steps, acceptance criteria</summary>
-
-**Source:** Customization interview, Gateway spec (D57, D59)
-
-**Steps:**
-1. Builder creates a client application (web, mobile, CLI, etc.)
-2. Client connects to the system through the Gateway API
-3. Client uses its own branding, design, and UX patterns
-4. System serves the client identically to any other client
-
-**Acceptance Criteria (Given-When-Then):**
-
-```gherkin
-Given an implementation with a custom branded client
-When the client sends a message through the Gateway API
-Then the system processes it identically to any other client
-And the Gateway has zero knowledge of the client's branding or identity
-```
-
-```gherkin
-Given multiple clients connecting to the same Foundation instance
-When each client sends messages
-Then each receives the same quality of service
-And conversations are portable across clients (start on one, continue on another)
-```
-
-**Status:** Open
-
-</details>
-
-### CS-5: Industry-Specific Implementation (Coaching Example) — **Open**
-
-As an industry professional (e.g., a coach), I want to build a domain-specific product on the Architecture so that I can ship personal AI systems to my clients without building the infrastructure myself.
-
-<details>
-<summary>Details — source, steps, acceptance criteria</summary>
-
-**Source:** Customization interview — coaching platform example (Dave W + Claude, 2026-02-26)
-
-**Steps:**
-1. Coach starts with the Architecture as a dependency
-2. Coach creates coaching-specific Your Memory content (client intake templates, session notes structure, goal tracking, coaching frameworks)
-3. Coach creates coaching skills (intake interview, session summary, progress review)
-4. Coach optionally adds coaching tools (scheduling API integration, CRM connector)
-5. Coach creates a branded client ("CoachDrive" or similar)
-6. Coach ships as repo + Docker image
-
-**Acceptance Criteria (Given-When-Then):**
-
-```gherkin
-Given a coaching product built on the Architecture
-When a coaching client receives their own system
-Then it behaves as a personal coaching AI with the coach's methodology
-And the client owns their data and Memory
-And no architecture code has been modified
-And the coaching product can take architecture updates without conflict
-```
-
-```gherkin
-Given a coaching product and BrainDrive both built on the same Foundation
-When tools are developed for one product
-Then compatible tools work on the other product without modification
-Because both share the same APIs and contracts
-```
-
-**Status:** Open
-
-</details>
-
-### CS-6: Owner Personalization — **Open**
-
-As an owner, I want to customize my system beyond the implementation defaults so that it fits my specific needs.
-
-<details>
-<summary>Details — source, steps, acceptance criteria</summary>
-
-**Source:** Customization interview, Ecosystem concept (D110, D113)
-
-**Steps:**
-1. Owner starts with a working implementation
-2. Owner adds personal Your Memory content (life pages, projects, personal context)
-3. Owner adds custom skills for their workflows
-4. Owner adjusts tool configuration (adds tools, changes always-send set)
-5. Owner adjusts config (model preferences, provider settings)
-
-**Acceptance Criteria (Given-When-Then):**
-
-```gherkin
-Given an implementation with owner personalization
-When the system runs
-Then it reflects both the product opinions (Implementation) and owner preferences
-And the customization mechanisms are identical to what the product builder used
-```
-
-```gherkin
-Given an owner who personalizes their BrainDrive
-When BrainDrive ships a product update (Implementation)
-Then the owner's personalizations are preserved
-And the update applies cleanly because owner content doesn't conflict with implementation defaults
-```
-
-**Status:** Open
-
-</details>
+Each coaching client receives their own system. It behaves as a personal coaching AI with the coach's methodology, the client owns their data and Your Memory, and no architecture contract has changed. Tools built for the coaching product work on any other product built on the same contracts, because both share the same APIs.
 
 ---
 
@@ -367,11 +165,11 @@ And the update applies cleanly because owner content doesn't conflict with imple
 
 ### Properties That Must Always Hold
 
-- [ ] Architecture code is never modified by an implementation — all customization is through Your Memory, tools, config, and client
+- [ ] Architecture contracts are never changed by an implementation — all customization is through Your Memory, tools, config, and client
 - [ ] Any Agent Loop that implements the architecture contract can boot any implementation — the product's behavior comes from Your Memory, not from Agent Loop customization
-- [ ] Removing all implementation customization leaves a working architecture system — the Architecture stands alone
+- [ ] Removing all implementation customization leaves a conforming system — the generic components stand alone
 - [ ] Implementation and owner customization use identical mechanisms — there is no technical difference between product builder customization and owner customization
-- [ ] Architecture updates can be adopted by implementations without merge conflicts — because an implementation is a dependency layer, not a fork
+- [ ] Owner changes survive product updates — where an update conflicts with an owner change, the owner is told instead of having it overwritten silently
 - [ ] Multiple implementations can run on the same Architecture without interfering with each other
 - [ ] All customization must work through the four mechanisms — no backdoor code-level modification of architecture components
 - [ ] Secrets never appear in Your Memory or tracked config files — API key references only (see [security-spec.md](./security-spec.md))
@@ -392,7 +190,6 @@ And the update applies cleanly because owner content doesn't conflict with imple
 | Implementation ships malformed bootstrap file | Agent Loop reports error at startup — model can't load instructions. Clear error message pointing to the bootstrap file. |
 | Implementation ships tools that aren't available | Agent Loop reports tool connection failure. Model informed of unavailable tools. System continues with available tools. |
 | Architecture update changes a default that an implementation was relying on | Implementation's explicit override takes precedence. If the implementation relied on the old default implicitly, the change surfaces as different behavior — caught by the implementation's test suite. |
-| Owner tries to customize something the managed hosting deployment restricts | System rejects the customization with a clear message explaining the managed hosting constraint. |
 
 ---
 
@@ -408,7 +205,7 @@ And the update applies cleanly because owner content doesn't conflict with imple
 
 ## Success Criteria
 
-- [ ] Builders can understand the customization model — Foundation is a runtime, defaults not contracts, four mechanisms
+- [ ] Builders can understand the customization model — fixed contracts, overridable defaults, four mechanisms
 - [ ] Builders know what to provide to build an implementation — Your Memory content, tools, config, client
 - [ ] BrainDrive serves as an example implementation
 - [ ] A conforming implementation boots with custom Your Memory content, tools, and config without changing the Architecture's contracts
@@ -435,4 +232,4 @@ And the update applies cleanly because owner content doesn't conflict with imple
 
 ---
 
-*The Foundation is a runtime. You don't extend it — you write programs that run on it. Your Memory is your content. Tools are your capabilities. Config is your settings. The client is your interface. Everything else stays generic, stays swappable, stays out of your way.*
+*The Architecture is a set of contracts. You don't fork it — you build a product that follows them. Your Memory is your content. Tools are your capabilities. Config is your settings. The client is your interface. Everything else stays generic, stays swappable, stays out of your way.*

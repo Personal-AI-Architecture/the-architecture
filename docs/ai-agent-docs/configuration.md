@@ -21,25 +21,36 @@ Define the boundary between runtime config, adapter config, preferences, and req
 
 ## Config Categories
 
-- Preferences: what the owner wants; live in Memory.
-- Runtime config: what exists in this environment; thin bootstrap.
+- Preferences: what the owner wants, including the model choice; live in Memory.
+- Runtime config: what exists in this environment; thin bootstrap (four fields).
 - Tool self-description: what tools can do; lives with the tools.
 - Adapter config: provider-specific settings; lives with adapters.
+- Agent Loop config: the bootstrap prompt; lives with the Agent Loop, not in runtime config or the request.
+
+Not configuration:
+
+- Permissions (including any approval rules) live only in Auth.
+- Secrets live outside Memory, somewhere git never tracks: environment variables, an untracked config file, or a secret store. Config refers to them by name.
 
 ## Required Behaviors
 
 - Keep runtime config, adapter config, and preferences distinct.
-- Keep request payloads free of hidden reconfiguration data.
+- Keep request payloads free of hidden reconfiguration data. The one per-request choice is the model: the Gateway reads the owner's current model choice on every message and passes it with the request.
+- A model change applies to the next message with no restart. Provider, adapter and tool changes may need a restart or hot-reload; they are still config-only.
 - Preserve provider/model/tool swaps through config and preference changes where defined.
 - Follow the boot sequence in a deterministic order.
 - Keep secrets out of Memory and tracked config.
+- Apply merge order Architecture -> Implementation -> Owner; the owner's choice always wins on their own hardware.
 
 ## Forbidden Behaviors
 
 - Collapsing all config types into one loader.
 - Treating request-time logic as the main configuration mechanism.
 - Storing preference-owned choices in the wrong layer.
-- Leaking provider/tool configuration through Gateway -> Agent Loop requests.
+- Fixing the model at startup so a change needs a restart.
+- Storing permissions or approval rules in configuration or preferences.
+- A product rule that overrides the owner's choice on the owner's own hardware.
+- Leaking provider/tool configuration or the bootstrap prompt through Gateway -> Agent Loop requests.
 
 ## Boot Sequence
 
@@ -49,6 +60,8 @@ Define the boundary between runtime config, adapter config, preferences, and req
 4. Mount Memory.
 5. Read preferences.
 6. Become ready.
+
+On every message, the Gateway reads the owner's current model choice through the Memory tools and passes it to the Agent Loop.
 
 ## Valid Example
 
@@ -81,10 +94,11 @@ Preference example:
 
 ```json
 {
-  "default_model": "llama3.1",
-  "approval_mode": "ask-on-write"
+  "default_model": "llama3.1"
 }
 ```
+
+Approval rules are not preferences. If a product adds approval prompts, the rules live in Auth.
 
 ## Invalid Drift Example
 
@@ -108,20 +122,24 @@ Why this is drift:
 
 - runtime config, adapter config, and preferences are collapsed into one loader
 - secret value is stored directly instead of referenced
-- provider/model choice is not clearly separated from owner preference
+- the model is fixed in runtime config instead of being an owner preference read on every message
+- an approval rule sits in configuration instead of in Auth
 - this shape encourages request-time and product-specific config leakage later
 
 ## Audit Questions
 
 - Where does each kind of configuration live?
-- Is anything being re-derived per request that should be ready at boot or refresh time?
+- Is anything being re-derived per request that should be ready at boot or refresh time? (The model choice is the exception: it is read on every message.)
+- Does a model change apply to the next message without a restart?
 - Are preferences stored in Memory rather than code/runtime config?
+- Are permissions kept out of configuration?
 - Is request payload data being abused as configuration?
 - Are secrets referenced rather than stored by value?
 
 ## Common Drift Patterns
 
-- Provider/model selection logic recomputed in the request path.
+- Provider selection logic recomputed in the request path.
+- Model fixed at startup, so changing it needs a restart.
 - Tool discovery rebuilt per request without clear refresh semantics.
 - Missing adapter-config layer.
 - Gateway endpoints mutating architecture-owned configuration responsibilities.

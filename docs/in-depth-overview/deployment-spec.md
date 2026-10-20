@@ -5,6 +5,8 @@ hide_table_of_contents: true
 
 # Deployment Spec: Where the System Lives
 
+**Serves stories:** US-1, US-9, US-11 in the [PAA spec](../spec/personal-ai-architecture-spec.md).
+
 Every AI system runs somewhere — a cloud server, a laptop, a container, a managed platform. Most AI systems choose for you. Your data lives on their servers, your AI runs on their infrastructure, your options are limited to what they offer. Want to run it yourself? Too bad — the architecture assumes their cloud, their database, their network. Moving means rebuilding.
 
 Here, the system **can always run on hardware you physically control.** Your laptop, your desktop, your home server. The architecture assumes nothing about what's beyond your machine — no cloud services required, no third-party accounts needed, no internet connection assumed. Everything the system needs to function can exist on a single computer you own. You might choose managed hosting, cloud models, or remote access — but those are choices, not requirements. The local path always exists, and that's what makes every other choice a real choice. You can leave anytime because the system runs without them.
@@ -86,11 +88,11 @@ These are dependencies that could prevent the system from functioning if they di
 
 #### Container Runtime
 
-**What it is:** Docker (OCI-compatible containers) is the default deployment vehicle (D14).
+**What it is:** Containers (OCI-compatible, such as Docker) are one supported way to package and run the system. They are not the architecture's default, and the architecture does not require them. An implementation may ship container images, native installers, or plain programs; choosing one is a packaging decision.
 
-**The dependency:** The system ships as container images. Running it requires a container runtime.
+**The dependency:** Only when an implementation chooses container packaging. Then running it requires a container runtime.
 
-**Escape path:** The system is software that runs in containers — it is not a container-native application. The components are standard programs (TypeScript/Node.js processes, HTTP servers, file I/O) that run natively without containers. Docker is the packaging, not the architecture.
+**Escape path:** The system is software that can run in containers — it is not a container-native application. The components are standard programs (HTTP servers, file I/O) that run natively without containers. Containers are packaging, not architecture.
 
 **Lock-in risk:** Low — packaging. OCI is an open standard with multiple runtimes (Docker, Podman, containerd). No container-specific features (orchestration, service mesh) are used.
 
@@ -169,9 +171,9 @@ The system requires persistent storage for Your Memory, conversations, auth data
 | **Read** | Retrieve stored data by path or identifier |
 | **Write** | Create or update stored data |
 | **Search** | Find data by content or metadata |
-| **Version** | Track changes over time (at minimum: know when something last changed) |
+| **Version** | Keep the history of what changed (not only that something changed), and restore an earlier state |
 
-The current implementation uses the local filesystem for Your Memory and SQLite for conversations. These are implementation choices that satisfy the abstract contract. The contract does not require a specific storage technology — it requires the four capabilities above.
+An implementation might use the local filesystem for Your Memory, a database such as SQLite for conversations, and Git for version history. These are implementation choices that satisfy the abstract contract. The contract does not require a specific storage technology — it requires the four capabilities above.
 
 One additional constraint: **Your Memory must be inspectable without the system running.** The owner must be able to read their own data using standard tools (text editor, file browser, database viewer) — not just through the system's APIs. This prevents storage implementations from making data opaque or proprietary. A future implementation could use a different storage backend (encrypted filesystem, structured database) as long as the owner retains the ability to inspect and extract their data independently of the system.
 
@@ -196,9 +198,9 @@ These verify that an implementation honors the deployment contract.
 
 | # | Decision | Rationale |
 |---|----------|-----------|
-| D14 | Docker-first deployment for V1 | Containers provide isolation, reproducibility, and cross-platform support. Docker is the default packaging, not an architectural requirement. |
+| D14 | Docker packaging (an implementation packaging choice, not an architecture rule) | Recorded because one implementation packages the system with Docker for isolation, reproducibility, and cross-platform support. The architecture names no packaging default; containers are one supported option (D173). |
 | D22 | Auth on both local and managed hosting | Auth is a memory concern (who can access your system), not a hosting concern. Even local deployments need auth for remote access scenarios and future multi-actor support. Under D148, managed hosting specifics are defined by an implementation. |
-| D23 | Managed hosting is stricter, not just easier | Same code, different configuration. Managed hosting restricts tool access and enforces policies through configuration, not code forks. |
+| D23 | Managed hosting is stricter, not just easier (superseded by D148 and D171: hosting is outside the architecture) | Same code, different configuration. Managed hosting restricts tool access and enforces policies through configuration, not code forks. |
 | D29 | Zero lock-in by design | Risks are implementation discipline, not architectural. The deployment contract enforces this at the infrastructure level. |
 | D111 | Managed hosting is a deployment option, not a level | The same stack runs locally or hosted. Managed hosting is a product decision — a convenience offered on top of the architecture. |
 | D148 | The architecture defines local deployment only — managed hosting is for implementations | The foundation defines how the system runs on hardware the owner controls. Managed hosting, VPS, and cloud hosting are product offerings. |

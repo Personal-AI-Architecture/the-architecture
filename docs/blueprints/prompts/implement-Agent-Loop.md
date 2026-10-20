@@ -53,23 +53,27 @@ If conflicts exist, do not guess silently. Create `conflict_register.md` and doc
 ## Required Agent Loop Capabilities
 
 Implement these behaviors:
-- Accept internal bounded Gateway -> Agent Loop requests (`messages + metadata`).
+- Accept internal bounded Gateway -> Agent Loop requests (`messages` + the model + `metadata`).
 - Run model-tool loop until model signals completion.
-- Invoke models through adapter boundary only.
-- Execute model-requested tools via tool executor/runtime.
+- Invoke the model named in each request through the adapter boundary only, so a changed model choice applies to the next request with no restart.
+- Put the bootstrap prompt from Agent Loop configuration first when calling the model; the request carries no system message.
+- Ask Auth before each tool call; do not run a refused call, and return a "not permitted" `tool-result` error.
+- Execute permitted model-requested tools via tool executor/runtime.
 - Re-inject tool outputs into model context for continuation turns.
 - Emit stream events with contract-visible semantics.
 - Emit classified mid-stream errors: `provider_error`, `tool_error`, `context_overflow`.
 - Preserve assistant text across tool-continuation turns.
-- Respect Auth-derived tool permission filtering.
-- Support approval interaction semantics as contract-visible events where required.
+- Mark tools Auth does not permit when advertising tool definitions to the model.
+- Where the owner's Auth rules require approval, support approval interaction semantics as contract-visible events. Require no approval by default.
 
 ## Canonical Internal Contract Rules
 
 ### Input request (`POST /engine/chat` contract shape)
 - Required:
-  - `messages`
+  - `messages` (conversation history including tool calls and tool results, plus the current message; content as a list of parts)
+  - the model to use (field name pending the next contract revision)
   - `metadata.correlation_id`
+  - a request timestamp (field name pending the next contract revision)
 - Optional:
   - `metadata.conversation_id`
   - `metadata.trigger`
@@ -77,6 +81,7 @@ Implement these behaviors:
 - Forbidden in request:
   - provider config
   - tool definitions
+  - a system message built by the Gateway (the bootstrap prompt is Agent Loop configuration)
   - secret/config side channels
 
 ### Output stream events
@@ -86,7 +91,7 @@ Implement these behaviors:
   - `tool-result`
   - `done`
   - `error`
-- Contract-visible approval extensions (MVP implementation surface):
+- Contract-visible approval extensions (only in products that add approval prompts):
   - `approval-request`
   - `approval-result`
 
@@ -105,7 +110,7 @@ Use these for MVP implementation consistency:
 1. Event payload naming:
    - Use primer/runtime naming (`text-delta.delta`, `tool-call.input`) for MVP compatibility.
 2. Approval visibility:
-   - Keep approval request/result contract-visible in stream where required by matrix/compliance artifacts.
+   - Where approval rules apply, keep approval request/result contract-visible in stream. The architecture default is no approval step.
 3. Loop completion:
    - Agent Loop must continue until model completion signal unless an explicit configured safety bound triggers classified termination.
 4. Parallelism:
@@ -116,7 +121,8 @@ Use these for MVP implementation consistency:
 - Do not implement conversation persistence inside Agent Loop.
 - Do not embed product-specific prompt/workflow logic into Agent Loop.
 - Do not place provider-specific wire formatting in core loop logic (adapters own this).
-- Do not bypass Auth boundary ownership for permission decisions.
+- Do not bypass Auth boundary ownership for permission decisions; ask Auth before every tool call.
+- Do not fix the model at startup.
 - Do not collapse all failures into `provider_error`.
 - Do not expose raw internal exceptions, stack traces, paths, or secrets in stream errors.
 - Do not treat request metadata as runtime reconfiguration input.
@@ -132,11 +138,13 @@ Implement automated tests that prove:
 5. Recoverable tool errors produce `tool-result` and allow continuation.
 6. Unrecoverable tool failures emit `tool_error` and terminate.
 7. Provider/runtime failures map to safe classified error events.
-8. Tool permissions are filtered by Auth context before model tool advertisement.
-9. Approval-required tool calls produce `approval-request` and `approval-result`.
+8. Every tool call is checked with Auth first; a refused call does not run and returns a "not permitted" tool result, and the loop continues.
+9. Where the owner's Auth rules require approval, the tool call produces `approval-request` and `approval-result`; with no rules, no approval is requested.
 10. Denied approvals produce denied tool result and loop continues correctly.
 11. Duplicate repeated tool-call guard behavior (if present) is deterministic and non-fatal.
 12. Mutation-scope/destructive overlap guard behavior (if present) is deterministic and non-fatal.
+13. Changing the model between two requests changes the model used, with no restart.
+14. The bootstrap prompt comes from Agent Loop configuration, not from the request.
 
 ## Drift-Critical Fail Conditions (Fail Build If Any True)
 
@@ -146,6 +154,8 @@ Implement automated tests that prove:
 - Mid-stream errors are unclassified or taxonomy-collapsed.
 - Unsafe raw error text reaches client-visible stream.
 - Approval semantics are trapped in client-only UI flow.
+- A tool call runs without an Auth check.
+- A model change needs a restart.
 - Request payload can smuggle provider/tool/runtime config through metadata.
 
 ## Deliverables

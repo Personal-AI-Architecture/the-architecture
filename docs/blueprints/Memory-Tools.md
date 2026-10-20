@@ -3,18 +3,19 @@
 ## 1. Overview
 
 ### Purpose
-Memory Tools define the always-present operational surface used to read, write, search, version, and export owner memory through bounded, auditable, approval-aware operations.
+Memory Tools define the always-present operational surface used to read, write, search, version, and export owner memory through bounded, auditable operations that Auth checks before each call.
 
 ### High-Level Responsibilities
 - Define the mandatory memory operation surface (`read`, `write`, `edit`, `delete`, `list`, `search`, `history`, `export`) as language-agnostic contracts.
 - Enforce path-safety, reserved-path protection, and memory-root confinement.
-- Define approval and audit behaviors for mutating memory operations.
+- Define audit behavior for mutating memory operations and how the per-call Auth check (including any approval rule) applies to them.
+- Define restore and the reporting of failed or conflicting writes.
 - Define failure taxonomy and safe error behavior for memory tool execution.
 - Preserve the Memory boundary so components and model paths access memory through tools/boundaries, not direct storage reach-in.
 
 ### System Context
 - Memory Tools are a capability boundary, not a standalone architecture component.
-- Memory Tools are executed by Agent Loop and permissioned by Auth.
+- Memory Tools are executed by Agent Loop, which asks Auth before each call.
 - Memory Tools sit in front of the Memory substrate and are required for day-one MVP guarantees (export/history/persistence readiness).
 - Memory Tools align with Tools capability rules while specializing the mandatory memory-facing surface.
 
@@ -25,7 +26,7 @@ Memory Tools define the always-present operational surface used to read, write, 
 ### What Memory Tools **are**
 - The canonical operation interface for owner memory access.
 - A contract pack for mandatory memory verbs and their inputs/outputs/failures.
-- The enforcement point for memory-path validation and mutation approvals.
+- The enforcement point for memory-path validation.
 - A portability-preserving boundary between callers and underlying storage mechanisms.
 
 ### What Memory Tools **are not**
@@ -39,7 +40,7 @@ Memory Tools define the always-present operational surface used to read, write, 
 - Must remain callable as tools/boundaries, regardless of backend storage technology.
 - Must preserve open-format export/version guarantees.
 - Must reject path escapes and reserved internals access.
-- Must keep mutating actions approval-aware and auditable.
+- Must keep mutating actions checked by Auth before each call and auditable.
 - Must avoid introducing direct storage access paths in Gateway/Agent Loop/Auth.
 
 ---
@@ -51,14 +52,15 @@ Memory Tools define the always-present operational surface used to read, write, 
 - **Reserved Memory Internals**: protected internal paths (for example version-control internals) that tools must not expose.
 - **Mutating Memory Operation**: operation that changes persisted state (`write`, `edit`, `delete`).
 - **Read-Only Memory Operation**: operation that inspects state (`read`, `list`, `search`, `history`, `export` request).
-- **Versioned Change Record**: history entry with commit metadata and optional prior state.
+- **Restore**: operation that makes an earlier state current again and records that as a new change.
+- **Versioned Change Record**: history entry with version metadata and optional prior state.
 - **Export Archive**: owner-portable archive of memory surface.
 
 ### Internal Concepts
 - **Path Resolution Guard**: normalization + confinement check to keep access inside memory root.
 - **Reserved-Path Guard**: explicit block for protected internals.
 - **Secret Redaction Pass**: output sanitization for search lines.
-- **Approval Gate Event Flow**: contract-visible approval request/result around mutation operations.
+- **Approval Gate Event Flow**: contract-visible approval request/result, used only where an approval rule in Auth applies.
 
 ### External Concepts
 - **Tool Source Registration**: runtime discovery path that makes memory tools available.
@@ -95,7 +97,7 @@ Memory Tools define the always-present operational surface used to read, write, 
   - `name` enum: `memory_read | memory_write | memory_edit | memory_delete | memory_list | memory_search | memory_history | memory_export`
   - `description` (string, non-empty)
   - `read_only` (boolean)
-  - `requires_approval` (boolean)
+  - `requires_approval` (boolean): reflects the approval rules held in Auth; `false` under the default policy, where the owner can do everything
   - `input_schema` (object)
 - Optional fields:
   - `source_id` (string)
@@ -112,7 +114,7 @@ Memory Tools define the always-present operational surface used to read, write, 
   "name": "memory_write",
   "description": "Write a file inside memory root",
   "read_only": false,
-  "requires_approval": true,
+  "requires_approval": false,
   "input_schema": {
     "type": "object",
     "properties": {
@@ -138,7 +140,7 @@ Memory Tools define the always-present operational surface used to read, write, 
 ### 4.3 `memory_path_policy`
 - Required fields:
   - `memory_root` (string, non-empty)
-  - `reserved_roots` (string array, non-empty; includes `.git`)
+  - `reserved_roots` (string array, non-empty; includes the version-history internals, for example `.git` when Git backs history)
   - `block_escape` (boolean, must be `true`)
 - Optional fields:
   - `allow_absolute_in_root` (boolean, default `true`)
@@ -239,10 +241,11 @@ Memory Tools define the always-present operational surface used to read, write, 
 - Forbidden fields:
   - input: `overwrite_policy`, `approval_bypass`
 - Approval behavior:
-  - requires approval before execution.
+  - no approval step under the default policy; approval applies only where an approval rule held in Auth covers this call.
 - Error behavior:
   - pre-stream: malformed call rejected
   - mid-stream: `memory_tool_failure` for execution/path/permission failures
+  - a conflicting or failed write is reported to the caller, never resolved silently (no silent last-write-wins)
 - Valid example:
 ```json
 {
@@ -272,7 +275,7 @@ Memory Tools define the always-present operational surface used to read, write, 
 - Forbidden behavior:
   - empty or absent `find` must not silently no-op when match is required
 - Approval behavior:
-  - requires approval before execution.
+  - no approval step under the default policy; approval applies only where an approval rule held in Auth covers this call.
 - Error behavior:
   - pre-stream: malformed call rejected
   - mid-stream: unmatched edit target -> `invalid_input`
@@ -305,7 +308,7 @@ Memory Tools define the always-present operational surface used to read, write, 
 - Forbidden behavior:
   - deleting reserved internals or escaped paths
 - Approval behavior:
-  - requires approval before execution.
+  - no approval step under the default policy; approval applies only where an approval rule held in Auth covers this call.
 - Error behavior:
   - pre-stream: malformed call rejected
   - mid-stream: path/policy/permission failures as classified errors
@@ -421,6 +424,13 @@ Memory Tools define the always-present operational surface used to read, write, 
 ```
 - Why invalid: path escapes memory root.
 
+### 4.11a Restore
+- Input: a path (or scope) and the earlier state to make current, as identified by `memory_history`.
+- Output: confirmation of the restore.
+- Behaviour: the earlier state becomes current, and the restore is recorded in history as a new change.
+- Auth check: the same per-call check as any mutating operation.
+- Field names are pending the next contract revision.
+
 ### 4.12 `memory_export_input` and `memory_export_output`
 - Input required fields: none.
 - Input optional fields: none.
@@ -469,21 +479,23 @@ Memory Tools define the always-present operational surface used to read, write, 
 - `memory_delete`: removes file/folder path recursively where permitted.
 - `memory_list`: lists directory entries with directory suffix formatting.
 - `memory_search`: traverses files, returns line-level matches, redacts secret-like tokens.
-- `memory_history`: returns git-backed change records and optional `previous_state`.
+- `memory_history`: returns version-backed change records and optional `previous_state`.
+- restore: makes an earlier state current again and records the restore in history.
 - `memory_export`: produces export archive path under memory-owned export location.
 
-### 5.4 Approval and Authorization Flow
+### 5.4 Authorization and Approval Flow
 1. Model issues tool call.
-2. Auth permission check gates execution.
-3. If operation is mutating (`write/edit/delete`), approval-request is emitted.
-4. Operation executes only on explicit `approved` decision.
-5. Denied decisions produce `tool-result` with denied status.
+2. The Agent Loop asks Auth whether the current actor may make this call.
+3. If Auth refuses, the call does not run and the model gets a "not permitted" result.
+4. Under the default policy the owner may make every call, with no approval step.
+5. Where an approval rule in Auth covers the call, an approval-request is emitted and the operation runs only on an explicit `approved` decision; a denied decision produces a `tool-result` with denied status.
 
 ### 5.5 Audit and Versioning Behavior
 - Mutating operations emit structured `memory.write` audit events.
 - History operations emit `memory.history` audit events.
 - Export operations emit `memory.export` audit events.
-- Mutating operations create version commits with path-scoped commit message semantics.
+- Mutating operations create version history entries with path-scoped change descriptions.
+- A failed or conflicting write is reported to the caller and never corrupts data.
 
 ### 5.6 Edge Cases and Error Handling
 - Empty search query returns classified `invalid_input`.
@@ -499,22 +511,22 @@ Memory Tools define the always-present operational surface used to read, write, 
 
 ### External/Runtime Dependencies
 - Filesystem APIs for file and directory operations.
-- Version history backend for commit/history/restore state.
+- Version history backend for history and restore state (Git is one option, a database with snapshots is another).
 - Archive tooling for export generation.
 
 ### Component Interactions
 - **Agent Loop -> Memory Tools**: executes tool calls and returns results to model.
-- **Auth -> Memory Tools**: permissions checked before execution.
+- **Auth -> Memory Tools**: the Agent Loop asks Auth before each call.
 - **Memory Tools -> Memory Substrate**: reads/writes/search/history/export across storage classes.
 - **Gateway -> Conversation Store Boundary**: conversation persistence through approved memory boundary/tool path.
-- **Security -> Memory Tools**: approval enforcement, safe errors, audit requirements.
+- **Security -> Memory Tools**: coded enforcement of any approval rules, safe errors, audit requirements.
 
 ### Data Flow
 1. Runtime config enables memory-tool sources.
 2. Agent Loop includes available memory tool definitions in model context.
 3. Model emits memory tool call.
-4. Auth checks permission.
-5. Approval gate (if mutating) resolves decision.
+4. Agent Loop asks Auth whether this call is permitted.
+5. Approval gate resolves a decision only where an approval rule applies.
 6. Tool executes against memory root.
 7. Classified result/failure returns through stream and model loop.
 
@@ -529,10 +541,12 @@ Memory Tools define the always-present operational surface used to read, write, 
 ## 7. Invariants & Rules
 
 - Memory Tool Surface must always include: `memory_read`, `memory_write`, `memory_edit`, `memory_delete`, `memory_list`, `memory_search`, `memory_history`, `memory_export`.
-- Mutating operations (`write/edit/delete`) must require approval.
+- Every memory tool call passes the per-call Auth check; mutating operations require approval only where an approval rule in Auth applies, and the default policy has none for the owner.
 - Read/list/search/history/export operations are read-only by default and must not require approval.
+- Restore must be available and recorded in history.
+- Failed or conflicting writes must be reported, never resolved silently.
 - All path-bearing operations must enforce memory-root confinement.
-- Reserved internal roots (at minimum `.git`) must never be reachable via memory tools.
+- Reserved internal roots (for example `.git` when Git backs history) must never be reachable via memory tools.
 - Search must reject empty queries.
 - Search output must redact secret-like token patterns.
 - History must support prior-state availability through `previous_state`.
@@ -560,7 +574,7 @@ Memory Tools define the always-present operational surface used to read, write, 
 
 ### Security Considerations
 - Path escape and reserved-path access must be blocked.
-- Mutating operations must remain approval-gated.
+- Mutating operations must pass the per-call Auth check, and any approval rule must be enforced in code.
 - Secret-like content in search results must be sanitized.
 - Audit records for memory mutations/history/export must be structured.
 - Secrets must not be persisted in normal memory content unless explicitly and safely directed by owner policy.
@@ -573,7 +587,7 @@ Memory Tools define the always-present operational surface used to read, write, 
 - **Path-policy wrapper** for all path-bearing operations.
 - **Operation-specific validation layer** before filesystem/backend calls.
 - **Failure-normalization mapper** from runtime errors to contract error taxonomy.
-- **Mutation pipeline**: approval -> execute -> audit -> version commit.
+- **Mutation pipeline**: Auth check (including any approval rule) -> execute -> audit -> version history entry.
 - **Traversal guard** for search/list to exclude reserved internals by default.
 
 ### Design Considerations
@@ -585,7 +599,9 @@ Memory Tools define the always-present operational surface used to read, write, 
 ### Anti-Patterns to Avoid
 - Direct component filesystem/database reach-in outside tool boundary.
 - Hidden request flags that mutate memory-root or reserved-root policy at runtime.
-- Prompt-only approval enforcement for writes.
+- Prompt-only enforcement of approval rules.
+- Approval on every write as a built-in default.
+- Silent last-write-wins on conflicting writes.
 - Returning raw runtime exception details in tool outputs.
 - Best-effort version/export behavior without hard startup/readiness gates.
 
@@ -600,7 +616,11 @@ Memory Tools define the always-present operational surface used to read, write, 
 - `M-05`, `M-06`: memory surface includes required storage classes and conversation/structured data boundaries.
 - `D-05`: startup must fail clearly if version-history readiness fails.
 - `D-07`: day-one export and persistent conversation path availability.
-- `S-03`: approval is coded control for mutations.
+- `S-03`: where approval rules exist, they are coded controls.
+- `A-06`: the Agent Loop asks Auth before each tool call.
+- `A-07`: the owner can do everything by default.
+- `M-07`: failed or conflicting writes are reported.
+- `S-06`: restore is available.
 - `S-02`: structured audit coverage expected for sensitive operations.
 
 ### Primer/Implementation Tensions
@@ -614,7 +634,8 @@ Memory Tools define the always-present operational surface used to read, write, 
 ### Confirmed Alignments
 - Memory operations are tool-mediated and substrate-oriented (`memory-spec.md`).
 - Tools are verbs; memory is data substrate (`tools-spec.md`, `memory-spec.md`).
-- Approval for writes must be coded, not prompt-only (`tools-spec.md`, `security-spec.md`).
+- There is no approval step by default; where approval rules exist they live in Auth and are coded, not prompt-only (`tools-spec.md`, `security-spec.md`).
+- Version history and restore are required (`memory-spec.md`).
 - Path-safe, exportable, versioned owner data is required (`memory-spec.md`, `security-spec.md`).
 - Gateway memory access must follow dedicated memory boundary/tool path (`memory-spec.md`, `gateway-agent-loop-contract.md`).
 
@@ -656,8 +677,8 @@ Memory Tools define the always-present operational surface used to read, write, 
 - `MTL-MUST-001`: Memory Tool Surface MUST expose `memory_read`, `memory_write`, `memory_edit`, `memory_delete`, `memory_list`, `memory_search`, `memory_history`, and `memory_export`.
 - `MTL-MUST-002`: Every path-bearing memory operation MUST enforce memory-root confinement.
 - `MTL-MUST-003`: Reserved memory internals MUST be blocked from read/write/edit/delete/list/search/history access.
-- `MTL-MUST-004`: Mutating operations (`memory_write`, `memory_edit`, `memory_delete`) MUST require coded approval before execution.
-- `MTL-MUST-005`: Mutating operations MUST emit structured memory-write audit records and version commits.
+- `MTL-MUST-004`: Every memory tool call, including mutating operations, MUST pass the per-call Auth check before execution; approval MUST apply only where an approval rule in Auth covers the call, and then MUST be enforced in code.
+- `MTL-MUST-005`: Mutating operations MUST emit structured memory-write audit records and version history entries.
 - `MTL-MUST-006`: Read/list/search/history/export operations MUST remain read-only and MUST NOT require approval.
 - `MTL-MUST-007`: `memory_search` MUST reject empty queries and default to `include_conversations=false`.
 - `MTL-MUST-008`: `memory_search` match content MUST apply secret-like token redaction.
@@ -667,6 +688,8 @@ Memory Tools define the always-present operational surface used to read, write, 
 - `MTL-MUST-012`: Memory tool failures MUST be classified (`not_found`, `path_invalid`, `reserved_path`, `invalid_input`, `permission_denied`, `execution_failed`) and safe for exposure.
 - `MTL-MUST-013`: Startup readiness MUST include memory-tool availability plus export/history-capable memory surface before ready-state.
 - `MTL-MUST-014`: Components MUST access memory through approved memory tool/boundary paths and MUST NOT use direct storage reach-in.
+- `MTL-MUST-015`: The Memory Tool Surface MUST include restore, which makes an earlier state current again and records the restore in history.
+- `MTL-MUST-016`: A failed or conflicting write MUST be reported to the caller as a classified failure, never resolved silently, and MUST NOT corrupt data.
 
 ### SHOULD
 
@@ -682,7 +705,7 @@ Memory Tools define the always-present operational surface used to read, write, 
 ## 14. Acceptance Gates (Pass/Fail)
 
 - `MTL-GATE-01 Contract Gate`: Pass if interfaces validate against `contracts/Memory-Tools.schema.json`; fail otherwise.
-- `MTL-GATE-02 Conformance Gate`: Pass if all vectors in `tests/Memory-Tools-conformance.md` pass (14 positive + 14 negative); fail on any `MTL-MUST-*` failure.
+- `MTL-GATE-02 Conformance Gate`: Pass if all vectors in `tests/Memory-Tools-conformance.md` pass (16 positive + 16 negative); fail on any `MTL-MUST-*` failure.
 - `MTL-GATE-03 Drift Gate`: Pass if all Critical checks in `drift/Memory-Tools-drift-guard.md` pass; fail on any Critical failure.
 - `MTL-GATE-04 Boundary Gate`: Pass if no direct component storage reach-in path bypasses memory tool/boundary controls.
 - `MTL-GATE-05 Conflict Gate`: Pass if no unresolved High-risk conflict remains in memory-tool conflict register.
@@ -694,7 +717,7 @@ Memory Tools define the always-present operational surface used to read, write, 
 | MTL-MUST-001 | Human `memory-spec.md` core operations; AI `memory.md` | `MTL-T001P`, `MTL-T001N` |
 | MTL-MUST-002 | Human `memory-spec.md`, `security-spec.md`; AI matrix `M-02` | `MTL-T002P`, `MTL-T002N` |
 | MTL-MUST-003 | Human `memory-spec.md` + runtime reserved internals policy; AI checklist `memory-review.md` | `MTL-T003P`, `MTL-T003N` |
-| MTL-MUST-004 | Human `tools-spec.md`, `security-spec.md`; AI matrix `S-03`, `S-05` | `MTL-T004P`, `MTL-T004N` |
+| MTL-MUST-004 | Human `tools-spec.md`, `auth-spec.md`, `security-spec.md`; AI matrix `A-06`, `A-07`, `S-03` | `MTL-T004P`, `MTL-T004N` |
 | MTL-MUST-005 | Human `memory-spec.md`, `security-spec.md`; AI matrix `S-02`, `M-04` | `MTL-T005P`, `MTL-T005N` |
 | MTL-MUST-006 | Human `memory-spec.md`; AI matrix `T-02` ownership alignment | `MTL-T006P`, `MTL-T006N` |
 | MTL-MUST-007 | Human operation semantics + MVP evidence; AI security/config guidance | `MTL-T007P`, `MTL-T007N` |
@@ -705,6 +728,8 @@ Memory Tools define the always-present operational surface used to read, write, 
 | MTL-MUST-012 | Human `security-spec.md`; AI matrix `S-01`, `GC-03` | `MTL-T012P`, `MTL-T012N` |
 | MTL-MUST-013 | Human `configuration-spec.md` startup order + memory readiness; AI matrix `D-05`, `D-07` | `MTL-T013P`, `MTL-T013N` |
 | MTL-MUST-014 | Human `memory-spec.md`, `gateway-spec.md`; AI matrix `M-02`, `G-03` | `MTL-T014P`, `MTL-T014N` |
+| MTL-MUST-015 | Human `memory-spec.md` `restore` operation; AI matrix `S-06` | `MTL-T015P`, `MTL-T015N` |
+| MTL-MUST-016 | Human `memory-spec.md` error handling and concurrency; AI matrix `M-07` | `MTL-T016P`, `MTL-T016N` |
 
 ## 16. Residual Risks & Open Decisions
 
@@ -749,10 +774,14 @@ Memory Tools define the always-present operational surface used to read, write, 
 ## Self-Validation Report
 
 - Coverage of required sections: 16/16 (100%)
-- Normative requirements count: 19 total (`14 MUST`, `3 SHOULD`, `2 MAY`)
+- Normative requirements count: 21 total (`16 MUST`, `3 SHOULD`, `2 MAY`)
 - Interfaces with schemas: 19 (`memory_tool_definition`, `memory_path_policy`, `memory_tool_failure`, plus input/output interfaces for read/write/edit/delete/list/search/history/export)
-- Test vectors count: 28 total (`14 positive`, `14 negative`)
+- Test vectors count: 32 total (`16 positive`, `16 negative`)
 - Conflicts detected/resolved: 5/5 resolved
 - Unresolved ambiguity list:
   - `A-01 (Medium)`: strictness policy for operation-name aliases across adapters is not yet standardized.
 - Final readiness rating: Conditionally Ready
+
+## Contract alignment
+
+`contracts/Memory-Tools.schema.json` is behind this blueprint: it has no restore tool in the `name` enum (MTL-MUST-015), no failure code for a write conflict (MTL-MUST-016), and no "not permitted" result shape for a refused call. `requires_approval` remains a boolean on the tool definition; under the default policy it is `false`. Build to the behaviour described here; the names follow in the next contract revision.

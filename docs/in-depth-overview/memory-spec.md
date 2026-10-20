@@ -5,6 +5,8 @@ hide_table_of_contents: true
 
 # Your Memory Spec: The Persistent Substrate
 
+**Serves stories:** US-2, US-3, US-4, US-11 in the [PAA spec](../spec/personal-ai-architecture-spec.md).
+
 Everything this system processes is either a noun or a verb. **Memory is the nouns — tools are the verbs.** If it's data, it's memory. If it's not data, it's a tool. There is no third category. This is the foundational concept that shapes the entire architecture.
 
 All data, everywhere, is memory — the only question is whose. Your local files are your memory. Your Salesforce data is memory hosted by Salesforce. Weather data is the weather service's memory. The internet is public memory. The storage mechanism, the location, the format — all implementation details. Memory is the concept; the component called "Your Memory" is specifically the subset you own: your local, persistent storage in open formats. Your Memory is the platform. Everything else exists to support it. External data — Salesforce records, weather feeds, the internet — lives outside the platform, and is accessed via tools.
@@ -95,9 +97,11 @@ The system provides six guarantees around your data. Four are Memory's job. Two 
 | 1 | **Persist** | What you store stays stored | Memory | Long-term memory |
 | 2 | **Retrieve** | You can get back what you stored | Memory | Recall |
 | 3 | **Search** | You can find content without knowing exactly where it is | Memory | Associative recall (starts as keyword, evolves toward biological) |
-| 4 | **Version** | You can see what changed and go back to what was | Memory | Changing your mind, then changing it back |
+| 4 | **Version** | You can see what changed and make an earlier state current again (restore) | Memory | Changing your mind, then changing it back |
 | 5 | **Structure** | Content has hierarchy, naming, relationships | Memory provides the structure; the model and owner decide what goes where | Filing system (the extension humans invented) |
 | 6 | **Protect** | Access is controlled — not everyone sees everything | Auth (gates requests before they reach Memory) | Privacy, selective sharing |
+
+Version history and restore are required, not optional. History must record what changed, not only that something changed, and the owner must be able to make an earlier state current again. How history is built is up to the implementation: Git is one option, a database with snapshots is another.
 
 The split matters — if Memory absorbs protection or content organization, it becomes opinionated. Each absorbed responsibility is an outward dependency, and an opinionated substrate breaks portability. Memory has zero outward dependencies. That's the architectural property that makes it the platform.
 
@@ -120,8 +124,8 @@ The specific export format is an implementation choice. The architecture require
 | Data | Included | Notes |
 |------|----------|-------|
 | All files (documents, pages, skills, config) | Yes | As-is, human-readable |
-| Conversation history | Yes | Open format (SQLite is open) |
-| Version history | Yes | Git repository or equivalent |
+| Conversation history | Yes | Open format, including tool calls, tool results and every content part (text, images, files) |
+| Version history | Yes | Open format (a Git repository is one option) |
 | Structured data (tasks, etc.) | Yes | Open format |
 | Derived data (indexes, embeddings) | Optional | Regenerable from source |
 
@@ -146,15 +150,16 @@ The specific operation names and signatures are implementation choices — the a
 | `search` | Find content by pattern | Query (pattern, keyword) | Matching content and locations | Search |
 | `list` | Enumerate content by location | Location (path, scope) | Content listing at that location | Structure |
 | `history` | View changes and previous states | Path + optional time range | Change records and previous states | Version |
+| `restore` | Make an earlier state current again | Path (or scope) + the earlier state to restore | Confirmation of the restore | Version |
 
 ### Error behavior
 
 | Condition | Memory behavior |
 |-----------|----------------|
 | Content not found | Report to caller (model decides next step) |
-| Write failure (disk full, permissions) | Report to caller |
+| Write failure (disk full, permissions) | Report to caller — never report a failed write as saved |
 | Invalid path or identifier | Report to caller |
-| Concurrent write conflict | Tool implementation resolves or reports |
+| Concurrent write conflict | Report to caller — never resolved silently (for example, no silent last-write-wins). Simultaneous changes must not corrupt data |
 
 ### The substrate test — what belongs in Memory and what doesn't
 
@@ -168,7 +173,7 @@ The core operation set is intentionally small. Adding a new operation requires p
 | Proposed operation | Substrate or content? | Memory operation? |
 |---|---|---|
 | `read`, `write`, `search` | Substrate — operating on storage | Yes |
-| `semantic_search` | Substrate — Memory stores and retrieves vectors. Text-to-vector is the Model's job. | Yes — Memory receives vectors, not text |
+| `semantic_search` | Substrate — Memory stores and retrieves vectors | Optional. Memory receives vectors, not text. How text becomes vectors is an implementation choice (for example, an embedding tool or a local embedding model); the Model API defines no embeddings route |
 | `summarize` | Content — requires understanding meaning | No — model reads and summarizes |
 | `associate` | Content — requires understanding relationships | No — model reads and creates links by writing |
 | `consolidate` | Content — requires judgment about what matters | No — model reads, decides, writes |
@@ -176,7 +181,7 @@ The core operation set is intentionally small. Adding a new operation requires p
 | Prompt assembly | Content — the model reads instructions from Memory | No — model + Agent Loop |
 | Context selection | Content — the model decides what to read | No — model decides |
 | Access control | Cross-cutting — gates requests before they reach Memory | No — Auth |
-| Conflict resolution | Implementation — concurrent access coordination | No — tool implementations |
+| Conflict handling | Implementation — concurrent access coordination | No — tool implementations detect conflicts and report them; they never resolve them silently |
 
 This is analogous to POSIX file operations — `open`, `read`, `write`, `close`, `stat`, `readdir`, `unlink`. That set has been stable for 50 years because the bar for a genuinely new storage operation is high.
 
@@ -189,9 +194,9 @@ Memory is not a single storage technology. It's everything that persists behind 
 | Storage mechanism | What it holds | Why this mechanism |
 |-------------------|--------------|-------------------|
 | **Files** (markdown, text, any format) | Documents, specs, plans, skills, configuration, context files | Human-readable, portable, AI-native |
-| **Database** (SQLite) | Conversations, structured/queryable data, tasks | Relational queries, transaction support |
-| **Version control** (git) | Change history, previous states | Diff, blame, restore |
-| **Index** (vector, future) | Vectors for semantic search (derived from source content) | Different retrieval mechanism |
+| **Database** (for example SQLite) | Conversations, structured/queryable data, tasks | Relational queries, transaction support |
+| **Version history** (for example Git) | Change history, previous states | Diff, restore |
+| **Index** (vector, optional) | Vectors for semantic search (derived from source content) | Different retrieval mechanism |
 
 Adding a new storage mechanism is adding tool implementations, not changing the contract.
 
@@ -213,13 +218,13 @@ The bootstrap is Agent Loop configuration, not Memory. One line. Generic. Implem
 
 ## Concurrency
 
-Concurrency is the tool implementation's problem, not Memory's. How concurrent writes are resolved depends on the storage mechanism. Memory does not impose a concurrency model — doing so would constrain which storage backends can implement it.
+Concurrency is the tool implementation's problem, not Memory's. How concurrent writes are coordinated depends on the storage mechanism. Memory does not impose a concurrency model — doing so would constrain which storage backends can implement it. Two rules hold for every backend: simultaneous changes must not corrupt data, and a failed or conflicting write is reported, never resolved silently.
 
-| Phase | Scenario | Resolution |
-|-------|----------|------------|
-| V1 | One owner, one agent | Minimal concern — filesystem handles it |
-| V1.1 | Owner + background agents | Usually different files; tool implementations coordinate when overlapping |
-| V2+ | Multiple actors | Storage backends with proper transaction support |
+| Scenario | Resolution |
+|----------|------------|
+| One owner, one agent | Rare conflicts; the tools still detect and report them |
+| Owner + background agents | Usually different files; tool implementations coordinate when overlapping and report conflicts |
+| Multiple actors | Storage backends with proper transaction support |
 
 ---
 
@@ -237,7 +242,7 @@ Memory starts as a filing system and adds smarter tools on top. It does NOT evol
 
 Each stage is additive. The substrate test ensures new operations are genuinely new storage capabilities, not content operations disguised as tools.
 
-Memory's scope expands with the expanding sphere (see [principles.md](./principles.md#5-start-constrained-expand-deliberately) §5 Start Constrained, Expand Deliberately) — from library folder (V1) to full filesystem (V2) to external services (V3) to federated data (V4). At every phase: you USE everything the system can access, you OWN the subset under your control in an open format.
+Memory's scope expands with the expanding sphere (see [principles.md](./principles.md#5-start-constrained-expand-deliberately) §5 Start Constrained, Expand Deliberately) — from one folder, to the full filesystem, to external services, to federated data. At every stage: you USE everything the system can access, you OWN the subset under your control in an open format.
 
 ---
 
@@ -271,11 +276,13 @@ None. Memory is a substrate — it stores and retrieves. If a question arises ab
 
 - [ ] Memory persists content reliably — what you store stays stored
 - [ ] Memory retrieves content through tools — read, search, list work correctly
-- [ ] Memory supports multiple storage mechanisms behind the tools (files + database minimum for V1)
+- [ ] Memory supports multiple storage mechanisms behind the tools
+- [ ] The owner can see what changed and restore an earlier state
+- [ ] A failed or conflicting write is reported to the caller, never resolved silently
 - [ ] Memory has zero product-specific structure — it's a generic substrate
 - [ ] Memory can be exported completely in open formats
 - [ ] Memory passes the independence test — remove any other component, Memory still works, still readable, still portable
-- [ ] Memory passes the robot test — take it to a completely different system and it works without rebuilding (for the human-readable portions)
+- [ ] Memory passes the robot test — take it to a completely different system and it works without rebuilding
 - [ ] Swapping Memory's storage backend requires changing only tool implementations — Agent Loop, Client, Auth, and Models are unaffected
 - [ ] Adding a new storage mechanism (vector index, cloud storage) is additive — existing tools keep working
 
@@ -287,9 +294,19 @@ Per-component requirements from [security-spec.md](./security-spec.md). Security
 
 - [ ] Memory must support full export in open formats — the owner can always get everything out
 - [ ] Memory must be independent of all other components — removing any component leaves Memory intact and readable
-- [ ] API keys, credentials, and tokens must never be stored in Memory (library files). Secrets live in configuration.
+- [ ] API keys, credentials, and tokens must never be stored in Memory. Secrets live outside Your Memory, somewhere git never tracks: environment variables, an untracked config file, or a secret store.
 - [ ] Memory access must be mediated by tools — no component accesses storage directly
-- [ ] Concurrent access must not corrupt data — tool implementations must handle concurrent writes safely
+- [ ] Concurrent access must not corrupt data — tool implementations must handle concurrent writes safely and report conflicts
+
+---
+
+## Contract alignment
+
+The text above is ahead of the contracts in these places, pending the next contract revision:
+
+- The memory tool contract has no restore operation. This spec requires one.
+- `specs/schemas/message.json` defines message content as a string. This spec stores conversations with every content part (text, images, files), and with tool calls and tool results.
+- `specs/openapi/model-api.yaml` has no embeddings route. Semantic search is therefore optional, and how text becomes vectors is left to the implementation.
 
 ---
 

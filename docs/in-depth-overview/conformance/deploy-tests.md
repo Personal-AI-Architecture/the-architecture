@@ -54,7 +54,7 @@
 
 **Pass criteria:**
 - [ ] All Your Memory data resides on the local filesystem
-- [ ] Conversations are stored locally (SQLite or files on local disk)
+- [ ] Conversations are stored locally (in a database or files on local disk)
 - [ ] Auth data is stored locally
 - [ ] Configuration files are local
 - [ ] No data is written to any external service unless explicitly configured

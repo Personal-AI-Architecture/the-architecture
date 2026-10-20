@@ -3,20 +3,20 @@
 ## 1. Overview
 
 ### Purpose
-The Gateway API is the external contract through which clients interact with the system. It defines how messages, conversations, streaming outputs, and approvals are exchanged with the Gateway component.
+The Gateway API is the external contract through which clients interact with the system. It defines how messages, conversations, streaming outputs, and (in products that add them) approvals are exchanged with the Gateway component.
 
 ### High-Level Responsibilities
 - Provide a stable, client-facing request and response contract.
 - Support conversation creation, continuation, listing, and retrieval.
 - Stream interaction outputs as server-sent events (SSE).
-- Expose approval interactions as explicit, auditable API behavior.
+- Where a product adds approvals, expose approval interactions as explicit, auditable API behavior. The architecture default is no approval step.
 - Keep external contract shape separate from internal Gateway ↔ Agent Loop handoff.
 
 ### Architectural Context
 - Boundary type: external API boundary, not a standalone component.
 - Component owner: Gateway component.
 - Upstream callers: clients (CLI, web, mobile, bots, other agents).
-- Downstream effect: Gateway normalizes this API into internal `messages + metadata` contract for the Agent Loop.
+- Downstream effect: Gateway calls Auth on every request, then normalizes this API into the internal `messages` + model + `metadata` contract for the Agent Loop.
 
 ### Companion Artifact
 - Gateway component specification: `blueprints/Gateway.md`
@@ -39,7 +39,7 @@ The Gateway API is the external contract through which clients interact with the
 ### Boundaries and Constraints
 - Client payloads must remain client-facing and simple.
 - Clients must not send internal Agent Loop request format directly.
-- Approval semantics must be contract-visible, not client-local hidden flow.
+- Where used, approval semantics must be contract-visible, not client-local hidden flow.
 - Error and event surfaces must be safe for external display.
 
 ---
@@ -48,7 +48,8 @@ The Gateway API is the external contract through which clients interact with the
 
 ### Contract Concepts
 - **Client Contract**: external API shape between clients and Gateway.
-- **Internal Contract**: bounded Gateway-to-Agent-Loop shape (`messages + metadata`).
+- **Internal Contract**: bounded Gateway-to-Agent-Loop shape (`messages` + model + `metadata`).
+- **Message Shape**: one shape shared with the internal contract and the Model API. Content is a list of parts (text first, room for images and files); tool calls and tool results are ordinary message parts.
 - **Conversation Resolution**: process by which a message is tied to an existing or new conversation ID.
 - **Contract-visible Interaction**: behavior represented in actual API routes/events.
 
@@ -58,7 +59,7 @@ The Gateway API is the external contract through which clients interact with the
 - **Error Event**: stream failure signal with classified code and safe message.
 
 ### Approval Concepts
-- **Approval Request**: event announcing required user decision for sensitive action.
+- **Approval Request**: event announcing a required owner decision for an action the owner's Auth rules mark as needing approval.
 - **Approval Result**: event indicating outcome of approval decision.
 - **Approval Decision Submission**: explicit route for client to provide final decision.
 
@@ -71,7 +72,7 @@ The Gateway API is the external contract through which clients interact with the
 #### `POST /message`
 - Purpose: submit a message for new or existing conversation processing.
 - Request body:
-  - `content` (required string)
+  - `content` (required; a list of content parts, with a non-empty string as the shorthand for one text part)
   - `metadata` (optional object)
 - Conversation continuation:
   - if conversation context is provided by client (for example via a request header), Gateway attempts to append to that conversation
@@ -96,9 +97,9 @@ The Gateway API is the external contract through which clients interact with the
 - Purpose: retrieve conversation detail and message history.
 - Response envelope:
   - `id`, `title`, `created_at`, `updated_at`
-  - `messages[]` entries with stable IDs, roles, content, and timestamps
+  - `messages[]` entries with stable IDs, roles, content parts, and timestamps, including the tool calls and tool results inside them
 
-#### `POST /approvals/:request_id`
+#### `POST /approvals/:request_id` (products that add approvals)
 - Purpose: submit approval decision.
 - Request body:
   - `decision` in `{ approved, denied }`
@@ -112,7 +113,7 @@ The Gateway API is the external contract through which clients interact with the
 
 #### Message request
 - Shape:
-  - `content: string` (required)
+  - `content: ContentPart[]` (required; a string is the shorthand for one text part)
   - `metadata?: object`
 - Rule:
   - metadata is contextual payload, not configuration channel
@@ -130,7 +131,7 @@ The Gateway API is the external contract through which clients interact with the
   - `title: string | null`
   - `created_at: timestamp`
   - `updated_at: timestamp`
-  - `messages: ConversationMessage[]`
+  - `messages: ConversationMessage[]` (including tool calls and tool results)
 
 #### Approval decision request/response
 - Request:
@@ -181,7 +182,7 @@ The Gateway API is the external contract through which clients interact with the
 ### 5.1 Message Interaction Flow
 1. Client sends `POST /message` with external contract payload.
 2. Gateway validates request shape.
-3. Gateway authenticates/authorizes protected request path.
+3. Gateway calls Auth to authenticate and authorize every protected request, including list and history reads.
 4. Gateway resolves conversation target (new or existing).
 5. Gateway streams processing output as SSE events.
 6. Gateway returns completion event with reconcilable IDs.
@@ -191,7 +192,7 @@ The Gateway API is the external contract through which clients interact with the
 - `GET /conversations/:id` returns canonical detail envelope.
 - Unknown IDs return safe not-found response.
 
-### 5.3 Approval Flow
+### 5.3 Approval Flow (products that add approvals)
 1. Stream emits `approval-request`.
 2. Stream emits `approval-result` when decision is applied.
 3. Client submits explicit decision using `POST /approvals/:request_id`.
@@ -213,14 +214,14 @@ The Gateway API is the external contract through which clients interact with the
 
 ### Direct Dependencies
 - Gateway runtime implementation.
-- Auth boundary on protected routes.
+- Auth, called by the Gateway on every protected request.
 - Conversation persistence boundary in Memory.
 - Internal Gateway ↔ Agent Loop stream contract.
 
 ### Interaction Boundaries
 - External clients depend on Gateway API stability.
 - Gateway API must remain decoupled from provider/adapter internals.
-- Approval and security controls must be exposed via contract semantics, not implicit UI behavior.
+- Security controls, and approval controls where a product adds them, must be exposed via contract semantics, not implicit UI behavior.
 
 ### Assumptions
 - Gateway can always normalize external request shape into internal handoff.
@@ -233,20 +234,22 @@ The Gateway API is the external contract through which clients interact with the
 
 ### Contract Invariants
 - External client request shape remains `{ content, metadata? }`.
-- Internal request shape (`messages + metadata`) is never client-authored.
+- Internal request shape (`messages` + model + `metadata`) is never client-authored.
 - Conversation endpoints return canonical envelopes, not raw storage records.
 - `done` event always provides stable identifiers needed by clients.
-- Approval uses canonical explicit route and payload.
+- Approval, where used, uses canonical explicit route and payload.
 
 ### Security Invariants
-- Protected routes always pass through Auth.
+- Protected routes always pass an Auth check called by the Gateway.
+- Conversation history keeps tool calls, tool results and every content part.
 - Client-visible errors/events never expose unsafe internals.
-- Approval is enforced as real runtime state, not prompt-only behavior.
+- Approval rules the owner sets are enforced as real runtime state, not prompt-only behavior. None are required by default.
 
 ### Drift Indicators
 - Client sends `messages`, `provider`, `model`, or tool definitions in `POST /message`.
 - Response leaks raw internal storage structures.
-- Approval handled only in client UI with no contract-visible events/routes.
+- Approval (where used) handled only in client UI with no contract-visible events/routes.
+- Conversation detail returns only user and assistant text, dropping tool calls and results.
 - Error surfaces leak stack traces, filesystem paths, or secrets.
 
 ---
@@ -301,7 +304,7 @@ The Gateway API is the external contract through which clients interact with the
 - Preserves matrix rules `G-05`, `G-06`, `G-07`, `G-08`, and `S-05`.
 - Enforces hidden-configuration prevention (`C-02`) on request metadata.
 - Reflects classified safe error expectations (`GC-03`, `GC-05`, `S-01`).
-- Keeps approval contract-visible via events and explicit decision route.
+- Keeps approval, where a product adds it, contract-visible via events and explicit decision route.
 
 ### Primer Emphasis Captured
 - Clear separation between client contract and internal contract.
@@ -331,7 +334,7 @@ The Gateway API is the external contract through which clients interact with the
 |---|---|---|---|---|
 | GAPI-CF-001 | Internal human examples use `text-delta.content` / `tool-call.arguments`; primer/runtime examples use `text-delta.delta` / `tool-call.input` | Use primer/runtime field naming for MVP contract conformance | Matches active client contract artifacts and tests | Client integrations diverge and break compatibility |
 | GAPI-CF-002 | Some internal docs emphasize `done.finish_reason`; client contract requires reconciliation IDs | Require `done.conversation_id` + `done.message_id` for external API | External clients need deterministic state reconciliation | Clients cannot bind terminal stream result to persisted state |
-| GAPI-CF-003 | Approval interaction sometimes described as implementation flow; matrix requires contract visibility | Preserve approval as explicit stream + decision endpoint contract behavior | Aligns with `G-08`, `S-05`, `GC-06` compliance targets | Approval behavior becomes non-portable and non-auditable |
+| GAPI-CF-003 | Approval interaction sometimes described as implementation flow; matrix requires contract visibility | Preserve approval as explicit stream + decision endpoint contract behavior in products that add approvals | Aligns with `G-08`, `S-05`, `GC-06` compliance targets | Approval behavior becomes non-portable and non-auditable |
 
 ## 13. Normative Requirements (MUST/SHOULD/MAY)
 
@@ -339,17 +342,18 @@ The Gateway API is the external contract through which clients interact with the
 
 - `GAPI-MUST-001`: `POST /message` MUST accept only `{ content, metadata? }`.
 - `GAPI-MUST-002`: API MUST reject client payloads that include internal handoff/configuration fields.
-- `GAPI-MUST-003`: Stream MUST emit only canonical event classes (`text-delta`, `tool-call`, `tool-result`, `approval-request`, `approval-result`, `done`, `error`).
+- `GAPI-MUST-003`: Stream MUST emit only canonical event classes (`text-delta`, `tool-call`, `tool-result`, `done`, `error`, plus `approval-request` and `approval-result` where approval rules apply).
 - `GAPI-MUST-004`: `done` event MUST include `conversation_id` and `message_id`.
 - `GAPI-MUST-005`: `POST /message` response MUST include `X-Conversation-ID` once conversation resolves.
 - `GAPI-MUST-006`: `GET /conversations` MUST return canonical envelope (`conversations`, `total`, `limit`, `offset`).
 - `GAPI-MUST-007`: `GET /conversations/:id` MUST return canonical detail envelope.
-- `GAPI-MUST-008`: Approval decision MUST use canonical endpoint/payload (`POST /approvals/:request_id`, `{ decision }` -> `{ request_id, decision }`).
-- `GAPI-MUST-009`: Approval interaction MUST be contract-visible via stream events.
+- `GAPI-MUST-008`: Where a product adds approvals, approval decision MUST use canonical endpoint/payload (`POST /approvals/:request_id`, `{ decision }` -> `{ request_id, decision }`).
+- `GAPI-MUST-009`: Where approval rules apply, approval interaction MUST be contract-visible via stream events.
 - `GAPI-MUST-010`: Pre-stream failures MUST be HTTP responses; mid-stream failures MUST be SSE `error` events.
 - `GAPI-MUST-011`: Mid-stream errors MUST use taxonomy codes with safe display messages.
-- `GAPI-MUST-012`: Protected routes MUST enforce Auth.
+- `GAPI-MUST-012`: Every request to a protected route MUST pass an Auth check called by the Gateway, including list and history reads.
 - `GAPI-MUST-013`: Unknown conversation/approval identifiers MUST return safe not-found behavior.
+- `GAPI-MUST-014`: Conversation detail MUST return tool calls, tool results and every content part, not only user and assistant text.
 
 ### SHOULD
 
@@ -363,7 +367,7 @@ The Gateway API is the external contract through which clients interact with the
 ## 14. Acceptance Gates (Pass/Fail)
 
 - `GAPI-GATE-01 Contract Gate`: Pass if endpoint payloads/events validate against `contracts/Gateway-API.schema.json`; fail otherwise.
-- `GAPI-GATE-02 Conformance Gate`: Pass if all vectors in `tests/Gateway-API-conformance.md` pass (13 positive + 13 negative); fail on any `GAPI-MUST-*` failure.
+- `GAPI-GATE-02 Conformance Gate`: Pass if all vectors in `tests/Gateway-API-conformance.md` pass (14 positive + 14 negative); fail on any `GAPI-MUST-*` failure.
 - `GAPI-GATE-03 Drift Gate`: Pass if all Critical checks in `drift/Gateway-API-drift-guard.md` pass; fail on any Critical check failure.
 - `GAPI-GATE-04 Security Gate`: Pass if auth bypass and unsafe error exposure are absent; fail if either is detected.
 - `GAPI-GATE-05 Conflict Gate`: Pass if no unresolved High-risk conflict remains in Conflict Register.
@@ -385,6 +389,7 @@ The Gateway API is the external contract through which clients interact with the
 | GAPI-MUST-011 | Human `security-spec.md`; AI matrix `GC-05`, `S-01` | `GAPI-T011P`, `GAPI-T011N` |
 | GAPI-MUST-012 | Human `auth-spec.md`; AI matrix `A-01` | `GAPI-T012P`, `GAPI-T012N` |
 | GAPI-MUST-013 | Human `gateway-spec.md`; AI contract guidance for not-found behavior | `GAPI-T013P`, `GAPI-T013N` |
+| GAPI-MUST-014 | Human `gateway-spec.md`, `gateway-agent-loop-contract.md`; AI matrix `G-09`, `GC-07` | `GAPI-T014P`, `GAPI-T014N` |
 
 ## 16. Residual Risks & Open Decisions
 
@@ -401,10 +406,18 @@ The Gateway API is the external contract through which clients interact with the
 ## Self-Validation Report
 
 - Coverage of required sections: 16/16 (100%)
-- Normative requirements count: 16 total (`13 MUST`, `2 SHOULD`, `1 MAY`)
+- Normative requirements count: 17 total (`14 MUST`, `2 SHOULD`, `1 MAY`)
 - Interfaces with schemas: 6 (`message_request`, `conversation_list_response`, `conversation_detail_response`, `approval_decision_request`, `approval_decision_response`, `stream_event`)
-- Test vectors count: 26 total (`13 positive`, `13 negative`)
+- Test vectors count: 28 total (`14 positive`, `14 negative`)
 - Conflicts detected/resolved: 3/3 resolved
 - Unresolved ambiguity list:
   - `A-01 (Medium)`: event-field naming examples still differ between some human and primer documents.
 - Final readiness rating: Conditionally Ready
+
+## Contract Alignment
+
+This blueprint follows the human specs, which are ahead of the contract files in these places:
+
+- `contracts/Gateway-API.schema.json`, `specs/openapi/gateway-api.yaml` and `specs/schemas/message.json` define message content as a string, not a list of parts.
+- `specs/openapi/gateway-api.yaml` stores only user and assistant messages, so tool calls and tool results are not part of conversation detail (GAPI-MUST-014).
+- `specs/openapi/gateway-api.yaml` says requests are authenticated before they reach the Gateway; the specs have the Gateway call Auth on every request (GAPI-MUST-012).

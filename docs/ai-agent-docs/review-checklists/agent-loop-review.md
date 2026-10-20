@@ -16,7 +16,11 @@ Use this when reviewing Agent Loop behavior, stream semantics, provider integrat
 - [ ] Mid-stream errors use the explicit taxonomy: `provider_error`, `tool_error`, `context_overflow`.
 - [ ] Error messages are safe for client display.
 - [ ] Assistant text is preserved correctly across tool-continuation turns.
-- [ ] Approval semantics are represented in the contract rather than trapped inside product-specific runtime flow.
+- [ ] The loop uses the model named in each request; a model change applies to the next message with no restart.
+- [ ] The bootstrap prompt comes from Agent Loop configuration, not from a system message in the request.
+- [ ] Every tool call is checked with Auth before it runs; a refused call returns a "not permitted" tool result.
+- [ ] Tool calls and tool results use the shared message shape so they can be saved in history.
+- [ ] Where a product adds approvals, approval semantics are represented in the contract rather than trapped inside product-specific runtime flow.
 
 ## Matrix IDs
 
@@ -24,10 +28,15 @@ Use this when reviewing Agent Loop behavior, stream semantics, provider integrat
 - `E-02`
 - `E-03`
 - `E-04`
+- `E-05`
+- `E-06`
+- `A-06`
 - `GC-02`
 - `GC-03`
 - `GC-05`
 - `GC-06`
+- `GC-07`
+- `GC-08`
 - `S-01`
 
 ## Common Failure Patterns
@@ -37,6 +46,8 @@ Use this when reviewing Agent Loop behavior, stream semantics, provider integrat
 - all errors collapse to `provider_error`
 - raw runtime errors leak through stream events
 - tool continuation loses assistant text or approval semantics
+- model fixed at startup
+- tool calls run without an Auth check
 
 ## Read Next
 

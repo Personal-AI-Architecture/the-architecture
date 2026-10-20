@@ -38,7 +38,9 @@ Deployment defines where and how the system runs, with owner control as the defa
 - Not a fifth component.
 - Not an API boundary.
 - Not an identity/permission model owner.
-- Not product-specific operations tooling or hosting product policy.
+- Not product-specific operations tooling or hosting product policy. Hosting rules the owner can't override are outside the architecture.
+- Not install or first-run screens. When and how a product shows things to the owner is a product choice.
+- Not a packaging choice. Containers are one supported way to run the system, not the default.
 - Not a substitute for configuration, security, or component contracts.
 
 ### Boundaries and Constraints
@@ -61,17 +63,17 @@ Deployment defines where and how the system runs, with owner control as the defa
 
 ### Internal Concepts
 - **Startup Readiness**: deterministic startup order and readiness gates before system is considered usable.
-- **Deployment Profile**: concrete runtime choices (containerized, native) implementing same deployment contract.
+- **Deployment Profile**: concrete runtime choices (native programs, installers, containers) implementing same deployment contract. None of them is the architecture default.
 - **Escape Path**: architecture-defined migration path away from a given external dependency.
 
 ### External Concepts
-- **Container Runtime**: packaging/runtime toolchain for deployment (for example OCI runtimes).
+- **Container Runtime**: packaging/runtime toolchain for deployment (for example OCI runtimes). A dependency only when an implementation chooses container packaging.
 - **Model Provider Endpoint**: local or cloud model runtime endpoint consumed through adapters.
 - **Remote Exposure Mechanism**: explicit owner-configured network publication mechanism (reverse proxy, tunnel, bind override).
 
 ### Terminology Clarifications
 - “Local deployment” is the architecture baseline.
-- “Managed hosting”, “VPS”, and “remote access” are implementation-level extensions, not level-1 boundary requirements.
+- “Managed hosting”, “VPS”, and “remote access” are implementation-level extensions, not architecture requirements.
 
 ---
 
@@ -180,7 +182,7 @@ Deployment defines where and how the system runs, with owner control as the defa
   - `local_model_path_supported` boolean (must be `true`)
   - `offline_loop_scope` enum: `message_model_tools_response`
 - Optional fields:
-  - `documented_docker_local_option` boolean (default `true`)
+  - `documented_docker_local_option` boolean (default `true`): whether a container-based local option is documented, for implementations that ship one; containers are not the default
 - Defaults:
   - `documented_docker_local_option=true`
 - Forbidden fields:
@@ -375,6 +377,8 @@ Deployment defines where and how the system runs, with owner control as the defa
     - `container_runtime`
   - `escape_paths_defined` boolean (must be `true`)
   - `dependency_lockin_classification` enum: `dependency_present_but_escapable`
+- Notes:
+  - `container_runtime` is a dependency only when the implementation packages the system as containers; the components are standard programs that also run natively.
 - Optional fields:
   - `non_critical_dependencies` array
 - Defaults:
@@ -498,7 +502,7 @@ Deployment defines where and how the system runs, with owner control as the defa
 ### 5.1 Startup and Readiness Behavior
 1. Load runtime and adapter configuration.
 2. Discover tools and initialize Memory surfaces.
-3. Load preferences and resolve runtime bindings.
+3. Load preferences (the owner's model choice is read again on every message).
 4. Validate deployment readiness guarantees (phase order, critical dependencies).
 5. Enter ready state only when required guarantees are satisfied.
 6. Fail clearly on unsupported adapter and critical startup-readiness violations.
@@ -535,7 +539,7 @@ Deployment defines where and how the system runs, with owner control as the defa
 
 ### External Dependencies
 - Model provider runtime (local or cloud endpoint).
-- Container runtime/tooling (implementation choice, non-exclusive).
+- Container runtime/tooling, only when an implementation chooses container packaging.
 - Operating system environment with local storage and networking stack.
 
 ### Internal Interactions
@@ -646,16 +650,16 @@ Deployment defines where and how the system runs, with owner control as the defa
 - `docs/ai-agent-docs/build-sequence.md`:
   - startup-readiness and localhost/offline guarantees required before feature claims.
 - `docs/ai-agent-docs/accepted-mvp-limits.md`:
-  - local docker deployment accepted in MVP.
+  - local deployment accepted in MVP; container packaging is one example, not a requirement.
   - internet-required runtime explicitly disallowed.
 
 ### Documented Discrepancies To Reconcile
 1. **Localhost default vs runtime sample binds**
    - Primer and architecture require localhost-first default.
    - Implementation evidence contains deployment config example with `bind_address: 0.0.0.0`.
-2. **Local Docker-only MVP phrasing vs architecture generality**
-   - MVP notes local docker as accepted scope.
-   - Architecture remains packaging/runtime-agnostic for local owner-controlled deployment.
+2. **Packaging choice vs architecture generality**
+   - Earlier MVP notes named local Docker as the accepted scope.
+   - Architecture remains packaging-agnostic: containers are one supported option, not the default (D173).
 3. **Startup-readiness ownership overlap**
    - Deployment references startup guarantees that are also cross-cutting with Configuration/Memory.
 
@@ -687,7 +691,7 @@ Deployment defines where and how the system runs, with owner control as the defa
    - Human spec requires localhost default.
    - Sample runtime config currently includes `0.0.0.0`, which broadens exposure.
 2. **Storage mechanism examples**
-   - Human spec mentions filesystem + SQLite as implementation examples.
+   - Human spec gives storage mechanisms (for example a filesystem or a database) only as examples.
    - Current evidence emphasizes memory-root filesystem with markdown conversation artifacts.
 3. **Software trust mechanisms**
    - Human spec requires verifiable authenticity but does not prescribe one mechanism.
@@ -705,8 +709,8 @@ Deployment defines where and how the system runs, with owner control as the defa
 | Conflict ID | Conflicting Statements | Chosen Resolution | Rationale | Risk if Unresolved |
 |---|---|---|---|---|
 | DEP-CF-001 | Deployment docs require localhost-only default; implementation sample `build/config.json` shows `bind_address: 0.0.0.0` | Treat localhost-only as normative default; treat `0.0.0.0` as explicit deployment override/profile example | Preserves architecture safety default while acknowledging current profile evidence | Runtime may ship unintentionally network-exposed by default |
-| DEP-CF-002 | AI accepted limits say local Docker deployment only for MVP; human deployment contract is runtime-agnostic local owner-controlled | Keep runtime-agnostic local contract as architecture authority; local Docker-only remains MVP implementation scope | Avoids narrowing architecture to one packaging choice | Future non-docker local deployments may be wrongly considered invalid |
-| DEP-CF-003 | Human storage examples include filesystem + SQLite; current evidence emphasizes filesystem/markdown surfaces | Keep storage capability contract (read/write/search/version + inspectability) as normative; mechanisms are implementation choices | Maintains flexibility without losing guarantees | Implementation lock-in to one storage format |
+| DEP-CF-002 | Earlier MVP notes named local Docker as the only accepted deployment; human deployment contract is packaging-agnostic | Keep the packaging-agnostic local contract as authority; containers are one supported option, not the default (D173) | Avoids narrowing architecture to one packaging choice | Non-container local deployments may be wrongly considered invalid |
+| DEP-CF-003 | Human storage examples include a filesystem and a database; current evidence emphasizes filesystem/markdown surfaces | Keep storage capability contract (read/write/search/version + inspectability) as normative; mechanisms are implementation choices | Maintains flexibility without losing guarantees | Implementation lock-in to one storage format |
 | DEP-CF-004 | Software trust is required but mechanism unspecified in architecture | Require integrity-verification capability, allow signatures/checksums/reproducible-build approaches | Enforces trust goal without overprescribing tooling | Supply-chain integrity may be inconsistently implemented |
 | DEP-CF-005 | Startup-readiness rules appear in multiple boundaries (Deployment, Configuration, Memory) | Keep shared invariants with explicit ownership mapping in traceability | Prevents duplication conflicts and missing checks | Readiness checks can become fragmented or incomplete |
 
@@ -729,7 +733,7 @@ Deployment defines where and how the system runs, with owner control as the defa
 - `DEP-MUST-014`: Remote/network exposure MUST require explicit owner action.
 
 ### SHOULD
-- `DEP-SHOULD-001`: Implementations SHOULD provide at least one documented Docker-local offline model option.
+- `DEP-SHOULD-001`: Implementations SHOULD provide at least one documented local offline model option (containers are one packaging choice, not the default).
 - `DEP-SHOULD-002`: Implementations SHOULD support artifact integrity verification mechanisms.
 - `DEP-SHOULD-003`: Implementations SHOULD include automated deployment posture checks in CI.
 
@@ -819,3 +823,7 @@ Deployment defines where and how the system runs, with owner control as the defa
 - Unresolved ambiguity list:
   - `A-01 (Medium)`: canonical profile policy for default bind values across local-dev/containerized distributions is not yet standardized.
 - Final readiness rating: Conditionally Ready
+
+## Contract alignment
+
+`contracts/Deployment.schema.json` requires `container_runtime` in `dependency_escape_profile.critical_dependencies` and names `documented_docker_local_option`, which reads as if containers were the default. This blueprint treats containers as one supported option (D173): a container runtime is a dependency only when an implementation chooses container packaging. Build to the behaviour described here; the schema follows in the next contract revision.

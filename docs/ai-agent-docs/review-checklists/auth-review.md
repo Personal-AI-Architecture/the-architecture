@@ -8,14 +8,18 @@ Use this when reviewing runtime auth wiring, identity propagation, permission en
 
 ## Checklist
 
-- [ ] Every protected request passes through Auth before system interaction.
+- [ ] The Gateway calls Auth on every request (including list and history reads) before anything reaches the Agent Loop.
+- [ ] The Agent Loop asks Auth before each tool call; a refused call doesn't run and is reported as not permitted.
 - [ ] Auth remains a real boundary even in local-owner-mode.
-- [ ] Identity context is attached consistently on the path between Gateway and Agent Loop.
-- [ ] Authorization decisions are made in Auth rather than scattered through Gateway, Agent Loop, or tools.
+- [ ] Identity context is attached consistently and survives a transport change.
+- [ ] Authorization decisions are made in Auth rather than scattered through Gateway, Agent Loop, tools, or configuration.
+- [ ] Default policy: the owner can do everything; every other identity starts with nothing.
+- [ ] After import, a re-created identity has no access until the owner turns it back on.
+- [ ] If Auth is unavailable, requests and tool calls fail closed.
 - [ ] Product-owned auth state exists and is inspectable/exportable.
 - [ ] `auth_whoami`, `auth_check`, and `auth_export` exist in the runtime.
-- [ ] Secrets are not written into normal inspectable Memory.
-- [ ] Approval authority is enforced through code, not only policy prose or prompt text.
+- [ ] Secrets are not written into Memory or any git-tracked file.
+- [ ] Approval rules the owner sets are enforced through code, not only policy prose or prompt text; none are required by default.
 
 ## Matrix IDs
 
@@ -24,12 +28,18 @@ Use this when reviewing runtime auth wiring, identity propagation, permission en
 - `A-03`
 - `A-04`
 - `A-05`
+- `A-06`
+- `A-07`
+- `A-08`
+- `C-04`
 - `GC-04`
 - `S-03`
 
 ## Common Failure Patterns
 
-- auth middleware missing from real runtime path
+- Gateway never calls Auth on the real runtime path
+- tool calls not checked with Auth
+- permissions kept in configuration
 - local-owner-mode treated as no-auth mode
 - permission checks hardcoded in unrelated components
 - auth state lives only in opaque provider systems

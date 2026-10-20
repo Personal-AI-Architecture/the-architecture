@@ -17,6 +17,8 @@ Run the model-tool loop for an interaction without owning product behavior, conv
 
 - Conversation persistence.
 - Authentication itself.
+- Permission decisions (it asks Auth and honours the answer).
+- The choice of model (it uses the model named in each request).
 - Product-specific prompts or business logic.
 - Memory storage implementation details.
 - Provider-specific logic outside adapters.
@@ -25,7 +27,9 @@ Run the model-tool loop for an interaction without owning product behavior, conv
 
 - Model boundary and adapters.
 - Tool runtime surface.
-- Auth context already established on the path.
+- Auth context already established by the Gateway's Auth check.
+- Auth, asked before each tool call.
+- Its own configuration, including the bootstrap prompt.
 - Memory only through approved tool/config/preference surfaces.
 
 ## Interfaces
@@ -39,9 +43,13 @@ Run the model-tool loop for an interaction without owning product behavior, conv
 
 - Remain generic rather than product-specific.
 - Continue the loop until the model signals completion through the contract-defined finish behavior.
-- Execute model-requested tools.
+- Use the model named in the request, so a changed model choice applies to the next message with no restart.
+- Put its configured bootstrap prompt first when it calls the model.
+- Ask Auth before each tool call; do not run a call Auth refuses, and tell the model it was not permitted.
+- Execute permitted model-requested tools.
 - Support concurrent tool execution where allowed.
 - Pass tool results back into model context.
+- Emit tool calls and tool results in the shared message shape so the Gateway can save them in history.
 - Stay separate from conversation ownership.
 - Consume Auth context without becoming Auth.
 
@@ -52,10 +60,14 @@ Run the model-tool loop for an interaction without owning product behavior, conv
 - Reaching into Memory storage directly.
 - Putting provider-specific request logic in the loop body.
 - Owning approval policy in a way that bypasses contract/tool semantics.
+- Deciding permissions itself instead of asking Auth.
+- Running a tool call without an Auth check.
+- Requiring a restart to pick up a new model.
 
 ## Lifecycle Rules
 
-- Tool/provider readiness should follow the architecture's configuration model.
+- Tool/provider readiness should follow the architecture's configuration model (boot time).
+- The model is not boot-time configuration: it arrives with each request.
 - Per-request payloads must not become a hidden configuration channel.
 - Runtime behavior must preserve the internal contract shape.
 
@@ -65,12 +77,16 @@ Run the model-tool loop for an interaction without owning product behavior, conv
 - Does it receive only contract-bounded request data?
 - Is provider-specific logic isolated to adapters?
 - Are tool calls executed and returned correctly?
+- Is every tool call checked with Auth first?
+- Does the loop use the model from the request?
 - Has conversation or prompt ownership leaked into Agent Loop?
 
 ## Common Drift Patterns
 
 - Request-time re-derivation of provider/tool config.
-- Approval logic hardcoded in the loop.
+- Model fixed at startup instead of taken from the request.
+- Approval logic hardcoded in the loop, or a confirm-every-write step treated as an architecture default.
+- Tool calls run on the strength of the request-level Auth check alone.
 - Product-specific prompt assembly in Agent Loop.
 - Provider-specific logic outside adapters.
 - Premature loop termination before model-side completion.

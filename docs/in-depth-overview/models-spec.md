@@ -5,6 +5,8 @@ hide_table_of_contents: true
 
 # Models: External Intelligence
 
+**Serves stories:** US-5 in the [PAA spec](../spec/personal-ai-architecture-spec.md).
+
 Every AI system uses a model — ChatGPT runs GPT, Copilot runs its own models, agent frameworks wire up whatever LLM the developer chooses. So what's different here?
 
 Nothing about how the model is used. What's different is where it sits in the architecture. **Models are not a component of the system — they are external intelligence accessed through the Model API.** The system doesn't contain a model. It calls one. The system has four components (Your Memory, Agent Loop, Auth, Gateway). Models aren't one of them.
@@ -38,9 +40,17 @@ The Model API is one of the system's two APIs. It defines how the Agent Loop cal
 | **Agent Loop → Model** | Prompt (system instructions + conversation history + tool definitions + context) |
 | **Model → Agent Loop** | Streamed completion (text + tool calls) |
 
-Prompts in, completions out. The pattern is the same regardless of which model, which provider, or what capabilities the model has. Provider-specific API formats are abstracted behind the adapter — a thin translation layer between the Agent Loop's internal interface and whatever format the provider expects. Switching models is a config change; switching providers is a config change plus an adapter swap. See [adapter-spec.md](./adapter-spec.md) §How Model Configuration Works in Practice for the concrete walkthrough.
+Prompts in, completions out. The pattern is the same regardless of which model, which provider, or what capabilities the model has. Provider-specific API formats are abstracted behind the adapter — a thin translation layer between the Agent Loop's internal interface and whatever format the provider expects. Switching models is a preference change that applies to the next message; switching providers is a config change plus an adapter swap. See [adapter-spec.md](./adapter-spec.md) §How Model Configuration Works in Practice for the concrete walkthrough.
 
 The Model API is a pass-through — it doesn't decide what goes into the prompt (Your Memory provides instructions and context), which tools to use (the model decides), or where responses are stored (Gateway manages conversations). It connects the Agent Loop to whatever model is configured.
+
+### Switching models
+
+The model travels with each request. The Gateway reads the owner's current model preference on every message and passes it to the Agent Loop, which names it in the Model API call. So when the owner's model preference changes, the next message uses the new model, with no restart and no code change.
+
+### Capabilities a model lacks
+
+Models are not identical. One can read images and another cannot; one supports tool calls and another does not; context windows differ. Local and cloud models go through the same Model API, but switching models does not promise identical abilities. When a request needs something the chosen model cannot do, that is reported to the Agent Loop (and through it to the owner), not faked: the system must not silently drop an image, pretend a tool was called, or quietly substitute a different model.
 
 ---
 
@@ -50,7 +60,7 @@ Every model-related concern maps to an existing component or configuration:
 
 | Concern | Where it lives | Why not a Models component |
 |---------|---------------|---------------------------|
-| Which model to call (including per-task selection) | Configuration | A config value, not a component |
+| Which model to call (including per-task selection) | The owner's model preference, passed with each request | A preference, not a component |
 | Provider routing (OpenRouter vs Anthropic vs Ollama) | Agent Loop implementation or SDK | How the Agent Loop calls models is an implementation detail |
 | Fallback if a provider is down | Agent Loop implementation | Error handling is the Agent Loop's job |
 | Context window awareness | Agent Loop or Model API | The Agent Loop knows the limits of what it's calling |
@@ -118,10 +128,20 @@ None. Models is the thinnest spec because models are the most external thing in 
 ## Success Criteria
 
 - [ ] Models are accessed exclusively through the Model API — no component depends on a specific model
-- [ ] Switching models requires only a configuration change — no code changes to Agent Loop, Your Memory, Auth, Gateway, or any client
+- [ ] Switching models requires only a preference change — no code changes to Agent Loop, Your Memory, Auth, Gateway, or any client
+- [ ] When the model preference changes, the next message uses the new model with no restart
 - [ ] The system works with any model that accepts prompts and returns completions — cloud, local, future
-- [ ] The Model API absorbs model evolution — new capabilities, new providers, new paradigms are configuration changes
-- [ ] Local models (Ollama) and cloud models (OpenRouter) are interchangeable from the Agent Loop's perspective
+- [ ] Capabilities a model lacks are reported, not faked — switching models does not promise identical abilities
+- [ ] Local models (Ollama) and cloud models (OpenRouter) go through the same Model API
+
+---
+
+## Contract alignment
+
+The text above is ahead of the contracts in these places, pending the next contract revision:
+
+- `specs/openapi/model-api.yaml` has no way to report that a model lacks a capability the request needs (no capability field or capability error).
+- `specs/openapi/gateway-engine.yaml` has no request field for the model, so the Agent Loop cannot yet receive the owner's current choice per request.
 
 ---
 

@@ -9,7 +9,7 @@ Separate acceptable MVP scope cuts from forbidden architectural shortcuts so fut
 ## Allowed In MVP
 
 - Terminal-only client
-- Local Docker deployment only
+- Local deployment only, in one packaging the product chooses (for example Docker; containers are not an architecture requirement)
 - No web UI
 - No managed hosting
 - No skill system
@@ -18,18 +18,22 @@ Separate acceptable MVP scope cuts from forbidden architectural shortcuts so fut
 - No configurable audit detail levels beyond structured stdout JSON
 - No broad general-purpose structured Memory query surface beyond what MVP needs for conversations and owned state
 - Conversation resumption may remain a product limitation
-- Approval may still be rendered in the terminal client
+- No approval prompts at all (the architecture default is that the owner can do everything)
+- Where the product adds approvals, they may still be rendered in the terminal client
 
 ## Not Allowed Even In MVP
 
 - Ephemeral-only conversations
 - Private in-process conversation store as source of truth
-- Auth omitted from the real request path
+- Auth omitted from the real request path, or tool calls run without an Auth check
+- Permissions stored in configuration instead of Auth
+- Model fixed at startup so a change needs a restart
+- Tool calls or tool results dropped from stored conversations
 - Config collapsed into one BrainDrive-specific loader
 - Hardcoded adapter selection in product code
-- Best-effort version history startup
+- Best-effort version history startup, or version history without restore
 - Missing export surface
-- Approval that exists only as local client control flow and not as contract-visible interaction
+- In a product that adds approvals, approval that exists only as local client control flow and not as contract-visible interaction
 - Unsafe raw error text in client-facing surfaces
 - Internet-required runtime with no local-model offline path
 
@@ -44,6 +48,7 @@ Separate acceptable MVP scope cuts from forbidden architectural shortcuts so fut
 
 - "No conversation resumption" does not mean conversations may be ephemeral.
 - "Approval may stay terminal-rendered" does not mean approval may live only in terminal-local control flow.
+- "No approval prompts" does not mean no Auth: the Gateway and the Agent Loop still call Auth; the owner's policy simply allows everything.
 - "No broad structured Memory query surface" does not mean structured or queryable owner data may live outside Memory.
 - "Local-owner-mode auth" does not mean Auth may be removed from runtime wiring.
 

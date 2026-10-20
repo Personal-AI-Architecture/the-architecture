@@ -19,7 +19,9 @@ This document defines anti-drift controls for Model API boundary implementations
 ## 2. Prohibited Implementation Shortcuts
 
 - Hardcoding provider SDK calls in Agent Loop.
-- Embedding provider/model/base URL/api key fields in request payload contract.
+- Embedding provider/base URL/api key fields in request payload contract.
+- Binding the model once at startup instead of naming it in each call.
+- Flattening content parts to plain text, or dropping tool calls from messages.
 - Merging runtime, adapter, and preference loading into one ad hoc request-time path.
 - Storing `api_key`, tokens, or credentials by value in tracked config.
 - Silently defaulting to an adapter when configured adapter is invalid.
@@ -44,6 +46,8 @@ This document defines anti-drift controls for Model API boundary implementations
 | MAPID-CHK-012 | Local/offline endpoint remains valid via adapter config | Offline-path integration test | High |
 | MAPID-CHK-013 | Boundary remains API, not component/tool collapse | Architecture classification tests | Critical |
 | MAPID-CHK-014 | Tool-call roundtrip preserves id/name/input continuity | Tool-call normalization tests | High |
+| MAPID-CHK-015 | Each call names the model that came with the request | Change-while-running test | Critical |
+| MAPID-CHK-016 | Messages use the shared shape with content parts | Message round-trip tests | Critical |
 
 ## 4. Contract-Break Indicators
 
@@ -60,6 +64,8 @@ This document defines anti-drift controls for Model API boundary implementations
 - Any Critical auto-check fails.
 - Any `MAPI-MUST-*` conformance vector fails.
 - Request-time hidden reconfiguration is accepted.
+- A model change needs a restart.
+- Content parts or tool calls are lost in translation.
 - Secret values are present in tracked adapter/runtime/preference config.
 - Unsupported adapter paths do not fail clearly.
 - Safe error mapping guarantees are violated.
@@ -80,4 +86,6 @@ This document defines anti-drift controls for Model API boundary implementations
 - [ ] Provider failures are safe, classified, and sanitized.
 - [ ] Unsupported/misconfigured adapters fail clearly.
 - [ ] Local/offline provider endpoint path still works.
+- [ ] Each call names the per-request model.
+- [ ] Messages keep content parts, tool calls and tool results.
 - [ ] Tool-call IDs/names/input continuity is preserved.

@@ -7,8 +7,8 @@ This file defines language-agnostic pass/fail vectors for Memory Tool Surface co
 - `MTL-MUST-001`: Expose canonical memory tool surface (`memory_read`, `memory_write`, `memory_edit`, `memory_delete`, `memory_list`, `memory_search`, `memory_history`, `memory_export`).
 - `MTL-MUST-002`: Enforce memory-root confinement for path-bearing operations.
 - `MTL-MUST-003`: Block reserved internals access (`.git` and equivalent reserved roots).
-- `MTL-MUST-004`: Require coded approval for mutating operations.
-- `MTL-MUST-005`: Record structured audit + version commit for successful mutations.
+- `MTL-MUST-004`: Every memory tool call passes the per-call Auth check; approval applies only where an approval rule in Auth covers the call, and is then enforced in code.
+- `MTL-MUST-005`: Record structured audit + version history entry for successful mutations.
 - `MTL-MUST-006`: Keep read/list/search/history/export as read-only no-approval operations.
 - `MTL-MUST-007`: `memory_search` rejects empty query and defaults to conversation exclusion.
 - `MTL-MUST-008`: `memory_search` output redacts secret-like token patterns.
@@ -18,6 +18,8 @@ This file defines language-agnostic pass/fail vectors for Memory Tool Surface co
 - `MTL-MUST-012`: Tool failure taxonomy is classified and safe.
 - `MTL-MUST-013`: Startup readiness includes memory-tool, version, and export-capable surface before ready.
 - `MTL-MUST-014`: No direct component storage reach-in bypassing memory tool/boundary paths.
+- `MTL-MUST-015`: Restore makes an earlier state current again and records the restore in history.
+- `MTL-MUST-016`: Failed or conflicting writes are reported as classified failures, never resolved silently, and never corrupt data.
 
 ## Test Vectors
 
@@ -29,10 +31,10 @@ This file defines language-agnostic pass/fail vectors for Memory Tool Surface co
 | MTL-T002N | MTL-MUST-002 | Negative | Call with escaping path (`../outside`) | Classified `path_invalid` failure | Escaped path accepted | Boundary escape drift |
 | MTL-T003P | MTL-MUST-003 | Positive | List/search root containing reserved internals | Reserved internals are excluded | Reserved entry exposed | Reserved-scope drift |
 | MTL-T003N | MTL-MUST-003 | Negative | Read/write against reserved path (for example `.git/config`) | Classified `reserved_path` failure | Reserved path accepted | Internal leakage drift |
-| MTL-T004P | MTL-MUST-004 | Positive | Invoke `memory_write/edit/delete` with pending approval workflow | Approval-request emitted and execution waits for decision | Mutation executes before approval | Approval-control drift |
-| MTL-T004N | MTL-MUST-004 | Negative | Force mutation execution without approval decision | Conformance gate fails | Ungated mutation accepted | Control bypass drift |
-| MTL-T005P | MTL-MUST-005 | Positive | Execute successful mutation | Structured `memory.write` audit + version commit recorded | Mutation has no audit/commit | Audit/version drift |
-| MTL-T005N | MTL-MUST-005 | Negative | Disable audit or commit side effects for mutations | Conformance gate fails | Missing audit/commit accepted | Accountability drift |
+| MTL-T004P | MTL-MUST-004 | Positive | (a) Owner under the default policy invokes `memory_write/edit/delete`; (b) an approval rule in Auth covers `memory_write` | (a) Auth check passes and the call runs with no approval step; (b) approval-request emitted and execution waits for decision | Call runs without an Auth check, or runs before a required approval | Authorization-control drift |
+| MTL-T004N | MTL-MUST-004 | Negative | Force mutation execution without an Auth decision, or with an applicable approval rule but no decision | Conformance gate fails | Unchecked mutation accepted | Control bypass drift |
+| MTL-T005P | MTL-MUST-005 | Positive | Execute successful mutation | Structured `memory.write` audit + version history entry recorded | Mutation has no audit/history entry | Audit/version drift |
+| MTL-T005N | MTL-MUST-005 | Negative | Disable audit or version history side effects for mutations | Conformance gate fails | Missing audit/history entry accepted | Accountability drift |
 | MTL-T006P | MTL-MUST-006 | Positive | Invoke read/list/search/history/export operations | Operations run without approval requirement | Read-only operation requires approval | Read-only regression |
 | MTL-T006N | MTL-MUST-006 | Negative | Mark read-only operation as approval-required | Conformance gate fails | Read-only approval inflation accepted | Semantics drift |
 | MTL-T007P | MTL-MUST-007 | Positive | Search with non-empty query and no `include_conversations` flag | Success with `include_conversations=false` default | Wrong default inclusion | Search-scope drift |
@@ -47,15 +49,19 @@ This file defines language-agnostic pass/fail vectors for Memory Tool Surface co
 | MTL-T011N | MTL-MUST-011 | Negative | Return external or non-memory-owned archive location by default | Conformance gate fails | External default accepted | Ownership drift |
 | MTL-T012P | MTL-MUST-012 | Positive | Trigger known not-found/path-invalid/permission errors | Classified safe failure codes/messages produced | Unclassified failure emitted | Error taxonomy drift |
 | MTL-T012N | MTL-MUST-012 | Negative | Emit raw exception/stack trace in failure message | Conformance gate fails | Unsafe failure text accepted | Error safety drift |
-| MTL-T013P | MTL-MUST-013 | Positive | Startup with valid config, tools, memory layout, git readiness | Ready state reached after required phases | Ready before memory/version/export readiness | Startup readiness drift |
+| MTL-T013P | MTL-MUST-013 | Positive | Startup with valid config, tools, memory layout, version-history readiness | Ready state reached after required phases | Ready before memory/version/export readiness | Startup readiness drift |
 | MTL-T013N | MTL-MUST-013 | Negative | Startup without version/history readiness | Startup fails clearly before ready | Warning-only continuation | Best-effort drift |
 | MTL-T014P | MTL-MUST-014 | Positive | Inspect component paths for memory access | Access goes through approved memory tool/boundary paths | Unauthorized direct access detected | Boundary integrity drift |
 | MTL-T014N | MTL-MUST-014 | Negative | Introduce direct filesystem/database reach-in from component path | Conformance gate fails | Direct reach-in accepted | Direct-access drift |
+| MTL-T015P | MTL-MUST-015 | Positive | Write a file twice, then restore the first version | First version is current; history shows the restore as a new change | Earlier state cannot be made current | Restore missing |
+| MTL-T015N | MTL-MUST-015 | Negative | Tool surface offers history but no restore | Conformance gate fails | History-only surface accepted | Read-only history drift |
+| MTL-T016P | MTL-MUST-016 | Positive | Two concurrent `memory_write` calls to the same path | One succeeds; the other returns a classified failure; file is not corrupted | Conflict hidden or file corrupted | Silent conflict resolution |
+| MTL-T016N | MTL-MUST-016 | Negative | Implementation applies silent last-write-wins | Conformance gate fails | Silent overwrite accepted | Silent conflict resolution |
 
 ## Coverage Summary
 
-- MUST requirements: 14
-- Positive tests: 14
-- Negative tests: 14
-- Total vectors: 28
-- Critical drift categories covered: surface incompleteness, path escape, reserved-path exposure, approval bypass, missing audit/versioning, search safety drift, history contract erosion, export ownership drift, unsafe error leakage, startup readiness degradation, direct storage reach-in.
+- MUST requirements: 16
+- Positive tests: 16
+- Negative tests: 16
+- Total vectors: 32
+- Critical drift categories covered: surface incompleteness, path escape, reserved-path exposure, Auth-check or approval bypass, missing audit/versioning, search safety drift, history contract erosion, export ownership drift, unsafe error leakage, startup readiness degradation, direct storage reach-in, missing restore, silent conflict resolution.

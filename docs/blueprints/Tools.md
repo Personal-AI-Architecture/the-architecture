@@ -8,7 +8,7 @@ Tools define the callable capability surface of the system: operations executed 
 ### High-Level Responsibilities
 - Define what a tool is and is not in architecture terms.
 - Define tool discovery, availability, and execution boundaries.
-- Define approval, authorization, and isolation interaction points for tool use.
+- Define authorization, isolation, and (where a product adds them) approval interaction points for tool use.
 - Define stable contract shapes for tool definition, invocation, result, and failure.
 - Prevent architectural drift where tools become a fifth component or a separate API.
 
@@ -37,9 +37,10 @@ Tools define the callable capability surface of the system: operations executed 
 ### Boundaries and Constraints
 - Tool execution belongs to Agent Loop.
 - Authorization belongs to Auth.
-- Tool availability comes from environment/runtime config plus permissions.
+- Tool availability comes from environment/runtime config plus permissions held in Auth.
+- The Agent Loop asks Auth before each tool call; a refused call does not run and returns "not permitted".
 - Tool definitions must be deterministic and machine-validated.
-- Sensitive tool actions requiring approval must use coded enforcement.
+- There is no approval step by default; the owner can use every tool. Where an approval rule in Auth covers a call, it is enforced in code.
 
 ---
 
@@ -58,13 +59,14 @@ Tools define the callable capability surface of the system: operations executed 
 ### Internal Concepts
 - **Execution boundary**: Agent Loop executes calls; tool runtime performs operation.
 - **Authorization boundary**: Auth allow/deny decision before execution.
-- **Approval boundary**: coded runtime interception before mutating operations.
+- **Approval boundary**: coded runtime interception before a call an approval rule covers. Approval rules live in Auth; the architecture default has none for the owner.
 - **Granularity control**: read/write/parameter-level capability scoping.
 
 ### External Concepts
 - **Environment availability**: whether a tool exists in runtime deployment.
 - **Actor permission**: whether current actor may invoke an available tool.
-- **Contract-visible approval**: approval appears via explicit stream/API events.
+- **Contract-visible approval**: where a product adds approvals, approval appears via explicit stream/API events.
+- **Not permitted**: a tool that exists but the current actor may not use. The model is told it exists and is not permitted, so it can tell this apart from "does not exist".
 
 ### Terminology
 - **Capability drift**: tool ownership or behavior leaks into wrong boundary.
@@ -131,7 +133,7 @@ Tools define the callable capability surface of the system: operations executed 
   - `description` (string, non-empty)
   - `input_schema` (object)
   - `read_only` (boolean)
-  - `requires_approval` (boolean)
+  - `requires_approval` (boolean): reflects approval rules held in Auth for the current actor; `false` under the default policy
 - Optional fields:
   - `source_id` (string)
   - `availability` enum: `always_send | discoverable`
@@ -349,7 +351,7 @@ Tools define the callable capability surface of the system: operations executed 
 - Optional fields: none.
 - Defaults: none.
 - Forbidden behavior:
-  - mutating tool execution before approval-request emission
+  - executing a call an approval rule covers before approval-request emission
 - Error shape:
   - mid-stream only; pre-stream not applicable
 - Valid example:
@@ -411,7 +413,9 @@ Tools define the callable capability surface of the system: operations executed 
 - Defaults:
   - `warning_on_unverified=true`
 - Forbidden behavior:
-  - `trust_level=untrusted` with non-dedicated isolation mode
+  - `trust_level=untrusted` with non-dedicated isolation mode, unless the owner has said they trust the tool (then its trust level changes)
+- Notes:
+  - containers are one way to isolate; separate processes or sandboxes are others
 - Error shape:
   - pre-stream/startup: `tool_failure` with `code=invalid_policy`
   - mid-stream: unavailable/timeout failures surfaced as tool failures
@@ -517,7 +521,7 @@ Tools define the callable capability surface of the system: operations executed 
 
 ### 5.2 Availability Resolution
 - Environment layer decides physically available tools.
-- Auth layer filters callable tools per actor.
+- Auth decides which tools the current actor may call; the Agent Loop marks the rest as not permitted rather than hiding them.
 - Granularity layer refines allowed mode (read/write/parameter constraints).
 - No request payload may override startup tool availability.
 
@@ -530,8 +534,8 @@ Tools define the callable capability surface of the system: operations executed 
 ### 5.4 Execution Workflow
 1. Model emits `tool-call` with stable call ID.
 2. Agent Loop verifies tool exists.
-3. Auth authorizes invocation.
-4. If tool requires approval, Agent Loop emits `approval-request` and waits for `approved|denied`.
+3. Agent Loop asks Auth whether the current actor may make this call. If not, the call does not run and the model gets a "not permitted" result.
+4. If an approval rule in Auth covers the call, Agent Loop emits `approval-request` and waits for `approved|denied`. Under the default policy the owner's calls need no approval.
 5. Agent Loop executes tool and emits `tool-result`.
 6. Agent Loop re-injects tool result into model context and continues loop.
 
@@ -544,7 +548,7 @@ Tools define the callable capability surface of the system: operations executed 
 ### 5.6 State Management
 - Tools are operation-scoped and stateless by default.
 - Persistent state belongs to Memory or external systems, never to tool definitions.
-- Approval pending state is explicit and externally resolvable by request ID.
+- Where approvals exist, approval pending state is explicit and externally resolvable by request ID.
 
 ### 5.7 Lifecycle and Health
 - Tool startup: in-process at runtime boot or by environment-managed startup.
@@ -600,10 +604,11 @@ Tools define the callable capability surface of the system: operations executed 
 - Tool availability must be environment/config + Auth driven.
 - Request metadata must not reconfigure runtime tool sources.
 - Memory access by components/models must use tool-mediated boundaries.
-- Mutating tools requiring approval must not execute before coded approval decision.
+- Every tool call passes a per-call Auth check.
+- Calls an approval rule covers must not execute before coded approval decision; the default policy has no approval rule for the owner.
 - Tool result and error outputs must remain structured and safe.
 - Tool calls and results must preserve stable call IDs.
-- Untrusted tools must have dedicated isolation (policy-level invariant).
+- Tools the owner has not said they trust must run isolated by default (policy-level invariant).
 - Tool crashes/unavailability must be surfaced explicitly.
 - Always-send/discoverable policy must remain owner-governed preference data.
 - Tool swaps must remain config/preference driven and must not require architecture rewrites.
@@ -613,7 +618,7 @@ Tools define the callable capability surface of the system: operations executed 
 ## 8. Non-Functional Requirements
 
 ### Performance Expectations
-- Tool listing and permission filtering should be bounded and low-latency per request.
+- Tool listing and per-call Auth checks should be bounded and low-latency.
 - Tool execution timeout controls must prevent indefinite loop blocking.
 - Discovery and catalog lookup should scale without sending all definitions every turn.
 
@@ -629,7 +634,7 @@ Tools define the callable capability surface of the system: operations executed 
 
 ### Security Considerations
 - Safe error surfaces: no stack traces/secrets in tool failure messages.
-- Approval gates: coded enforcement for sensitive mutations.
+- Approval gates: coded enforcement where approval rules exist.
 - Isolation controls: trust-level-appropriate filesystem/network/resource boundaries.
 - Auditability: structured tool call/result and approval events with correlation IDs.
 
@@ -639,14 +644,14 @@ Tools define the callable capability surface of the system: operations executed 
 
 ### Suggested Architectural Patterns
 - **Capability registry abstraction** for source->definition discovery.
-- **Policy gate chain**: availability, authorization, approval, execution.
+- **Policy gate chain**: availability, per-call Auth check (including any approval rule), execution.
 - **Structured failure normalization** with explicit code/recoverable flags.
 - **Catalog split pattern**: always-send and discoverable sets.
 
 ### Design Considerations
 - Validate tool definitions before exposure to model.
 - Keep source identity explicit to prevent name/source ambiguity.
-- Keep approval lifecycle externally addressable by request ID.
+- Where approvals exist, keep approval lifecycle externally addressable by request ID.
 - Prefer deterministic ordering for tool lists and discovery outputs.
 
 ### Anti-Patterns to Avoid
@@ -654,7 +659,9 @@ Tools define the callable capability surface of the system: operations executed 
 - Embedding auth decisions inside tool definition payloads.
 - Letting request payload metadata mutate runtime tool configuration.
 - Collapsing all tool failures to generic untyped errors.
-- Using prompt-only approval behavior for mutating tools.
+- Using prompt-only approval behavior.
+- Shipping approval on every write as an architecture default.
+- Hiding not-permitted tools so the model reports them as missing.
 
 ---
 
@@ -664,7 +671,9 @@ Tools define the callable capability surface of the system: operations executed 
 - `T-01`: tools are not a component and not a separate API.
 - `T-02`: execution in Agent Loop, authorization in Auth.
 - `T-03`: availability via config/environment + Auth permissions.
-- `S-03`: approval must be coded enforcement.
+- `S-03`: where approval rules exist, enforcement is coded.
+- `A-06`: the Agent Loop asks Auth before each tool call.
+- `A-07`: the owner can use every tool by default.
 - `S-04`: tool scope/isolation must enforce runtime boundaries.
 - `C-01`, `C-02`: config ownership and no request-side hidden config channels.
 - `M-02`: memory access through approved boundaries.
@@ -681,7 +690,8 @@ Tools define the callable capability surface of the system: operations executed 
 - Tools are capability surface, not component (`tools-spec.md`, `foundation-spec.md`).
 - Model API + Agent Loop execution path removes need for separate tool API (`tools-spec.md`).
 - Scope is driven by available tools plus Auth permissions (`tools-spec.md`, `auth-spec.md`).
-- Approval for sensitive writes must be coded, not prompt-only (`tools-spec.md`, `security-spec.md`).
+- There is no approval step by default; where approval rules exist they live in Auth and are coded, not prompt-only (`tools-spec.md`, `security-spec.md`).
+- The model can tell "does not exist" apart from "not permitted" (`tools-spec.md`).
 - Memory access is mediated by tools (`memory-spec.md`, `security-spec.md`).
 
 ### Documented Discrepancies To Reconcile
@@ -689,8 +699,8 @@ Tools define the callable capability surface of the system: operations executed 
    - Human docs emphasize self-description from tools.
    - Current implementation evidence uses a static map of supported sources.
 2. **Model visibility of unavailable tools**
-   - Human docs (D56) recommend model awareness of exists-but-not-permissioned tools.
-   - Current runtime filters unavailable tools out before model invocation.
+   - Human docs require that the model can tell "does not exist" apart from "not permitted".
+   - Current runtime evidence filters not-permitted tools out before model invocation; this is now a gap to close.
 3. **Always-send/discoverable split depth**
    - Human docs include explicit split and discovery flow.
    - Current runtime evidence does not expose a full catalog discovery tool path.
@@ -710,7 +720,7 @@ Tools define the callable capability surface of the system: operations executed 
 | Conflict ID | Conflicting Statements | Chosen Resolution | Rationale | Risk if Unresolved |
 |---|---|---|---|---|
 | TOL-CF-001 | Human docs: tools self-describe from sources; MVP evidence: static source registry map | Keep self-description as normative target; allow static registry as MVP evidence under strict schema validation | Preserves architecture direction while recognizing current implementation stage | Tool onboarding may require code edits and create lock-in drift |
-| TOL-CF-002 | Human docs D56: model should know tools that exist but are not permissioned; MVP evidence filters tool list by permission before model call | Keep this as SHOULD-level in MVP, not MUST-level | Avoids overclaiming current behavior while retaining future architecture intent | Model may produce less informative permission feedback |
+| TOL-CF-002 | Human docs: model must tell "does not exist" from "not permitted"; MVP evidence filters tool list by permission before model call | Make it MUST-level (TOL-MUST-015); treat current filtering as a gap | Follows the current tools and Auth specs | Model reports permitted-but-refused tools as missing, misleading the owner |
 | TOL-CF-003 | Human docs define always-send/discoverable + discovery meta-tool; MVP evidence sends configured tools directly | Treat split as SHOULD-level readiness pattern and MUST-level when tool count/scale requires | Maintains MVP simplicity while preventing scale-time drift | Context bloat and degraded tool selection at higher tool counts |
 | TOL-CF-004 | Security/tools docs require mandatory isolation for untrusted tools; MVP evidence uses curated in-process tools and no full trust policy surface | Keep mandatory untrusted isolation as MUST policy in contract; document current gap as implementation backlog | Ensures future marketplace/third-party integration stays safe | Untrusted tool compromise could breach host/data boundaries |
 | TOL-CF-005 | Agent Loop spec guarantees concurrent execution for parallel tool calls; current loop evidence processes calls sequentially | Keep concurrent capability as SHOULD for MVP and MUST for scale/performance profiles | Avoids contradicting current implementation while preserving spec intent | Latency and throughput degradation for multi-tool turns |
@@ -727,17 +737,19 @@ Tools define the callable capability surface of the system: operations executed 
 - `TOL-MUST-006`: Tool definitions MUST include canonical fields (`name`, `description`, `input_schema`, `read_only`, `requires_approval`).
 - `TOL-MUST-007`: Unsupported or invalid tool sources/definitions MUST fail clearly before runtime readiness.
 - `TOL-MUST-008`: Tool calls and tool results MUST preserve stable call IDs and contract-visible event shape.
-- `TOL-MUST-009`: Mutating tools requiring approval MUST be gated by coded approval enforcement before execution.
+- `TOL-MUST-009`: Where an approval rule in Auth covers a tool call, the call MUST be gated by coded approval enforcement before execution.
 - `TOL-MUST-010`: Tool failures MUST be emitted as structured safe outputs with code/message/recoverable semantics.
 - `TOL-MUST-011`: Memory access by model/components MUST remain tool-mediated rather than direct storage reach-in.
 - `TOL-MUST-012`: Tool scope/isolation controls MUST enforce trust boundaries independent of Auth policy alone.
 - `TOL-MUST-013`: Tool unavailability/timeout/crash MUST be surfaced explicitly and MUST NOT fail silently.
 - `TOL-MUST-014`: Tool add/remove swap paths MUST remain configuration/preference driven without architecture rewrites.
+- `TOL-MUST-015`: The Agent Loop MUST ask Auth before each tool call; a refused call MUST NOT run and MUST return "not permitted", and tools the actor may not use MUST be marked not permitted rather than hidden.
+- `TOL-MUST-016`: The default policy MUST let the owner use every tool with no approval step; any approval rule MUST live in Auth, not in tool definitions or configuration.
 
 ### SHOULD
 
 - `TOL-SHOULD-001`: Systems SHOULD implement explicit always-send/discoverable split with discovery query path.
-- `TOL-SHOULD-002`: Systems SHOULD expose exists-but-not-permissioned capability hints to improve model/user guidance.
+- `TOL-SHOULD-002`: A "not permitted" result SHOULD carry a short safe reason so the model can explain it to the owner.
 - `TOL-SHOULD-003`: Systems SHOULD support concurrent execution for independent tool calls in a single loop turn.
 
 ### MAY
@@ -748,9 +760,9 @@ Tools define the callable capability surface of the system: operations executed 
 ## 14. Acceptance Gates (Pass/Fail)
 
 - `TOL-GATE-01 Contract Gate`: Pass if interfaces validate against `contracts/Tools.schema.json`; fail otherwise.
-- `TOL-GATE-02 Conformance Gate`: Pass if all vectors in `tests/Tools-conformance.md` pass (14 positive + 14 negative); fail on any `TOL-MUST-*` failure.
+- `TOL-GATE-02 Conformance Gate`: Pass if all vectors in `tests/Tools-conformance.md` pass (16 positive + 16 negative); fail on any `TOL-MUST-*` failure.
 - `TOL-GATE-03 Drift Gate`: Pass if all Critical checks in `drift/Tools-drift-guard.md` pass; fail on any Critical check failure.
-- `TOL-GATE-04 Boundary Gate`: Pass if execution/auth/approval/memory-boundary ownership is preserved end-to-end.
+- `TOL-GATE-04 Boundary Gate`: Pass if execution, per-call Auth, approval (where rules exist) and memory-boundary ownership is preserved end-to-end.
 - `TOL-GATE-05 Conflict Gate`: Pass if no unresolved High-risk conflict remains in Tools conflict register.
 
 ## 15. Traceability Matrix (Requirement -> Source -> Test ID)
@@ -765,19 +777,21 @@ Tools define the callable capability surface of the system: operations executed 
 | TOL-MUST-006 | Human `tools-spec.md`; AI `tools.md` | `TOL-T006P`, `TOL-T006N` |
 | TOL-MUST-007 | Human `configuration-spec.md`, `tools-spec.md`; AI checklist `configuration-review.md` | `TOL-T007P`, `TOL-T007N` |
 | TOL-MUST-008 | Human `agent-loop-spec.md`, `gateway-agent-loop-contract.md`; AI matrix `GC-02` | `TOL-T008P`, `TOL-T008N` |
-| TOL-MUST-009 | Human `tools-spec.md`, `security-spec.md`; AI matrix `S-03`, `S-05` | `TOL-T009P`, `TOL-T009N` |
+| TOL-MUST-009 | Human `tools-spec.md`, `security-spec.md`; AI matrix `S-03` | `TOL-T009P`, `TOL-T009N` |
 | TOL-MUST-010 | Human `security-spec.md`, `gateway-agent-loop-contract.md`; AI matrix `S-01`, `GC-05` | `TOL-T010P`, `TOL-T010N` |
 | TOL-MUST-011 | Human `memory-spec.md`, `gateway-spec.md`; AI matrix `M-02` | `TOL-T011P`, `TOL-T011N` |
 | TOL-MUST-012 | Human `security-spec.md`, `tools-spec.md`; AI matrix `S-04` | `TOL-T012P`, `TOL-T012N` |
 | TOL-MUST-013 | Human `tools-spec.md`, `agent-loop-spec.md`; AI matrix `GC-03` | `TOL-T013P`, `TOL-T013N` |
 | TOL-MUST-014 | Human `configuration-spec.md` (D147), `tools-spec.md`; AI matrix `T-03`, `MO-03` | `TOL-T014P`, `TOL-T014N` |
+| TOL-MUST-015 | Human `tools-spec.md`, `auth-spec.md`, decision `D176`; AI matrix `A-06`, `T-02` | `TOL-T015P`, `TOL-T015N` |
+| TOL-MUST-016 | Human `tools-spec.md` (no approval step by default), decision `D177`; AI matrix `A-07`, `C-04` | `TOL-T016P`, `TOL-T016N` |
 
 ## 16. Residual Risks & Open Decisions
 
 - `TOL-RISK-001 (Medium)`: Static source registration can become a lock-in vector if self-description paths are not expanded.
 - `TOL-RISK-002 (Medium)`: Missing explicit always-send/discoverable machinery can increase context/token overhead as tool count grows.
 - `TOL-RISK-003 (Medium)`: Incomplete trust-level isolation controls create security exposure when third-party tools are introduced.
-- `TOL-RISK-004 (Low)`: Filtering unavailable tools from model context may reduce quality of permission-aware responses.
+- `TOL-RISK-004 (Low)`: Implementations that still filter not-permitted tools out of model context will fail TOL-MUST-015 until they mark them instead.
 - `TOL-DECISION-OPEN-001`: Standardize duplicate tool-name conflict policy across sources (source precedence vs explicit disambiguation).
 - `TOL-DECISION-OPEN-002`: Define required observability metrics for discovery quality (hit rate, false positives, load latency).
 
@@ -815,10 +829,14 @@ Tools define the callable capability surface of the system: operations executed 
 ## Self-Validation Report
 
 - Coverage of required sections: 16/16 (100%)
-- Normative requirements count: 19 total (`14 MUST`, `3 SHOULD`, `2 MAY`)
+- Normative requirements count: 21 total (`16 MUST`, `3 SHOULD`, `2 MAY`)
 - Interfaces with schemas: 12 (`tool_source_entry`, `tool_definition`, `tool_visibility_policy`, `tool_availability_context`, `tool_call`, `tool_execution_result`, `tool_failure`, `approval_request_event`, `approval_result_event`, `tool_isolation_profile`, `tool_discovery_query`, `tool_discovery_match`)
-- Test vectors count: 28 total (`14 positive`, `14 negative`)
+- Test vectors count: 32 total (`16 positive`, `16 negative`)
 - Conflicts detected/resolved: 5/5 resolved
 - Unresolved ambiguity list:
   - `A-01 (Medium)`: timing and threshold for making discovery split mandatory in MVP-to-V1 transition is not yet standardized.
 - Final readiness rating: Conditionally Ready
+
+## Contract alignment
+
+`contracts/Tools.schema.json` has no "not permitted" result shape and no way to mark a tool as existing but not permitted for the current actor (TOL-MUST-015). `requires_approval` stays a boolean on the tool definition; under the default policy it is `false`, and the decision comes from Auth. `tool_isolation_profile.isolation_mode` names only container modes. Build to the behaviour described here; the schema follows in the next contract revision.

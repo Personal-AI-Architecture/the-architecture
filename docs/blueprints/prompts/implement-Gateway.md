@@ -54,17 +54,18 @@ Implement these routes:
 - `POST /message`
 - `GET /conversations`
 - `GET /conversations/:id`
-- `POST /approvals/:request_id`
+- `POST /approvals/:request_id` (only if the product adds approval prompts)
 
 Implement these behaviors:
 - Gateway owns conversation lifecycle (create/append/list/detail).
 - Gateway uses approved Memory conversation-store boundary (no private in-process source of truth).
-- Gateway normalizes client request into internal `messages + metadata`.
+- Gateway normalizes client request into internal `messages` + model + `metadata`, reading the owner's current model choice on every message (no restart to switch). No system message: the bootstrap prompt is Agent Loop configuration.
+- Gateway saves tool calls and tool results as ordinary parts of messages in conversation history and sends them back on resume.
 - Gateway streams Agent Loop events via SSE.
-- Gateway enforces Auth on protected routes (all except explicit health checks).
+- Gateway calls Auth on every request to protected routes (all except explicit health checks), including list and history reads.
 - Gateway returns `X-Conversation-ID` once conversation is resolved.
 - `done` payload includes `conversation_id` and `message_id`.
-- Approval is contract-visible (`approval-request`, `approval-result`) and decision route is canonical.
+- Where the product adds approvals, approval is contract-visible (`approval-request`, `approval-result`) and decision route is canonical. The architecture default is no approval step.
 - Request metadata must not be a hidden config channel.
 - Client-visible errors must be safe (no raw stack paths/secrets).
 
@@ -78,7 +79,7 @@ Implement these behaviors:
 - `GET /conversations`: canonical envelope (`conversations`, `total`, `limit`, `offset`)
 - `GET /conversations/:id`: canonical detail envelope (id/title/timestamps/messages)
 
-### Approval decision endpoint
+### Approval decision endpoint (products that add approvals)
 - `POST /approvals/:request_id`
 - Request body: `{ decision }`
 - Response body: `{ request_id, decision }`
@@ -88,8 +89,8 @@ Implement these behaviors:
   - `text-delta`
   - `tool-call`
   - `tool-result`
-  - `approval-request`
-  - `approval-result`
+  - `approval-request` (where approval rules apply)
+  - `approval-result` (where approval rules apply)
   - `done`
   - `error`
 
@@ -100,15 +101,16 @@ Use these for MVP implementation consistency:
 1. Prefer primer/client-contract event payload naming for external behavior:
    - `text-delta` uses `delta`
    - `tool-call` uses `input`
-2. Keep approval events in stream as contract-visible interaction state.
+2. Where approval rules apply, keep approval events in stream as contract-visible interaction state.
 3. Keep `done` externally reconcilable with `conversation_id` and `message_id`.
 4. Keep internal handoff bounded; no provider/tool runtime config in request metadata.
 
 ## Non-Negotiable Constraints
 
-- Do not move model/provider selection into Gateway.
+- Do not move model/provider selection into Gateway: read the owner's current model choice and pass it on, never pick one.
+- Do not fix the model at startup.
 - Do not execute model-driven tools in Gateway (Gateway may use only conversation-store operational boundary).
-- Do not bypass Auth boundary on protected routes.
+- Do not bypass the Auth call on protected routes.
 - Do not return raw storage/internal database shape directly to clients.
 - Do not introduce undocumented helper routes for approvals.
 - Do not leak unsafe internal exception text to clients.
@@ -117,7 +119,7 @@ Use these for MVP implementation consistency:
 
 Implement automated tests that prove:
 
-1. Protected routes require Auth.
+1. Every protected-route request is checked with Auth, including list and history reads.
 2. Happy-path `POST /message` returns stream + `X-Conversation-ID` + `done` identifiers.
 3. Conversation is persisted and retrievable via canonical conversation endpoints.
 4. Invalid request bodies fail safely with 400.
@@ -125,13 +127,16 @@ Implement automated tests that prove:
 6. Unknown conversation ID returns safe 404.
 7. Approval decision endpoint enforces authority and handles not-found approval IDs.
 8. Stream and error surfaces remain contract-safe (no unsafe internals).
-9. Gateway only sends bounded `messages + metadata` to Agent Loop.
+9. Gateway only sends bounded `messages` + model + `metadata` to Agent Loop, with no system message.
+10. Changing the model preference changes the model passed on the next message, with no restart.
+11. Tool calls and tool results are in stored history and are replayed on resume.
 
 ## Drift-Critical Fail Conditions (Fail Build If Any True)
 
 - Gateway stores conversation truth in route-local/in-memory-only structures.
 - Client can submit internal Agent Loop payload directly.
-- Approval flow works only in local client UI and is not contract-visible.
+- Approval flow (where the product adds it) works only in local client UI and is not contract-visible.
+- Tool calls or tool results are dropped from stored history.
 - Error taxonomy/event shapes drift from canonical contract.
 - Unsafe raw error text reaches client-visible responses/events.
 - Gateway owns provider/model selection or runtime provider config mutation.

@@ -7,17 +7,19 @@ This file defines language-agnostic pass/fail vectors for Gateway conformance.
 - `GW-MUST-001`: Gateway owns conversation lifecycle operations (create, append, list, detail).
 - `GW-MUST-002`: `POST /message` accepts only canonical client request shape `{ content, metadata? }`.
 - `GW-MUST-003`: External clients cannot submit internal Agent Loop contract fields.
-- `GW-MUST-004`: Gateway sends only bounded internal handoff fields (`messages + metadata`) and blocks configuration side channels.
-- `GW-MUST-005`: Protected routes enforce Auth.
+- `GW-MUST-004`: Gateway sends only bounded internal handoff fields (`messages` + model + `metadata`), with no system message, and blocks configuration side channels.
+- `GW-MUST-005`: The Gateway calls Auth on every request to a protected route, including list and history reads.
 - `GW-MUST-006`: Conversation list/detail endpoints return canonical envelopes.
 - `GW-MUST-007`: Streaming response includes `X-Conversation-ID` once conversation is resolved.
 - `GW-MUST-008`: Terminal `done` event includes `conversation_id` and `message_id`.
-- `GW-MUST-009`: Approval decision endpoint remains canonical (`POST /approvals/:request_id`, `{ decision }` -> `{ request_id, decision }`).
-- `GW-MUST-010`: Approval interactions are contract-visible in stream (`approval-request`, `approval-result`).
+- `GW-MUST-009`: Where a product adds approvals, the approval decision endpoint remains canonical (`POST /approvals/:request_id`, `{ decision }` -> `{ request_id, decision }`).
+- `GW-MUST-010`: Where approval rules apply, approval interactions are contract-visible in stream (`approval-request`, `approval-result`).
 - `GW-MUST-011`: Mid-stream failures use classified error taxonomy (`provider_error`, `tool_error`, `context_overflow`).
 - `GW-MUST-012`: Client-visible errors/events are safe and sanitized.
 - `GW-MUST-013`: Unknown conversation and approval IDs return safe not-found behavior.
 - `GW-MUST-014`: Conversation state is durable through Memory boundary, not private in-process state.
+- `GW-MUST-015`: The Gateway reads the owner's current model choice on every message and passes it to the Agent Loop.
+- `GW-MUST-016`: Tool calls and tool results are saved in conversation history and sent back on resume.
 
 ## Test Vectors
 
@@ -29,10 +31,10 @@ This file defines language-agnostic pass/fail vectors for Gateway conformance.
 | GW-T002N | GW-MUST-002 | Negative | `POST /message` body `{ metadata: {} }` | 400 safe invalid-request response | Request accepted or unsafe parser error exposed | Validation drift |
 | GW-T003P | GW-MUST-003 | Positive | Client sends only external contract fields | Gateway normalizes to internal shape itself | Client required/allowed to send internal fields | Boundary ownership drift |
 | GW-T003N | GW-MUST-003 | Negative | `POST /message` includes `messages`, `provider`, or `tool_definitions` | 400 safe reject | Payload accepted | Internal contract fabrication |
-| GW-T004P | GW-MUST-004 | Positive | Instrument Agent Loop boundary adapter during valid request | Outbound payload contains only `messages` and bounded `metadata` | Extra config fields appear in Gateway->Agent Loop payload | Hidden configuration channel |
+| GW-T004P | GW-MUST-004 | Positive | Instrument Agent Loop boundary adapter during valid request | Outbound payload contains only `messages`, the model, and bounded `metadata`; no system message | Extra config fields or a system message appear in Gateway->Agent Loop payload | Hidden configuration channel |
 | GW-T004N | GW-MUST-004 | Negative | `metadata` includes `api_key`, `provider`, `tool_sources` | Request rejected pre-stream with safe 400 | Request forwarded to Agent Loop | Request-time reconfiguration drift |
-| GW-T005P | GW-MUST-005 | Positive | Valid auth context on protected route (`GET /conversations`) | 2xx with expected response | 401 despite valid auth | Auth regression |
-| GW-T005N | GW-MUST-005 | Negative | Missing/invalid auth on protected route | 401 safe unauthorized | Route returns data without auth | Auth bypass |
+| GW-T005P | GW-MUST-005 | Positive | Valid credentials on protected route (`GET /conversations`) | Gateway calls Auth; 2xx with expected response | 401 despite valid auth, or no Auth call made | Auth regression |
+| GW-T005N | GW-MUST-005 | Negative | Missing/invalid credentials on protected route, including list and history reads | 401 safe unauthorized | Route returns data without an Auth check | Auth bypass |
 | GW-T006P | GW-MUST-006 | Positive | Call `GET /conversations` and `GET /conversations/:id` for existing records | Responses match canonical envelopes | Envelope fields missing/renamed | Response contract drift |
 | GW-T006N | GW-MUST-006 | Negative | Force endpoint to return raw storage row shape | Conformance schema validation fails | Test passes with non-canonical response | Storage leakage |
 | GW-T007P | GW-MUST-007 | Positive | Successful `POST /message` stream | Response header includes `X-Conversation-ID` | Header absent | Reconciliation drift |
@@ -41,7 +43,7 @@ This file defines language-agnostic pass/fail vectors for Gateway conformance.
 | GW-T008N | GW-MUST-008 | Negative | Emit `done` with only `finish_reason` | Conformance test fails | Missing IDs accepted | Completion reconciliation drift |
 | GW-T009P | GW-MUST-009 | Positive | `POST /approvals/{id}` with `{ decision: "approved" }` | 2xx response `{ request_id, decision }` | Non-canonical body/route semantics | Approval endpoint drift |
 | GW-T009N | GW-MUST-009 | Negative | Send `{ approved: true }` or wrong route path | 400 safe invalid request | Non-canonical payload accepted | Approval payload drift |
-| GW-T010P | GW-MUST-010 | Positive | Tool call requiring approval during stream | `approval-request` then `approval-result` events emitted | One or both approval events missing | Approval invisibility |
+| GW-T010P | GW-MUST-010 | Positive | Owner's Auth rules require approval for a tool call during stream | `approval-request` then `approval-result` events emitted | One or both approval events missing | Approval invisibility |
 | GW-T010N | GW-MUST-010 | Negative | Implement approval only in local client flow, no stream events | Conformance test fails | Test passes with no approval events | Client-only approval drift |
 | GW-T011P | GW-MUST-011 | Positive | Inject provider timeout mid-stream | `error` event with code `provider_error` | Wrong or generic error code | Error taxonomy drift |
 | GW-T011N | GW-MUST-011 | Negative | Collapse all failures to `provider_error` | Conformance test fails on tool/context cases | Taxonomy collapse accepted | Error taxonomy collapse |
@@ -51,11 +53,15 @@ This file defines language-agnostic pass/fail vectors for Gateway conformance.
 | GW-T013N | GW-MUST-013 | Negative | Map unknown IDs to internal storage error text | Conformance test fails | Internal text reaches client | Error leakage |
 | GW-T014P | GW-MUST-014 | Positive | Create conversation, instantiate new Gateway runtime, retrieve conversation | Data available through Memory boundary | Data only in process-local store | Durability drift |
 | GW-T014N | GW-MUST-014 | Negative | Stub implementation with private map storage only | Conformance test fails on restart/persistence check | Non-durable store accepted | Memory boundary bypass |
+| GW-T015P | GW-MUST-015 | Positive | Change the owner's model preference while running, then send one message | The Agent Loop request for that message names the new model; no restart | Old model passed, or restart needed | Model-fixed-at-startup drift |
+| GW-T015N | GW-MUST-015 | Negative | Implementation reads the model once at startup | Conformance test fails | Startup-fixed model accepted | Model-fixed-at-startup drift |
+| GW-T016P | GW-MUST-016 | Positive | Run a turn with a tool call, then fetch the conversation and resume it | History contains the tool call and tool result; the resumed request sends them back | Tool call or result missing from history or replay | Lossy history drift |
+| GW-T016N | GW-MUST-016 | Negative | Implementation stores only user and assistant text | Conformance test fails | Text-only history accepted | Lossy history drift |
 
 ## Coverage Summary
 
-- MUST requirements: 14
-- Positive tests: 14
-- Negative tests: 14
-- Total vectors: 28
-- Critical drift categories covered: auth bypass, internal contract fabrication, hidden configuration channel, response envelope drift, approval invisibility, taxonomy collapse, unsafe error leakage, non-durable conversation storage.
+- MUST requirements: 16
+- Positive tests: 16
+- Negative tests: 16
+- Total vectors: 32
+- Critical drift categories covered: auth bypass, internal contract fabrication, hidden configuration channel, response envelope drift, approval invisibility, taxonomy collapse, unsafe error leakage, non-durable conversation storage, model fixed at startup, lossy history.

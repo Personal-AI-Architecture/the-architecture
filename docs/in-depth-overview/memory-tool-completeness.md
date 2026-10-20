@@ -84,8 +84,8 @@ Every concept people might think needs its own subsystem decomposes into memory 
 | **Analytics/logging** | Collected metrics, log entries — data | `analyze(query)`, `aggregate(params)` — analysis is an operation | Log collection is a tool writing to memory |
 | **Workflows/orchestration** | Workflow definitions — data (skills, prompts, step descriptions) | Execution steps — tools; orchestration is the Agent Loop's loop | Auth gates each step independently |
 | **Scheduling** | Schedule definitions, cron expressions — data | Triggering — a tool (cron tool triggers the Agent Loop) | — |
-| **Configuration** | Three categories: preferences (Your Memory — personal data), runtime config (thin bootstrap — environment config), tool self-description (from the tools themselves, D146) | Applying config — Agent Loop reads config at startup | Auth controls who can modify config |
-| **Version history** | Historical states, diffs — data | `diff(v1, v2)`, `restore(version)` — operations | Memory's versioning guarantee (guarantee #6) |
+| **Configuration** | Three categories: preferences (Your Memory — personal data), runtime config (thin bootstrap — environment config), tool self-description (from the tools themselves, D146) | Applying config — environment config is read at startup; preferences such as the model choice are read through the Memory tools (the model choice on every message) | Auth controls who can modify config; permissions themselves live only in Auth |
+| **Version history** | Historical states, diffs — data | `diff(v1, v2)`, `restore(version)` — operations | Memory's version guarantee — history and restore are required |
 | **Notifications** | Notification rules, templates — data | `send_notification(target, content)` — sending is an operation | Auth controls who receives what |
 
 Every row decomposes. No row has a remainder that requires a new component.
@@ -147,7 +147,7 @@ The binary classifies the water, not the plumbing. The infrastructure itself —
 **Components:**
 - **Memory** — the persistent substrate. Stores all data. Doesn't interpret it.
 - **Agent Loop** — the agent loop. Connects models to tools. Executes operations.
-- **Auth** — access control. Cross-cutting. Gates every request. Decomposes into memory + tools but exists as a component because security can't depend on swappable intelligence (see §2, Exception 2).
+- **Auth** — access control. Cross-cutting. Gates every request (called by the Gateway) and every tool call (asked by the Agent Loop). Decomposes into memory + tools but exists as a component because security can't depend on swappable intelligence (see §2, Exception 2).
 - **Gateway** — conversation management. Single entry point for all clients.
 
 These are the system. They're not memory or tools — they're what processes memory and tools.

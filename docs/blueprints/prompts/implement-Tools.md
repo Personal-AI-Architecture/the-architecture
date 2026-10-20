@@ -67,7 +67,9 @@ Implement these behaviors:
 - Resolve availability via environment/config + Auth permissions.
 - Keep request payloads from reconfiguring runtime tool state.
 - Preserve stable tool-call/tool-result IDs in stream contract.
-- Enforce coded approval gate before approval-required mutations.
+- Ask Auth before each tool call; a refused call does not run and returns "not permitted".
+- Mark tools the actor may not use as not permitted instead of hiding them.
+- Ship no approval step by default; where an approval rule in Auth covers a call, enforce it in code before execution.
 - Emit structured safe tool failures with classification and recoverability.
 - Keep component/model memory access tool-mediated.
 - Enforce trust-level tool isolation and scope boundaries.
@@ -97,9 +99,9 @@ Enforce required fields, optional fields, defaults, forbidden fields, and condit
 Use these for MVP consistency:
 
 1. Self-describing tools are normative; static source maps are acceptable only as transitional implementation evidence.
-2. Keep model visibility of unavailable tools as a SHOULD-level target when full hinting is not yet implemented.
+2. Model visibility of not-permitted tools is required (TOL-MUST-015): mark them, do not hide them. The contract has no field for this yet; report the shape you chose.
 3. Keep always-send/discoverable split architecture-ready even if initial deployment runs with a small fixed set.
-4. Treat untrusted-tool dedicated isolation as non-negotiable policy for any third-party/untrusted source.
+4. Isolate tools the owner has not said they trust, by default. Containers are one option; separate processes or sandboxes are others.
 
 ## Non-Negotiable Constraints
 
@@ -108,7 +110,9 @@ Use these for MVP consistency:
 - Do not execute tools outside Agent Loop path.
 - Do not bypass Auth authorization for tool calls.
 - Do not accept request-side tool source or definition overrides.
-- Do not execute approval-required mutations before decision.
+- Do not execute a call an approval rule covers before decision.
+- Do not ship approval on every write as a built-in default.
+- Do not run a tool call without a per-call Auth check.
 - Do not return raw stack traces or secret-bearing error text.
 - Do not let components bypass tool-mediated Memory access.
 - Do not run untrusted tools without required isolation controls.
@@ -126,12 +130,14 @@ Implement automated tests proving all `TOL-MUST-*` requirements in `Tools-confor
 6. Canonical definition schema enforcement.
 7. Clear startup failure on invalid sources/definitions.
 8. Stable tool-call/tool-result stream shape.
-9. Approval-gated mutation control.
+9. Approval-rule enforcement where rules exist.
 10. Structured/safe tool failure taxonomy.
 11. Tool-mediated memory-boundary enforcement.
 12. Trust-level isolation boundary enforcement.
 13. Explicit failure surfacing for timeout/unavailability/crash.
 14. Config/preference-only tool swap path.
+15. Per-call Auth check with "not permitted" results and marked, not hidden, tools.
+16. Owner can use every tool by default; approval rules live only in Auth.
 
 Include positive and negative vectors linked to requirement IDs.
 
@@ -139,7 +145,8 @@ Include positive and negative vectors linked to requirement IDs.
 
 - Any Critical check in `Tools-drift-guard.md` fails.
 - Any `TOL-MUST-*` conformance test fails.
-- Approval-required mutation executes before approval decision.
+- A call an approval rule covers executes before approval decision.
+- A tool call runs without a per-call Auth check.
 - Unsafe tool failure leakage is detected.
 - Direct component storage access bypasses tool boundaries.
 - Untrusted-tool isolation requirements are violated.

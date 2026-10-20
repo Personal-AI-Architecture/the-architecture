@@ -5,6 +5,8 @@ hide_table_of_contents: true
 
 # Adapter Spec: Making Contracts Swappable
 
+**Serves stories:** US-5, US-7 in the [PAA spec](../spec/personal-ai-architecture-spec.md).
+
 You own the internal interface your system speaks. That's what adapters are about.
 
 Every AI system depends on external standards — OpenAI format, Anthropic format, provider-specific APIs, streaming conventions. You don't control those standards. They change when someone else decides they change. Without a boundary between you and them, your entire system is coupled to decisions you didn't make.
@@ -42,7 +44,7 @@ WITH ADAPTERS:
 
 ### Gateway API Adapter — Between Clients and Gateway
 
-**External standard (today):** OpenAI Chat Completions format with product convention for client metadata.
+**External interface (today):** The Gateway API defined in `specs/openapi/gateway-api.yaml`: a plain REST and Server-Sent Events API for sending messages and managing conversations (for example `POST /conversations/messages`). It is not OpenAI Chat Completions. A Gateway API adapter can add another external format, such as Chat Completions, for clients that already speak it.
 
 **Internal interface:** Message in, response out. The Gateway receives a normalized request (messages, conversation ID, metadata) and returns a normalized response stream. It doesn't know or care what protocol the client spoke.
 
@@ -51,7 +53,7 @@ WITH ADAPTERS:
 - Translates outbound Gateway responses from the internal interface into the external standard
 - This is the only place the external protocol lives
 
-**Swap scenario:** A new standard supersedes OpenAI Chat Completions. Write a new adapter that translates the new format to/from the same internal interface. Gateway doesn't change. Auth doesn't change. Agent Loop doesn't change. Clients adopt the new standard at their own pace (or you run both adapters during transition).
+**Swap scenario:** Clients start expecting a different standard. Write a new adapter that translates the new format to/from the same internal interface. Gateway doesn't change. Auth doesn't change. Agent Loop doesn't change. Clients adopt the new standard at their own pace (or you run both adapters during transition).
 
 ### Model API Adapter — Between Agent Loop and Models
 
@@ -95,11 +97,11 @@ Three pieces of config control this:
 "I prefer anthropic/claude-sonnet-4-6 via OpenRouter"
 ```
 
-At boot, the system loads the adapter, reads your preference, and every request flows through the same path: Agent Loop → Model API Adapter → model. Your client doesn't need to know which model is behind the system — it sends messages to the Gateway API and gets responses back.
+At boot, the system loads the adapter. On every message, the Gateway reads your current model preference and passes it to the Agent Loop with the request, and every request flows through the same path: Agent Loop → Model API Adapter → model. Your client doesn't need to know which model is behind the system — it sends messages to the Gateway API and gets responses back.
 
 ### Two kinds of change
 
-**Same provider, different model** — change your model preference in Your Memory. One change, immediate effect.
+**Same provider, different model** — change your model preference in Your Memory. One change: the next message uses the new model, with no restart.
 
 | Before | After | What changed |
 |--------|-------|-------------|
@@ -121,7 +123,7 @@ See [configuration-spec.md](./configuration-spec.md) for runtime config details,
 
 ## The Discipline
 
-The test: can you describe what the adapter does in one sentence? "Translates OpenAI Chat Completions format to the internal message interface." If the sentence needs an "and," the adapter is doing too much. The logic belongs in the component, not the adapter.
+The test: can you describe what the adapter does in one sentence? "Translates one provider's chat format to the internal message interface." If the sentence needs an "and," the adapter is doing too much. The logic belongs in the component, not the adapter.
 
 ---
 

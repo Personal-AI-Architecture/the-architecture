@@ -5,29 +5,23 @@ hide_table_of_contents: true
 
 # Tools: Capabilities in the Environment
 
-The system reduces to two things: memory and tools. 
+**Serves stories:** US-8, US-10, US-17 in the [PAA spec](../spec/personal-ai-architecture-spec.md).
 
-If it's not data (memory), it's a tool.
+The system reduces to two things: memory and tools.
 
-Tools are operations — verbs. Read, write, search, query, send, execute. The operation itself has no persistent state. It acts on memory and returns.
+Memory is the nouns: data, wherever it lives. Tools are the verbs: read, write, search, query, send, execute. A tool's definition, code and instructions are data, but the act of running it is not. The operation has no persistent state. It acts on memory and returns.
 
-Memory is the nouns. Tools are the verbs. Clean binary.
+## Current architectures are inefficient
 
-## Current Architectures are inefficient
+Current architectures generally assume tools need a dedicated subsystem: registries, protocols, discovery frameworks, execution engines.
 
-Current architectures generally assume tools need a dedicated subsystem — registries, protocols, discovery frameworks, execution engines.
+But your hand doesn't need a tool management department between you and your hammer. Your AI system doesn't need one either. That's why this architecture has no dedicated tool subsystem. The model and Your Memory (the brain) tell the Agent Loop (the hand) which tool calls to execute. Nothing is left over.
 
-But your hand doesn't need a tool management department between you and your hammer. And your AI system doesn't need one either. That's why this architecture has no dedicated tool subsystem.
+## Same tools, better architecture
 
-Tools are data. The AI model and the memory (the brain) tell the agent loop (the hand) what tool calls to execute. There's nothing left over.
+This architecture uses the same tools as everyone else: MCP servers, CLI tools, APIs, whatever the ecosystem produces. What's different is that it builds no dedicated infrastructure around them. Everything a tool needs already has a home.
 
-## Same Tools, Better Architecture
-
-This architecture uses the same tools — MCP servers, CLI tools, APIs, whatever the ecosystem produces.
-
-What's different is that it doesn't build dedicated infrastructure around them. Tools are just operations that act on data (memory) — and everything they need already has a home.
-
-The architecture has four components, two APIs, and three external dependencies. Tools are one of the external dependencies — not a component, not an API. Tool calls flow through the Model API and are executed by the Agent Loop. No separate tool protocol needed.
+The architecture has four components, two APIs and three external dependencies. Tools are one of the external dependencies, not a component and not an API. Tool calls flow through the Model API and are executed by the Agent Loop. No separate tool protocol is needed.
 
 ```
                               ┌───────────────────────────────────────────────┐
@@ -41,35 +35,30 @@ The architecture has four components, two APIs, and three external dependencies.
     (external)        (API)       (component)   (component)        (API)          (external)
                                                       │
                         ─── Auth ───                  └──→ Tools (verbs)  ──→  External Memory (nouns)
-                        (cross-cutting                     ├── MCP servers      ├── Salesforce data
-                         component,                        ├── CLI tools        ├── Weather services
-                         applies to all                    └── Native functions └── The internet
-                         requests)
+                        (checks every request             ├── MCP servers      ├── Salesforce data
+                         and every tool call)             ├── CLI tools        ├── Weather services
+                                                          └── Native functions └── The internet
 ```
-
-## Your Memory is the platform. Tools are how you interact with it.
 
 Three things follow from this:
 
-**The architecture stays small.** Everything this system processes is either a noun (memory) or a verb (tool). No third category. That binary is what keeps it at four components. New capabilities arrive by adding tools to the environment, not by adding components to the system. 
+**The architecture stays small.** Everything the system processes is either a noun (memory) or a verb (tool). There is no third category. New capabilities arrive by adding tools to the environment, not by adding components to the system.
 
-**Your Memory stays dependency-free.** Memory never knows what's reading or writing to it — tools handle that. Swap the Agent Loop, swap the storage, swap the tools themselves — Memory doesn't change. That's what makes it truly portable and ownable.
+**Your Memory stays dependency-free.** Memory never knows what is reading or writing it. Swap the Agent Loop, the storage or the tools, and Memory doesn't change. That is what makes it portable and ownable.
 
-**The system adapts at the speed of AI.** Because the architecture expands via tools rather than via new infrastructure, a new model capability, a new protocol, a new integration — all tool additions, not system changes. The thing that doesn't need to be rebuilt is the thing that survives.
+**The system adapts at the speed of AI.** A new model capability, a new protocol or a new integration is a tool addition, not a system change.
 
-The rest of this document shows why.
+This is an architecture document. It defines how tools work at the generic level. Which tools ship, their defaults and the choice of MCP as the default protocol are implementation choices.
 
-This is an **Architecture document** — it defines how tools work at the generic, unopinionated level. Product-specific tool choices (which tools ship, what defaults, MCP as default protocol) are implementation opinions.
-
-**Related documents:** [foundation-spec.md](./foundation-spec.md) (architecture overview, links to all component specs)
+**Related documents:** [foundation-spec.md](./foundation-spec.md) (architecture overview), [agent-loop-spec.md](./agent-loop-spec.md), [auth-spec.md](./auth-spec.md), [configuration-spec.md](./configuration-spec.md), [security-spec.md](./security-spec.md)
 
 ---
 
-## The Memory/Tool Binary
+## The memory/tool binary
 
-In the physical world, a hammer is a distinct object from a filing cabinet, and a screwdriver is a separate thing from the book about screwdrivers. In the digital world, that distinction dissolves. A tool *is* its definition, its code, its instructions — all just data. The tool's definition comes from the tool itself — MCP tools self-describe via protocol, others provide manifest files. The tool's executable — the software that runs when the Agent Loop makes a call — lives in the environment. The only thing that isn't data is the act of execution itself — the moment the Agent Loop runs the call. That's runtime, not persistent.
+In the physical world, a hammer is a separate object from a filing cabinet. In the digital world, that distinction dissolves. A tool's definition comes from the tool itself: MCP tools describe themselves through the protocol, others provide manifest files. The tool's executable lives in the environment. The only thing that isn't data is the moment the Agent Loop runs the call.
 
-The AI industry typically defines "tool" as an MCP server or function call — conflating the operation (the verb) with the data it accesses (the noun). This system is more precise. What looks like "a RAG tool" is actually a pattern that decomposes:
+The industry often calls an MCP server or function call "a tool", mixing the operation (the verb) with the data it reaches (the noun). This architecture separates them:
 
 | What people call it | Memory (data/noun) | Tool (operation/verb) |
 |---|---|---|
@@ -78,317 +67,269 @@ The AI industry typically defines "tool" as an MCP server or function call — c
 | Salesforce integration | CRM data (externally hosted) | `salesforce_query(filter)` |
 | Knowledge graph | Nodes and edges | `graph_traverse(start, relation)` |
 | Search index | Indexed content | `full_text_search(terms)` |
-| Email via Gmail | Email history (Google-hosted) | `send_email` tool calling Gmail API (tool calling tool) |
+| Email via Gmail | Email history (Google-hosted) | `send_email` tool calling the Gmail API (tool calling tool) |
 
-Pure tools with no memory component do exist: sending a message, running a calculation, controlling a browser. These are verbs with side effects, not data.
+Pure tools with no memory component exist too: sending a message, running a calculation, controlling a browser. These are verbs with side effects.
 
 ---
 
-## Why Tools Are Not a Component
+## Why tools are not a component
 
-The Agent Loop is a component — it has a distinct job (run the agent loop), a contract, and an implementation. Your Memory is a component — it has a distinct job (persist and retrieve data), a contract, and an implementation. Auth is a component — it has a distinct job (control access), a contract, and an implementation.
-
-Tools don't have a distinct job that isn't already covered by existing components. Every concern that seems like it belongs to a "Tools component" actually belongs somewhere else:
+The Agent Loop, Your Memory, the Gateway and Auth each have a distinct job, a contract and an implementation. Tools have no job that an existing part doesn't already cover:
 
 | Concern | Where it lives | Why not a Tools component |
 |---------|---------------|--------------------------|
-| Tool definitions (name, description, parameters) | **The tools themselves** — self-describing via MCP protocol or manifest files | Tools know what they can do. Nobody writes definitions manually |
-| Tool code / executables | **The environment** — software the Agent Loop can call | Available software isn't a component of this system |
-| Instructions for when/how to use tools | **Your Memory** — skills, AGENT.md | The model reads instructions from Your Memory — these are personal data |
-| Tool preferences (always-send set, policies) | **Your Memory** — personal data about how you work | "Always load git tools" is about you, not about this desk |
-| Tool plumbing (server addresses, ports, API keys) | **Environment config** — deployment-specific | Plumbing describes the desk, not the person sitting at it |
-| Tool discovery (what's available) | **Configuration** — which tool sources to search; tools self-describe once found | Discovery is just knowing where to look, not a separate system |
-| Tool execution | **Agent Loop** — it executes calls | Part of the agent loop — the Agent Loop already does this |
-| Tool results | **Agent Loop** — returned to the model | Part of the agent loop — the Agent Loop already does this |
-| Tool permissions (who can use what) | **Auth** | Access control is Auth's job |
-| Tool installation | **The environment** — environment-specific | Installing a tool changes the deployment environment |
+| Tool definitions (name, description, parameters) | **The tools themselves**, through MCP or a manifest | Tools know what they can do. Nobody writes definitions by hand |
+| Tool code and executables | **The environment** | Available software isn't a component of this system |
+| Instructions for when and how to use tools | **Your Memory** (skills, AGENT.md) | Personal data the model reads |
+| Tool preferences (which tools are always sent) | **Your Memory** | "Always load git tools" is about you, not about this machine |
+| Tool plumbing (server addresses, ports, secret references) | **Environment config** | Plumbing describes the machine, not the person using it |
+| Tool discovery (what's available) | **Configuration** says where to look; tools describe themselves once found | Discovery is knowing where to look |
+| Tool execution and results | **Agent Loop** | Already part of the agent loop |
+| Tool permissions (who can use what) | **Auth**, and only Auth | Access control is Auth's job |
+| Tool installation | **The environment** | Installing a tool changes the deployment environment |
 
-Nothing is left over. There is no gap that requires a dedicated component.
+Nothing is left over.
 
-**Tools are also not an API.** The foundation spec originally proposed a Tool Protocol API alongside the Gateway API and Model API. But trace where each part actually lives.
-
-How tool calls are expressed — that's the Model API. The model's API format already defines tool call syntax. How tool calls are executed — that's the Agent Loop's implementation detail (MCP server, CLI command, native function). How results come back — that's the Model API again, in the next message to the model.
-
-The Model API covers one side. The Agent Loop's implementation covers the other. There's no gap between them that needs a dedicated API. MCP, CLI tools, native functions — these aren't "the tool protocol." They're implementation options for how the Agent Loop executes specific tools.
+**Tools are also not an API.** How tool calls are expressed is the Model API: the model's format already defines tool-call syntax. How they are executed is an Agent Loop implementation detail (MCP server, CLI command, native function). How results come back is the Model API again, in the next message to the model. MCP, CLI and native functions aren't "the tool protocol". They are options for how the Agent Loop runs a given tool.
 
 ---
 
-## How Scope Works
+## How scope works
 
-The expanding sphere — library folder → full filesystem → external services → inbound connections — is entirely driven by which tools exist in the environment and what Auth allows.
-
-- **V1:** The environment has library-scoped file tools. The Agent Loop can only operate within the library folder. Not because a scope enforcer limits it — but because those are the only tools that exist.
-- **V2:** System-level file tools are added to the environment. The Agent Loop can now access the full filesystem. The Agent Loop didn't change. Your Memory didn't change. More data (tool definitions) entered the environment.
-- **V3:** External API tools are added. Same pattern.
-- **V4:** Inbound integration tools are added. Same pattern.
-
-Each expansion is more data entering the environment. Each contraction is data being removed. The Agent Loop doesn't know what scope it's operating in. It uses whatever tools exist. Scope equals what tools are available plus what Auth permits.
+What the system can reach (the library folder, the full filesystem, external services, inbound connections) is set entirely by which tools exist in the environment and what Auth allows. Add system-level file tools and the Agent Loop can reach the filesystem. Add external API tools and it can reach those services. The Agent Loop doesn't change and Your Memory doesn't change. No scope enforcer is needed: if a tool doesn't exist, the call can't happen.
 
 ### Three layers of tool availability
 
 | Layer | What it controls | Who decides |
 |-------|-----------------|-------------|
-| **Environment** — what tools exist | Which tools are physically present and executable | Configuration. On local: defaults + owner adds anything. On managed hosting: the provider curates + allow list. |
-| **Auth** — who can use what | Which of the available tools each actor can access | Permissions. Owner has full access. Collaborators, agents, and other actors have scoped access. |
-| **Granularity** — how you can use them | Read-only vs read-write, restricted parameters, conditional access | Permissions refined. Future concern — Auth getting more specific over time. |
+| **Environment**: what tools exist | Which tools are present and executable | The owner, starting from whatever the implementation ships |
+| **Auth**: who can use what | Which available tools each actor may use | Permissions in Auth. By default the owner can use every tool. Any other actor starts with no permissions until the owner grants them |
+| **Granularity**: how they can be used | Read-only vs read-write, restricted parameters, conditions | Finer-grained Auth permissions |
 
-**Configuration decides what exists. Auth decides who can use what. The model sees both. The Agent Loop only sees what it can execute.**
+**The environment decides what exists. Auth decides who can use what. The model is told both.**
 
-The model benefits from knowing about tools that exist but aren't permissioned for the current actor. This lets the model say "that capability is available but your account doesn't have access" rather than pretending the capability doesn't exist. The Agent Loop doesn't need this distinction — if a tool isn't executable (for any reason), it can't run it.
+### Before each tool call, the Agent Loop asks Auth
+
+The Agent Loop holds no permissions of its own. Before it runs any tool call, it asks Auth whether the current actor may make that call. If Auth says no, the call doesn't run and the model gets a "not permitted" result, so it can tell the owner what happened.
+
+The model also needs to know about tools that exist but aren't permitted for the current actor. Then it can say "that capability exists but this account can't use it" instead of acting as if it doesn't exist. When the Agent Loop prepares tool definitions for the model, it asks Auth which ones the current actor may use and marks the rest as not permitted.
+
+### No approval step by default
+
+The architecture default is that the owner can do everything. There is no built-in "confirm before every write" step.
+
+An owner or a product may want approval before some actions, such as writing files or sending email. Those are approval rules, and they live in Auth with the other permissions. The Agent Loop's check before each tool call is where they are enforced. Whether a product adds approvals, how strict its defaults are and what the prompt looks like are product choices.
+
+An approval rule can't be enforced by a prompt alone. A system prompt that says "always ask before writing" is a suggestion the model might ignore. A check in software before the call runs is a guarantee.
 
 ---
 
-## Tools and Skills
+## Tools and skills
 
-Skills and tools are related but different things.
+A **skill** is a recipe: instructions in Your Memory that tell the model what to do, step by step, with judgment. "Interview the owner about this topic. Ask 10 rounds of questions. Produce a spec at the end."
 
-A **skill** is a recipe — instructions in Your Memory that tell the model what to do, step by step, with judgment. "Interview the user about this topic. Ask 10 rounds of questions. Challenge vague answers. Produce a spec at the end."
+A **tool** is kitchen equipment: a capability in the environment. Read a file. Write a file. Search. Call an API.
 
-A **tool** is kitchen equipment — a capability in the environment that lets the model do something specific. Read a file. Write a file. Search for content. Call an API.
-
-The skill references the tools. "Use the read tool to check AGENT.md first. Use the write tool to save the spec." But the skill is not a tool. The skill is data in Your Memory that the model reads and follows. The tool is a capability in the environment that the Agent Loop executes.
-
-Skills can include code or scripts alongside natural language instructions — bash commands, configuration snippets, templates. These are still data. A script on disk is just bytes in Your Memory. The model reads it, understands what it does, and executes it through available tools (bash, shell, etc.).
+The skill refers to tools ("use the read tool to check AGENT.md first"), but it is not a tool. It is data the model reads and follows. Skills can include scripts and templates. These are still data: the model reads them and runs them through whatever tools exist.
 
 ### The skill tool pattern
 
-Every skill is a prompt — a markdown file in Your Memory. Every prompt is the same from the system's standpoint. There's no structural difference between an interview skill, a spec-generation skill, or any future skill. This means skills don't each need their own tool.
-
-**One generic skill tool handles all skills.** The skill tool's job: load a skill prompt from Your Memory and inject it into the model's context. The model then follows the skill's instructions using whatever tools are available. The interview skill, the spec-generation skill, and the plan-generation skill all work through the same skill tool — the only difference is which markdown file gets loaded.
+Every skill is a prompt, a Markdown file in Your Memory. So skills don't each need their own tool. **One generic skill tool loads any skill** into the model's context, and the model follows it with the tools available.
 
 This has three consequences:
 
-1. **Skills are owner-editable without developer involvement.** Want to change 8 things about the interview prompt? Edit the markdown file. No code changes, no redeployment, no developer required.
-
-2. **New skills are free.** Adding a new skill is creating a new markdown file. The skill tool doesn't need to know about it in advance — it just loads whatever skill the model (or owner) selects.
-
-3. **Coded tools are the escalation path, not the starting point.** If a skill-as-prompt isn't sufficient — if prompt engineering hits a ceiling and the model can't handle a particular workflow through instructions alone — *then* a specific coded tool can be built. But not preemptively. Start with the simplest thing (prompt), see how it works, code only when necessary. As models improve, what requires coded tools today may be handled by prompts tomorrow.
-
-### Approval gates — why they can't be a prompt
-
-One tool that *must* be a coded tool from the start: approval gates.
-
-When the system is about to write to the user's files, it must pause and ask for confirmation. This cannot be handled by the system prompt alone — you can't guarantee the model will comply. A system prompt that says "always ask before writing" is a suggestion the model might follow. An approval gate tool that intercepts write operations is a guarantee enforced by software. The approval gate is still a tool — a capability in the environment that the Agent Loop executes — but when the consequence of non-compliance is writing to the user's files without permission, you don't rely on compliance.
+1. **The owner can edit skills without a developer.** Edit the Markdown file. No code change, no redeploy.
+2. **New skills are free.** Adding a skill is adding a file. The skill tool doesn't need to know about it in advance.
+3. **Coded tools are the escalation path, not the starting point.** Build a specific coded tool only when prompting hits a ceiling. As models improve, what needs code today may need only a prompt tomorrow.
 
 ### Example: a minimal tool set
 
-A deployment needs very few tools to be functional. Filesystem operations (read, write, edit, delete, search, list) are the foundation — they give the Agent Loop access to Your Memory. On top of those, three tools cover the core patterns:
+A working deployment needs very few tools. Filesystem operations (read, write, edit, delete, search, list) give the Agent Loop access to Your Memory. On top of those:
 
-| Tool | Type | What it illustrates |
-|------|------|-------------|
-| **Skill tool** | Generic loader | One tool handles all skills — loads a prompt from Your Memory and injects it into context. No per-skill tools needed. |
-| **Git tool** | Version control | A standard external tool wrapped for the Agent Loop — initializes repos, commits changes, provides diff. |
-| **Approval gate** | Write guard | A coded tool that *must* exist (see above) — intercepts write operations, pauses for owner confirmation. |
+| Tool | What it illustrates |
+|------|-------------|
+| **Skill tool** | One generic loader handles every skill |
+| **Version history tool** | A standard external capability (Git is one option) wrapped for the Agent Loop to record and restore versions of Your Memory |
 
-This set is illustrative, not prescriptive. An implementation decides which tools ship. The point is that a small number of tools — filesystem access, a skill loader, version control, and a write guard — is enough to run a fully functional system.
+This set is illustrative. An implementation decides which tools ship.
 
 ---
 
-## Tool Context Management — What the Model Sees
+## What the model sees
 
-Tool definitions are sent through the Model API alongside system instructions and conversation history. Every tool definition consumes context window space and costs tokens on every API call. With a handful of MVP tools, this is negligible. As the system expands — more filesystem tools, external API tools, marketplace tools — sending every registered tool definition with every prompt becomes wasteful and degrades model performance. Models make worse tool selections when presented with dozens of irrelevant options.
+Tool definitions are sent through the Model API with the system instructions and conversation history. Every definition costs context space and tokens on every call, and models choose worse when shown dozens of irrelevant tools.
 
 ### Two sets: always-send and discoverable
 
-| Category | What it is | How it works |
+| Set | What it is | How it works |
 |----------|-----------|--------------|
-| **Always-send set** | Tools the owner uses regularly — their daily drivers | Definitions are sent with every prompt through the Model API. Zero overhead to use. |
-| **Discoverable set** | Everything else that's registered in the environment | Available on demand through a discovery tool. Not sent with every prompt. |
+| **Always-send** | Tools the owner uses regularly | Definitions go with every prompt |
+| **Discoverable** | Every other tool in the environment | Found on demand through a discovery tool |
 
-The **always-send set** is owner-configured. The owner decides which tools belong in their daily set based on how they work. A developer might always-send filesystem, git, and deployment tools. A writer might always-send filesystem and research tools. A business owner might always-send calendar, email, and CRM tools. The set reflects the individual, not a product decision.
+**The owner chooses which set each tool is in, not the tool and not the product.** A developer might always send filesystem, git and deployment tools. A writer might always send filesystem and research tools. This choice is a preference in Your Memory, so it travels with the owner. An implementation may suggest a starting set, but a tool can't place itself in the always-send set.
 
-The **discovery tool** is a meta-tool that's always in the always-send set. When the model needs a capability that isn't in the current context, it searches available tools, finds what it needs, and loads it. The model decides when to search — the Agent Loop stays a pass-through.
+The **discovery tool** is always in the always-send set. When the model needs something not in context, it searches, finds the tool and loads its definition. The model decides when to search. The Agent Loop stays a pass-through.
 
-### Why the owner controls this
+On many AI platforms, the platform decides which tools every user gets. You can't drop tools you never use, or add ones that matter to you. Here the owner makes that trade-off.
 
-On big-tech AI platforms, the platform decides which tools every user gets. You can't remove tools you don't use (they still consume your context). You can't add specialized tools that matter to your workflow. You can't tune the tradeoff between tool availability and context efficiency.
+This scales in both directions. With few tools, everything is always sent and discovery rarely fires. With thousands, discovery becomes essential and the always-send set stays lean. The architecture doesn't change.
 
-In this architecture, the owner makes that call.
+### Discovery at scale
 
-### Scaling properties
+**The tool catalog is just data.** The Agent Loop collects self-descriptions from every tool in the environment into a searchable index. Tools appear and disappear, and the catalog follows.
 
-This approach degrades gracefully in both directions:
+**Discovery has two steps: search, then load.** The model describes what it needs. The discovery tool returns a short list of names and descriptions. The model picks one and loads its full definition. The model never sees every definition at once.
 
-- **Small tool count (MVP, V1):** Put everything in the always-send set. No discovery needed. The discovery tool exists but rarely fires.
-- **Medium tool count (V2):** Owner's daily drivers in always-send, the rest discoverable. One extra round trip when the model needs something unusual.
-- **Large tool count (marketplace, V3+):** Discovery becomes essential. The always-send set stays lean. The long tail lives in discovery. Same architecture, no changes.
-
-### Discovery at scale — hundreds or thousands of tools
-
-The two-set split handles *context window* scaling — don't send everything in every prompt. But when the discoverable set grows to hundreds or thousands of tools, the discovery tool itself needs to work at that scale. Three things make this work.
-
-**The tool catalog is just data.** The Agent Loop collects self-descriptions from every tool in the environment into a searchable index. The catalog doesn't own the tools — it just reflects what's available. Tools appear and disappear; the catalog tracks that.
-
-**Discovery is two-step: search, then load.** The model calls the discovery tool with a natural-language description of what it needs. The discovery tool searches the catalog and returns a short list of matches — names and descriptions only, not full definitions. The model picks the right one and loads its full definition into context. The model never sees every definition at once, so this stays lightweight at any scale.
-
-**Tools identify themselves by source and name.** MCP servers expose a namespace, CLI tools have command names, native functions have function names. When tools come from different sources, the source is part of the identity — two tools named `search` from different sources are distinguishable without a central naming authority.
-
-None of this changes the architecture. The discovery tool is still a tool. The catalog is data. The Agent Loop still executes whatever it's told.
+**Tools are identified by source and name.** MCP servers expose a namespace, CLI tools have command names, native functions have function names. The source is part of the identity, so two tools named `search` from different sources stay distinct without a central naming authority.
 
 ---
 
-## How the Agent Loop Uses Tools
-
-The previous sections explain *what* tools are and *what they enable*. This section explains *how* they work at runtime — how the Agent Loop finds them, calls them, and gets results back.
+## How the Agent Loop uses tools
 
 ### The execution loop
 
-When the model decides to use a tool, the sequence is:
+1. **The model produces one or more tool calls** in the assistant message, through the Model API. It may write text alongside them.
+2. **The Agent Loop asks Auth** whether each call is permitted for the current actor.
+3. **The Agent Loop runs the permitted calls.** Independent calls requested together run at the same time, not one after another. Each call uses whatever mechanism its tool needs (MCP, CLI, native function).
+4. **The results go back to the model** as the next message, one result per call. Text the model wrote alongside the calls is kept, not dropped.
+5. **The model continues.** It may call more tools or answer.
 
-1. **Model produces a tool call** — "call `read` with `{path: '~/my-ai/memory/finances/spec.md'}`" — expressed in the model's completion format through the Model API
-2. **Agent Loop receives the tool call** — the Agent Loop sees a tool call in the model's response and executes it
-3. **Agent Loop calls the tool** — using whatever execution mechanism the tool requires (MCP protocol, CLI command, native function call)
-4. **Tool returns a result** — data flows back to the Agent Loop
-5. **Agent Loop passes the result to the model** — as the next message in the conversation
-6. **Model continues** — may call more tools or produce a text response
+Tool calls and tool results are normal parts of messages, in the same message shape every contract uses. They are saved in conversation history with the rest of the conversation, so they survive export and are there when the conversation resumes.
 
-The Agent Loop doesn't interpret, filter, or modify tool calls or results. It's a pass-through executor. The model decides *what* to call. The Agent Loop handles *how* to call it. Auth controls *whether* the call is permitted.
+The Agent Loop doesn't interpret, filter or change tool calls or results. The model decides *what* to call. The Agent Loop handles *how*. Auth decides *whether*.
 
-### Tool registration — how the Agent Loop knows what's available
+### Tool registration
 
-There's no special registration system. The Agent Loop's normal loop (see [agent-loop-spec.md](./agent-loop-spec.md)) already includes tool definitions as an input alongside the system prompt and conversation history. "Registration" is just how those definitions get there.
+There is no special registration system. The Agent Loop already takes tool definitions as an input alongside the system prompt and conversation history (see [agent-loop-spec.md](./agent-loop-spec.md)). Registration is just how those definitions arrive.
 
-Tool plumbing — where tools live, what addresses to connect to — is environment configuration that travels with the deployment. Tool preferences — which tools to always-send, what policies to apply — are personal data in Your Memory. At startup, the Agent Loop reads environment config to know where to find tools, then discovers what they offer. How it gets the actual definitions depends on the tool:
+Environment config tells the Agent Loop where to find tools. The tools then describe themselves:
 
 | Mechanism | How definitions arrive | Example |
 |-----------|----------------------|---------|
-| **MCP server** | Agent Loop connects to the configured server and discovers what tools it offers via the MCP protocol. | Filesystem tools (read, write, search, list) |
-| **Native function** | Definition is part of the configuration data directly. | Approval gate, audit |
-| **CLI tool** | Wrapped in a tool definition that describes the command and its parameters. | Git operations |
+| **MCP server** | The Agent Loop connects and asks the server what tools it offers | Filesystem tools |
+| **Native function** | The definition is part of the tool's own code | Audit logging |
+| **CLI tool** | A manifest describes the command and its parameters | Git operations |
 
-Either way, the result is the same: tool definitions end up in the prompt, the model sees them, and the model decides when to use them. The Agent Loop doesn't understand what the tools do — it just includes their definitions and executes calls.
+Either way, the definitions end up in the prompt (if always-send) or the catalog (if discoverable). The Agent Loop doesn't understand what the tools do.
 
 ### Where tool executables live
 
-Tool *definitions* come from the tools themselves — they self-describe what they can do. But a definition alone doesn't do anything — somewhere, there's actual software that *runs* when the Agent Loop executes a tool call. That software — the tool executable — lives in the environment, not in Your Memory.
+| Location | What it means | Example |
+|----------|--------------|---------|
+| **In-process** | Runs inside the Agent Loop's process. Calls are function calls | A filesystem tool library, native functions |
+| **Separate process or container** | Runs alongside the Agent Loop. Calls go over a local channel or the network | A third-party tool suite |
+| **Remote service** | Runs on an external server | A hosted code-execution service, a weather API |
 
-| Location | What it means | When it applies | Example |
-|----------|--------------|-----------------|---------|
-| **In-process** | Tool code runs inside the Agent Loop's process. Calls are function calls — fast, simple, no network overhead. | MVP. The simplest thing that works. | MCP tool server as a library, native functions (approval gate, audit) |
-| **Sibling container** | Tool code runs in a separate Docker container alongside the Agent Loop. Calls go over the network. | V1+. When isolation, independent deployment, or language diversity matters. | Per-tool or per-group containers |
-| **Remote service** | Tool code runs on an external server. | V2+. Third-party tools, marketplace tools, partner integrations. | A hosted code execution service, a weather API |
-
-**The Agent Loop treats all three identically.** It calls the configured protocol, passes the input, gets a result. The difference between in-process, sibling container, and remote service is a deployment decision — it doesn't change how the Agent Loop works, how the model sees the tool, or how Auth permissions it.
-
-### Communication mechanisms
+**The Agent Loop treats all three the same.** Where a tool runs is a deployment decision. It doesn't change how the Agent Loop works, how the model sees the tool or how Auth governs it.
 
 | Mechanism | How it works | When it's used |
 |-----------|-------------|----------------|
-| **MCP over stdio** | Agent Loop and tool communicate through standard input/output streams within the same process or a child process. | In-process tools, locally spawned MCP servers |
-| **MCP over network** | Agent Loop sends requests to a tool's network endpoint (HTTP, WebSocket). Same MCP protocol, different transport. | Sibling containers, remote MCP servers |
-| **CLI execution** | Agent Loop spawns a child process, passes arguments, reads stdout/stderr. | Host binaries (Git, system utilities) |
-| **Native function call** | Direct function invocation within the Agent Loop process. No serialization, no protocol overhead. | Built-in Agent Loop functions (approval gate, audit logging) |
+| **MCP over stdio** | Standard input and output with a local process | Locally spawned MCP servers |
+| **MCP over network** | Same protocol over HTTP or WebSocket | Separate or remote MCP servers |
+| **CLI execution** | Spawn a process, pass arguments, read output | Git, system utilities |
+| **Native function call** | Direct call inside the Agent Loop process | Built-in functions such as audit logging |
 
-**MCP is the default protocol** — this is an implementation opinion. MCP provides structured tool definitions, typed parameters, and a standard discovery mechanism. But the architecture doesn't mandate it. Any mechanism that takes input and returns output works.
+MCP is a common default, but the architecture doesn't require it. Any mechanism that takes input and returns output works.
 
 ### Tool isolation
 
-Tools that run outside the Agent Loop process can be isolated in their own Docker containers. This is a V1+ concern, but the architecture supports it from the start.
+A tool the owner doesn't trust runs isolated from the owner's data and from other tools. The owner decides which tools they trust. An implementation may treat third-party tools as untrusted until the owner says otherwise.
 
-| Trust level | Isolation | Who | Example |
-|-------------|-----------|-----|---------|
-| **Full trust** (in-process) | None — runs in Agent Loop's process with same access | Platform-provided tools — code reviewed and maintained by the platform team | Filesystem tools, skill loader, approval gate |
-| **Shared container** | Grouped tools share a container, separated from Agent Loop | Related tools from the same source where inter-tool access is expected | A tool suite from one third-party vendor |
-| **Dedicated container** | Own filesystem, own network policy, own resource limits | Untrusted third-party or marketplace tools | Community-contributed tools, marketplace installs |
+Isolation protects against four risks:
 
-Container isolation protects against four risks: **filesystem access** (tool sees only its own filesystem, specific directories mounted as needed), **network access** (restricted to specific hosts/ports or none), **cross-tool interference** (no shared state or process space), and **resource exhaustion** (CPU/memory/disk limits per container — a runaway tool is throttled or killed without affecting the Agent Loop or anything else).
+- **Filesystem access:** the tool sees only what it is given.
+- **Network access:** limited to specific hosts, or none.
+- **Cross-tool interference:** no shared state or process space.
+- **Resource exhaustion:** a runaway tool is throttled or stopped without affecting the Agent Loop.
 
-**Owner-installed tools** — tools the owner writes or installs themselves — are isolated by default (separate container), but the owner can override. On local, the owner has full control over the isolation level. On managed hosting, the provider applies minimum isolation requirements.
+How isolation is built is up to the implementation. Containers are one option, separate processes or sandboxes are others.
 
-### Tool lifecycle, health, and upgrades
+Tools from the same trusted source may share an isolation boundary when they are meant to work together. Trusted, well-tested tools may run in-process.
 
-**Starting:** In-process tools start with the Agent Loop — no separate step. Containerized tools start at Agent Loop startup (via Docker Compose or equivalent) or on demand when first needed. Remote tools are independently managed — already running when the Agent Loop connects.
+### Tool lifecycle and health
 
-**Stopping:** In-process tools stop with the Agent Loop. Containerized tools can stop independently — the Agent Loop treats a stopped tool the same as a crashed tool and reports unavailability to the model. Remote tools may go down at any time — same handling.
+**Starting and stopping.** In-process tools start and stop with the Agent Loop. Separate tools can start with it or on first use, and can stop independently. Remote tools are managed independently.
 
-**Health:** The Agent Loop detects unresponsive tools through configurable timeouts. Failures are reported to the model as tool results ("tool X is unavailable"), not as system errors. The model decides the next step — retry, alternative approach, or inform the owner. Container crashes don't take down the Agent Loop. In-process crashes are more serious (they can crash the Agent Loop), which is why in-process is reserved for trusted, well-tested code.
+**Health.** The Agent Loop enforces timeouts on tool calls. A tool that fails, hangs or is unavailable produces a tool result that says so ("tool X is unavailable"), not a system error. The model decides what to do next: retry, try another way or tell the owner. A separate tool crashing doesn't take down the Agent Loop. An in-process crash can, which is why in-process is for trusted, well-tested code.
 
-**Upgrades:** Containerized and remote tools can be upgraded without restarting the Agent Loop — stop the old container, start the new one, the Agent Loop reconnects and re-discovers capabilities. In-process tools require an Agent Loop restart (acceptable for platform-provided tools, which change alongside the Agent Loop).
+**Upgrades.** Separate and remote tools can be upgraded without restarting the Agent Loop: it reconnects and rediscovers their definitions. In-process tools need an Agent Loop restart.
 
-### Tools and the Gateway API — the parity principle
+### Tools and the Gateway API: the parity principle
 
-**Any external caller — whether a human client or a programmatic tool/agent — should be able to use the same API to interact with the system.**
+**Any external caller, human client or program, uses the same API to talk to the system.**
 
-The Gateway API is the single entry point for all clients. This creates a clean separation between two kinds of tool:
-
-| Category | Relationship to Agent Loop | Example |
+| Kind | Relationship to the Agent Loop | Example |
 |----------|----------------------|---------|
-| **Tools the Agent Loop calls** | Agent Loop → Tool. The model decides to use a capability and the Agent Loop executes the call. | Filesystem read/write, Git, skill loader |
-| **Agents/tools that call the system** | Tool → Gateway API → Agent Loop. An external program sends a message the same way a human interface does. | Another AI agent, a scheduled job, a webhook handler |
+| **Tools the Agent Loop calls** | Agent Loop → tool. The model chooses and the Agent Loop runs it | Filesystem read and write, Git, skill loader |
+| **Agents and programs that call the system** | Program → Gateway API → Agent Loop, the same way a client does | Another AI agent, a scheduled job, a webhook handler |
 
-When software talks *to* the system (not *for* the system), it should go through the Gateway API — the same contract any client uses. This ensures that a programmatic caller has the same capabilities, the same auth checks, and the same conversation management as a human owner.
-
-**For the MVP**, this distinction doesn't matter — there's one owner at a terminal, and tools are in-process. **For V1+**, maintaining this parity is a discipline checkpoint: the CLI must not have any special path to the Agent Loop that a programmatic caller couldn't also use.
+Software that talks *to* the system goes through the Gateway API. It gets the same Auth checks and the same conversation handling as the owner's own client. No client gets a private path to the Agent Loop that another caller couldn't use.
 
 ---
 
-## Decisions Made
+## Decisions made
 
 | # | Decision | Rationale |
 |---|----------|-----------|
-| D51 | Tools are not a component — they are capabilities in the environment (data executed by the Agent Loop, permissioned by Auth) | Every tool-related concern maps to an existing component: definitions are self-describing (from the tools themselves, D146), execution is the Agent Loop's job, permissions are Auth's job, configuration is data, installation is data entering the system. There is no gap that requires a dedicated component. Same pattern as D41 (the original "Harness" dissolved into the other components working together). |
-| D52 | Tools are data — in the digital world, a tool IS its definition, code, and instructions | In the physical world, a screwdriver is a separate object from the book about screwdrivers. In the digital world, that distinction dissolves. Tool definitions, executable code, and usage instructions are all data. There's no special category of "tool stuff" separate from data. **Refined by D141-refined:** three-way split — tool definitions come from the tools themselves (self-describing, D146), tool plumbing (addresses, ports) is environment config, tool preferences (always-send, policies) are personal data in Your Memory (D145). Skills and instructions remain in Your Memory. |
-| D53 | The Tool Protocol API is not needed — tool calls flow through the Model API, tool execution is an Agent Loop implementation detail | The Model API already defines how tool calls are expressed (model completions) and how results are returned (next message). The Agent Loop already handles execution (MCP, CLI, native functions are implementation options). There's no gap between them that needs a separate API. The architecture has two APIs, not three. |
-| D54 | A tool is a tool — no categories, no taxonomies, no special handling for different kinds of tools | Whether a tool reads Your Memory, calls an external API, or does computation, the Agent Loop treats it identically. Auth handles permissions. The tool system doesn't need to distinguish between "memory tools" and "capability tools" and "integration tools." A tool is a tool. |
-| D55 | Scope is determined by what tools exist in the environment plus what Auth allows — the expanding sphere is just adding data | Each expansion (library → filesystem → external → inbound) is more tool data entering the environment. Each contraction is data being removed. The Agent Loop doesn't know what scope it's in. No scope enforcer, no boundary manager, no special mechanism. Scope = available tools + permissions. |
-| D56 | The model should know about tools that exist but aren't permissioned — the Agent Loop doesn't need to | The model benefits from knowing "this tool exists but you can't use it" so it can give the owner a useful response. The Agent Loop doesn't care why a tool is unavailable — it just knows it can't execute it. Richer information flows to the intelligence (model), simpler information flows to the executor (Agent Loop). |
-| D109 | Owner controls which tools are sent with every prompt (always-send set) vs. available on demand (discoverable set) — a discovery meta-tool bridges the gap | Sending every registered tool definition with every prompt wastes context, costs tokens, and degrades model quality as tool count grows. Splitting into owner-configured always-send + discoverable sets keeps the prompt lean while preserving access to everything. The owner — not the platform — decides the tradeoff. This is a concrete expression of user-owned AI: you control what your AI has at its fingertips. |
-| D135 | Memory/tool binary — if it's data, it's memory; if it's not data, it's a tool | All data, anywhere, is memory — the only question is whose. Tools are the verbs, memory is the nouns. Clean binary that decomposes everything the system processes. |
-| D141 | Tool configs are environment configuration, not personal data — they travel with the deployment, not with Your Memory | Dave J identified that storing tool configs in Your Memory creates a false dependency: move your memory to another system and it references tools that don't exist. Tool plumbing (server addresses, ports) and installation describe the deployment environment, not the user's personal data. Same principle as `.env` files or `settings.json`. **Refined by D141-refined:** original scope was too broad. Tool definitions → provided by tools themselves (D146). Tool preferences (always-send, policies) → Your Memory (D145). Only plumbing stays in environment config. See [configuration-spec.md](./configuration-spec.md#the-three-categories) §The Three Categories. |
-| D141-refined | Three-way split: tool definitions → self-describing (D146), plumbing → environment config, preferences → Your Memory (D145) | Original D141 scope was too broad — moving everything to environment config pulled personal preferences away from the owner. The refinement keeps only plumbing in environment config, returns preferences to Your Memory, and lets tools self-describe their own definitions. |
-| D145 | Tool preferences are personal data in Your Memory — they travel with you | "Always load git tools" is about you, not about this desk. Preferences (always-send set, policies, interaction style) belong in Your Memory because they describe the owner, not the deployment. |
-| D146 | Tools self-describe — definitions come from the tools themselves, not from manual configuration | MCP tools describe themselves via protocol. Other tools provide manifest files. Nobody writes tool definitions manually. This is the first leg of the D141-refined three-way split. |
+| D51 | Tools are not a component. They are capabilities in the environment, executed by the Agent Loop and governed by Auth | Every tool concern maps to an existing part: tools describe themselves, the Agent Loop executes, Auth decides access, preferences live in Your Memory, plumbing lives in environment config. No gap needs a dedicated component |
+| D53 | No separate tool API. Tool calls flow through the Model API, and tool execution is an Agent Loop implementation detail | The Model API already expresses tool calls and returns results. The architecture has two APIs, not three |
+| D135 | Memory/tool binary: if it's data, it's memory; if it's not data, it's a tool | Everything the system processes is a noun or a verb. No third category |
+
+The configuration split behind this spec (definitions from the tools, plumbing in environment config, preferences in Your Memory) is set out in [configuration-spec.md](./configuration-spec.md).
 
 ---
 
-## Open Questions
+## Open questions
 
-### OQ-1: Tool discovery/registration path in V1+
+### OQ-1: How tools that run as separate services are discovered
 
-In the MVP, tools are in-process — the Agent Loop calls them directly. In V1+, when tools run as separate services or containers, how does discovery work? Two options:
-
-1. **Agent-Loop-direct** — The Agent Loop connects to configured tool servers at startup and discovers their capabilities via MCP. Tools register with the Agent Loop, not the Gateway.
-2. **Gateway-mediated** — Tools register through the Gateway API, the same way any client connects. The Gateway tells the Agent Loop what tools are available.
-
-Option 1 is simpler and matches how MCP works today. Option 2 enforces the parity principle (tools use the same API as clients) but adds complexity to the Gateway. This doesn't need to be resolved for the MVP — tools are in-process either way. Revisit for V1 Gateway design.
-
-**Source:** 2026-02-25 foundation architecture discussion (Dave W + Dave J). Dave J described tools "talking to the agent loop through the API gateway." Current spec has the Agent Loop executing tools directly. Both are valid — the question is which path V1 takes.
+Today the Agent Loop connects to configured tool servers and asks what they offer. An alternative is for tool services to announce themselves through the Gateway API, as any client does. The first is simpler and matches how MCP works. The second applies the parity principle to tool registration but adds work to the Gateway. Either way, the model, Auth and Your Memory are unaffected.
 
 ---
 
-## Success Criteria
+## Success criteria
 
-- [ ] Adding a tool to the environment requires only adding data (configuration, files) — no code changes to Agent Loop, Your Memory, Client, or Auth
-- [ ] Removing a tool from the environment requires only removing data — no code changes
-- [ ] The Agent Loop executes tool calls without knowing or caring what the tools do
-- [ ] Auth controls tool access without the Agent Loop or Your Memory knowing about permissions
-- [ ] Scope expansion (library → filesystem → external → inbound) works by adding tools — no architectural changes
-- [ ] The model can distinguish between "tool doesn't exist" and "tool exists but not permissioned" — the Agent Loop doesn't need to
-- [ ] Skills (recipes in Your Memory) reference tools (equipment in the environment) and both work independently — changing a skill doesn't require changing tools, adding a tool doesn't require changing skills
-- [ ] The owner can configure which tools are in the always-send set — no code changes, just configuration
-- [ ] A discovery tool can find and load tools from the discoverable set at runtime — the model decides when to search, the Agent Loop stays a pass-through
-
----
-
-## Security Requirements
-
-Per-component requirements from [security-spec.md](./security-spec.md). Security-spec owns the "why"; this section owns the "what" for Tools.
-
-- [ ] Untrusted tools must run in isolated containers — mandatory, not configurable. Restricted filesystem, restricted network, resource limits
-- [ ] Tool isolation must be independent of Auth — even if Auth fails, the tool can't escape its container
-- [ ] The system must warn the owner when installing unverified tools on local deployment
-- [ ] Managed hosting must enforce a curated tool allow list — no unvetted tools
-- [ ] Tool crashes must not take down the Agent Loop — containerized tools fail independently
+- [ ] Adding or removing a tool means adding or removing data (configuration, files). No code changes to the Agent Loop, Your Memory, the Gateway, Auth or clients. Removing a tool reduces what the system can do and nothing else
+- [ ] Each tool describes itself, and the Agent Loop discovers it through the shared tool interface
+- [ ] The Agent Loop runs tool calls without knowing what the tools do
+- [ ] The Agent Loop asks Auth before every tool call. Permissions live only in Auth
+- [ ] By default the owner can use every tool, with no approval step. Any other actor starts with no permissions until the owner grants them
+- [ ] If the owner sets approval rules, they are enforced in software before the call runs, not by prompt
+- [ ] The model can tell "this tool does not exist" apart from "this tool exists but is not permitted"
+- [ ] When the model asks for several independent tool calls at once, they run at the same time, and text the model wrote alongside them is kept
+- [ ] Tool calls and tool results are parts of messages and are saved in conversation history
+- [ ] The owner, not the tool or the product, chooses which tools are always sent and which are discoverable, without code changes
+- [ ] A discovery tool can find and load tools from the discoverable set at runtime
+- [ ] Skills and tools change independently: changing a skill doesn't require changing a tool, and adding a tool doesn't require changing a skill
+- [ ] Scope grows by adding tools, with no architectural change
 
 ---
 
-*Tools is the spec that explains why it doesn't need to be a spec. Every architecture assumes tools need a dedicated subsystem — registries, protocols, discovery frameworks, execution engines. This one doesn't. Tools are data — definitions come from the tools themselves (self-describing), plumbing (addresses, ports) is environment config, preferences (always-send, policies) and skills are personal data in Your Memory. The Agent Loop executes tool calls. Auth permissions them. There's nothing left over.*
+## Security requirements
 
+Per-component requirements from [security-spec.md](./security-spec.md). The security spec owns the "why". This section owns the "what" for tools.
 
+- [ ] A tool the owner doesn't trust must run isolated from the owner's data and other tools, with restricted filesystem access, restricted network access and resource limits
+- [ ] Isolation must not depend on Auth: even if Auth fails, an isolated tool can't escape its boundary
+- [ ] The owner must be able to see whether a tool is verified before choosing to trust it
+- [ ] A tool failure must not take down the Agent Loop. Failures reach the model as tool results
 
+---
 
+## Contract alignment
 
+The text above is ahead of the published contracts in these places:
 
+- **Who chooses visibility.** `specs/schemas/tool-definition.json` has a `category` field (always-send or discoverable) on the tool's own self-description, so the tool can choose its visibility. This spec makes it the owner's choice, stored as a preference.
+- **Tool identity.** In `specs/schemas/tool-definition.json`, `source` is optional, and the tool definition in `specs/openapi/model-api.yaml` has no source at all. Two tools with the same name from different sources can collide.
+- **"Exists but not permitted".** Neither `tool-definition.json` nor `model-api.yaml` has a way to tell the model that a tool exists but isn't permitted for the current actor.
+- **Parallel calls.** The contracts don't say that several tool calls in one turn may run at the same time, or that the text alongside them is kept.
+- **Tool calls and results in messages.** `specs/schemas/message.json`, `specs/openapi/model-api.yaml` and `specs/openapi/gateway-engine.yaml` still use different shapes for tool calls and tool results, and the Gateway–Agent Loop contract paths still say "engine".
+- **Adapter config.** There is no schema for adapter config files in `specs/schemas/`.
+- **Approval step.** No contract defines an approval step for products that add one.
+- **Wording.** `tool-definition.json` examples still say "user's library", and its `source` description uses an approval-gate tool as an example.
 
+---
 
-
+*Tools is the spec that explains why it doesn't need to be a spec. Tools describe themselves. Plumbing is environment config. Preferences and skills are personal data in Your Memory. The Agent Loop runs tool calls after asking Auth. There's nothing left over.*

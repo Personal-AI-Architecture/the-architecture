@@ -63,14 +63,15 @@ Implement these behaviors:
 - Keep provider-specific logic inside adapters.
 - Keep primary model invocation out of tool-bootstrap flow.
 - Keep runtime config, adapter config, and preferences as distinct layers.
-- Keep same-provider model swaps preference-driven.
+- Keep same-provider model swaps preference-driven; the model travels with each request, so the next message uses the new choice with no restart.
+- Report capabilities the chosen model lacks; never drop content silently or substitute another model.
 - Keep provider swaps adapter/runtime-config-driven.
-- Reject request-time provider/runtime reconfiguration fields.
+- Reject provider/runtime reconfiguration fields in client request metadata.
 - Use secret references (`api_key_env`) instead of secret values in tracked config.
 - Fail clearly for unsupported adapters with no silent fallback.
 - Preserve local/offline model endpoint path support.
 - Emit safe classified model failure taxonomy.
-- Keep Gateway from owning model/provider selection responsibility.
+- Keep Gateway from owning model/provider selection responsibility; it only reads the owner's choice and passes it on.
 - Preserve exactly two external APIs: Gateway API and Model API.
 
 ## Canonical Contract Rules
@@ -128,6 +129,8 @@ Implement automated tests proving all `MOD-MUST-*` rules:
 12. Safe classified model failure taxonomy.
 13. Gateway non-ownership of model/provider selection.
 14. External API set remains exactly Gateway API and Model API.
+15. Model per request with no restart.
+16. Missing capabilities reported, not faked.
 
 Include positive and negative coverage linked to requirement IDs.
 
@@ -141,6 +144,8 @@ Include positive and negative coverage linked to requirement IDs.
 - Unsupported adapter falls back silently.
 - Offline local endpoint path is unsupported by design.
 - Additional external API is introduced.
+- A model change needs a restart.
+- A capability gap is hidden or faked.
 
 ## Deliverables
 

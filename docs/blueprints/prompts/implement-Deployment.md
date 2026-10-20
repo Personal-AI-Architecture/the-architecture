@@ -91,7 +91,7 @@ Enforce required fields, const/enums, defaults, and forbidden behaviors exactly.
 Use these for implementation consistency:
 
 1. Treat localhost-only as the normative default, even if example deployment profiles include explicit public bind overrides.
-2. Treat “local Docker deployment only” as an MVP implementation scope, not an architecture restriction against other local owner-controlled packaging.
+2. Treat containers as one supported packaging option, not the default. Native programs and installers are equally valid for local owner-controlled deployment.
 3. Keep startup-readiness checks shared across boundaries but do not weaken deployment guarantees.
 4. Keep storage technology choices flexible while preserving local inspectability and required capabilities.
 

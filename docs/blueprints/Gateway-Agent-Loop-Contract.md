@@ -6,15 +6,15 @@
 The Gateway ↔ Agent Loop Contract defines the bounded internal handoff between Gateway and Agent Loop so both components can evolve independently while preserving behavior, safety, and auditability.
 
 ### High-Level Responsibilities
-- Define one internal request contract (`messages + metadata`) for `POST /engine/chat`.
+- Define one internal request contract (`messages` + model + `metadata`) for `POST /engine/chat` (the path keeps the component's older name until the next contract revision).
 - Define one internal streaming event contract for interaction output.
 - Define pre-stream vs mid-stream failure behavior.
-- Enforce that Auth sits on the request path.
+- Require that the Gateway calls Auth on every request before the handoff, and that the Agent Loop asks Auth before each tool call.
 - Prevent hidden reconfiguration and boundary ownership drift.
 
 ### System Context
 - Upstream: Gateway component.
-- On-path control: Auth boundary.
+- Access control: Auth, called by the Gateway for every request and by the Agent Loop before each tool call.
 - Downstream: Agent Loop execution loop.
 - Relationship to external contracts:
   - Not a third external API.
@@ -33,18 +33,18 @@ The Gateway ↔ Agent Loop Contract defines the bounded internal handoff between
 - An internal contract between two components in the same deployment.
 - A strict request and stream-event shape agreement.
 - A decoupling boundary that enables Gateway and Agent Loop replacement.
-- A control point for error taxonomy and contract-visible approval semantics.
+- A control point for error taxonomy and (where a product adds approvals) contract-visible approval semantics.
 
 ### What this contract **is not**
 - Not a public client-facing API.
 - Not component business logic for Gateway or Agent Loop.
-- Not a configuration surface for provider, model, tools, or runtime behavior.
-- Not an Auth implementation; only an Auth-on-path requirement.
+- Not a configuration surface for provider, tools, or runtime behavior. (The model is the one per-request choice it carries: the owner's current choice, read by the Gateway on every message.)
+- Not an Auth implementation; only a requirement that Auth is called through its contract.
 
 ### Boundaries and Constraints
 - Gateway owns conversation lifecycle and request normalization.
 - Agent Loop owns loop execution and stream generation.
-- Auth validates before Agent Loop execution.
+- The Gateway calls Auth before the handoff; the Agent Loop asks Auth before each tool call.
 - Request payload must remain bounded and non-configurational.
 - Stream payloads must remain typed, classified, and safe.
 
@@ -54,18 +54,19 @@ The Gateway ↔ Agent Loop Contract defines the bounded internal handoff between
 
 ### Key Concepts
 - **Internal Contract**: strict handoff shape between Gateway and Agent Loop.
-- **Bounded Request**: `messages[]` and `metadata` only.
+- **Bounded Request**: `messages[]`, the model, and `metadata` only.
+- **Shared Message Shape**: one shape across the Gateway API, this contract and the Model API. Content is a list of parts; tool calls and tool results are ordinary message parts and are saved in history.
 - **Stream Event Taxonomy**: canonical set of event classes produced by Agent Loop.
 - **Pre-stream Error**: request rejected before SSE stream starts.
 - **Mid-stream Error**: error event emitted after stream starts.
-- **Contract-visible Approval**: approval request/outcome represented in interaction model.
+- **Contract-visible Approval**: where approval rules apply, approval request/outcome represented in interaction model.
 
 ### Internal vs External Concepts
 - **Internal**
   - `POST /engine/chat` payload and SSE event semantics.
-  - auth context attached on path.
+  - identity attached by the Gateway after its Auth call.
 - **External**
-  - client request/response contract (`/message`, `/conversations`, `/approvals`).
+  - client request/response contract (`/message`, `/conversations`, and `/approvals` where used).
   - model-provider contract via adapter boundary.
 
 ---
@@ -78,7 +79,9 @@ Canonical schema pack: `blueprints/contracts/Gateway-Engine-Contract.schema.json
 
 Required:
 - `messages: GatewayMessage[]`
+- the model to use (the owner's current choice; field name pending the next contract revision)
 - `metadata.correlation_id: string`
+- a request timestamp, ISO 8601 (field name pending the next contract revision)
 
 Optional metadata:
 - `conversation_id: string`
@@ -88,7 +91,6 @@ Optional metadata:
 Forbidden request-time fields:
 - `provider`
 - `provider_adapter`
-- `model`
 - `base_url`
 - `api_key`
 - `api_key_env`
@@ -101,8 +103,8 @@ Defaults:
 ### 4.2 `gateway_message`
 
 Required:
-- `role: system | user | assistant | tool`
-- `content: string`
+- `role: user | assistant | tool` (no `system` message: the bootstrap prompt is Agent Loop configuration)
+- `content`: a list of content parts (text first, room for images and files); a string is the shorthand for one text part
 
 Optional:
 - `tool_call_id: string` (tool-role continuity)
@@ -133,25 +135,26 @@ Allowed event types:
 - `text-delta`
 - `tool-call`
 - `tool-result`
-- `approval-request`
-- `approval-result`
+- `approval-request` (where approval rules apply)
+- `approval-result` (where approval rules apply)
 - `done`
 - `error`
 
 #### Event payload requirements
 - `text-delta`: `{ type, delta }`
 - `tool-call`: `{ type, id, name, input }`
-- `tool-result`: `{ type, id, status, output }`
+- `tool-result`: `{ type, id, status, output }`, with a "not permitted" error status when Auth refuses the call
 - `approval-request`: `{ type, request_id, tool_name, summary }`
 - `approval-result`: `{ type, request_id, decision }`
 - `done`: `{ type, conversation_id, message_id, finish_reason }`
-- `error`: `{ type, code, message }`
+- `error`: `{ type, code, message }` plus the request's correlation ID
 
 ### 4.6 `pre_stream_error_response`
 
 Required:
 - `code`
 - `message`
+- the request's correlation ID
 
 Optional:
 - `status` (4xx/5xx)
@@ -175,7 +178,6 @@ Allowed `code` values:
 ```json
 {
   "messages": [
-    { "role": "system", "content": "Read /AGENT.md." },
     { "role": "user", "content": "Draft a project plan." }
   ],
   "metadata": {
@@ -204,22 +206,25 @@ Allowed `code` values:
 Why invalid:
 - request includes forbidden runtime/provider configuration fields.
 
+The valid example omits the model and timestamp because their field names are pending the next contract revision.
+
 ---
 
 ## 5. Behavior Specification
 
 ### 5.1 Handoff Sequence
-1. Gateway validates and normalizes client request into internal `messages + metadata`.
-2. Auth validates request and attaches auth context.
+1. Gateway calls Auth for the request; Auth authenticates and authorizes it, or the Gateway rejects it with 401.
+2. Gateway validates and normalizes client request into internal `messages` + model + `metadata`, reading the owner's current model choice and attaching the identity Auth returned.
 3. Gateway calls Agent Loop handoff path with bounded request.
 4. Agent Loop starts stream and emits typed events through interaction lifecycle.
 5. Gateway forwards events and reconciles completion identifiers as needed.
 
 ### 5.2 Request Composition Rules
 - `messages` assembled from:
-  - system bootstrap prompt
-  - conversation history
+  - conversation history, including tool calls and tool results
   - current interaction message
+- The bootstrap prompt is not in the request; the Agent Loop adds it from its own configuration.
+- The model is the owner's current choice, read on every message.
 - `metadata` carries trace and context only, not runtime reconfiguration.
 
 ### 5.3 Stream Event Rules
@@ -239,7 +244,8 @@ Why invalid:
 - After terminal `error` or `done`, stream closes.
 
 ### 5.5 Approval Interaction Behavior
-- Approval-required actions must be visible through contract interaction flow.
+- The architecture default is that the owner can do everything; no approval is required unless the owner's Auth rules say so.
+- Where approval rules apply, approval-required actions must be visible through contract interaction flow.
 - Approval request and result must not exist only in local client control logic.
 - Denied approvals produce contract-visible denied outcomes.
 
@@ -255,7 +261,7 @@ Why invalid:
 
 ### Direct Dependencies
 - Gateway request normalization path.
-- Auth middleware/boundary on request path.
+- Auth contract, called by the Gateway on every request and by the Agent Loop before each tool call.
 - Agent Loop stream-emission path.
 - Shared request/event contracts.
 
@@ -264,8 +270,10 @@ Why invalid:
   - bounded request handoff.
 - Agent Loop -> Gateway:
   - typed SSE stream events.
-- Auth -> Gateway/Agent Loop path:
-  - authenticate, then allow handoff.
+- Gateway -> Auth:
+  - authenticate and authorize the request, then allow handoff.
+- Agent Loop -> Auth:
+  - authorize each tool call before it runs.
 
 ### Dependency Assumptions
 - Gateway and Agent Loop may be in same process or separate internal services.
@@ -280,7 +288,7 @@ Why invalid:
 - Internal handoff is not an external API (`F-02` alignment).
 - Gateway remains owner of conversation lifecycle (`G-01`).
 - Agent Loop remains owner of loop execution (`E-01`).
-- Auth must sit on path (`GC-04`, `A-01`).
+- The Gateway calls Auth on every request and the Agent Loop asks Auth before each tool call (`GC-04`, `A-01`, `A-06`).
 
 ### Contract Invariants
 - Request remains bounded (`GC-01`).
@@ -288,13 +296,15 @@ Why invalid:
 - Stream event taxonomy remains canonical (`GC-02`).
 - Mid-stream errors remain classified (`GC-03`, `GC-05`).
 - Error surfaces remain safe (`S-01`).
-- Approval remains contract-visible (`GC-06`, `S-05`).
+- Approval, where used, remains contract-visible (`GC-06`, `S-05`).
+- One message shape across all three contracts; tool calls and tool results kept in history (`GC-07`).
+- Every request carries a timestamp; every error carries the correlation ID (`GC-08`).
 
 ### Validation Rules (Conceptual)
 - Validate request schema strictly before Agent Loop execution.
 - Validate stream events against schema taxonomy.
 - Validate error code/message safety.
-- Validate auth context presence for protected paths.
+- Validate that the Gateway's Auth call happened before the handoff.
 
 ---
 
@@ -314,7 +324,7 @@ Why invalid:
 - Recoverable tool failures remain non-terminal unless explicitly unrecoverable.
 
 ### Security
-- No bypass around Auth.
+- No bypass around Auth, for requests or tool calls.
 - No unsafe internal leakage in stream errors.
 - Correlation ID traceability across contract path.
 
@@ -332,11 +342,11 @@ Why invalid:
 - Keep Gateway normalization separate from Agent Loop logic.
 - Keep event names stable and avoid alias/event-version proliferation.
 - Preserve tool-call roundtrip IDs across buffering and forwarding.
-- Preserve approval interaction semantics through contract path.
+- Where approval rules apply, preserve approval interaction semantics through contract path.
 
 ### Anti-Patterns to Avoid
 - Passing client payload directly to Agent Loop without normalization.
-- Adding per-request model/provider/tool config fields.
+- Adding per-request provider/tool config fields (the model is the one per-request choice).
 - Replacing structured `error` events with raw exception dumps.
 - Treating contract as undocumented internal implementation detail (drift risk).
 
@@ -345,18 +355,20 @@ Why invalid:
 ## 10. Validation Against AI Primer (`/docs/ai`)
 
 ### Confirmed Alignments
-- `GC-01`: bounded `messages + metadata` handoff.
+- `GC-01`: bounded `messages` + model + `metadata` handoff.
 - `GC-02`: canonical stream event types.
 - `GC-03`: mid-stream classified error events.
-- `GC-04`: Auth on path.
+- `GC-04`: Gateway calls Auth on every request; Agent Loop asks Auth before each tool call.
 - `GC-05`: error taxonomy preserved.
-- `GC-06`: approval semantics represented in contract interaction model.
+- `GC-06`: approval semantics, where used, represented in contract interaction model.
+- `GC-07`: one message shape; tool calls and tool results are message parts.
+- `GC-08`: correlation ID on every error.
 - `C-02`: no request-time configuration channel drift.
 - `S-01`: safe client-visible error surfaces.
 
 ### Primer/Implementation Tightening
 - Primer examples show `done.finish_reason` alone in some snippets; current runtime includes reconciliation IDs as well. This spec preserves reconciliation IDs as required for client contract alignment.
-- Primer core event list is concise; runtime and matrix require contract-visible approval events for full conformance.
+- Primer core event list is concise; runtime and matrix require contract-visible approval events in products that add approvals.
 
 ---
 
@@ -365,7 +377,7 @@ Why invalid:
 ### Confirmed Alignments
 - One internal endpoint and one stream response model (`gateway-agent-loop-contract.md`).
 - Internal contract is not a third external API (`foundation-spec.md`).
-- Auth sits on the path as independent boundary (`auth-spec.md`).
+- Auth is an independent component the Gateway calls on every request and the Agent Loop asks before each tool call (`auth-spec.md`).
 - Error channel split (pre-stream HTTP vs mid-stream stream errors) is preserved.
 
 ### Documented Discrepancies To Reconcile
@@ -392,16 +404,16 @@ Why invalid:
 |---|---|---|---|---|
 | GEC-CF-001 | Human examples use `text-delta.content` / `tool-call.arguments`; runtime/primer use `delta` / `input` | Standardize on `delta` and `input` in schema and conformance | Matches active implementation and client contract artifacts | Event consumers break across implementations |
 | GEC-CF-002 | Human example `done` payload emphasizes `finish_reason`; client/runtime alignment requires reconciliation IDs | Require `done.conversation_id` and `done.message_id` plus `finish_reason` | Enables deterministic state reconciliation across clients | Completion cannot be reliably persisted/reconciled |
-| GEC-CF-003 | Human core event list excludes approval-specific events; matrix requires contract-visible approval semantics | Include `approval-request` and `approval-result` in contract taxonomy | Aligns with `GC-06` and `S-05` compliance targets | Approval behavior becomes UI-specific and non-portable |
+| GEC-CF-003 | Human core event list excludes approval-specific events; matrix requires contract-visible approval semantics | Include `approval-request` and `approval-result` in contract taxonomy, used only where approval rules apply | Aligns with `GC-06` and `S-05` compliance targets | Approval behavior becomes UI-specific and non-portable |
 
 ## 13. Normative Requirements (MUST/SHOULD/MAY)
 
 ### MUST
-- `GEC-MUST-001`: Gateway MUST send only bounded `messages + metadata` request shape.
+- `GEC-MUST-001`: Gateway MUST send only bounded `messages` + model + `metadata` request shape.
 - `GEC-MUST-002`: `metadata.correlation_id` MUST be present on every request.
 - `GEC-MUST-003`: Metadata MUST be limited to contract-approved keys.
-- `GEC-MUST-004`: Request MUST reject hidden provider/tool/runtime configuration fields.
-- `GEC-MUST-005`: Auth MUST be enforced on the Gateway -> Agent Loop path.
+- `GEC-MUST-004`: Request MUST reject hidden provider/tool/runtime configuration fields and MUST NOT carry a system message.
+- `GEC-MUST-005`: The Gateway MUST call Auth on every request before the handoff, and the Agent Loop MUST ask Auth before each tool call.
 - `GEC-MUST-006`: Agent Loop MUST emit only canonical contract event types.
 - `GEC-MUST-007`: Mid-stream `error.code` MUST be `provider_error`, `tool_error`, or `context_overflow`.
 - `GEC-MUST-008`: Mid-stream error messages MUST be safe for client display.
@@ -409,8 +421,10 @@ Why invalid:
 - `GEC-MUST-010`: Tool-call and tool-result IDs MUST preserve continuity.
 - `GEC-MUST-011`: Completion event MUST include `conversation_id`, `message_id`, and finish semantics.
 - `GEC-MUST-012`: This contract MUST remain internal and MUST NOT be treated as a third external API.
-- `GEC-MUST-013`: Approval requests/outcomes MUST be represented through contract interaction flow where required.
+- `GEC-MUST-013`: Where the owner's Auth rules require approval, approval requests/outcomes MUST be represented through contract interaction flow. With no approval rules (the default), none is required.
 - `GEC-MUST-014`: Gateway and Agent Loop MUST remain independently swappable if contract compatibility is preserved.
+- `GEC-MUST-015`: Messages MUST use the single shared shape: content is a list of parts, and tool calls and tool results are ordinary message parts that the Gateway saves in history and sends back on resume.
+- `GEC-MUST-016`: Every request MUST carry a timestamp, and every error (HTTP or SSE) MUST carry the request's correlation ID.
 
 ### SHOULD
 - `GEC-SHOULD-001`: Correlation IDs SHOULD propagate to logs and tool context for traceability.
@@ -424,7 +438,7 @@ Why invalid:
 ## 14. Acceptance Gates (Pass/Fail)
 
 - `GEC-GATE-01 Contract Gate`: Pass if request/event/error shapes validate against `contracts/Gateway-Engine-Contract.schema.json`; fail otherwise.
-- `GEC-GATE-02 Conformance Gate`: Pass if all vectors in `tests/Gateway-Agent-Loop-Contract-conformance.md` pass (14 positive + 14 negative); fail on any `GEC-MUST-*` violation.
+- `GEC-GATE-02 Conformance Gate`: Pass if all vectors in `tests/Gateway-Agent-Loop-Contract-conformance.md` pass (16 positive + 16 negative); fail on any `GEC-MUST-*` violation.
 - `GEC-GATE-03 Drift Gate`: Pass if all Critical checks in `drift/Gateway-Agent-Loop-Contract-drift-guard.md` pass; fail on any Critical check failure.
 - `GEC-GATE-04 Security Gate`: Pass if auth path and safe error-surface requirements pass; fail on auth bypass or unsafe leakage.
 - `GEC-GATE-05 Boundary Gate`: Pass if contract remains internal and swapability checks pass; fail if treated as external third API or if contract-compatible swaps fail.
@@ -437,7 +451,7 @@ Why invalid:
 | GEC-MUST-002 | Human `gateway-agent-loop-contract.md`; AI `gateway-agent-loop-contract.md` | `GEC-T002P`, `GEC-T002N` |
 | GEC-MUST-003 | Human `gateway-agent-loop-contract.md`; AI `gateway-agent-loop-contract.md` | `GEC-T003P`, `GEC-T003N` |
 | GEC-MUST-004 | Human `configuration-spec.md`; AI matrix `C-02`, `GC-01` | `GEC-T004P`, `GEC-T004N` |
-| GEC-MUST-005 | Human `auth-spec.md`; AI matrix `GC-04`, `A-01` | `GEC-T005P`, `GEC-T005N` |
+| GEC-MUST-005 | Human `auth-spec.md`; AI matrix `GC-04`, `A-01`, `A-06` | `GEC-T005P`, `GEC-T005N` |
 | GEC-MUST-006 | Human `gateway-agent-loop-contract.md`; AI matrix `GC-02` | `GEC-T006P`, `GEC-T006N` |
 | GEC-MUST-007 | Human `gateway-agent-loop-contract.md`; AI matrix `GC-05` | `GEC-T007P`, `GEC-T007N` |
 | GEC-MUST-008 | Human `security-spec.md`; AI matrix `GC-03`, `S-01` | `GEC-T008P`, `GEC-T008N` |
@@ -447,6 +461,8 @@ Why invalid:
 | GEC-MUST-012 | Human `foundation-spec.md`; AI matrix `F-02` | `GEC-T012P`, `GEC-T012N` |
 | GEC-MUST-013 | Human contract approval section; AI matrix `GC-06`, `S-05` | `GEC-T013P`, `GEC-T013N` |
 | GEC-MUST-014 | Human swappability goals (`FS-5`, `FS-7` references); AI drift checks | `GEC-T014P`, `GEC-T014N` |
+| GEC-MUST-015 | Human `gateway-agent-loop-contract.md`, `communication-principles.md`; AI matrix `GC-07`, `G-09` | `GEC-T015P`, `GEC-T015N` |
+| GEC-MUST-016 | Human `gateway-agent-loop-contract.md`, `communication-principles.md`; AI matrix `GC-08` | `GEC-T016P`, `GEC-T016N` |
 
 ## 16. Residual Risks & Open Decisions
 
@@ -471,10 +487,21 @@ Why invalid:
 ## Self-Validation Report
 
 - Coverage of required sections: 16/16 (100%)
-- Normative requirements count: 19 total (`14 MUST`, `3 SHOULD`, `2 MAY`)
+- Normative requirements count: 21 total (`16 MUST`, `3 SHOULD`, `2 MAY`)
 - Interfaces with schemas: 6 (`gateway_engine_request`, `gateway_message`, `gateway_tool_call`, `auth_context`, `stream_event`, `pre_stream_error_response`)
-- Test vectors count: 28 total (`14 positive`, `14 negative`)
+- Test vectors count: 32 total (`16 positive`, `16 negative`)
 - Conflicts detected/resolved: 3/3 resolved
 - Unresolved ambiguity list:
   - `A-01 (Medium)`: some human examples still use legacy event payload field names.
 - Final readiness rating: Conditionally Ready
+
+## Contract Alignment
+
+This blueprint follows `docs/in-depth-overview/gateway-agent-loop-contract.md`, which is ahead of `contracts/Gateway-Engine-Contract.schema.json`, `specs/openapi/gateway-engine.yaml` and `specs/schemas/message.json` in these places:
+
+- No request field for the model and no request timestamp (GEC-MUST-001, GEC-MUST-016); `model` is still listed as a forbidden field.
+- The `system` role and Gateway-assembled system message are still present (GEC-MUST-004).
+- Content is a string, and tool calls and tool results are not message parts (GEC-MUST-015).
+- Auth is described as middleware between the Gateway and the Agent Loop, and there is no "not permitted" tool-result shape (GEC-MUST-005).
+- Error bodies and error events carry only `code` and `message` (GEC-MUST-016).
+- The `/engine/chat` path and `engine` schema names still use the component's old name.

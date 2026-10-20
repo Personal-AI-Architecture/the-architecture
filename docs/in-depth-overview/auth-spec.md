@@ -5,406 +5,341 @@ hide_table_of_contents: true
 
 # Auth Spec: Identity, Access, and Permissions
 
-Every AI system has some form of access control — ChatGPT has user accounts and sessions, Copilot inherits your organization's credentials, agent frameworks usually punt auth to the developer. In those systems, auth is a **feature of the application** — a login screen, a session cookie, maybe an API key. The app decides what you can do.
+**Serves stories:** US-3, US-7, US-10 in the [PAA spec](../spec/personal-ai-architecture-spec.md).
 
-Here, auth is a **first-class component** of the architecture. A personal AI system that stores your memory, manages your tools, and acts on your behalf needs access control from the start — not as a login screen, but as an architectural boundary. Auth controls who can access your memory, what tools they can use, what actions they can take, and what happens when things go wrong — across humans, AI agents, services, and eventually federated systems.
+Every AI system has some form of access control. ChatGPT has user accounts and sessions, Copilot inherits your organization's credentials, and agent frameworks usually leave auth to the developer. In those systems, auth is a **feature of the application**: a login screen, a session cookie, maybe an API key.
 
-Why a separate component? Because if auth lived in the Model, you couldn't swap models. Auth policies, permissions, identity verification — these must persist across model swaps. Switch models, and your collaborators' access shouldn't disappear. Your approval policies shouldn't reset. Your audit trail shouldn't break. This is the same argument that keeps the Model outside Your Memory. Memory is inert so it stays portable. Auth is independent so the Model stays swappable. Each component's independence is what makes the other components swappable.
+Here, auth is a **component** of the architecture. A personal AI system that stores your memory, manages your tools and acts on your behalf needs access control as an architectural boundary, not a login screen. Auth decides who and what may act on the owner's system: who can reach it, what they can read and change in Your Memory, which tools they can use, and what they can do outside the system. That covers humans, AI agents, services and, later, other systems.
 
-Auth is a **cross-cutting layer** — it touches every other component, it's security-critical from day one, and bad auth decisions are expensive to reverse. Auth is independent of the Gateway — both can be swapped without affecting the other. Auth is a **memory concern** — it controls who can read, write, and act on the owner's memory. Not a hosting concern, not an infrastructure concern.
+Auth is separate so the other components stay swappable. If auth lived in the Model, swapping models would mean losing your security settings. Switch models, and your collaborators' access shouldn't disappear, your rules shouldn't reset and your audit trail shouldn't break. This is the same argument that keeps the Model outside Your Memory: Memory is inert so it stays portable; Auth is independent so the Model, the Agent Loop and the Gateway stay swappable.
 
-This is a **requirements and design spec**, not a technology choice document. The auth contract defined here is implementation-agnostic — any technology that satisfies the contract is valid.
-
-This is an **Architecture spec** — it defines what the auth system does at the generic, unopinionated level. Product-specific auth choices (technology stack, managed hosting policies, MFA requirements, product evolution timeline) are implementation concerns (not published in this repository).
+This is a **requirements and design spec**, not a technology choice. Any technology that meets the Auth contract is valid. Product choices such as the auth technology, MFA, login screens and how approvals look are implementation concerns (not published in this repository).
 
 **Related documents:** [foundation-spec.md](./foundation-spec.md) (architecture overview, links to all component specs)
 
 ---
 
-## Guiding Principles
+## Where Auth sits
 
-These constrain every auth design choice.
+Auth is a check that other components call through the Auth contract. It is called at two points:
 
-### Auth Is Separate So the Model Stays Swappable
+1. **On every request, by the Gateway.** When a request arrives, the Gateway asks Auth who is making it and whether they may make it, before anything reaches the Agent Loop. This applies to every Gateway API request, including reading conversation history, not only to messages that reach the model. A request Auth rejects goes no further.
+2. **Before each tool call, by the Agent Loop.** When the model asks to call a tool, the Agent Loop asks Auth whether this identity may use this tool on this resource. If Auth says no, the tool does not run, and the model is told the tool exists but is not permitted. That result is different from "this tool does not exist", so the model can tell the two apart.
 
-In a human brain, intelligence handles access control — you decide who to trust, what to share, what to keep private. No separate auth system. But in a personal AI architecture, intelligence is swappable. If auth lived in the Model, swapping models means losing security. Auth policies, permissions, identity verification — these must persist regardless of which model is plugged in.
+```
+Client → Gateway ──(who is this? may they?)──→ Auth
+            │
+            ▼ (only if allowed, with the identity attached)
+        Agent Loop ──(may this identity use this tool here?)──→ Auth
+            │
+            ▼ (only if allowed)
+          Tool
+```
 
-This is the same root as why the Model is external to Memory. Memory is inert so it stays portable. Auth is independent so the Model stays swappable. The independence of each component is what makes the others swappable.
+Auth stays independently swappable. The Gateway and the Agent Loop depend only on the Auth contract, not on any Auth implementation, and Auth knows nothing about the Gateway or the Agent Loop. Replace Auth and the Gateway doesn't change; replace the Gateway and Auth doesn't change.
 
-### Auth Is a Memory Concern
-
-Auth controls who can read, write, and act on the owner's memory. Infrastructure isolation (managed hosting separating instances) and memory permissions (who can access what within an instance) are separate problems with separate solutions. Auth is a memory concern, not a hosting concern, not an infrastructure concern.
-
-### Start Constrained, Owner Drives Expansion
-
-The permission model starts maximally constrained. The owner loosens it as they gain confidence. The system never grants itself more permission — the owner always drives expansion. This applies to:
-
-- Approval flow (ask everything → ask nothing)
-- Collaborator access (owner only → invited collaborators)
-- Agent autonomy (human approves all → standing permissions)
-- External connections (none → authorized services)
-
-### Auth Through Conversation
-
-The primary way to manage auth is through the same interface as everything else — conversation. "Give my business partner read access to finances" should just work. "Stop asking me to approve file edits" should just work. Settings pages exist as a fallback.
-
-This means the auth system must be accessible through tools — the agent reads and modifies permissions the same way it reads and modifies memory.
-
-### Owner Inspectability
-
-The owner can inspect, modify, and export their complete auth state — identities, policies, configuration. No opaque auth databases they can't access. The auth data is theirs just like their memory is theirs.
-
-### Each Instance Is Its Own Authority
-
-Each system instance is its own identity authority. There is no central auth server that everyone connects to. Every instance is self-contained and could operate independently. This is the foundation for federation — instance-to-instance trust relationships without a central authority.
-
-### Open Standards
-
-Auth uses open standards wherever possible — OAuth 2.1, OpenID Connect, standard token formats. Not proprietary auth protocols. This makes the system interoperable, reduces lock-in, and means the community can integrate with existing identity infrastructure.
-
-### Swappable Implementation
-
-The auth contract is what the rest of the system depends on. The auth provider behind that contract is an implementation detail. If the auth technology needs to change, only the auth component changes — nothing else is affected.
+**Permissions live only in Auth.** No other component, including Configuration, stores or decides permissions. Components ask Auth; they don't keep their own copy of the rules.
 
 ---
 
-## What Auth Does NOT Do
+## Guiding principles
 
-These are explicit boundaries. They exist to prevent other concerns from creeping into auth.
+### The owner has full control
 
-| Responsibility | Where It Lives | NOT in Auth |
-|---------------|---------------|-------------|
-| Persist data | Your Memory (via tools) | Auth does not own data storage |
-| Decide what to do | Model (via Agent Loop) | Auth does not make content decisions |
+The owner can do everything on their own system. That is the default policy: on a new system, the owner is allowed every action, with no approval prompts required by the architecture. No product rule overrides the owner on their own hardware.
+
+Everyone and everything else starts with nothing. A new identity has no permissions until the owner grants them. The system never grants itself or anyone else more access; the owner always drives expansion.
+
+Whether to ask the owner before some actions (approval prompts), and which actions, is a product choice. Version history and restore in Your Memory are the safety net whatever the product chooses.
+
+### Auth through conversation
+
+The owner manages auth the same way they manage everything else: by asking. "Give my business partner read access to finances" should just work. Settings screens can exist as well. This means Auth is reachable through tools, so the agent can read and change permissions when the owner asks.
+
+### Owner inspectability
+
+The owner can inspect, change and export their complete auth state: identities, policies, configuration and audit log. No opaque databases. The auth data is theirs, like their memory.
+
+### Each instance is its own authority
+
+Each system is its own identity authority. There is no central auth server. Every instance can operate on its own, which is the basis for trust between instances later without a central authority.
+
+### Open standards
+
+Auth uses open standards wherever possible (OAuth 2.1, OpenID Connect, standard token formats), not proprietary protocols.
+
+### Swappable implementation
+
+The rest of the system depends on the Auth contract. The auth provider behind it is an implementation detail. Changing auth technology changes only the Auth component.
+
+---
+
+## What Auth does not do
+
+| Responsibility | Where it lives | Not in Auth |
+|---|---|---|
+| Persist data | Your Memory (via tools) | Auth does not own memory storage |
+| Decide what to do | Model (via Agent Loop) | Auth makes no content decisions |
 | Route requests | Gateway | Auth does not route |
 | Execute tools | Agent Loop | Auth does not execute |
 | Manage conversations | Gateway | Auth does not track conversations |
 | Define product behavior | Your Memory (instructions, skills) | Auth has no product logic |
+| Keep secrets | Outside Your Memory, never tracked by git (environment variables, an untracked config file or a secret store) | Auth checks credentials; it does not put them in memory |
 
-Auth's job is one thing: **gate access**. Every request passes through auth. Auth says yes or no. Everything else belongs to other components.
+Auth's job is one thing: **decide who is acting and whether they may**.
 
----
-
-## Actors
-
-The auth system must support these actor types. The identity model should accommodate all types from the start — even if only the owner exists initially — so that adding new actor types is a data change, not a schema change.
-
-**Architecture implementation:** Build the schema and headers for all actor types, but only the owner flow needs to work at runtime. Multi-actor paths exist in the data model — they don't need to be exercised until a future capability phase activates them.
-
-### Humans
-
-| Actor | Description |
-|-------|-------------|
-| **Owner** | The person whose system this is. Full control over everything — memory, permissions, configuration, who gets access. Exactly one owner per instance. |
-| **Collaborator** | A human invited by the owner with scoped access. A business partner who sees finances, an assistant who sees projects, a family member with access to shared content. Each collaborator has individually configured permissions. |
-
-### Internal Agents
-
-These actors run inside the deployment. They are trusted infrastructure — code the owner deployed, operating under the system's rules.
-
-| Actor | Description |
-|-------|-------------|
-| **System agent** | The interactive AI agent. Acts on the owner's behalf during conversations. Constrained by configured tool and memory scope. |
-| **Background agent** | Scheduled or autonomous tasks that run without a human in the loop. Needs its own identity so the owner can distinguish "the background task changed this" from "I changed this." |
-
-### External Actors
-
-These actors connect from outside the deployment. They are someone else's code asking for access — fundamentally different trust model from internal actors. Must prove identity, receive explicitly scoped permissions, and access is revocable at any time.
-
-| Actor | Description |
-|-------|-------------|
-| **External agent** | Another AI acting on behalf of someone else (or on behalf of the owner via an external service). |
-| **Service** | An integration — calendar sync, email connector, webhook receiver. Connects via API with scoped access. |
-| **Economic actor** | Something that can spend money — purchases, payments, marketplace transactions. Needs spending limits and audit trails. |
-
-### Federated
-
-| Actor | Description |
-|-------|-------------|
-| **Another instance** | A whole other system instance interacting with yours through open protocols. Bidirectional trust relationship. Neither side needs an account on the other — trust is established at the instance level. |
+Tool availability is the owner's outbound data control. If the owner enables a tool that sends data outside the system, they have accepted that the model may send data to it. Finer outbound rules (such as "never send financial data to this tool") are implementation features.
 
 ---
 
-## Permission Model
+## Identities
 
-The auth system enforces permissions across these categories. The permission model must be extensible — new categories can be added without re-architecting.
+Every actor that uses the system has an identity. The identity model supports all actor types from the start, even if only the owner exists at first, so adding a new kind of actor is a data change, not a redesign.
 
-### 1. Memory Access
+### Identity types
 
-Who can read, write, and delete which parts of memory.
+| Type | Who it is |
+|---|---|
+| **Owner** | The person whose system this is. Full control. Exactly one per instance. |
+| **Collaborator** | A person the owner invites, with access the owner chooses. A business partner who sees finances, a family member who sees shared content. |
+| **Interactive agent** | The AI agent acting for the owner in conversation, limited to the tools and memory it is given. |
+| **Background agent** | A scheduled or autonomous task that runs with no person watching. It has its own identity so the owner can tell "the background task changed this" from "I changed this". |
+| **External agent** | Another AI connecting from outside, acting for someone else or for the owner through an outside service. |
+| **Service** | An integration, such as calendar sync or a webhook receiver, with scoped API access. |
+| **Economic actor** | Something that can spend money. Needs spending limits and an audit trail. |
+| **Another instance** | A whole other system connecting through open protocols. Trust is between instances; neither side needs an account on the other. |
 
-| Scope | Example |
-|-------|---------|
-| Full access | Owner has unrestricted access |
-| Per-path | Collaborator can read/write a specific folder |
-| Per-resource | Agent can only modify a specific file |
-| Read-only | Collaborator can read but not modify |
+Interactive and background agents run inside the deployment: code the owner deployed. External agents, services and economic actors are someone else's code asking for access. They must prove who they are, get explicitly scoped permissions, and can be cut off at any time.
 
-### 2. Tool Access
+New kinds of actor can be added. A new type gets no permissions until the owner grants them.
 
-Which tools and capabilities each actor can use.
+### Identity status
 
-| Scope | Example |
-|-------|---------|
-| All tools | Owner has unrestricted tool access |
-| Read tools only | A collaborator can search and read but not write |
-| Specific tools | Background agent can use `edit` but not `delete` |
-| No tools | A viewer can see content through the client but can't trigger agent actions |
+Each identity is in one of these states:
 
-### 3. System Actions
+- **Active**: can sign in and act within its permissions.
+- **Suspended**: cannot act. The owner can turn it back on.
+- **Revoked**: permanently cut off. Revoking an identity stops anything it is doing.
 
-What system-level operations each actor can perform beyond memory and tool operations.
+An identity re-created after export and import starts with no access: it cannot act until the owner turns it back on (see [Failure modes](#failure-modes)).
 
-| Action | Example |
-|--------|---------|
-| Change settings | Can this actor modify model selection, API keys? |
-| Manage permissions | Can this actor change auth policies? |
-| Create/manage identities | Can this actor invite collaborators, register agents? |
+### Identity travels with the request
 
-### 4. Delegation
-
-Whether an actor can grant access to others.
-
-| Scope | Example |
-|-------|---------|
-| No delegation | Collaborator can use their access but can't share it |
-| Limited delegation | Collaborator can invite others to resources within their own scope |
-| Full delegation | Trusted collaborator can invite others with up to their own permission level |
-
-### 5. Resource and Spending Limits
-
-Quantitative constraints — not just "can you do this" but "how much."
-
-| Limit | Example |
-|-------|---------|
-| AI usage budget | Collaborator's interactions consume at most N tokens per month |
-| Spending cap | Agent can spend up to $X per transaction |
-| Rate limiting | External agent limited to N requests per minute |
-| Storage limits | Collaborator's writes can't exceed N MB |
-
-### 6. Approval Authority
-
-What each actor can approve, and what requires escalation.
-
-| Level | Example |
-|-------|---------|
-| No approval authority | Collaborator's changes always need owner approval |
-| Scoped auto-approve | Background agent can auto-approve routine operations but escalates structural changes |
-| Full auto-approve | Owner has turned off approval for their own agent |
-| Standing permissions | Agent has pre-approved rules for common operations |
-
-The approval model is a spectrum, not a binary:
-- **Ask for everything** — default for new configurations
-- **Ask for some things** — owner defines what needs approval per actor
-- **Ask for nothing** — owner trusts the system fully, version history is the safety net
-
-### 7. External Action Scope
-
-What actors can do outside the system boundary.
-
-| Scope | Example |
-|-------|---------|
-| No external actions | Agent stays inside the memory boundary |
-| Specific services | Agent can read your calendar but not send emails |
-| Spending authority | Agent can make purchases up to a limit |
-| Communication | Agent can send messages on your behalf to approved contacts |
-
-### 8. Administration
-
-Who can change the rules themselves.
-
-| Scope | Example |
-|-------|---------|
-| Full admin | Owner can change any permission, invite/revoke anyone, modify auth config |
-| Limited admin | Trusted collaborator can invite others to their own scope |
-| No admin | Most actors cannot change permissions |
-
-### Extensibility
-
-The permission model must support adding new categories without re-architecture. The contract is `(identity, resource, action) → decision` where resource and action are not hardcoded enums but extensible types. New permission categories are new resource types and action types — not changes to the model itself.
+Once the Gateway has the identity from Auth, it passes that identity to the Agent Loop with the request, and the Agent Loop uses it for each tool check and for the audit log. The identity must survive a change of transport or a replacement of either the Gateway or the Agent Loop: whatever carries it, the same authenticated identity arrives intact.
 
 ---
 
-## The Auth Contract
+## Permissions
 
-The rest of the system never talks to an auth provider directly. It talks to a contract. This is what makes the auth implementation swappable.
+### Policy model
 
-### Interface
+A permission is a rule: **(identity, resource, action) → allow or deny**. Resources and actions are open-ended types, not fixed lists, so a new kind of permission is a new resource or action type, not a change to the model. Policies are data, not code: adding a permission is adding a rule.
 
-Three operations:
+If no rule allows an action, it is denied. The owner is the exception by default: the owner can do everything.
 
-| Operation | Input | Output | Used By |
-|-----------|-------|--------|---------|
-| **Authenticate** | Request (cookie, token, or API key) | Identity (who is this, what type, active/inactive) | Auth middleware — every request passes through this |
-| **Authorize** | Identity + resource + action | Allow or deny | Agent Loop (before tool calls), client (before rendering), tools (before execution) |
-| **Manage** | Identity + permission change | Success or failure | Agent (through tools, when owner asks), settings UI (as fallback) |
+### What policies can cover
 
-### Data Format
+The model must cover these categories, and new ones can be added without redesign:
 
-The product owns the data format for identities and policies. The auth provider stores data in this format, not its own. This ensures:
+- **Memory access**: who can read, write and delete which parts of Your Memory: all of it, a folder, a single file, or read-only.
+- **Tool access**: which tools each identity can use: all, read-only tools, a named set, or none.
+- **System actions**: changing settings, managing permissions, inviting collaborators or registering agents.
+- **Delegation**: whether an identity can pass some of its own access on to others, never more than it has.
+- **Limits**: how much, not just whether: AI usage budgets, spending caps per transaction, request rates, storage.
+- **Approval**: which actions need someone's approval and who may give it. The architecture requires that an approval rule the owner sets is enforced; it does not require any approval by default.
+- **External actions**: what an identity can do outside the system: read a calendar but not send email, buy within a limit, message approved contacts.
+- **Administration**: who can change the rules themselves. By default only the owner.
 
-- **Migration between providers.** Switch auth technology without losing identities.
-- **Export with memory.** Permission policies and identity records are extractable in a known format.
-- **Owner inspection.** The owner can see exactly what's in their auth state — no opaque databases.
+---
 
-**Identities:**
-- ID, type (owner | collaborator | agent | service | economic | federated), display name, created timestamp, status (active | suspended | revoked)
-- Type field is extensible — new actor types are new values, not schema changes
+## The Auth contract
 
-**Policies:**
-- `(subject, resource, action) → effect` where subject is an identity, resource is extensible (memory path, tool name, system action, external service), action is extensible (read, write, delete, execute, delegate, approve, configure), and effect is allow or deny
-- Policies are data, not code — adding a new permission is adding a row, not writing a conditional
+The rest of the system never talks to an auth provider directly. It talks to the Auth contract, which is what makes the implementation swappable.
 
-**Audit log:**
-- Who did what, when, to which resource, with what result
-- Required when external actors are introduced, but the schema should exist from the start
+### Operations
 
-### Tool Access
+| Operation | Input | Output | Called by |
+|---|---|---|---|
+| **Authenticate** | The request's credential (session, token or API key) | The identity: who, what type, what status | The Gateway, on every request |
+| **Authorize** | Identity + resource + action | Allow or deny | The Gateway (for the request), the Agent Loop (before each tool call) |
+| **Manage** | Identity + permission change | Success or failure | Auth tools, when the owner asks; any settings screen a product offers |
 
-The auth system is accessible through tools so the agent can read and modify permissions through conversation:
+### Data format
 
-| Tool | What It Does |
-|------|-------------|
-| `auth_whoami` | Returns the current identity and active permissions |
-| `auth_check` | Checks if a specific action on a specific resource is allowed |
-| `auth_list_policies` | Lists current permission policies |
-| `auth_grant` | Grants a permission (owner or delegator only) |
-| `auth_revoke` | Revokes a permission or identity |
-| `auth_list_identities` | Lists all identities with access |
-| `auth_create_identity` | Creates a new identity (invite collaborator, register agent) |
+The architecture, not the auth provider, owns the format of identity, policy and audit records. The provider stores data in this format. This allows:
+
+- **Moving between providers** without losing identities or rules.
+- **Export with memory**: identities, policies and the audit log come out in a known format.
+- **Owner inspection**: the owner can see exactly what is in their auth state.
+
+Identity records hold an ID, type, display name, creation time and status. Policy records hold the rules described in [Policy model](#policy-model).
+
+### Audit log
+
+Every action is recorded: who did what, when, to which resource, and with what result. This includes requests Auth denied, tool calls, and changes to identities and permissions. Audit logging is required from the start, including on a system with only the owner.
+
+If the audit log cannot be written, work continues and the owner is alerted. The audit log is the owner's data: protected like Your Memory, exportable and deletable by the owner.
+
+### Auth tools
+
+Auth is reachable through tools so the agent can read and change permissions in conversation. For example:
+
+| Tool | What it does |
+|---|---|
+| `auth_whoami` | Returns the current identity and its permissions |
+| `auth_check` | Checks whether an action on a resource is allowed |
+| `auth_list_identities` / `auth_list_policies` | Lists identities or rules |
+| `auth_create_identity` | Invites a collaborator or registers an agent |
+| `auth_grant` / `auth_revoke` | Grants or removes a permission, or revokes an identity |
 | `auth_audit` | Queries the audit log |
-| `auth_export` | Exports complete auth state (identities + policies) |
+| `auth_export` | Exports the complete auth state |
 
-The minimal set (`auth_whoami`, `auth_check`, `auth_export`) should exist from the start. Others are added as the actor model expands.
-
----
-
-## Failure Modes
-
-### Session Expiry Mid-Conversation
-
-**Scenario:** Owner is in the middle of a conversation. Session expires.
-
-**Required behavior:** Silent refresh. The client handles token refresh transparently. The owner never sees a login screen mid-conversation. No work is lost. If silent refresh fails (e.g., credentials were revoked), redirect to login with conversation state preserved for after re-authentication.
-
-### Access Revoked During Active Operation
-
-**Scenario:** An external agent is mid-task and the owner revokes its access.
-
-**Required behavior:** Current operation terminates immediately. The owner said stop, so stop. Any in-progress writes that haven't been committed are discarded. The agent receives an auth error and cannot retry. Audit log records the revocation and the terminated operation.
-
-### Owner Locked Out
-
-**Scenario:** Owner lost credentials, no recovery method configured.
-
-**Required behavior:** On a local deployment, the owner has filesystem access. Recovery path is through the filesystem — reset credentials via CLI tool or direct database modification. This is the owner's responsibility. Product-specific recovery paths (managed hosting support, account recovery flows) are implementation concerns.
-
-### Auth Provider Failure
-
-**Scenario:** The auth provider crashes or becomes unavailable.
-
-**Required behavior:** The system fails closed — unauthenticated requests are denied. Active sessions with valid tokens may continue operating (depending on token validation approach). The client shows a clear error. No data is exposed. Auth recovery is an operational concern.
-
-### Stale Permissions After Export/Import
-
-**Scenario:** Owner exports from one deployment, imports to another. Permission policies reference identities that don't exist on the new deployment.
-
-**Required behavior:** Policies import cleanly. References to unknown identities are preserved but inactive — no access is granted for identities that can't authenticate. When the owner re-establishes those identities, existing policies apply automatically.
+A conforming system needs at least `auth_whoami`, `auth_check` and `auth_export`. The others are added as more kinds of actor are supported.
 
 ---
 
-## Data Portability
+## Failure modes
 
-### What Exports
+### Session expiry mid-conversation
 
-When an owner exports their system, the export includes:
+**Scenario:** The owner's session expires in the middle of a conversation.
+
+**Required behavior:** No work is lost. The session is renewed without interrupting the owner where possible. If it can't be renewed (for example, the credentials were revoked), the owner signs in again and the conversation is still there afterwards.
+
+### Access revoked during an operation
+
+**Scenario:** The owner revokes an external agent's access while it is mid-task.
+
+**Required behavior:** The operation stops immediately. The owner said stop, so stop. Writes not yet committed are discarded. The agent receives an auth error and cannot retry. The audit log records the revocation and the stopped operation.
+
+### Owner locked out
+
+**Scenario:** The owner has lost their credentials and set up no recovery method.
+
+**Required behavior:** On their own hardware the owner has filesystem access, so recovery goes through the filesystem: reset the credentials with a command-line tool or by editing the auth data directly. Other recovery paths are product choices.
+
+### Auth unavailable
+
+**Scenario:** The auth provider crashes or can't be reached.
+
+**Required behavior:** The system fails closed. Requests that can't be checked are refused, and tool calls that can't be checked don't run. No data is exposed. The owner sees a clear error.
+
+### Audit log can't be written
+
+**Scenario:** The audit log's storage is full or unavailable.
+
+**Required behavior:** Work continues and the owner is alerted. The failure itself is logged wherever logging is still possible.
+
+### Stale permissions after export/import
+
+**Scenario:** The owner exports from one system and imports into another. Policies refer to identities that don't exist on the new system.
+
+**Required behavior:**
+
+- Policies for unknown identities are kept but **dormant**. They grant nothing while the identity is unknown.
+- When an identity is re-created, it gets **no access** until the owner turns it back on. Old rules never come back into force silently.
+- How the owner turns access back on is up to each product. Restoring the dormant rules in one step is fine, as long as the owner chooses to do it.
+- Rules the new system supports are enforced the same way as before. Rules it doesn't support are reported to the owner and never grant access.
+
+---
+
+## Data portability
+
+### What exports
 
 | Data | Included | Format |
-|------|----------|--------|
+|---|---|---|
 | Memory (files, content) | Yes | As-is, open formats |
-| Permission policies | Yes | Product-owned format (JSON/YAML) |
-| Identity records | Yes (metadata only) | Display names, types, creation dates, policy associations |
-| Credentials | No | Passwords, tokens, keys are not exportable |
+| Permission policies | Yes | The architecture's open format (JSON or YAML) |
+| Identity records | Yes, details only | Names, types, creation dates, links to policies |
 | Audit log | Yes | Queryable records of who did what |
-| Auth configuration | Yes | Approval settings, default policies |
+| Auth configuration | Yes | The owner's auth settings, including any approval rules |
+| Credentials | No | Set up again on the new system |
 
-### What Doesn't Export
+### What doesn't export
 
-- Password hashes and authentication credentials (security — re-created on import)
-- Active session tokens (invalid on a different instance)
+- Passwords, password hashes, API keys and other credentials. They are re-created on the new system.
+- Active sessions and tokens. They aren't valid on another instance.
+
+Unknown identities arrive inactive, as described in [Stale permissions after export/import](#stale-permissions-after-exportimport).
 
 ---
 
 ## Evolution
 
-Auth expands in capability phases. Each phase is additive — the core contract doesn't change.
+Auth gains capability in phases. Each phase is additive; the contract doesn't change.
 
-| Phase | What's Added | What Stays the Same |
-|-------|-------------|-------------------|
-| **Owner only** | One human owner, full access, configurable approval flow, API keys for programmatic access | Auth contract, identity schema, policy model |
-| **Internal agents** | Background agents with own identities, scoped permissions, configurable approval per agent | Everything above |
-| **Collaborators** | Invited humans with per-path memory access, tool restrictions, delegation rules, resource limits | Everything above |
-| **External actors** | External agents and services with time-bound scoped tokens, spending limits, audit trails, OAuth 2.1 token issuance | Everything above |
-| **Federation** | Instance-to-instance trust via open protocols, bidirectional permissions, each instance is its own authority | Everything above |
+| Phase | What's added |
+|---|---|
+| **Owner only** | One owner with full access, API keys for programmatic access, audit log |
+| **Internal agents** | Background agents with their own identities and scoped permissions |
+| **Collaborators** | Invited people with per-folder memory access, tool limits, delegation rules and usage limits |
+| **External actors** | Outside agents and services with time-limited scoped tokens, spending limits, OAuth 2.1 token issuance |
+| **Federation** | Trust between instances through open protocols, each instance its own authority |
 
-The pattern: **add actor types and permission rules, don't change the contract.** Each expansion is a data change (new identity types, new policy rows), not an architecture change.
+The pattern: **add identity types and rules, don't change the contract.**
 
 ---
 
-## Decisions Made
+## Decisions made
 
 | # | Decision | Rationale |
-|---|----------|-----------|
-| D22 | Login required on every access — even on local | Local deployment still needs authentication. Filesystem access is not the same as authenticated system access. Prevents accidental exposure if the system is network-accessible. |
-| D27 | Auth is a memory concern — not hosting, not infrastructure | Auth controls who can read, write, and act on the owner's memory. Infrastructure isolation (separating instances) and memory permissions (who can access what within an instance) are separate problems. |
-| D60 | Auth is a cross-cutting concern — independent of the Gateway | Auth and the Gateway don't know about each other. Requests must be authenticated before interacting with the system, but how (middleware, proxy, sidecar) is an implementation decision. Both can be swapped independently. |
-| D149 | Auth is a separate component — so the Model stays swappable | If auth lived in the Model, swapping models means losing security. Same pattern as Model outside Memory. Each component's independence is what makes the others swappable. |
+|---|---|---|
+| D22 | Auth on both local and managed hosting | Local deployment still needs authentication. Filesystem access is not the same as authenticated access to the system, and a local system may be reachable over a network. Auth is a memory concern: who can act on the owner's system, not where it runs. |
+| D60 | Auth is a cross-cutting layer, independent of the Gateway | Auth and the Gateway can each be swapped without changing the other. The Gateway calls Auth only through the Auth contract. |
 
 ---
 
-## Open Questions
+## Success criteria
 
-### ~~OQ-1: Tool-Level Identity Propagation~~ — RESOLVED
-
-**Resolution:** Not needed in the architecture. Each system has one owner — the Agent Loop always runs as that owner (D151). Multi-actor collaboration is system-to-system: collaborators bring their own systems and access shared Memory through Auth, not as users within your system. There are no users, only owners. If a future capability phase introduces delegated agents acting within the system, identity propagation becomes relevant — design it then, not now.
-
-### ~~OQ-2: Outbound Data Flow to External Tools~~ — RESOLVED
-
-**Resolution:** In the architecture, tool availability is the outbound data control. The owner chooses which tools are enabled (D109) — if you enable an external tool, you've accepted that the model may send data to it. The model decides what to include in each tool call, but can only call tools the owner made available. Fine-grained outbound policies (per-tool data restrictions, content filtering, "never send financial data to this tool") are implementation features, not an architecture concern.
-
----
-
-## Success Criteria
-
-- [ ] Every request is authenticated before interacting with the system — unauthenticated requests rejected
-- [ ] Owner can set up credentials on first run
+- [ ] Every Gateway request is authenticated and authorized by Auth before it reaches the Agent Loop; requests without a valid identity are refused
+- [ ] Every tool call is authorized by Auth before it runs
+- [ ] A denied tool call is reported as "not permitted", distinguishable from "does not exist"
+- [ ] The owner can set up credentials on a new system
 - [ ] API keys can be generated for programmatic access
-- [ ] Approval flow is configurable (ask everything → ask some things → ask nothing)
-- [ ] Auth state is exportable — identities, policies, configuration
-- [ ] Swapping the auth provider requires changing only the auth component — no other component is affected
-- [ ] Auth data format is product-owned, not provider-specific
-- [ ] Identity schema supports all actor types (even if only owner exists initially)
-- [ ] Policy model supports all permission categories (even if only "owner can do everything" is initially active)
-- [ ] Adding a new actor type is a data change, not a code change
+- [ ] By default the owner can do everything; no approval prompt is required by the architecture
+- [ ] Approval rules the owner sets are enforced
+- [ ] A new identity, of any type, has no permissions until the owner grants them
+- [ ] Every action is recorded in the audit log; if the log can't be written, work continues and the owner is alerted
+- [ ] Auth state is exportable: identities, policies, configuration and audit log
+- [ ] After import, re-created identities have no access until the owner turns it back on; unsupported rules are reported and grant nothing
+- [ ] Swapping the auth provider changes only the Auth component
+- [ ] Adding a new identity type is a data change, not a code change
 
 ---
 
-## Security Requirements
+## Security requirements
 
 Per-component requirements from [security-spec.md](./security-spec.md). Security-spec owns the "why"; this section owns the "what" for Auth.
 
-- [ ] Every request must be authenticated before interacting with the system (D22)
-- [ ] Unauthenticated requests must be rejected — fail closed
-- [ ] Auth state must be exportable — the owner's identity and policy data belongs to them
-- [ ] Auth must be independent of the Gateway — swapping either doesn't affect the other (D60)
-- [ ] Auth data format must be product-owned, not provider-specific — enabling migration between auth providers
+- [ ] Every request must be authenticated before it reaches the Agent Loop (D22)
+- [ ] Requests and tool calls that can't be checked must be refused: fail closed
+- [ ] Permissions live only in Auth
+- [ ] Credentials stay outside Your Memory and are never tracked by git
+- [ ] Auth state must be exportable; it belongs to the owner
+- [ ] Auth and the Gateway must be independently swappable (D60)
+- [ ] The auth data format belongs to the architecture, not the provider, so the owner can move between providers
 
 ---
 
-## Related Documents
+## Related documents
 
-[foundation-spec.md](./foundation-spec.md) (architecture overview, links to all component specs)
+[foundation-spec.md](./foundation-spec.md) (architecture overview, links to all component specs) · [security-spec.md](./security-spec.md) · [gateway-agent-loop-contract.md](./gateway-agent-loop-contract.md)
 
 ---
 
-*Auth is the gatekeeper — the component that makes all other components safely swappable. Its independence is what lets the Model, Agent Loop, Gateway, and even Auth itself be replaced without compromising security. A personal AI system needs access control that persists regardless of what intelligence is plugged in.*
+## Contract alignment
+
+This spec is ahead of the contract files in these places:
+
+- **Where Auth sits.** `specs/openapi/gateway-api.yaml` says requests are authenticated before reaching the Gateway, and `gateway-agent-loop-contract.md` and `specs/openapi/gateway-engine.yaml` describe Auth as middleware between the Gateway and the Agent Loop. Both need to say the Gateway calls Auth on every request and the Agent Loop calls Auth before each tool call.
+- **Identity status.** `specs/schemas/identity.json` needs a starting status for re-created identities that grants no access until the owner turns it back on. Its status list today is active, suspended and revoked.
+- **Identity types.** `specs/schemas/identity.json` has a fixed list of types; this spec requires new types to be addable as data.
+- **Identity transport (open).** Identity currently travels in `X-Actor-ID` and `X-Actor-Permissions` headers (`specs/openapi/gateway-engine.yaml`). This spec requires only that the authenticated identity survives a transport swap or a replacement of the Gateway or Agent Loop. The `X-Actor-Permissions` example format also doesn't match `specs/schemas/policy.json`.
+- **Policy rules.** `specs/schemas/policy.json` adds wildcards, deny-wins precedence and conditions that this spec doesn't describe yet, and needs its default (if it has one) to be "the owner can do everything".
+- **Denied and revoked errors.** Neither `gateway-api.yaml` nor `gateway-engine.yaml` has an error code for a denied action, a "not permitted" tool result, or a revocation mid-operation.
+- **API keys.** `gateway-api.yaml` describes API keys as full-access (owner-level) only.
+
+---
+
+*Auth is the gatekeeper that makes the other components safely swappable. A personal AI system needs access control that persists whatever intelligence is plugged in.*

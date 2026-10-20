@@ -50,9 +50,12 @@ If conflicts exist, do not guess silently. Create `conflict_register.md` and doc
 ## Required Auth Capabilities
 
 Implement these behaviors:
-- Authenticate protected requests before system interaction.
+- Answer the Gateway's Auth call on every protected request, including list and history reads.
+- Answer the Agent Loop's Auth check before each tool call.
 - Build and attach normalized auth context (identity, actor type, mode, permissions).
-- Enforce authorization decisions for tools and approval actions.
+- Enforce authorization decisions for tool calls and, where a product adds approvals, approval actions.
+- Ship a default policy where the owner can do everything and every other identity starts with nothing.
+- Keep permissions, including approval rules, only in Auth.
 - Fail closed on invalid/missing credentials or mismatched auth context.
 - Keep auth state product-owned, inspectable, and exportable.
 - Provide required day-one tools: `auth_whoami`, `auth_check`, `auth_export`.
@@ -69,10 +72,16 @@ Implement these behaviors:
 ### Auth context propagation
 - Protected path must carry actor identity and permission context.
 - Agent Loop consumes authenticated context; it does not authenticate independently.
+- Agent Loop asks Auth before each tool call; a refused call does not run and is reported as "not permitted", not "does not exist".
 
 ### Authorization
 - Permission denial must be explicit and enforced in code.
-- Approval decision submission requires `approval_authority`.
+- Where a product adds approvals, approval decision submission requires `approval_authority`.
+- No approval step is required by the architecture for the owner.
+
+### Export and import
+- After import, policies for unknown identities stay dormant.
+- A re-created identity gets no access until the owner turns it back on.
 
 ### Required tools
 - `auth_whoami`: returns current actor identity details.
@@ -92,7 +101,8 @@ Use these for MVP implementation consistency:
 
 - Do not bypass Auth on any protected route.
 - Do not implement fail-open auth behavior.
-- Do not store secrets in inspectable Memory/preferences files.
+- Do not store secrets in Memory or in any file git tracks.
+- Do not put permissions or approval rules in configuration or preferences.
 - Do not move authorization ownership into Gateway, Agent Loop, or tools.
 - Do not remove required auth tools from runtime.
 - Do not return opaque provider-only auth blobs as the canonical export surface.
@@ -101,9 +111,9 @@ Use these for MVP implementation consistency:
 
 Implement automated tests that prove:
 
-1. Protected routes fail without valid auth context.
+1. The Gateway calls Auth on every protected request, and requests fail without valid auth context.
 2. Auth context parsing/validation rejects malformed or mismatched identity data.
-3. Permission-denied actions are blocked (including tool access and approval decisions).
+3. Permission-denied actions are blocked: each tool call is checked by Auth, refusals are reported as "not permitted", and approval decisions are checked where approvals exist.
 4. Startup creates/loads product-owned auth state for day-one runtime.
 5. `auth_export` returns non-secret product-owned state.
 6. `auth_whoami`, `auth_check`, and `auth_export` are available.
@@ -111,13 +121,17 @@ Implement automated tests that prove:
 8. Structured auth audit records exist for allowed and denied outcomes.
 9. Local-owner mode still validates and enforces the boundary.
 10. Auth module does not own non-auth responsibilities.
+11. In a fresh state the owner can do everything with no approval step, and other identities start with nothing.
+12. Permissions and approval rules are read only from Auth, never from configuration or preferences.
+13. After import, policies for unknown identities stay dormant and a re-created identity gets no access.
 
 ## Drift-Critical Fail Conditions (Fail Build If Any True)
 
 - Any protected route is reachable without Auth.
 - Missing credentials are treated as implicit allow.
-- Approval decisions can be submitted without `approval_authority`.
-- Restricted tools execute for unauthorized actors.
+- Approval decisions can be submitted without `approval_authority` where approvals exist.
+- A tool call runs without a per-call Auth decision.
+- Permissions are read from configuration or preferences.
 - Secret-like fields appear in exportable auth state.
 - Required auth tools are missing.
 - Auth logic is scattered outside Auth boundary ownership.

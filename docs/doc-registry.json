@@ -8,6 +8,20 @@
       "depends_on": []
     },
     {
+      "path": "docs/spec/personal-ai-architecture-spec.md",
+      "covers": [],
+      "tier": 1,
+      "update_trigger": "manual",
+      "depends_on": []
+    },
+    {
+      "path": "docs/spec/personal-ai-architecture-gaps.md",
+      "covers": [],
+      "tier": 1,
+      "update_trigger": "manual",
+      "depends_on": ["docs/spec/personal-ai-architecture-spec.md"]
+    },
+    {
       "path": "docs/in-depth-overview/gateway-agent-loop-contract.md",
       "covers": ["src/gateway/", "src/engine/"],
       "tier": 1,

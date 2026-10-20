@@ -7,7 +7,8 @@ This document defines anti-drift controls for the external Gateway API boundary.
 - External API becomes a passthrough for internal Gateway ↔ Agent Loop contract payloads.
 - Event names/payloads drift from canonical stream taxonomy.
 - Missing reconciliation fields (`X-Conversation-ID`, `done` IDs).
-- Approval behavior trapped in local UI flow rather than API contract.
+- Approval behavior (in products that add it) trapped in local UI flow rather than API contract.
+- Conversation detail drops tool calls and tool results.
 - Error channel confusion (HTTP errors emitted mid-stream or SSE errors emitted pre-stream).
 - Raw storage/internal error details leaked externally.
 
@@ -29,19 +30,20 @@ This document defines anti-drift controls for the external Gateway API boundary.
 | GAPID-CHK-004 | `done` includes required IDs | Stream payload validation tests | Critical |
 | GAPID-CHK-005 | `X-Conversation-ID` header emitted | Response header contract tests | Critical |
 | GAPID-CHK-006 | Conversation list/detail envelopes canonical | Response schema tests for list and detail | Critical |
-| GAPID-CHK-007 | Approval decision endpoint is canonical | Route and payload contract tests | Critical |
-| GAPID-CHK-008 | Approval events are contract-visible | Stream tests requiring approval path | Critical |
+| GAPID-CHK-007 | Approval decision endpoint is canonical (where present) | Route and payload contract tests | Critical |
+| GAPID-CHK-008 | Approval events are contract-visible where approval rules apply | Stream tests with an approval rule set | Critical |
 | GAPID-CHK-009 | Error channel split is deterministic | Tests for pre-stream HTTP vs mid-stream SSE errors | High |
 | GAPID-CHK-010 | Error taxonomy and sanitization enforced | Fault injection tests on error code and safe message | Critical |
-| GAPID-CHK-011 | Protected routes enforce Auth | Unauthorized route test suite | Critical |
+| GAPID-CHK-011 | Gateway calls Auth on every protected route, including list and history reads | Unauthorized route test suite | Critical |
 | GAPID-CHK-012 | Unknown IDs map to safe 404 behavior | Not-found behavior tests for conversation and approval routes | High |
+| GAPID-CHK-013 | Conversation detail keeps tool calls and tool results | Tool-turn history test | Critical |
 
 ## 4. Contract-Break Indicators
 
 - Clients can send internal request shape to `POST /message`.
 - `done` omits required state-reconciliation identifiers.
 - Approval decision route deviates from canonical path or body shape.
-- Approval-required flows have no `approval-request` and `approval-result` events.
+- Flows an approval rule covers have no `approval-request` and `approval-result` events.
 - Mid-stream failures appear as HTTP responses after stream start.
 - Error messages expose stack traces, filesystem paths, tokens, or provider internals.
 
@@ -61,7 +63,8 @@ This document defines anti-drift controls for the external Gateway API boundary.
 - [ ] `done` and `X-Conversation-ID` reconciliation artifacts present.
 - [ ] Conversation list/detail responses match canonical envelopes.
 - [ ] Approval decision route and payload are canonical.
-- [ ] Approval events are contract-visible in stream.
+- [ ] Approval events are contract-visible in stream (where approval rules apply).
+- [ ] Conversation detail includes tool calls and tool results.
 - [ ] Pre-stream and mid-stream error channels are correct.
 - [ ] Error codes/messages are safe and classified.
 - [ ] Protected routes reject unauthorized requests.

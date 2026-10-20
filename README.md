@@ -45,6 +45,7 @@ Four components and two APIs:
 | Build a system | [TypeScript template](https://github.com/Personal-AI-Architecture/ts-architecture-template) |
 | Build with an AI coding agent | [AGENT.md](AGENT.md) and the [architecture primer](docs/ai-agent-docs/) |
 | Build one component | [Blueprints](docs/blueprints/) |
+| See what every system must promise | [Product spec](docs/spec/personal-ai-architecture-spec.md) |
 | Check my system conforms | [Conformance guide](docs/in-depth-overview/conformance/) |
 | Check for lock-in | [Lock-in gate](docs/in-depth-overview/lockin-gate.md) |
 

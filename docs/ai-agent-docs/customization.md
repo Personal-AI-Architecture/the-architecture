@@ -29,13 +29,17 @@ Define what can change safely across products and owner setups without turning c
 
 - Customization happens through approved mechanisms rather than core component modification.
 - Product variation preserves component boundaries.
-- Implementations build on the architecture as a dependency relationship rather than a fork where possible.
-- The fixed contracts remain the Gateway API and Model API.
+- Implementations start from the published contracts and, optionally, a template — not from a package or a fork.
+- The fixed contracts are the Gateway API, the Model API, the internal Gateway ↔ Agent Loop contract and the shared schemas in `specs/`.
+- Merge order is Architecture -> Implementation -> Owner. The owner's choice always wins on their own hardware; no product rule sits above the owner.
+- Owner changes survive product updates; a conflicting update tells the owner instead of overwriting silently.
+- The user stories are US-17 (build a product on the architecture) and US-11 (owner changes survive updates) in `docs/spec/personal-ai-architecture-spec.md`.
 
 ## Forbidden Behaviors
 
 - Using customization as a justification for responsibility leakage.
 - Changing core contracts without treating it as an architecture change.
+- Product rules the owner can't override on their own hardware.
 - Moving architecture-owned decisions into arbitrary product code.
 - Turning customization into hidden modifications of generic components.
 
@@ -62,6 +66,7 @@ Define what can change safely across products and owner setups without turning c
 ## Source Docs
 
 - `docs/in-depth-overview/customization-spec.md`
+- `docs/spec/personal-ai-architecture-spec.md` (US-17, US-11)
 - `docs/in-depth-overview/configuration-spec.md`
 - `docs/in-depth-overview/tools-spec.md`
 - `docs/in-depth-overview/models-spec.md`

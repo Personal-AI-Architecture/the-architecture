@@ -16,8 +16,8 @@ hide_table_of_contents: true
 ```mermaid
 flowchart LR
     C[Clients external] -->|Gateway API| G[Gateway component]
-    G -->|Auth middleware check| A[Auth component]
-    A -->|POST engine chat and SSE stream internal contract D137| E[Agent Loop component]
+    G -->|Auth check on every request| A[Auth component]
+    G -->|POST engine chat and SSE stream internal contract D137| E[Agent Loop component]
     E -->|Model API| M[Models external]
 
     G -->|Conversation store tool D152| CST[Conversation Store Tool internal]
@@ -27,7 +27,7 @@ flowchart LR
     TR -->|Memory tools read write edit delete search list history| YM
     TR -->|External tools| EX[External services and external memory]
 
-    A -.->|Authorizes tool actions by actor policy| TR
+    E -.->|Asks before each tool call| A
 ```
 
 | Layer | Elements |
@@ -50,20 +50,22 @@ flowchart LR
 | Exposure | Through tools only (internal tools = the system's own interface to its platform) |
 | Inspectability | Must be inspectable without the system running (text editor, file browser, database viewer) |
 | Export | Must support full export in open formats from day one. Even if the implementation is a simple archive of the memory root, export is non-negotiable. |
-| Version history | Must be reliably established at startup. If version history cannot be initialized, fail startup -- do not degrade to a warning. |
+| Version history | Required, with restore. Must record what changed (not only that something changed) and let the owner make an earlier state current again. Must be reliably established at startup: if it cannot be initialized, fail startup -- do not degrade to a warning. How it is built is up to the implementation (Git is one option). |
 
-**Core operations:** read, write, edit, delete, search, list, history
+**Core operations:** read, write, edit, delete, search, list, history, restore (names are implementation choices)
 
-`history` must return change records **and** previous states, not just metadata. Accept an optional commit/version identifier to retrieve file content at that point in time.
+`history` must return change records **and** previous states, not just metadata. Accept an optional version identifier to retrieve file content at that point in time. `restore` makes an earlier state current again.
 
-**Storage mechanisms (out of the box):**
+A failed or conflicting write is reported to the caller, never reported as saved and never resolved silently.
 
-| Mechanism | Implementation |
+**Storage mechanisms (examples):**
+
+| Mechanism | Example implementation |
 |-----------|---------------|
 | Files | Markdown, plain text |
-| Version control | Git |
+| Version history | Git, or a database with snapshots |
 
-Implementations can add storage mechanisms as needed (SQLite for structured queries, vector indexes for semantic search, etc.). Adding a mechanism means adding tool implementations — it doesn't change the contract. See `memory-spec.md` §Evolution.
+Implementations choose their storage mechanisms and can add more as needed (a database such as SQLite for structured queries, vector indexes for semantic search, etc.). Adding a mechanism means adding tool implementations — it doesn't change the contract. See `memory-spec.md` §Evolution.
 
 **Substrate test:** If it stores/retrieves/searches/versions data, it belongs to Your Memory. If it interprets or produces content, it belongs to the model.
 
@@ -77,7 +79,7 @@ Generic, commodity, no product-specific logic.
 
 | Property | Requirement |
 |----------|-------------|
-| Configuration | Pre-configured at boot with tool definitions and provider config (not per-request) |
+| Configuration | Pre-configured at boot with the bootstrap prompt, tool definitions and provider adapter config. The model is not boot-time config: it arrives with each request |
 | Concurrency | Must handle multiple concurrent loops independently |
 | Scope | Connects models to tools -- nothing else |
 | Iteration cap | The Agent Loop MUST NOT impose a default iteration cap. Implementations MAY configure a safety bound as a deployment choice. |
@@ -88,15 +90,15 @@ Generic, commodity, no product-specific logic.
 - Construct prompts
 - Manage skills
 - Handle approval state
-- Enforce scope
+- Decide permissions (it asks Auth before each tool call and honours the answer)
 - Decide context
 - Persist conversations
 - Authenticate
 - Have personality
 
-### Auth (cross-cutting layer)
+### Auth (separate component)
 
-Independent of Gateway -- both are swappable independently.
+Independent of Gateway -- both are swappable independently. Permissions live only in Auth. Default policy: the owner can do everything; every other identity starts with nothing.
 
 **Three operations:**
 
@@ -106,9 +108,9 @@ Independent of Gateway -- both are swappable independently.
 | Authorize | (identity, resource, action) -> allow/deny |
 | Manage | modify permissions |
 
-**Middleware position:** Sits between Gateway and the Agent Loop. Validates via headers, rejects unauthorized with 401.
+**Where it is called:** The Gateway calls Auth on every request, before anything reaches the Agent Loop or conversation data; unauthorized requests are rejected with 401. The Agent Loop asks Auth before each tool call; a refused call is not run and the model is told it was not permitted. If Auth is unavailable, fail closed.
 
-**Headers:** `X-Actor-ID`, `X-Actor-Permissions`
+**Identity transport (today):** headers `X-Actor-ID`, `X-Actor-Permissions`
 
 **Actor types:** owner, collaborator, system agent, background agent, external agent, service, economic actor, federated
 
@@ -132,13 +134,13 @@ Manages conversations and routes to the Agent Loop. Content-agnostic, interface-
 
 **Guarantees:** route, persist conversations, resume, stream, content-agnostic, interface-agnostic
 
-Stores conversations in Your Memory.
+Stores conversations in Your Memory, including the tool calls and tool results inside them. Reads the owner's current model choice on every message and passes it to the Agent Loop.
 
 **Gateway does NOT:**
 
 - Interpret messages
 - Execute tools
-- Authenticate
+- Authenticate or decide permissions (it calls Auth and honours the answer)
 - Influence model behavior
 - Route to models
 - Transform content
@@ -156,7 +158,7 @@ How the world interacts with the system.
 
 | Direction | Payload |
 |-----------|---------|
-| In | Message content + conversation ID (optional) + metadata |
+| In | Message content (a list of parts: text first, room for images and files) + conversation ID (optional) + metadata |
 | Out | Streamed response + conversation ID + message record |
 
 Built on prevailing industry standard. Swappable via adapter.
@@ -185,9 +187,9 @@ One HTTP endpoint. Not a third API.
 ```json
 {
   "messages": [
-    { "role": "system", "content": "..." },
     { "role": "user", "content": "..." }
   ],
+  "model": "...",
   "metadata": {
     "conversation_id": "conv_abc123",
     "correlation_id": "req_xyz789",
@@ -202,7 +204,9 @@ One HTTP endpoint. Not a third API.
 | Field | Required |
 |-------|----------|
 | `messages` | Yes |
+| Model | Yes |
 | `metadata.correlation_id` | Yes |
+| Request timestamp | Yes |
 | `metadata.conversation_id` | No |
 | `metadata.trigger` | No |
 | `metadata.client_context` | No |
@@ -229,7 +233,13 @@ One HTTP endpoint. Not a third API.
 
 **Error message safety:** SSE error event messages must be safe for client display. Never forward raw `Error.message`, stack traces, or file paths into the stream. Map each error code to a fixed safe message; log raw diagnostic detail to structured stdout only.
 
-**Auth middleware path:** validate request -> attach `X-Actor-ID` + `X-Actor-Permissions` headers -> reject with 401 on failure.
+**Auth path:** Gateway calls Auth -> attach identity (today `X-Actor-ID` + `X-Actor-Permissions` headers) -> reject with 401 on failure. Agent Loop asks Auth before each tool call -> a refused call returns a `tool-result` error saying it was not permitted.
+
+**Messages:** one shape across all three contracts. Content is a list of parts; tool calls and tool results are ordinary message parts and are saved in conversation history. The bootstrap prompt is Agent Loop configuration, so the request carries no system message.
+
+**Errors:** every error, HTTP or SSE, carries the request's correlation ID.
+
+The `/engine/chat` path and `engine` schema names keep the component's older name until the next contract revision.
 
 ---
 
@@ -245,15 +255,16 @@ One HTTP endpoint. Not a third API.
 | Execute tools | Agent Loop | Your Memory |
 | Decide which tools to use | Model (via agent loop) | Your Memory, Gateway |
 | Execute skills | Model + Agent Loop | Your Memory |
-| Protect access / permissions | Auth | Your Memory, Gateway |
+| Protect access / permissions | Auth (called by the Gateway on every request and by the Agent Loop before each tool call) | Your Memory, Gateway, Configuration |
 | Manage conversations | Gateway | Agent Loop, Your Memory |
 | Route requests to Agent Loop | Gateway | Auth |
 | Connect to AI models | Model API | Agent Loop internals |
 | Accept client connections | Gateway API | Agent Loop |
 | Provide intelligence | Models (external) | Agent Loop, Your Memory |
 | Display content to owners | Clients (external) | Gateway |
-| Bootstrap the system | Runtime config (4 fields) | Your Memory |
-| Resolve concurrent writes | Tool implementations | Your Memory component |
+| Bootstrap the system | Runtime config (4 fields) + Agent Loop config (bootstrap prompt) | Your Memory |
+| Choose the model | The owner (a preference, passed with each request) | Runtime config |
+| Coordinate concurrent writes and report conflicts | Tool implementations | Your Memory component |
 
 ---
 
@@ -272,9 +283,10 @@ One HTTP endpoint. Not a third API.
 
 | What | Where |
 |------|-------|
-| Preferences | Your Memory (personal data, travels with you) |
+| Preferences | Your Memory (personal data, travels with you), including the model choice |
+| Permissions | Auth only (not configuration or preferences) |
 | Tool definitions | Self-describing (from the tools themselves) |
-| Secrets | Environment variables only (never in files) |
+| Secrets | Outside Your Memory, never in a git-tracked file: environment variables, an untracked config file, or a secret store |
 | Skills | Prompts in Your Memory |
 | Bootstrap prompt | One line in Agent Loop config: "Read AGENT.md for your instructions" |
 | Bind address | Default `127.0.0.1` (localhost only). Network binding (`0.0.0.0`) requires explicit configuration. See DEPLOY-3, DEPLOY-5. |
@@ -285,9 +297,11 @@ One HTTP endpoint. Not a third API.
 2. Load adapter config
 3. Discover tools
 4. Mount Your Memory
-5. Verify version history (git init or equivalent). Fail if version history cannot be established.
+5. Verify version history (for example, git init). Fail if version history cannot be established.
 6. Read preferences
 7. Ready
+
+On every message, the Gateway reads the owner's current model choice and passes it with the request, so a changed choice applies to the next message with no restart.
 
 ---
 
@@ -297,8 +311,8 @@ One HTTP endpoint. Not a third API.
 
 | ID | Test | Pass Condition |
 |----|------|----------------|
-| SWAP-1 | Provider swap | Change `provider_adapter` + adapter config -> next message uses new provider -> no code changes |
-| SWAP-2 | Model swap | Change model preference in Your Memory -> next message uses new model -> no code changes |
+| SWAP-1 | Provider swap | Change `provider_adapter` + adapter config -> after a restart (allowed for a provider swap), messages use the new provider -> no code changes |
+| SWAP-2 | Model swap | Change model preference in Your Memory -> next message uses new model with no restart -> no code changes |
 | SWAP-3 | Tool swap | Add/remove a tool -> system functions -> no code changes |
 
 ### Architectural Invariant Tests
@@ -313,7 +327,7 @@ One HTTP endpoint. Not a third API.
 | ARCH-6 | Error message sanitization | No SSE error event contains paths, stack traces, or credentials |
 | ARCH-7 | Memory export | `memory_export` produces complete archive in open formats -> readable without system |
 | ARCH-8 | Auth tool surface | `auth_whoami`, `auth_check`, `auth_export` exist and return correct results |
-| ARCH-9 | Version history reliability | System fails to start if version history cannot be initialized -> `memory_history` returns previous states |
+| ARCH-9 | Version history reliability | System fails to start if version history cannot be initialized -> the history operation returns previous states -> restore makes an earlier state current |
 
 ### Deployment Invariant Tests
 
@@ -347,10 +361,21 @@ One HTTP endpoint. Not a third API.
 | Your Memory | Swappable via tools |
 | Components | Swappable via contracts |
 | Contracts | Swappable via adapters |
-| Auth | Swappable via cross-cutting independence |
+| Auth | Swappable via the Auth contract |
 
 **Adapters** are thin, stateless translation layers. Each describable in one sentence. See [adapter-spec.md](./adapter-spec.md) §How Model Configuration Works in Practice for the concrete model/provider swap walkthrough.
 
-**Tools** are data in the environment, not a component. Definitions self-describe, execution is the Agent Loop's job, permissions are Auth's job.
+**Tools** are data in the environment, not a component. Definitions self-describe, execution is the Agent Loop's job, permissions are Auth's job (asked before each call).
 
 **Everything** is either memory (nouns/data) or tools (verbs/operations). No third category.
+
+---
+
+## Contract alignment
+
+This reference is ahead of the contract files in these places, pending the next contract revision:
+
+- `specs/openapi/gateway-engine.yaml`: no request field for the model, no request timestamp, no correlation ID on errors, and the system message is described as assembled by the Gateway.
+- `specs/schemas/message.json`: content is a string, not a list of parts, and tool calls and tool results are not message parts.
+- `specs/openapi/gateway-api.yaml`: says requests are authenticated before they reach the Gateway, and stores only user and assistant messages.
+- Memory tool contract: no restore operation.

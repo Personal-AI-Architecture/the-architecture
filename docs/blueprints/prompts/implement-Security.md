@@ -57,19 +57,22 @@ If conflicts appear, do not guess silently. Create `conflict_register.md` and do
 
 Implement these behaviors:
 - Keep security as a cross-cutting boundary, not a standalone component.
-- Prevent secret persistence in forbidden inspectable/tracked storage locations.
+- Prevent secret persistence in Memory or any file git tracks; secrets live in environment variables, an untracked config file, or a secret store.
 - Enforce safe sanitized pre-stream and mid-stream error surfaces.
 - Preserve mid-stream taxonomy (`provider_error`, `tool_error`, `context_overflow`).
 - Emit structured audit events for sensitive actions.
-- Enforce approval as coded runtime control.
-- Keep approval interactions contract-visible (`approval-request`, `approval-result`, decision route).
-- Enforce auth-on-path and fail-closed behavior for protected routes.
+- Ship the architecture default: the owner can do everything, with no approval step.
+- Where an approval rule exists in Auth, enforce it as coded runtime control.
+- Where a product adds approvals, keep approval interactions contract-visible (`approval-request`, `approval-result`, decision route).
+- Have the Gateway call Auth on every request and the Agent Loop ask Auth before each tool call; both fail closed.
+- Never let a product or environment rule override the owner on the owner's own hardware.
+- Isolate tools the owner has not said they trust, by default.
 - Block request payloads from acting as hidden runtime/provider/tool configuration channels.
 - Enforce tool scope/isolation boundaries independent of Auth policy alone.
 - Ensure auth export remains product-owned and non-secret.
 - Keep day-one security controls active at startup.
 - Preserve correlation-aware traceability.
-- Preserve memory export/version-history safety-net behavior.
+- Preserve memory export, version history and restore as the safety net.
 - Preserve security behavior across component/provider/adapter swaps.
 
 ## Canonical Contract Rules
@@ -102,12 +105,14 @@ Use these for MVP consistency:
 - Do not persist credentials/tokens/passwords in normal inspectable Memory or tracked config.
 - Do not expose raw stack traces, provider raw payloads, or internal paths in client-visible errors.
 - Do not collapse error taxonomy to a generic catch-all.
-- Do not implement approval as prompt-only behavior.
+- Do not implement approval rules as prompt-only behavior.
+- Do not ship approval on every write as a built-in default.
 - Do not hide approval state transitions outside contract-visible interfaces.
-- Do not bypass Auth on protected routes.
+- Do not bypass Auth on protected routes or on tool calls.
+- Do not add rules that override the owner on the owner's own hardware.
 - Do not allow hidden request fields to reconfigure runtime/provider/tool behavior.
 - Do not rely on Auth-only checks where runtime tool scope/isolation controls are required.
-- Do not disable export/history safety net guarantees.
+- Do not disable export, history or restore.
 
 ## Required Tests (Minimum)
 
@@ -117,16 +122,19 @@ Implement automated tests proving all `SEC-MUST-*` requirements in `Security-con
 2. Safe sanitized error surfaces.
 3. Mid-stream taxonomy preservation.
 4. Structured audit capture for sensitive actions.
-5. Coded approval enforcement.
-6. Contract-visible approval interactions.
-7. Auth-on-path fail-closed behavior.
+5. Coded enforcement of approval rules where set.
+6. Contract-visible approval interactions where a product adds approvals.
+7. Per-request and per-tool-call Auth checks, fail closed.
 8. No hidden configuration channels in request payload.
 9. Independent tool scope/isolation enforcement.
 10. Non-secret auth export behavior.
 11. Day-one security startup controls.
 12. Correlation-aware traceability.
-13. Export/history safety-net guarantees.
+13. Export, history and restore safety net.
 14. Swap resilience of security controls.
+15. Owner can do everything by default.
+16. No rule above the owner.
+17. Untrusted tools isolated by default.
 
 Include positive and negative vectors, linked to requirement IDs.
 
@@ -135,8 +143,9 @@ Include positive and negative vectors, linked to requirement IDs.
 - Any Critical check in `Security-drift-guard.md` fails.
 - Any `SEC-MUST-*` conformance test fails.
 - Secret leakage is detected in forbidden surfaces.
-- Approval enforcement or visibility is missing.
-- Auth bypass is possible on protected routes.
+- Approval enforcement or visibility is missing where approval rules exist.
+- Auth bypass is possible on protected routes or tool calls.
+- A rule overrides the owner on the owner's own hardware.
 - Error taxonomy or safe-message constraints are broken.
 - Swap introduces boundary/security regressions.
 

@@ -57,14 +57,17 @@ If conflicts appear, do not guess silently. Create `conflict_register.md` and do
 Implement these behaviors:
 - Keep runtime config, adapter config, and preferences as distinct ownership layers.
 - Keep request metadata free of hidden runtime/provider/tool configuration fields.
-- Keep secrets reference-only in configuration surfaces.
+- Keep secrets reference-only in configuration surfaces; the values live outside Memory and outside anything git tracks (environment variable, untracked config file, or secret store).
 - Keep runtime config thin and environment-owned.
 - Keep adapter config provider-specific.
 - Keep preferences owner-owned in Memory.
 - Enforce deterministic startup sequence and readiness gating.
 - Fail clearly on invalid/unsupported configuration.
 - Drive tool discovery from configured tool sources.
-- Support same-provider model swaps via preferences only.
+- Support same-provider model swaps via preferences only; read the owner's model choice on every message so a change applies to the next message with no restart.
+- Keep permissions and approval rules out of every configuration layer; they live only in Auth.
+- Merge defaults Architecture -> Implementation -> Owner; the owner always wins.
+- Keep the bootstrap prompt in the Agent Loop's own configuration.
 - Support provider swaps via adapter/runtime config changes only.
 - Preserve localhost-first default bind posture unless explicitly overridden.
 - Ensure day-one startup readiness surfaces exist (auth bootstrap, persistence path, export-capable memory surface).
@@ -97,7 +100,10 @@ Use these for MVP consistency:
 
 - Do not merge runtime, adapter, and preferences into one configuration layer.
 - Do not allow request metadata to override runtime/provider/tool bootstrap.
-- Do not store raw secrets in tracked config or Memory preference files.
+- Do not store raw secrets in Memory or in any file git tracks.
+- Do not fix the model at startup.
+- Do not store permissions or approval modes in configuration or preferences, even if the current schema still has `approval_mode`; report that gap.
+- Do not let any product or environment rule override the owner.
 - Do not move owner preferences into runtime/adapter config.
 - Do not hardcode provider/model selection in Gateway or Agent Loop code.
 - Do not mark startup ready before canonical startup phases complete.
@@ -121,6 +127,10 @@ Implement automated tests proving all `CFG-MUST-*` requirements in `Configuratio
 12. Localhost-first bind default.
 13. Day-one readiness surfaces.
 14. Config-only anti-lock-in swap suite.
+15. Model choice read on every message.
+16. No permissions in configuration.
+17. Owner wins the merge.
+18. Bootstrap prompt ownership.
 
 Include positive and negative vectors linked to requirement IDs.
 
@@ -131,6 +141,8 @@ Include positive and negative vectors linked to requirement IDs.
 - Secret-by-value fields appear in tracked config or Memory preferences.
 - Startup readiness/sequence constraints are violated.
 - Provider/model/tool swaps require code edits.
+- A model change needs a restart.
+- Permissions are read from configuration or preferences.
 - Unresolved High-risk configuration conflicts remain.
 
 ## Deliverables

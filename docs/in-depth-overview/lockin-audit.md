@@ -34,7 +34,7 @@ hide_table_of_contents: true
 
 ### Security and Change Safety
 
-- [ ] No secrets were introduced into source-controlled files or owner memory content.
+- [ ] No secrets were introduced into Your Memory or any git-tracked file (secrets stay in environment variables, an untracked config file, or a secret store).
 - [ ] Auth data and policies remain portable with owner-controlled export path.
 - [ ] Update flow preserves existing owner data and remains reversible in failure scenarios.
 
@@ -60,6 +60,8 @@ Run the sections that match changed areas.
 ### Auth
 
 - [ ] Auth remains a cross-cutting layer independent of Gateway/Agent Loop implementation internals (D60).
+- [ ] The Gateway still calls Auth on every request and the Agent Loop still asks Auth before each tool call; permissions live only in Auth, not in configuration.
+- [ ] The default policy is still that the owner can do everything; no approval step was added as an architecture default.
 - [ ] Permission model changes remain additive and backward-compatible where practical.
 - [ ] Auth implementation choices do not create a single inescapable identity-provider dependency.
 
@@ -67,7 +69,7 @@ Run the sections that match changed areas.
 
 - [ ] Storage/tool abstractions remain stable if storage backend changes — tools define the contract, not the storage (D135).
 - [ ] Memory organization conventions remain transparent and owner-readable (D43).
-- [ ] Version/history behavior remains portable and inspectable.
+- [ ] Version history and restore remain available, portable and inspectable, without hard-coding one mechanism (Git is one option).
 
 ### Clients
 
@@ -76,7 +78,7 @@ Run the sections that match changed areas.
 
 ### Models and Provider Integration
 
-- [ ] Model choice remains configuration-driven (D63, D147).
+- [ ] Model choice remains an owner preference passed with each request; a change applies to the next message with no restart (D63, D147, D175).
 - [ ] Provider-specific request/stream/tool-call details remain adapter concerns (D139).
 - [ ] Fallback routing strategy remains possible via config/adapters.
 

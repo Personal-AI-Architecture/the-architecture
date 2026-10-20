@@ -26,11 +26,14 @@ Define what tools are, where they live, how they are executed, and how they avoi
 - Tool use stays within the component responsibility model.
 - Memory access through tools respects Memory boundaries.
 - Tool scope expands or contracts through availability and permissions, not architecture changes.
+- The Agent Loop asks Auth before each tool call. A refused call doesn't run, and the model is told it is not permitted (distinct from "does not exist").
+- No approval step by default: the owner can do everything. Approval rules, where an owner or product adds them, live in Auth and are enforced in code at that check.
+- A tool the owner doesn't trust runs isolated; the owner decides what they trust. How isolation is built is up to the implementation.
 
 ## Availability Layers
 
 - Environment: what tools exist.
-- Auth: who can use what.
+- Auth: who can use what (asked before each tool call).
 - Granularity: how each actor may use them.
 
 ## Forbidden Behaviors
@@ -50,7 +53,7 @@ Define what tools are, where they live, how they are executed, and how they avoi
 
 - Are tools being treated as a fifth component?
 - Is execution happening in the right place?
-- Is authorization handled by Auth rather than ad hoc logic?
+- Is authorization handled by Auth, asked before each tool call, rather than ad hoc logic?
 - Is Memory access tool-mediated where required?
 - Is tool discovery/configuration living in the correct layers?
 
@@ -59,7 +62,9 @@ Define what tools are, where they live, how they are executed, and how they avoi
 - Tool discovery or selection logic in the wrong component.
 - Direct Memory access bypassing tool-mediated boundaries.
 - Product-specific orchestration embedded into tool runtime assumptions.
-- Approval modeled as prompt guidance instead of a coded enforcement tool.
+- Approval modeled as prompt guidance instead of a coded check (where approval rules exist).
+- "Confirm every write" built in as an architecture default.
+- Permissions held in tool configuration instead of Auth.
 
 ## Source Docs
 
