@@ -81,9 +81,9 @@ These criteria verify that the implementation matches the architectural topology
 
 ---
 
-## 2. Pillar Verification
+## 2. Owner Outcome Verification
 
-The four pillars are values, not code — but they produce observable properties. A system either exhibits these properties or it doesn't.
+These four owner outcomes are values, not code — but they produce observable properties. A system either exhibits these properties or it doesn't.
 
 ### P-1. Empowerment — AI that works for you
 
@@ -496,7 +496,7 @@ Each story is an acceptance test for the architecture itself.
 
 **Fail condition:** The system makes outbound network calls not attributable to explicitly configured services.
 
-### DEP-5. Level boundary respected
+### DEP-5. Deployment boundary respected
 
 **Claim:** The Architecture defines local deployment. Managed hosting is Implementation.
 

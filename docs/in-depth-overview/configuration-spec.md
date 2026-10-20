@@ -97,7 +97,7 @@ Tool definitions (name, description, parameters, capabilities) are not written b
 
 ## Layered Overrides (D110)
 
-Configuration follows the three-level model. Each level can override the one below it. Last layer wins.
+Configuration is layered: the architecture, then the implementation, then the owner. Each layer can override the one below it. Last layer wins.
 
 | Layer | What it provides | Example |
 |-------|-----------------|---------|

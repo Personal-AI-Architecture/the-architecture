@@ -115,8 +115,8 @@ Use these terms consistently. The "Don't Use" column lists old terms that should
 | **Model API** | Provider API | "Model API" is immediately clear |
 | **Clients** | External clients | Interfaces that communicate with a system through the Gateway API |
 | **Apps** | — | Compositions of instructions, tools, context, configuration, and optional client resources for a bounded outcome |
-| **Architecture** | Level 1 | The product-independent specifications, contracts, guidance, and requirements |
-| **Implementation** | Level 2 | A product or system that follows the Architecture (e.g., BrainDrive) |
+| **Architecture** | Level 1, Foundation | The product-independent specifications, contracts, guidance, and requirements |
+| **Implementation** | Level 2, product | A product or system that follows the Architecture (e.g., BrainDrive) |
 
 Terms that are correct as-is: **Gateway**, **Auth**, **Your Memory**, **Tools**, **Adapters**, **Contracts**.
 

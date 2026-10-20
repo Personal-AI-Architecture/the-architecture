@@ -89,7 +89,7 @@
 
 ## FS-3: Run on Own Hardware
 
-**Validates:** Deployment contract, Pillar 2 (Ownership), Pillar 3 (Freedom)
+**Validates:** Deployment contract, owner outcomes P-2 (Ownership) and P-3 (Freedom) in [foundation-verification.md](../foundation-verification.md#2-owner-outcome-verification)
 
 **Equivalent to:** DEPLOY-1 (Offline operation) + DEPLOY-2 (Local data storage) + DEPLOY-3 (Default localhost)
 

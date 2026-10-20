@@ -13,7 +13,7 @@ Use these documents:
    Milestone/release audit. Deeper verification for architecture drift and swap claims.
 
 3. [foundation-verification.md](./foundation-verification.md)
-   Full architecture compliance spec. Verifies every claim in [foundation-spec.md](./foundation-spec.md) — structure, pillars, principles, contracts, responsibilities, user stories, deployment. Run at release or architecture change. The gate and audit are operational subsets of this.
+   Full architecture compliance spec. Verifies every claim in [foundation-spec.md](./foundation-spec.md) — structure, owner outcomes, principles, contracts, responsibilities, user stories, deployment. Run at release or architecture change. The gate and audit are operational subsets of this.
 
 ---
 

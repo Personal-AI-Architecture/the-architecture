@@ -35,9 +35,9 @@ The only fixed contracts are the two APIs:
 
 This is the same "drop-down menu" principle from the foundation spec (Principle 2) applied to the Foundation's own internals. Bootstrap via minimal Agent Loop config? That's the default. Tool discovery via configured sources + self-description? That's the default. Change either if your product needs something different.
 
-### What the Levels Mean (Working Model)
+### Who Customizes What
 
-| Level | What it is | Functional? | Who provides it |
+| Layer | What it is | Functional? | Who provides it |
 |-------|-----------|-------------|-----------------|
 | **Architecture** | Components + APIs + sensible defaults. The working generic system. | Yes — minimal but working | Architecture repo |
 | **Implementation** | Architecture + product opinions (methodology, skills, starter content, branded client, default tools). | Yes — opinionated product | Product repo (e.g., BrainDrive) |
@@ -426,12 +426,12 @@ And the update applies cleanly because owner content doesn't conflict with imple
 | D50 | Bootstrap prompt is Agent Loop configuration; product entrypoint content lives in Your Memory | Foundation provides minimal bootstrap mechanism. Products provide/override entrypoint content and conventions. |
 | D57 | Clients are external — not a system component | Products ship branded clients that connect through the Gateway API. The system doesn't know or care what the client looks like. |
 | D109 | Always-send tool set vs. discoverable set | Products configure which tools appear in every prompt (always-send) and which are available on demand (discoverable). |
-| D110 | Three-level ecosystem: Foundation → Product → Personalization | The architecture provides mechanisms. An implementation provides product opinions. The owner provides owner preferences. All use the same four customization mechanisms. |
-| D112 | Level 2 is a dependency relationship, not a fork | Product repos import Level 1 as a package. Foundation updates flow to every Level 2 product automatically. |
+| D110 | Three layers: architecture → product → owner personalization | The architecture provides mechanisms. An implementation provides product opinions. The owner provides owner preferences. All use the same four customization mechanisms. |
+| D112 | A product depends on the architecture; it does not fork it | Superseded in mechanism by the repository split (OQ-2): products follow the published specs and contracts rather than importing a package. |
 | D141-refined | Tool definitions/plumbing/preferences are split across source/mechanism/owner | Definitions self-describe from tools (D146), plumbing is runtime environment config, preferences are personal data in Your Memory (D145). |
-| D153 | Foundation repo ships runnable code — working runtime with sensible defaults | Level 2 builders `npm install`, configure, run. Specs/schemas/conformance ship alongside. |
-| D155 | Level 2 depends on Level 1 via npm package | Standard dependency management, semver, `npm update` for Foundation improvements. |
-| D158 | Level 1 default bootstrap is a minimal generic system prompt | Level 2 overrides via `bootstrapTarget` pointing to product content in Your Memory (e.g., AGENT.md). |
+| D153 | Foundation repo ships runnable code — working runtime with sensible defaults | Superseded by the repository split (OQ-4): this repo ships specs and contracts; runnable code lives in the separate TypeScript template. |
+| D155 | Products depend on the architecture via an npm package | Superseded by the repository split (OQ-2). |
+| D158 | The architecture's default bootstrap is a minimal generic system prompt | Products override it with their own entry point content in Your Memory (e.g., AGENT.md). |
 
 ---
 

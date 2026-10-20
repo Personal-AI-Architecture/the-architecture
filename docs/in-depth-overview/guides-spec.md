@@ -142,7 +142,7 @@ A runnable test suite that validates *any* implementation against the architectu
 |---------|-------|---------------|-----------|
 | FS-1 | Move Your Memory | Export memory → import on fresh deployment → preferences honored, gaps reported, nothing lost | Principle 1, memory portability |
 | FS-2 | Add capability | Add a tool/skill/client/provider → Memory gains no outward dependencies → four-component structure holds | Principle 3, Principle 1, D64 |
-| FS-3 | Run on own hardware | Install on laptop/desktop/server → no external service required → full offline capability | D148, Pillars 2+3 |
+| FS-3 | Run on own hardware | Install on laptop/desktop/server → no external service required → full offline capability | D148, owner outcomes P-2 and P-3 |
 | FS-4 | Swap provider | = SWAP-1 | Model API |
 | FS-5 | Swap client | = ARCH-3 | Gateway API |
 | FS-6 | Evolve Memory | Add search capability → no other component changes | Principle 1 |

@@ -129,7 +129,7 @@ The test: can you describe what the adapter does in one sentence? "Translates Op
 
 Nothing stops you from bypassing adapters, hardcoding a provider, or coupling components directly. The system still works. But every violation is a lock-in you've chosen to accept.
 
-This is by design. Pillar 3 — Freedom — means you're free to use the system however you please. Enforcing the architecture would mean the platform telling you what you can and can't do with your own system. That's what Big Tech does. Instead, the architecture makes the zero-lock-in path the easiest path — not the only path. The choice is yours.
+This is by design. Freedom from lock-in means you're free to use the system however you please. Enforcing the architecture would mean the platform telling you what you can and can't do with your own system. That's what Big Tech does. Instead, the architecture makes the zero-lock-in path the easiest path — not the only path. The choice is yours.
 
 ## Completing the Swappability Story
 
