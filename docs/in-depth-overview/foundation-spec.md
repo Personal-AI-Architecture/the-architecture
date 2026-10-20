@@ -5,13 +5,17 @@ hide_table_of_contents: true
 
 # Architecture Overview
 
-**Own your AI.** The Personal AI Architecture is an open blueprint for building personal AI systems. Keep your memory, swap everything else.
+**Own your AI.** The Personal AI Architecture is a blueprint for building personal AI systems that you own and control.
 
-Personal AI systems will get to know us better the more we use them. The better they know us, the more helpful they become, and the harder they are to leave. When a platform owns that system, it is the same lock-in that captured the last phase of the internet, only stronger: more power, wealth and control for the platform, and less for the people using it.
+It does not ship a product. It defines the parts of a personal AI system, and the rules that keep you from being locked into a vendor, a technology, or even this architecture itself. It also provides examples and templates you can use to build your own.
 
-It doesn't have to be this way. Instead of being users of someone else's AI system, we can be owners of our own. No users. Only owners.
+<p align="center">
+  <img src="../assets/readme-hero.svg" alt="Your Memory (conversations, preferences, skills, documents and more, in files you own) stays under your control, while models, interfaces and tools can be swapped freely." width="680" />
+</p>
 
-This architecture is how. It does not ship a product. It defines the parts of a personal AI system and the rules that keep you from being locked in: to a vendor, to a technology, or even to this architecture itself.
+We will soon rely on personal AI systems to help us in all areas of our lives.
+
+We should own those systems, so we can always ensure they are working with our best interests in mind, and so the immense wealth created by the AI revolution can flow far and wide, instead of being concentrated in a few Big Tech platforms.
 
 ## How it works, in six steps
 
