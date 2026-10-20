@@ -82,7 +82,7 @@ Two things must stay true for Your Memory to remain under your control:
 1. **Your Memory has no outward dependencies.** Everything else depends on it, and it depends on nothing.
 2. **Everything else stays decoupled.** Swapping one component has no effect on Your Memory or on any other component.
 
-That lets you use any model, interface or tool without losing control of Your Memory. The [architecture principles](./principles.md) turn these two rules into five, and the rest of this document shows how the parts follow them.
+That lets you use any model, interface or tool without losing control of Your Memory. Five [architecture principles](./principles.md) make sure these two things always stay true, and the rest of this document shows how the parts follow them.
 
 ---
 
