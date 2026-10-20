@@ -10,12 +10,12 @@ You are a senior software engineer implementing a production-ready API boundary.
 
 Implement the **Model API boundary** in **{{TARGET_LANGUAGE}}** so it is architecture-aligned, contract-faithful, and drift-resistant.
 
-Important: Model API is an external connector boundary, not a standalone architecture component.
+Important: Model API is an external API boundary, not a standalone architecture component.
 
 ## Primary Inputs
 
 - `/home/hex/Project/PAA-MVP-Prod/blueprints/Model-API.md`
-- `/home/hex/Project/PAA-MVP-Prod/blueprints/Engine.md`
+- `/home/hex/Project/PAA-MVP-Prod/blueprints/Agent-Loop.md`
 - `/home/hex/Project/PAA-MVP-Prod/blueprints/contracts/Model-API.schema.json`
 - `/home/hex/Project/PAA-MVP-Prod/blueprints/tests/Model-API-conformance.md`
 - `/home/hex/Project/PAA-MVP-Prod/blueprints/drift/Model-API-drift-guard.md`
@@ -27,7 +27,7 @@ Important: Model API is an external connector boundary, not a standalone archite
 - `/home/hex/Project/PAA-MVP-Prod/docs/ai-agent-docs/compliance-matrix.md`
 - `/home/hex/Project/PAA-MVP-Prod/docs/ai-agent-docs/traceability-map.md`
 - `/home/hex/Project/PAA-MVP-Prod/docs/ai-agent-docs/review-checklists/configuration-review.md`
-- `/home/hex/Project/PAA-MVP-Prod/docs/ai-agent-docs/review-checklists/engine-review.md`
+- `/home/hex/Project/PAA-MVP-Prod/docs/ai-agent-docs/review-checklists/agent-loop-review.md`
 
 ## Human Architecture Inputs (Authoritative for boundary ownership)
 
@@ -115,7 +115,7 @@ Use these for MVP implementation consistency:
 
 ## Non-Negotiable Constraints
 
-- Do not implement model/provider logic directly in Engine core loop.
+- Do not implement model/provider logic directly in Agent Loop core loop.
 - Do not expose provider/runtime config fields in request payload contracts.
 - Do not collapse runtime/adapter/preferences into one config layer.
 - Do not store raw secrets in tracked config files.
@@ -127,7 +127,7 @@ Use these for MVP implementation consistency:
 Implement automated tests that prove:
 
 1. Models remain external through Model API boundary.
-2. Engine calls model through adapter interface only.
+2. Agent Loop calls model through adapter interface only.
 3. Provider payload translation is adapter-confined.
 4. Generic completion contract shape validates.
 5. Same-provider model swap is preference/model-binding only.
@@ -138,12 +138,12 @@ Implement automated tests that prove:
 10. Provider failures are safe/classified.
 11. Unsupported adapter selection fails clearly.
 12. Local/offline provider endpoint works via adapter config.
-13. Boundary classification remains connector (not component/tool).
+13. Boundary classification remains API (not component/tool).
 14. Tool-call roundtrip continuity is preserved.
 
 ## Drift-Critical Fail Conditions (Fail Build If Any True)
 
-- Engine directly calls provider APIs bypassing adapter.
+- Agent Loop directly calls provider APIs bypassing adapter.
 - Request payload accepts provider/model/base URL/api-key reconfiguration fields.
 - Raw secret values appear in tracked adapter/runtime/preference config.
 - Unsupported adapter silently falls back.

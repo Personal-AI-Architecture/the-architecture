@@ -1,6 +1,6 @@
 # Foundation User Story Tests
 
-> Validates the end-to-end promises of the architecture (FS-1 through FS-8 from [foundation-spec.md](../../foundation-spec.md)).
+> Validates the end-to-end promises of the architecture (FS-1 through FS-8 from [foundation-spec.md](../foundation-spec.md)).
 > Some tests overlap with SWAP/ARCH/DEPLOY tests — noted with `=` references.
 
 ---
@@ -43,7 +43,7 @@
 
 ## FS-2: Add Capability Without Violating the Architecture
 
-**Validates:** Principle 3 (interfaces over implementations), Principle 1 (Memory has zero outward dependencies), D64
+**Validates:** Principle 2 (Keep Everything Else Swappable), Principle 1 (Memory has zero outward dependencies), D64
 
 **Setup:**
 1. System running with base configuration
@@ -89,7 +89,7 @@
 
 ## FS-3: Run on Own Hardware
 
-**Validates:** Deployment contract, Pillar 2 (Ownership), Pillar 3 (Freedom)
+**Validates:** Deployment contract, owner outcomes P-2 (Ownership) and P-3 (Freedom) in [foundation-verification.md](../foundation-verification.md#2-owner-outcome-verification)
 
 **Equivalent to:** DEPLOY-1 (Offline operation) + DEPLOY-2 (Local data storage) + DEPLOY-3 (Default localhost)
 

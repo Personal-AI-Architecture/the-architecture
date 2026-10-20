@@ -1,9 +1,9 @@
-# Gateway-Engine Contract Blueprint Specification
+# Gateway ↔ Agent Loop Contract Blueprint Specification
 
 ## 1. Overview
 
 ### Purpose
-The Gateway-Engine Contract defines the bounded internal handoff between Gateway and Engine so both components can evolve independently while preserving behavior, safety, and auditability.
+The Gateway ↔ Agent Loop Contract defines the bounded internal handoff between Gateway and Agent Loop so both components can evolve independently while preserving behavior, safety, and auditability.
 
 ### High-Level Responsibilities
 - Define one internal request contract (`messages + metadata`) for `POST /engine/chat`.
@@ -15,14 +15,14 @@ The Gateway-Engine Contract defines the bounded internal handoff between Gateway
 ### System Context
 - Upstream: Gateway component.
 - On-path control: Auth boundary.
-- Downstream: Engine (Agent Loop) execution loop.
+- Downstream: Agent Loop execution loop.
 - Relationship to external contracts:
   - Not a third external API.
   - Distinct from Gateway API and Model API.
 
 ### Companion Artifacts
 - Gateway component: `blueprints/Gateway.md`
-- Engine component: `blueprints/Engine.md`
+- Agent Loop component: `blueprints/Agent-Loop.md`
 - Gateway API boundary: `blueprints/Gateway-API.md`
 
 ---
@@ -32,19 +32,19 @@ The Gateway-Engine Contract defines the bounded internal handoff between Gateway
 ### What this contract **is**
 - An internal contract between two components in the same deployment.
 - A strict request and stream-event shape agreement.
-- A decoupling boundary that enables Gateway and Engine replacement.
+- A decoupling boundary that enables Gateway and Agent Loop replacement.
 - A control point for error taxonomy and contract-visible approval semantics.
 
 ### What this contract **is not**
 - Not a public client-facing API.
-- Not component business logic for Gateway or Engine.
+- Not component business logic for Gateway or Agent Loop.
 - Not a configuration surface for provider, model, tools, or runtime behavior.
 - Not an Auth implementation; only an Auth-on-path requirement.
 
 ### Boundaries and Constraints
 - Gateway owns conversation lifecycle and request normalization.
-- Engine owns loop execution and stream generation.
-- Auth validates before Engine execution.
+- Agent Loop owns loop execution and stream generation.
+- Auth validates before Agent Loop execution.
 - Request payload must remain bounded and non-configurational.
 - Stream payloads must remain typed, classified, and safe.
 
@@ -53,9 +53,9 @@ The Gateway-Engine Contract defines the bounded internal handoff between Gateway
 ## 3. Core Concepts & Terminology
 
 ### Key Concepts
-- **Internal Contract**: strict handoff shape between Gateway and Engine.
+- **Internal Contract**: strict handoff shape between Gateway and Agent Loop.
 - **Bounded Request**: `messages[]` and `metadata` only.
-- **Stream Event Taxonomy**: canonical set of event classes produced by Engine.
+- **Stream Event Taxonomy**: canonical set of event classes produced by Agent Loop.
 - **Pre-stream Error**: request rejected before SSE stream starts.
 - **Mid-stream Error**: error event emitted after stream starts.
 - **Contract-visible Approval**: approval request/outcome represented in interaction model.
@@ -211,8 +211,8 @@ Why invalid:
 ### 5.1 Handoff Sequence
 1. Gateway validates and normalizes client request into internal `messages + metadata`.
 2. Auth validates request and attaches auth context.
-3. Gateway calls Engine handoff path with bounded request.
-4. Engine starts stream and emits typed events through interaction lifecycle.
+3. Gateway calls Agent Loop handoff path with bounded request.
+4. Agent Loop starts stream and emits typed events through interaction lifecycle.
 5. Gateway forwards events and reconciles completion identifiers as needed.
 
 ### 5.2 Request Composition Rules
@@ -256,19 +256,19 @@ Why invalid:
 ### Direct Dependencies
 - Gateway request normalization path.
 - Auth middleware/boundary on request path.
-- Engine stream-emission path.
+- Agent Loop stream-emission path.
 - Shared request/event contracts.
 
 ### Cross-Component Interactions
-- Gateway -> Engine:
+- Gateway -> Agent Loop:
   - bounded request handoff.
-- Engine -> Gateway:
+- Agent Loop -> Gateway:
   - typed SSE stream events.
-- Auth -> Gateway/Engine path:
+- Auth -> Gateway/Agent Loop path:
   - authenticate, then allow handoff.
 
 ### Dependency Assumptions
-- Gateway and Engine may be in same process or separate internal services.
+- Gateway and Agent Loop may be in same process or separate internal services.
 - Contract shape, not transport topology, is the source of interoperability.
 - Contract remains internal even if network transport is used.
 
@@ -279,7 +279,7 @@ Why invalid:
 ### Boundary Invariants
 - Internal handoff is not an external API (`F-02` alignment).
 - Gateway remains owner of conversation lifecycle (`G-01`).
-- Engine remains owner of loop execution (`E-01`).
+- Agent Loop remains owner of loop execution (`E-01`).
 - Auth must sit on path (`GC-04`, `A-01`).
 
 ### Contract Invariants
@@ -291,7 +291,7 @@ Why invalid:
 - Approval remains contract-visible (`GC-06`, `S-05`).
 
 ### Validation Rules (Conceptual)
-- Validate request schema strictly before Engine execution.
+- Validate request schema strictly before Agent Loop execution.
 - Validate stream events against schema taxonomy.
 - Validate error code/message safety.
 - Validate auth context presence for protected paths.
@@ -323,19 +323,19 @@ Why invalid:
 ## 9. Implementation Notes (Language-Agnostic)
 
 ### Suggested Patterns
-- **Contract-first request validator** at Gateway -> Engine boundary.
+- **Contract-first request validator** at Gateway -> Agent Loop boundary.
 - **Typed stream-event emitter** with schema-backed validation.
 - **Error mapper** that converts raw failures into safe taxonomy.
 - **Boundary adapter** for same-process and cross-process deployments.
 
 ### Design Considerations
-- Keep Gateway normalization separate from Engine loop logic.
+- Keep Gateway normalization separate from Agent Loop logic.
 - Keep event names stable and avoid alias/event-version proliferation.
 - Preserve tool-call roundtrip IDs across buffering and forwarding.
 - Preserve approval interaction semantics through contract path.
 
 ### Anti-Patterns to Avoid
-- Passing client payload directly to Engine without normalization.
+- Passing client payload directly to Agent Loop without normalization.
 - Adding per-request model/provider/tool config fields.
 - Replacing structured `error` events with raw exception dumps.
 - Treating contract as undocumented internal implementation detail (drift risk).
@@ -363,7 +363,7 @@ Why invalid:
 ## 11. Validation Against Human Documentation (`/the-architecture/docs`)
 
 ### Confirmed Alignments
-- One internal endpoint and one stream response model (`gateway-engine-contract.md`).
+- One internal endpoint and one stream response model (`gateway-agent-loop-contract.md`).
 - Internal contract is not a third external API (`foundation-spec.md`).
 - Auth sits on the path as independent boundary (`auth-spec.md`).
 - Error channel split (pre-stream HTTP vs mid-stream stream errors) is preserved.
@@ -401,8 +401,8 @@ Why invalid:
 - `GEC-MUST-002`: `metadata.correlation_id` MUST be present on every request.
 - `GEC-MUST-003`: Metadata MUST be limited to contract-approved keys.
 - `GEC-MUST-004`: Request MUST reject hidden provider/tool/runtime configuration fields.
-- `GEC-MUST-005`: Auth MUST be enforced on the Gateway -> Engine path.
-- `GEC-MUST-006`: Engine MUST emit only canonical contract event types.
+- `GEC-MUST-005`: Auth MUST be enforced on the Gateway -> Agent Loop path.
+- `GEC-MUST-006`: Agent Loop MUST emit only canonical contract event types.
 - `GEC-MUST-007`: Mid-stream `error.code` MUST be `provider_error`, `tool_error`, or `context_overflow`.
 - `GEC-MUST-008`: Mid-stream error messages MUST be safe for client display.
 - `GEC-MUST-009`: Pre-stream errors MUST use HTTP responses; mid-stream failures MUST use SSE `error` events.
@@ -410,7 +410,7 @@ Why invalid:
 - `GEC-MUST-011`: Completion event MUST include `conversation_id`, `message_id`, and finish semantics.
 - `GEC-MUST-012`: This contract MUST remain internal and MUST NOT be treated as a third external API.
 - `GEC-MUST-013`: Approval requests/outcomes MUST be represented through contract interaction flow where required.
-- `GEC-MUST-014`: Gateway and Engine MUST remain independently swappable if contract compatibility is preserved.
+- `GEC-MUST-014`: Gateway and Agent Loop MUST remain independently swappable if contract compatibility is preserved.
 
 ### SHOULD
 - `GEC-SHOULD-001`: Correlation IDs SHOULD propagate to logs and tool context for traceability.
@@ -418,14 +418,14 @@ Why invalid:
 - `GEC-SHOULD-003`: Contract validation SHOULD run in automated CI for every boundary-changing release.
 
 ### MAY
-- `GEC-MAY-001`: Gateway and Engine MAY run in same process or separate internal services.
+- `GEC-MAY-001`: Gateway and Agent Loop MAY run in same process or separate internal services.
 - `GEC-MAY-002`: Metadata MAY carry additional client context only via explicitly approved schema evolution.
 
 ## 14. Acceptance Gates (Pass/Fail)
 
 - `GEC-GATE-01 Contract Gate`: Pass if request/event/error shapes validate against `contracts/Gateway-Engine-Contract.schema.json`; fail otherwise.
-- `GEC-GATE-02 Conformance Gate`: Pass if all vectors in `tests/Gateway-Engine-Contract-conformance.md` pass (14 positive + 14 negative); fail on any `GEC-MUST-*` violation.
-- `GEC-GATE-03 Drift Gate`: Pass if all Critical checks in `drift/Gateway-Engine-Contract-drift-guard.md` pass; fail on any Critical check failure.
+- `GEC-GATE-02 Conformance Gate`: Pass if all vectors in `tests/Gateway-Agent-Loop-Contract-conformance.md` pass (14 positive + 14 negative); fail on any `GEC-MUST-*` violation.
+- `GEC-GATE-03 Drift Gate`: Pass if all Critical checks in `drift/Gateway-Agent-Loop-Contract-drift-guard.md` pass; fail on any Critical check failure.
 - `GEC-GATE-04 Security Gate`: Pass if auth path and safe error-surface requirements pass; fail on auth bypass or unsafe leakage.
 - `GEC-GATE-05 Boundary Gate`: Pass if contract remains internal and swapability checks pass; fail if treated as external third API or if contract-compatible swaps fail.
 
@@ -433,15 +433,15 @@ Why invalid:
 
 | Requirement ID | Primary Source(s) | Conformance Test IDs |
 |---|---|---|
-| GEC-MUST-001 | Human `gateway-engine-contract.md`; AI matrix `GC-01` | `GEC-T001P`, `GEC-T001N` |
-| GEC-MUST-002 | Human `gateway-engine-contract.md`; AI `gateway-engine-contract.md` | `GEC-T002P`, `GEC-T002N` |
-| GEC-MUST-003 | Human `gateway-engine-contract.md`; AI `gateway-engine-contract.md` | `GEC-T003P`, `GEC-T003N` |
+| GEC-MUST-001 | Human `gateway-agent-loop-contract.md`; AI matrix `GC-01` | `GEC-T001P`, `GEC-T001N` |
+| GEC-MUST-002 | Human `gateway-agent-loop-contract.md`; AI `gateway-agent-loop-contract.md` | `GEC-T002P`, `GEC-T002N` |
+| GEC-MUST-003 | Human `gateway-agent-loop-contract.md`; AI `gateway-agent-loop-contract.md` | `GEC-T003P`, `GEC-T003N` |
 | GEC-MUST-004 | Human `configuration-spec.md`; AI matrix `C-02`, `GC-01` | `GEC-T004P`, `GEC-T004N` |
 | GEC-MUST-005 | Human `auth-spec.md`; AI matrix `GC-04`, `A-01` | `GEC-T005P`, `GEC-T005N` |
-| GEC-MUST-006 | Human `gateway-engine-contract.md`; AI matrix `GC-02` | `GEC-T006P`, `GEC-T006N` |
-| GEC-MUST-007 | Human `gateway-engine-contract.md`; AI matrix `GC-05` | `GEC-T007P`, `GEC-T007N` |
+| GEC-MUST-006 | Human `gateway-agent-loop-contract.md`; AI matrix `GC-02` | `GEC-T006P`, `GEC-T006N` |
+| GEC-MUST-007 | Human `gateway-agent-loop-contract.md`; AI matrix `GC-05` | `GEC-T007P`, `GEC-T007N` |
 | GEC-MUST-008 | Human `security-spec.md`; AI matrix `GC-03`, `S-01` | `GEC-T008P`, `GEC-T008N` |
-| GEC-MUST-009 | Human `gateway-engine-contract.md`; AI matrix `GC-03` | `GEC-T009P`, `GEC-T009N` |
+| GEC-MUST-009 | Human `gateway-agent-loop-contract.md`; AI matrix `GC-03` | `GEC-T009P`, `GEC-T009N` |
 | GEC-MUST-010 | Human contract tool event continuity intent; runtime contract in `build/contracts.ts` | `GEC-T010P`, `GEC-T010N` |
 | GEC-MUST-011 | AI `client-gateway-contract.md`; runtime completion reconciliation behavior | `GEC-T011P`, `GEC-T011N` |
 | GEC-MUST-012 | Human `foundation-spec.md`; AI matrix `F-02` | `GEC-T012P`, `GEC-T012N` |

@@ -17,7 +17,7 @@ Implement the **Auth** component in **{{TARGET_LANGUAGE}}** so it is architectur
 - `/home/hex/Project/PAA-MVP-Prod/blueprints/tests/Auth-conformance.md`
 - `/home/hex/Project/PAA-MVP-Prod/blueprints/drift/Auth-drift-guard.md`
 - `/home/hex/Project/PAA-MVP-Prod/blueprints/Gateway.md`
-- `/home/hex/Project/PAA-MVP-Prod/blueprints/Engine.md`
+- `/home/hex/Project/PAA-MVP-Prod/blueprints/Agent-Loop.md`
 
 ## Supporting Inputs (Authoritative for contracts/audit)
 
@@ -32,7 +32,7 @@ Implement the **Auth** component in **{{TARGET_LANGUAGE}}** so it is architectur
 - `/home/hex/Reference/the-architecture/docs/in-depth-overview/auth-spec.md`
 - `/home/hex/Reference/the-architecture/docs/in-depth-overview/security-spec.md`
 - `/home/hex/Reference/the-architecture/docs/in-depth-overview/foundation-spec.md`
-- `/home/hex/Reference/the-architecture/docs/in-depth-overview/gateway-engine-contract.md`
+- `/home/hex/Reference/the-architecture/docs/in-depth-overview/gateway-agent-loop-contract.md`
 
 ## Source Precedence (Mandatory)
 
@@ -56,7 +56,7 @@ Implement these behaviors:
 - Fail closed on invalid/missing credentials or mismatched auth context.
 - Keep auth state product-owned, inspectable, and exportable.
 - Provide required day-one tools: `auth_whoami`, `auth_check`, `auth_export`.
-- Propagate actor context across Gateway -> Engine -> tool execution path.
+- Propagate actor context across Gateway -> Agent Loop -> tool execution path.
 - Emit structured audit records for allow/deny auth outcomes.
 - Preserve Auth as an independent boundary (no routing, conversation, or model-loop ownership).
 
@@ -68,7 +68,7 @@ Implement these behaviors:
 
 ### Auth context propagation
 - Protected path must carry actor identity and permission context.
-- Engine consumes authenticated context; it does not authenticate independently.
+- Agent Loop consumes authenticated context; it does not authenticate independently.
 
 ### Authorization
 - Permission denial must be explicit and enforced in code.
@@ -85,7 +85,7 @@ Use these for MVP implementation consistency:
 
 1. Schema supports multi-actor extensibility; MVP runtime may execute owner-first flow.
 2. Keep local-owner mode as a real boundary with validation, never as a bypass.
-3. Keep authorization ownership in Auth; Gateway/Engine may consume decisions but must not own policy logic.
+3. Keep authorization ownership in Auth; Gateway/Agent Loop may consume decisions but must not own policy logic.
 4. Keep export product-owned and non-secret even if provider implementation offers richer internal state.
 
 ## Non-Negotiable Constraints
@@ -93,7 +93,7 @@ Use these for MVP implementation consistency:
 - Do not bypass Auth on any protected route.
 - Do not implement fail-open auth behavior.
 - Do not store secrets in inspectable Memory/preferences files.
-- Do not move authorization ownership into Gateway, Engine, or tools.
+- Do not move authorization ownership into Gateway, Agent Loop, or tools.
 - Do not remove required auth tools from runtime.
 - Do not return opaque provider-only auth blobs as the canonical export surface.
 

@@ -13,7 +13,7 @@ This file defines language-agnostic pass/fail vectors for Auth component conform
 - `AUTH-MUST-007`: Product-owned auth state is created/loaded at startup in inspectable owner data.
 - `AUTH-MUST-008`: `auth_export` returns non-secret, product-owned auth state.
 - `AUTH-MUST-009`: Required day-one auth tools exist: `auth_whoami`, `auth_check`, `auth_export`.
-- `AUTH-MUST-010`: Auth context propagates across Gateway -> Engine -> Tool execution path.
+- `AUTH-MUST-010`: Auth context propagates across Gateway -> Agent Loop -> Tool execution path.
 - `AUTH-MUST-011`: Structured audit records are emitted for authorized and denied auth outcomes.
 - `AUTH-MUST-012`: Local-owner mode remains a real boundary, not an auth bypass mode.
 - `AUTH-MUST-013`: Auth responsibilities remain boundary-scoped (no routing, conversation lifecycle, or model-loop ownership).
@@ -40,7 +40,7 @@ This file defines language-agnostic pass/fail vectors for Auth component conform
 | AUTH-T008N | AUTH-MUST-008 | Negative | Inject secret-like fields into export payload | Conformance check fails | Secrets accepted in export | Secret leakage |
 | AUTH-T009P | AUTH-MUST-009 | Positive | Discover tools at runtime | `auth_whoami`, `auth_check`, `auth_export` available | One required tool missing | Day-one capability drift |
 | AUTH-T009N | AUTH-MUST-009 | Negative | Build without auth tool source enabled | Conformance gate fails | Missing tools accepted as compliant | Contract incompleteness |
-| AUTH-T010P | AUTH-MUST-010 | Positive | Authenticated request triggers Engine tool execution | Tool context carries actor identity/permissions | Tool context has no auth details | Context propagation drift |
+| AUTH-T010P | AUTH-MUST-010 | Positive | Authenticated request triggers Agent Loop tool execution | Tool context carries actor identity/permissions | Tool context has no auth details | Context propagation drift |
 | AUTH-T010N | AUTH-MUST-010 | Negative | Strip auth context before tool execution | Execution denied or conformance failure | Tool executes with empty auth context | Broken trust-boundary propagation |
 | AUTH-T011P | AUTH-MUST-011 | Positive | Execute one authorized and one denied request | Structured audit records for both outcomes | Missing audit event for either path | Audit coverage drift |
 | AUTH-T011N | AUTH-MUST-011 | Negative | Disable auth audit emission | Conformance test fails | Missing audit logs accepted | Audit omission |

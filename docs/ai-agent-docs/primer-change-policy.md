@@ -23,7 +23,7 @@ Update examples when:
 Affected files usually include:
 
 - `client-gateway-contract.md`
-- `gateway-engine-contract.md`
+- `gateway-agent-loop-contract.md`
 - `configuration.md`
 - `examples/README.md`
 - `examples-validation.md`
@@ -79,7 +79,7 @@ Update `review-checklists/*` when:
 ## Invalid Change Example
 
 ```text
-Update gateway-engine-contract.md with a new required event,
+Update gateway-agent-loop-contract.md with a new required event,
 but leave compliance-matrix.md, client-gateway-contract.md,
 and checklists unchanged.
 ```

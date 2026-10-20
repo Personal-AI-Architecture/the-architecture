@@ -4,7 +4,7 @@ This document defines anti-drift controls for the external Gateway API boundary.
 
 ## 1. Top Drift Patterns
 
-- External API becomes a passthrough for internal Gateway-Engine contract payloads.
+- External API becomes a passthrough for internal Gateway ↔ Agent Loop contract payloads.
 - Event names/payloads drift from canonical stream taxonomy.
 - Missing reconciliation fields (`X-Conversation-ID`, `done` IDs).
 - Approval behavior trapped in local UI flow rather than API contract.

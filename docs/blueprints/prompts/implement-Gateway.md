@@ -21,14 +21,14 @@ Implement the **Gateway** component in **{{TARGET_LANGUAGE}}** so it is architec
 ## Supporting Inputs (Authoritative for contracts/audit)
 
 - `/home/hex/Project/PAA-MVP-Prod/docs/ai-agent-docs/client-gateway-contract.md`
-- `/home/hex/Project/PAA-MVP-Prod/docs/ai-agent-docs/gateway-engine-contract.md`
+- `/home/hex/Project/PAA-MVP-Prod/docs/ai-agent-docs/gateway-agent-loop-contract.md`
 - `/home/hex/Project/PAA-MVP-Prod/docs/ai-agent-docs/compliance-matrix.md`
 - `/home/hex/Project/PAA-MVP-Prod/docs/ai-agent-docs/traceability-map.md`
 
 ## Human Architecture Inputs (Authoritative for ownership boundaries)
 
 - `/home/hex/Reference/the-architecture/docs/in-depth-overview/gateway-spec.md`
-- `/home/hex/Reference/the-architecture/docs/in-depth-overview/gateway-engine-contract.md`
+- `/home/hex/Reference/the-architecture/docs/in-depth-overview/gateway-agent-loop-contract.md`
 - `/home/hex/Reference/the-architecture/docs/in-depth-overview/foundation-spec.md`
 - `/home/hex/Reference/the-architecture/docs/in-depth-overview/security-spec.md`
 - `/home/hex/Reference/the-architecture/docs/in-depth-overview/memory-spec.md`
@@ -60,7 +60,7 @@ Implement these behaviors:
 - Gateway owns conversation lifecycle (create/append/list/detail).
 - Gateway uses approved Memory conversation-store boundary (no private in-process source of truth).
 - Gateway normalizes client request into internal `messages + metadata`.
-- Gateway streams Engine events via SSE.
+- Gateway streams Agent Loop events via SSE.
 - Gateway enforces Auth on protected routes (all except explicit health checks).
 - Gateway returns `X-Conversation-ID` once conversation is resolved.
 - `done` payload includes `conversation_id` and `message_id`.
@@ -125,12 +125,12 @@ Implement automated tests that prove:
 6. Unknown conversation ID returns safe 404.
 7. Approval decision endpoint enforces authority and handles not-found approval IDs.
 8. Stream and error surfaces remain contract-safe (no unsafe internals).
-9. Gateway only sends bounded `messages + metadata` to Engine.
+9. Gateway only sends bounded `messages + metadata` to Agent Loop.
 
 ## Drift-Critical Fail Conditions (Fail Build If Any True)
 
 - Gateway stores conversation truth in route-local/in-memory-only structures.
-- Client can submit internal Engine payload directly.
+- Client can submit internal Agent Loop payload directly.
 - Approval flow works only in local client UI and is not contract-visible.
 - Error taxonomy/event shapes drift from canonical contract.
 - Unsafe raw error text reaches client-visible responses/events.

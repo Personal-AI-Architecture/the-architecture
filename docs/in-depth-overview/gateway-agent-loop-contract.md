@@ -246,20 +246,8 @@ Per-component requirements from [security-spec.md](./security-spec.md). Security
 
 | # | Decision | Rationale |
 |---|----------|-----------|
-| D136 | Protocol evaluation — 29+ communication gaps collapsed to one interface | Systematic review identified that all inter-component communication concerns resolve through existing architecture (contracts, tools, configuration). Only one gap remained: how the Gateway passes requests to the Engine. |
-| D137 | Gateway ↔ Engine is a plain HTTP API contract | Not a third connector — an internal interface between two components we control. One endpoint, SSE streaming, auth middleware on path. No protocol envelope, no routing, no node registration. Fills the one gap identified by D136. |
-
----
-
-## Changelog
-
-| Date | Change | Source |
-|------|--------|--------|
-| 2026-03-01 | "No users, only owners" language pass: user → owner | Ownership model alignment (Dave W + Claude) |
-| 2026-03-01 | Cross-doc consistency: Implementation Notes labeled "Level 2 Reference", genericized SDK references (Hono/Vercel AI SDK → generic same-process option and SSE event mapping). | Cross-doc review (Dave W + Claude) |
-| 2026-03-01 | D152: Conversation history source clarified — "from Your Memory, via the Gateway's conversation store tool." Structural alignment with component specs: narrative opener, Success Criteria, Security Requirements. | Doc consistency pass + architecture review (Dave W + Claude) |
-| 2026-02-26 | Initial contract created — one endpoint, SSE stream, auth middleware, conventions | Design session (Dave W + Claude) |
-| 2026-03-17 | maxIterations clarified as optional implementation-provided parameter with no default. Error taxonomy: classification guidance added (no catch-all codes, recoverable vs unrecoverable tool failures). Error message safety: explicit requirement added inline (safe for client display, no raw Error.message). | Drift remediation — MVP Build Review (Dave W + Dave J + Claude) |
+| D136 | Protocol evaluation — 29+ communication gaps collapsed to one interface | Systematic review identified that all inter-component communication concerns resolve through existing architecture (contracts, tools, configuration). Only one gap remained: how the Gateway passes requests to the Agent Loop. |
+| D137 | Gateway ↔ Agent Loop is a plain HTTP API contract | Not a third API — an internal interface between two components we control. One endpoint, SSE streaming, auth middleware on path. No protocol envelope, no routing, no node registration. Fills the one gap identified by D136. |
 
 ---
 

@@ -14,7 +14,7 @@ Memory Tools define the always-present operational surface used to read, write, 
 
 ### System Context
 - Memory Tools are a capability boundary, not a standalone architecture component.
-- Memory Tools are executed by Engine and permissioned by Auth.
+- Memory Tools are executed by Agent Loop and permissioned by Auth.
 - Memory Tools sit in front of the Memory substrate and are required for day-one MVP guarantees (export/history/persistence readiness).
 - Memory Tools align with Tools capability rules while specializing the mandatory memory-facing surface.
 
@@ -40,7 +40,7 @@ Memory Tools define the always-present operational surface used to read, write, 
 - Must preserve open-format export/version guarantees.
 - Must reject path escapes and reserved internals access.
 - Must keep mutating actions approval-aware and auditable.
-- Must avoid introducing direct storage access paths in Gateway/Engine/Auth.
+- Must avoid introducing direct storage access paths in Gateway/Agent Loop/Auth.
 
 ---
 
@@ -491,7 +491,7 @@ Memory Tools define the always-present operational surface used to read, write, 
 - Permission-denied filesystem errors are mapped to `permission_denied`.
 - Not-found filesystem errors are mapped to `not_found`.
 - Unexpected runtime failures are mapped to `execution_failed`.
-- Unrecoverable failures may escalate to stream `error` classification via Engine contract.
+- Unrecoverable failures may escalate to stream `error` classification via Agent Loop contract.
 
 ---
 
@@ -503,7 +503,7 @@ Memory Tools define the always-present operational surface used to read, write, 
 - Archive tooling for export generation.
 
 ### Component Interactions
-- **Engine -> Memory Tools**: executes tool calls and returns results to model.
+- **Agent Loop -> Memory Tools**: executes tool calls and returns results to model.
 - **Auth -> Memory Tools**: permissions checked before execution.
 - **Memory Tools -> Memory Substrate**: reads/writes/search/history/export across storage classes.
 - **Gateway -> Conversation Store Boundary**: conversation persistence through approved memory boundary/tool path.
@@ -511,7 +511,7 @@ Memory Tools define the always-present operational surface used to read, write, 
 
 ### Data Flow
 1. Runtime config enables memory-tool sources.
-2. Engine includes available memory tool definitions in model context.
+2. Agent Loop includes available memory tool definitions in model context.
 3. Model emits memory tool call.
 4. Auth checks permission.
 5. Approval gate (if mutating) resolves decision.
@@ -616,7 +616,7 @@ Memory Tools define the always-present operational surface used to read, write, 
 - Tools are verbs; memory is data substrate (`tools-spec.md`, `memory-spec.md`).
 - Approval for writes must be coded, not prompt-only (`tools-spec.md`, `security-spec.md`).
 - Path-safe, exportable, versioned owner data is required (`memory-spec.md`, `security-spec.md`).
-- Gateway memory access must follow dedicated memory boundary/tool path (`memory-spec.md`, `gateway-engine-contract.md`).
+- Gateway memory access must follow dedicated memory boundary/tool path (`memory-spec.md`, `gateway-agent-loop-contract.md`).
 
 ### Documented Discrepancies To Reconcile
 1. **Operation naming flexibility vs canonical `memory_*` names**

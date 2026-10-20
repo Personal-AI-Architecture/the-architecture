@@ -1,4 +1,4 @@
-# Engine
+# Agent Loop
 
 > The generic loop that processes one interaction at a time, calls models, and executes tools.
 
@@ -30,8 +30,8 @@ Run the model-tool loop for an interaction without owning product behavior, conv
 
 ## Interfaces
 
-- Accepts the internal Gateway -> Engine request contract.
-- Emits streamed Engine -> Gateway events.
+- Accepts the internal Gateway -> Agent Loop request contract.
+- Emits streamed Agent Loop -> Gateway events.
 - Invokes models through adapters.
 - Invokes tools during the loop.
 
@@ -61,31 +61,31 @@ Run the model-tool loop for an interaction without owning product behavior, conv
 
 ## Audit Questions
 
-- Does Engine own anything besides loop execution?
+- Does Agent Loop own anything besides loop execution?
 - Does it receive only contract-bounded request data?
 - Is provider-specific logic isolated to adapters?
 - Are tool calls executed and returned correctly?
-- Has conversation or prompt ownership leaked into Engine?
+- Has conversation or prompt ownership leaked into Agent Loop?
 
 ## Common Drift Patterns
 
 - Request-time re-derivation of provider/tool config.
 - Approval logic hardcoded in the loop.
-- Product-specific prompt assembly in Engine.
+- Product-specific prompt assembly in Agent Loop.
 - Provider-specific logic outside adapters.
 - Premature loop termination before model-side completion.
 - Lossy or off-contract stream behavior.
 
 ## Review Links
 
-- Checklist: `docs/ai-agent-docs/review-checklists/engine-review.md`
+- Checklist: `docs/ai-agent-docs/review-checklists/agent-loop-review.md`
 - Traceability: `docs/ai-agent-docs/traceability-map.md`
 - Examples: `docs/ai-agent-docs/examples/README.md`
 
 ## Source Docs
 
-- `docs/in-depth-overview/engine-spec.md`
-- `docs/in-depth-overview/gateway-engine-contract.md`
+- `docs/in-depth-overview/agent-loop-spec.md`
+- `docs/in-depth-overview/gateway-agent-loop-contract.md`
 - `docs/in-depth-overview/tools-spec.md`
 - `docs/in-depth-overview/configuration-spec.md`
 - `docs/in-depth-overview/foundation-spec.md`

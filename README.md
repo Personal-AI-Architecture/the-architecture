@@ -31,7 +31,7 @@ Four components and two APIs:
 | Part | What it does |
 |------|--------------|
 | [Your Memory](docs/in-depth-overview/memory-spec.md) | All your data, in files you own. Everything else depends on it; it depends on nothing. |
-| [Agent Loop](docs/in-depth-overview/engine-spec.md) | Calls the model, runs the tools it asks for, and repeats until the job is done. |
+| [Agent Loop](docs/in-depth-overview/agent-loop-spec.md) | Calls the model, runs the tools it asks for, and repeats until the job is done. |
 | [Gateway](docs/in-depth-overview/gateway-spec.md) | One front door for every interface. Start on the web, pick up on your phone. |
 | [Auth](docs/in-depth-overview/auth-spec.md) | Controls who and what gets in. Swapping other parts never changes it. |
 | [Gateway API](specs/openapi/gateway-api.yaml) | How interfaces connect. Anything that speaks it plugs in. |

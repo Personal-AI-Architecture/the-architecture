@@ -1,6 +1,6 @@
-# Implement Gateway-Engine Contract (AI Coding Prompt)
+# Implement Gateway ↔ Agent Loop Contract (AI Coding Prompt)
 
-Use this prompt with a coding AI to implement and validate the **Gateway-Engine internal contract boundary** in a target language.
+Use this prompt with a coding AI to implement and validate the **Gateway ↔ Agent Loop internal contract boundary** in a target language.
 
 ---
 
@@ -8,34 +8,34 @@ You are a senior software engineer implementing a production-ready internal cont
 
 ## Mission
 
-Implement the **Gateway-Engine internal handoff contract** in **{{TARGET_LANGUAGE}}** so it is architecture-aligned, contract-faithful, and drift-resistant.
+Implement the **Gateway ↔ Agent Loop internal handoff contract** in **{{TARGET_LANGUAGE}}** so it is architecture-aligned, contract-faithful, and drift-resistant.
 
-Important: This is an internal contract between Gateway and Engine. It is not a third external API.
+Important: This is an internal contract between Gateway and Agent Loop. It is not a third external API.
 
 ## Primary Inputs
 
-- `/home/hex/Project/PAA-MVP-Prod/blueprints/Gateway-Engine-Contract.md`
+- `/home/hex/Project/PAA-MVP-Prod/blueprints/Gateway-Agent-Loop-Contract.md`
 - `/home/hex/Project/PAA-MVP-Prod/blueprints/Gateway.md`
-- `/home/hex/Project/PAA-MVP-Prod/blueprints/Engine.md`
+- `/home/hex/Project/PAA-MVP-Prod/blueprints/Agent-Loop.md`
 - `/home/hex/Project/PAA-MVP-Prod/blueprints/contracts/Gateway-Engine-Contract.schema.json`
-- `/home/hex/Project/PAA-MVP-Prod/blueprints/tests/Gateway-Engine-Contract-conformance.md`
-- `/home/hex/Project/PAA-MVP-Prod/blueprints/drift/Gateway-Engine-Contract-drift-guard.md`
+- `/home/hex/Project/PAA-MVP-Prod/blueprints/tests/Gateway-Agent-Loop-Contract-conformance.md`
+- `/home/hex/Project/PAA-MVP-Prod/blueprints/drift/Gateway-Agent-Loop-Contract-drift-guard.md`
 
 ## Supporting Inputs (Authoritative for contracts/audit)
 
-- `/home/hex/Project/PAA-MVP-Prod/docs/ai-agent-docs/gateway-engine-contract.md`
+- `/home/hex/Project/PAA-MVP-Prod/docs/ai-agent-docs/gateway-agent-loop-contract.md`
 - `/home/hex/Project/PAA-MVP-Prod/docs/ai-agent-docs/client-gateway-contract.md`
 - `/home/hex/Project/PAA-MVP-Prod/docs/ai-agent-docs/compliance-matrix.md`
 - `/home/hex/Project/PAA-MVP-Prod/docs/ai-agent-docs/traceability-map.md`
-- `/home/hex/Project/PAA-MVP-Prod/docs/ai-agent-docs/review-checklists/engine-review.md`
+- `/home/hex/Project/PAA-MVP-Prod/docs/ai-agent-docs/review-checklists/agent-loop-review.md`
 - `/home/hex/Project/PAA-MVP-Prod/docs/ai-agent-docs/review-checklists/security-review.md`
 - `/home/hex/Project/PAA-MVP-Prod/docs/ai-agent-docs/review-checklists/gateway-review.md`
 
 ## Human Architecture Inputs (Authoritative for ownership/boundaries)
 
-- `/home/hex/Reference/the-architecture/docs/in-depth-overview/gateway-engine-contract.md`
+- `/home/hex/Reference/the-architecture/docs/in-depth-overview/gateway-agent-loop-contract.md`
 - `/home/hex/Reference/the-architecture/docs/in-depth-overview/gateway-spec.md`
-- `/home/hex/Reference/the-architecture/docs/in-depth-overview/engine-spec.md`
+- `/home/hex/Reference/the-architecture/docs/in-depth-overview/agent-loop-spec.md`
 - `/home/hex/Reference/the-architecture/docs/in-depth-overview/auth-spec.md`
 - `/home/hex/Reference/the-architecture/docs/in-depth-overview/security-spec.md`
 - `/home/hex/Reference/the-architecture/docs/in-depth-overview/foundation-spec.md`
@@ -54,14 +54,14 @@ Implement these behaviors:
 - Keep one bounded internal handoff request shape (`messages + metadata`).
 - Require `metadata.correlation_id` for every request.
 - Reject request-time provider/tool/runtime configuration leakage.
-- Ensure Auth is on the path before Engine execution.
+- Ensure Auth is on the path before Agent Loop execution.
 - Emit canonical stream events for in-progress and terminal interaction states.
 - Enforce error taxonomy (`provider_error`, `tool_error`, `context_overflow`).
 - Keep stream error messages safe and sanitized.
 - Preserve tool-call/tool-result ID continuity.
 - Emit completion with stable reconciliation IDs (`conversation_id`, `message_id`).
 - Keep approval semantics contract-visible where required.
-- Preserve Gateway/Engine independent replaceability as long as contract holds.
+- Preserve Gateway/Agent Loop independent replaceability as long as contract holds.
 
 ## Canonical Contract Rules
 
@@ -113,7 +113,7 @@ Use these for MVP implementation consistency:
 
 - Do not expose this internal contract as a third external API.
 - Do not allow request payloads to become hidden config channels.
-- Do not bypass Auth on protected Gateway -> Engine paths.
+- Do not bypass Auth on protected Gateway -> Agent Loop paths.
 - Do not emit off-contract event names or malformed event payloads.
 - Do not collapse all mid-stream errors to one code.
 - Do not leak stack traces, filesystem paths, provider internals, or secrets in stream-visible errors.
@@ -125,7 +125,7 @@ Implement automated tests proving:
 1. Request shape remains bounded to `messages + metadata`.
 2. Missing `metadata.correlation_id` is rejected.
 3. Hidden provider/tool/runtime config fields are rejected.
-4. Auth is required before Engine execution.
+4. Auth is required before Agent Loop execution.
 5. Stream emits canonical event types only.
 6. Error taxonomy is enforced.
 7. Error messages are sanitized.
@@ -134,7 +134,7 @@ Implement automated tests proving:
 10. `done` includes stable reconciliation IDs.
 11. Approval semantics are contract-visible where required.
 12. Internal contract is not exposed as external API.
-13. Gateway and Engine remain independently swappable with contract compatibility.
+13. Gateway and Agent Loop remain independently swappable with contract compatibility.
 
 ## Drift-Critical Fail Conditions (Fail Build If Any True)
 
@@ -144,12 +144,12 @@ Implement automated tests proving:
 - Error taxonomy collapses or unsafe error text leaks.
 - `done` event omits reconciliation IDs.
 - Approval semantics are trapped in local UI flow.
-- Gateway/Engine changes require cross-component rewrites despite contract compatibility.
+- Gateway/Agent Loop changes require cross-component rewrites despite contract compatibility.
 - Internal handoff is published as public/external API.
 
 ## Deliverables
 
-1. Gateway-Engine contract implementation/wiring in `{{TARGET_LANGUAGE}}`.
+1. Gateway ↔ Agent Loop contract implementation/wiring in `{{TARGET_LANGUAGE}}`.
 2. Automated conformance test suite.
 3. `implementation-report.md`:
    - requirement coverage map

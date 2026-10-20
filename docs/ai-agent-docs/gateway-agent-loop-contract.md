@@ -1,10 +1,10 @@
-# Gateway-Engine Contract
+# Gateway ↔ Agent Loop Contract
 
 > The bounded internal handoff between Gateway and Agent Loop.
 
 ## Purpose
 
-Define the exact internal request and stream contract so Gateway and Engine remain decoupled and auditably compliant.
+Define the exact internal request and stream contract so Gateway and Agent Loop remain decoupled and auditably compliant.
 
 ## Contract Shape
 
@@ -62,7 +62,7 @@ Define the exact internal request and stream contract so Gateway and Engine rema
 ## Approval Interaction
 
 - Approval enforcement remains a coded control.
-- Approval requests and outcomes must be represented through the Gateway-Engine interaction model rather than only a local client-specific prompt path.
+- Approval requests and outcomes must be represented through the Gateway ↔ Agent Loop interaction model rather than only a local client-specific prompt path.
 - Approval semantics must not be trapped in a single CLI or UI implementation.
 
 ## Valid Example
@@ -137,14 +137,14 @@ Why this is drift:
 
 - Auth validates the request before the Agent Loop handles it.
 - Auth attaches identity context via headers.
-- Engine consumes already-authenticated context; it does not authenticate requests itself.
+- Agent Loop consumes already-authenticated context; it does not authenticate requests itself.
 
 ## Required Behaviors
 
 - Keep the internal handoff bounded.
 - Preserve explicit stream event semantics.
 - Keep the contract internal rather than treating it as a third public API.
-- Allow Gateway and Engine to evolve independently as long as the contract holds.
+- Allow Gateway and Agent Loop to evolve independently as long as the contract holds.
 
 ## Forbidden Behaviors
 
@@ -155,8 +155,8 @@ Why this is drift:
 
 ## Audit Questions
 
-- What exactly may Gateway send to Engine?
-- What exactly may Engine emit back?
+- What exactly may Gateway send to Agent Loop?
+- What exactly may Agent Loop emit back?
 - Is forbidden configuration leaking through the contract?
 - Are error and tool events contract-compliant?
 - Is Auth actually on the path?
@@ -170,8 +170,8 @@ Why this is drift:
 
 ## Source Docs
 
-- `docs/in-depth-overview/gateway-engine-contract.md`
+- `docs/in-depth-overview/gateway-agent-loop-contract.md`
 - `docs/in-depth-overview/gateway-spec.md`
-- `docs/in-depth-overview/engine-spec.md`
+- `docs/in-depth-overview/agent-loop-spec.md`
 - `docs/in-depth-overview/communication-principles.md`
 - `docs/in-depth-overview/foundation-spec.md`

@@ -167,7 +167,7 @@ If you're auditing something and can't identify which intermediary protects it, 
 - [deployment-spec.md](./deployment-spec.md)
 - [configuration-spec.md](./configuration-spec.md)
 - [adapter-spec.md](./adapter-spec.md)
-- [gateway-engine-contract.md](./gateway-engine-contract.md)
+- [gateway-agent-loop-contract.md](./gateway-agent-loop-contract.md)
 - [security-spec.md](./security-spec.md)
 - [lock-in-analysis.md](./lock-in-analysis.md)
 

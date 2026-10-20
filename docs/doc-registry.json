@@ -8,15 +8,15 @@
       "depends_on": []
     },
     {
-      "path": "docs/in-depth-overview/gateway-engine-contract.md",
+      "path": "docs/in-depth-overview/gateway-agent-loop-contract.md",
       "covers": ["src/gateway/", "src/engine/"],
       "tier": 1,
       "update_trigger": "code",
-      "depends_on": ["docs/in-depth-overview/foundation-spec.md", "docs/in-depth-overview/gateway-spec.md", "docs/in-depth-overview/engine-spec.md"]
+      "depends_on": ["docs/in-depth-overview/foundation-spec.md", "docs/in-depth-overview/gateway-spec.md", "docs/in-depth-overview/agent-loop-spec.md"]
     },
 
     {
-      "path": "docs/in-depth-overview/engine-spec.md",
+      "path": "docs/in-depth-overview/agent-loop-spec.md",
       "covers": ["src/engine/"],
       "tier": 2,
       "update_trigger": "code",

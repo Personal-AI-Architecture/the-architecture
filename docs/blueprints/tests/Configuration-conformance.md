@@ -44,7 +44,7 @@ This file defines language-agnostic pass/fail vectors for Configuration boundary
 | CFG-T010P | CFG-MUST-010 | Positive | Change `default_model` preference within same adapter/provider | Resolved model changes without component code edits | Model unchanged or code edit required | Preference bypass drift |
 | CFG-T010N | CFG-MUST-010 | Negative | Require adapter code edit for same-provider model change | Conformance gate fails | Code edit path accepted | Same-provider lock-in |
 | CFG-T011P | CFG-MUST-011 | Positive | Switch `provider_adapter` and adapter config file only | Runtime works with new provider adapter | Unrelated component edits required | Provider swap coupling |
-| CFG-T011N | CFG-MUST-011 | Negative | Provider swap requires Engine/Gateway logic rewrite | Conformance gate fails | Code rewrite accepted | Provider lock-in drift |
+| CFG-T011N | CFG-MUST-011 | Negative | Provider swap requires Agent Loop/Gateway logic rewrite | Conformance gate fails | Code rewrite accepted | Provider lock-in drift |
 | CFG-T012P | CFG-MUST-012 | Positive | Omit bind address and inspect effective bind default | Effective bind resolves to localhost posture | Non-localhost default used | Exposure default drift |
 | CFG-T012N | CFG-MUST-012 | Negative | System defaults to `0.0.0.0` without explicit override | Conformance gate fails | Unsafe default accepted | Network posture drift |
 | CFG-T013P | CFG-MUST-013 | Positive | Complete startup and verify auth state, conversation store path, export-capable memory surface | Required readiness surfaces exist from day one | Missing readiness surface | Day-one readiness drift |

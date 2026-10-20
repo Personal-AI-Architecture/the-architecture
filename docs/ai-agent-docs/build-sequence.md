@@ -20,7 +20,7 @@ Build the architecture-dependent runtime path first, then build product behavior
 
 ### 2. Foundation Conformance
 
-- Fix Engine completion, error taxonomy, and stream behavior first.
+- Fix Agent Loop completion, error taxonomy, and stream behavior first.
 - Fix Gateway, Auth, Memory, and config path issues before product code depends on them.
 - Validate startup readiness before calling the runtime usable.
 
@@ -102,7 +102,7 @@ Why this is drift-prone:
 - `docs/ai-agent-docs/index.md`
 - `docs/ai-agent-docs/compliance-matrix.md`
 - `docs/ai-agent-docs/accepted-mvp-limits.md`
-- `docs/ai-agent-docs/gateway-engine-contract.md`
+- `docs/ai-agent-docs/gateway-agent-loop-contract.md`
 - `docs/ai-agent-docs/client-gateway-contract.md`
 - `docs/ai-agent-docs/configuration.md`
 - `docs/ai-agent-docs/memory.md`

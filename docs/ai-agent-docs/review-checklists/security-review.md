@@ -42,7 +42,7 @@ Use this when reviewing audit logging, error handling, approval enforcement, sec
 - `docs/ai-agent-docs/security.md`
 - `docs/ai-agent-docs/auth.md`
 - `docs/ai-agent-docs/client-gateway-contract.md`
-- `docs/ai-agent-docs/gateway-engine-contract.md`
+- `docs/ai-agent-docs/gateway-agent-loop-contract.md`
 - `docs/ai-agent-docs/compliance-matrix.md`
 
 ## Example Files
@@ -59,5 +59,5 @@ Use this when reviewing audit logging, error handling, approval enforcement, sec
 - `docs/ai-agent-docs/security.md`
 - `docs/ai-agent-docs/auth.md`
 - `docs/ai-agent-docs/client-gateway-contract.md`
-- `docs/ai-agent-docs/gateway-engine-contract.md`
+- `docs/ai-agent-docs/gateway-agent-loop-contract.md`
 - `docs/ai-agent-docs/compliance-matrix.md`

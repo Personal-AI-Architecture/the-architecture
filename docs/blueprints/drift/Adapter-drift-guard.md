@@ -7,7 +7,7 @@ This document defines anti-drift controls for Adapter boundary implementations.
 - Adapters promoted into a component or separate API.
 - Runtime adapter selection overridden by request payloads.
 - Silent fallback for unknown adapters.
-- Provider protocol logic leaked into Engine or Gateway internals.
+- Provider protocol logic leaked into Agent Loop or Gateway internals.
 - Gateway-side translation accumulates conversation/auth ownership logic.
 - Runtime config, adapter config, and preferences collapsed.
 - Raw secrets stored in adapter config.
@@ -22,7 +22,7 @@ This document defines anti-drift controls for Adapter boundary implementations.
 - Adding a dedicated Adapter component/service/API by default.
 - Allowing `provider_adapter` or equivalent request-time override fields.
 - Auto-fallback from unsupported adapter keys.
-- Embedding provider SDK request shaping in Engine loop.
+- Embedding provider SDK request shaping in Agent Loop.
 - Using adapter layer for conversation lifecycle or auth policy decisions.
 - Writing `api_key`, `token`, or `password` values in tracked config.
 - Hardcoding provider choice in component code paths.
@@ -52,7 +52,7 @@ This document defines anti-drift controls for Adapter boundary implementations.
 - New `Adapter API` or `Adapter component` appears in architecture inventory.
 - Request payload fields alter adapter selection or provider routing.
 - Unsupported adapter key resolves silently.
-- Engine/Gateway imports provider-native payload logic directly.
+- Agent Loop/Gateway imports provider-native payload logic directly.
 - Adapter modules contain conversation persistence or auth policy branching.
 - Tracked adapter config contains literal secrets.
 - Same-provider or provider swap requires unrelated component code changes.

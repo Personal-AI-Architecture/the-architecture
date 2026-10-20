@@ -117,5 +117,5 @@ Why this is invalid:
 - `docs/ai-agent-docs/compliance-matrix.md`
 - `docs/ai-agent-docs/accepted-mvp-limits.md`
 - `docs/ai-agent-docs/client-gateway-contract.md`
-- `docs/ai-agent-docs/gateway-engine-contract.md`
+- `docs/ai-agent-docs/gateway-agent-loop-contract.md`
 - `docs/ai-agent-docs/build-sequence.md`

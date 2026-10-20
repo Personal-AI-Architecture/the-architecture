@@ -129,7 +129,7 @@ The test: can you describe what the adapter does in one sentence? "Translates Op
 
 Nothing stops you from bypassing adapters, hardcoding a provider, or coupling components directly. The system still works. But every violation is a lock-in you've chosen to accept.
 
-This is by design. Pillar 3 — Freedom — means you're free to use the system however you please. Enforcing the architecture would mean the platform telling you what you can and can't do with your own system. That's what Big Tech does. Instead, the architecture makes the zero-lock-in path the easiest path — not the only path. The choice is yours.
+This is by design. Freedom from lock-in means you're free to use the system however you please. Enforcing the architecture would mean the platform telling you what you can and can't do with your own system. That's what Big Tech does. Instead, the architecture makes the zero-lock-in path the easiest path — not the only path. The choice is yours.
 
 ## Completing the Swappability Story
 
@@ -177,17 +177,6 @@ This also aligns with existing practice. Existing AI SDKs already work this way 
 | # | Decision | Rationale |
 |---|----------|-----------|
 | D139 | Contracts are swappable via adapters — completing the zero-lock-in architecture | Components are swappable through contracts, but contracts bind to a specific standard. Adapters absorb the standard: components speak an internal interface, adapters translate to/from the external standard. Swap the standard → swap the adapter → nothing else changes. Completes the chain: Your Memory via tools, Components via contracts, Contracts via adapters. |
-
----
-
-## Changelog
-
-| Date | Change | Reason | Source | Decision |
-|------|--------|--------|--------|----------|
-| 2026-03-01 | Cross-doc consistency: genericized Vercel AI SDK reference in Architectural Impact — replaced with "Existing AI SDKs" (Level 1 spec, no product-specific SDK recommendations). | Cross-doc review (Dave W + Claude) | — |
-| 2026-03-01 | Added "How Model Configuration Works in Practice" section | Practical walkthrough of model/provider config and swaps — what to set, what changes for each swap type. Cross-references added to foundation-spec, models-spec, configuration-spec, implementers-reference. | Dave W + Claude | — |
-| 2026-02-27 | Opener reframe + trim | Consistency with other specs: "How we define adapters" opener, collapsed related docs, added Level 1 note | Reorder + trim pass (Dave W + Claude) | — |
-| 2026-02-27 | Initial spec created | Architecture discussion | Dave W + Claude | D139 |
 
 ---
 

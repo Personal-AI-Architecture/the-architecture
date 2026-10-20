@@ -221,7 +221,7 @@ Why this is drift:
 
 ## Required Behaviors
 
-- Gateway exposes a stable client contract distinct from the internal Gateway-Engine contract.
+- Gateway exposes a stable client contract distinct from the internal Gateway ↔ Agent Loop contract.
 - Conversation responses use canonical envelopes rather than raw storage shape.
 - Client-facing payloads remain safe and presentation-ready.
 - Approval and completion semantics remain visible in the contract.
@@ -252,6 +252,6 @@ Why this is drift:
 ## Source Docs
 
 - `docs/in-depth-overview/gateway-spec.md`
-- `docs/in-depth-overview/gateway-engine-contract.md`
+- `docs/in-depth-overview/gateway-agent-loop-contract.md`
 - `docs/in-depth-overview/communication-principles.md`
 - `spec/mvp-build-primer.md`

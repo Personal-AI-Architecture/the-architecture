@@ -6,7 +6,7 @@ This file defines language-agnostic pass/fail vectors for Gateway conformance.
 
 - `GW-MUST-001`: Gateway owns conversation lifecycle operations (create, append, list, detail).
 - `GW-MUST-002`: `POST /message` accepts only canonical client request shape `{ content, metadata? }`.
-- `GW-MUST-003`: External clients cannot submit internal Engine contract fields.
+- `GW-MUST-003`: External clients cannot submit internal Agent Loop contract fields.
 - `GW-MUST-004`: Gateway sends only bounded internal handoff fields (`messages + metadata`) and blocks configuration side channels.
 - `GW-MUST-005`: Protected routes enforce Auth.
 - `GW-MUST-006`: Conversation list/detail endpoints return canonical envelopes.
@@ -29,8 +29,8 @@ This file defines language-agnostic pass/fail vectors for Gateway conformance.
 | GW-T002N | GW-MUST-002 | Negative | `POST /message` body `{ metadata: {} }` | 400 safe invalid-request response | Request accepted or unsafe parser error exposed | Validation drift |
 | GW-T003P | GW-MUST-003 | Positive | Client sends only external contract fields | Gateway normalizes to internal shape itself | Client required/allowed to send internal fields | Boundary ownership drift |
 | GW-T003N | GW-MUST-003 | Negative | `POST /message` includes `messages`, `provider`, or `tool_definitions` | 400 safe reject | Payload accepted | Internal contract fabrication |
-| GW-T004P | GW-MUST-004 | Positive | Instrument Engine boundary adapter during valid request | Outbound payload contains only `messages` and bounded `metadata` | Extra config fields appear in Gateway->Engine payload | Hidden configuration channel |
-| GW-T004N | GW-MUST-004 | Negative | `metadata` includes `api_key`, `provider`, `tool_sources` | Request rejected pre-stream with safe 400 | Request forwarded to Engine | Request-time reconfiguration drift |
+| GW-T004P | GW-MUST-004 | Positive | Instrument Agent Loop boundary adapter during valid request | Outbound payload contains only `messages` and bounded `metadata` | Extra config fields appear in Gateway->Agent Loop payload | Hidden configuration channel |
+| GW-T004N | GW-MUST-004 | Negative | `metadata` includes `api_key`, `provider`, `tool_sources` | Request rejected pre-stream with safe 400 | Request forwarded to Agent Loop | Request-time reconfiguration drift |
 | GW-T005P | GW-MUST-005 | Positive | Valid auth context on protected route (`GET /conversations`) | 2xx with expected response | 401 despite valid auth | Auth regression |
 | GW-T005N | GW-MUST-005 | Negative | Missing/invalid auth on protected route | 401 safe unauthorized | Route returns data without auth | Auth bypass |
 | GW-T006P | GW-MUST-006 | Positive | Call `GET /conversations` and `GET /conversations/:id` for existing records | Responses match canonical envelopes | Envelope fields missing/renamed | Response contract drift |

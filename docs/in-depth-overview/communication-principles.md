@@ -60,7 +60,7 @@ If every internal interface has its own message shape, field names, and type con
 
 This applies to errors too. When every interface invents its own error shape, error handling becomes per-interface custom code. Errors are part of the contract, not an afterthought — machine-readable codes, correlation context, no leaked internals. Same structural conventions as normal messages.
 
-At minimum, every internal request carries: a correlation ID (P5), a timestamp, and enough context for the receiver to process it without ambient state. Events within a stream (like SSE events) inherit the request's correlation context — they don't each carry their own. The [gateway-engine-contract.md](./gateway-engine-contract.md) is one application of this — its `metadata` object and field conventions should be the starting point for other internal interfaces, not an island.
+At minimum, every internal request carries: a correlation ID (P5), a timestamp, and enough context for the receiver to process it without ambient state. Events within a stream (like SSE events) inherit the request's correlation context — they don't each carry their own. The [gateway-agent-loop-contract.md](./gateway-agent-loop-contract.md) is one application of this — its `metadata` object and field conventions should be the starting point for other internal interfaces, not an island.
 
 Consistency means one swap, not N. Can a developer reading any internal message recognize the structure without checking which interface produced it? If not, each interface is its own lock-in surface.
 
@@ -108,10 +108,10 @@ Can one component add new fields to its messages without breaking any other comp
 |-------|---------|---------------|
 | Specific message format (JSON-RPC, custom envelope, etc.) | Implementation choice | Product spec / implementation |
 | Specific transport (HTTP, gRPC, queues) | Deployment choice | [deployment-spec.md](./deployment-spec.md), component specs |
-| Semantic routing / task dispatch | The model decides (P4) | [engine-spec.md](./engine-spec.md) |
-| Specific error codes | Interface-specific | Each contract (e.g., [gateway-engine-contract.md](./gateway-engine-contract.md)) |
+| Semantic routing / task dispatch | The model decides (P4) | [agent-loop-spec.md](./agent-loop-spec.md) |
+| Specific error codes | Interface-specific | Each contract (e.g., [gateway-agent-loop-contract.md](./gateway-agent-loop-contract.md)) |
 | Authentication mechanism | Auth's responsibility | [auth-spec.md](./auth-spec.md) |
-| The Gateway-Engine contract details | Already defined | [gateway-engine-contract.md](./gateway-engine-contract.md) |
+| The Gateway ↔ Agent Loop contract details | Already defined | [gateway-agent-loop-contract.md](./gateway-agent-loop-contract.md) |
 
 ---
 
@@ -126,7 +126,7 @@ Can one component add new fields to its messages without breaking any other comp
 ## Open Questions
 
 - **OQ-1: ~~Does this spec warrant a new foundation decision number?~~** Resolved → D169.
-- **OQ-2: Should gateway-engine-contract.md be updated to explicitly reference these principles?** The contract already follows them — the question is whether to make the relationship explicit.
+- **OQ-2: Should gateway-agent-loop-contract.md be updated to explicitly reference these principles?** The contract already follows them — the question is whether to make the relationship explicit.
 - **OQ-3: Should D16 be annotated to distinguish transport-level protocols (always use standards) from internal communication conventions (principles-based, implementation flexible)?** This would clarify the tension Dave J's work surfaced.
 
 ---
@@ -142,21 +142,11 @@ Can one component add new fields to its messages without breaking any other comp
 
 ---
 
-## Changelog
-
-| Date | Change | Source |
-|------|--------|--------|
-| 2026-03-05 | Voice alignment: rewrote to match finalized spec style — "How we define" opener, conversational tone, analogies woven through, scope folded into opener, Decisions Made restored, test language woven into prose instead of bold-formatted subsections. | Style alignment (Dave W + Claude) |
-| 2026-03-05 | Complete rewrite: reframed from "debate position" to "properties for lock-in-free communication." 8 principles reduced to 6, each derived from "what makes communication swappable." Old P1 (Standards First) removed — covered by Foundation Principle 4. Old P5 (Structured Errors) folded into P2 (Consistency). Old P7 (Memory Stays Central) reframed as P3 (No State) + P1 (Not Embedded). Old P8 (Transport Independence) removed — scope statement, not principle. | Architecture review (Dave W + Claude) |
-| 2026-03-05 | Initial draft — 8 principles, success criteria, open questions | Architecture review of BDP (Dave W + Claude) |
-
----
-
 ## Summary
 
 The architecture requires a separation of responsibilities because swappability depends on it. Communication is the connective tissue between components — that makes it the most likely place for responsibilities to bleed across boundaries, because every component touches it. If the communication layer starts holding state, it's doing Memory's job. If it starts making semantic decisions, it's doing the model's job. If it starts enforcing access control, it's doing Auth's job. Each leak makes swapping harder.
 
-The six principles are Principle #6 (Responsibilities Stay Where They Belong) applied to the communication layer: keep it thin, keep it dumb, keep it stateless — because those jobs already have owners. A communication layer that carries signals without interpreting them is one you can swap without consequences. A communication layer that's accumulated other components' responsibilities is one you're stuck with.
+The six principles are Principle 3 (Keep Responsibilities Where They Belong) applied to the communication layer: keep it thin, keep it dumb, keep it stateless — because those jobs already have owners. A communication layer that carries signals without interpreting them is one you can swap without consequences. A communication layer that's accumulated other components' responsibilities is one you're stuck with.
 
 The communication layer's job is to communicate. The architecture works because nothing else is doing that job, and communication isn't doing anything else.
 

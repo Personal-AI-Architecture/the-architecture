@@ -112,7 +112,7 @@
       "kind": "valid",
       "owning_docs": [
         "docs/ai-agent-docs/client-gateway-contract.md",
-        "docs/ai-agent-docs/gateway-engine-contract.md"
+        "docs/ai-agent-docs/gateway-agent-loop-contract.md"
       ],
       "matrix_ids": [
         "S-05",
@@ -121,7 +121,7 @@
       "related_checklists": [
         "docs/ai-agent-docs/review-checklists/gateway-review.md",
         "docs/ai-agent-docs/review-checklists/security-review.md",
-        "docs/ai-agent-docs/review-checklists/engine-review.md"
+        "docs/ai-agent-docs/review-checklists/agent-loop-review.md"
       ],
       "glossary_terms": [
         "contract-visible",
@@ -133,7 +133,7 @@
       "kind": "invalid",
       "owning_docs": [
         "docs/ai-agent-docs/client-gateway-contract.md",
-        "docs/ai-agent-docs/gateway-engine-contract.md"
+        "docs/ai-agent-docs/gateway-agent-loop-contract.md"
       ],
       "matrix_ids": [
         "S-05",
@@ -142,7 +142,7 @@
       "related_checklists": [
         "docs/ai-agent-docs/review-checklists/gateway-review.md",
         "docs/ai-agent-docs/review-checklists/security-review.md",
-        "docs/ai-agent-docs/review-checklists/engine-review.md"
+        "docs/ai-agent-docs/review-checklists/agent-loop-review.md"
       ],
       "glossary_terms": [
         "contract-visible",
@@ -155,7 +155,7 @@
       "kind": "valid",
       "owning_docs": [
         "docs/ai-agent-docs/client-gateway-contract.md",
-        "docs/ai-agent-docs/gateway-engine-contract.md"
+        "docs/ai-agent-docs/gateway-agent-loop-contract.md"
       ],
       "matrix_ids": [
         "S-05",
@@ -164,7 +164,7 @@
       "related_checklists": [
         "docs/ai-agent-docs/review-checklists/gateway-review.md",
         "docs/ai-agent-docs/review-checklists/security-review.md",
-        "docs/ai-agent-docs/review-checklists/engine-review.md"
+        "docs/ai-agent-docs/review-checklists/agent-loop-review.md"
       ],
       "glossary_terms": [
         "contract-visible",
@@ -176,7 +176,7 @@
       "kind": "invalid",
       "owning_docs": [
         "docs/ai-agent-docs/client-gateway-contract.md",
-        "docs/ai-agent-docs/gateway-engine-contract.md"
+        "docs/ai-agent-docs/gateway-agent-loop-contract.md"
       ],
       "matrix_ids": [
         "S-05",
@@ -185,7 +185,7 @@
       "related_checklists": [
         "docs/ai-agent-docs/review-checklists/gateway-review.md",
         "docs/ai-agent-docs/review-checklists/security-review.md",
-        "docs/ai-agent-docs/review-checklists/engine-review.md"
+        "docs/ai-agent-docs/review-checklists/agent-loop-review.md"
       ],
       "glossary_terms": [
         "contract-visible",
@@ -197,7 +197,7 @@
       "file": "docs/ai-agent-docs/examples/gateway-engine-request.json",
       "kind": "valid",
       "owning_docs": [
-        "docs/ai-agent-docs/gateway-engine-contract.md",
+        "docs/ai-agent-docs/gateway-agent-loop-contract.md",
         "docs/ai-agent-docs/configuration.md"
       ],
       "matrix_ids": [
@@ -206,7 +206,7 @@
         "C-02"
       ],
       "related_checklists": [
-        "docs/ai-agent-docs/review-checklists/engine-review.md",
+        "docs/ai-agent-docs/review-checklists/agent-loop-review.md",
         "docs/ai-agent-docs/review-checklists/configuration-review.md"
       ],
       "glossary_terms": [
@@ -218,7 +218,7 @@
       "file": "docs/ai-agent-docs/examples/invalid-gateway-engine-request.json",
       "kind": "invalid",
       "owning_docs": [
-        "docs/ai-agent-docs/gateway-engine-contract.md",
+        "docs/ai-agent-docs/gateway-agent-loop-contract.md",
         "docs/ai-agent-docs/configuration.md",
         "docs/ai-agent-docs/security.md"
       ],
@@ -230,7 +230,7 @@
         "S-01"
       ],
       "related_checklists": [
-        "docs/ai-agent-docs/review-checklists/engine-review.md",
+        "docs/ai-agent-docs/review-checklists/agent-loop-review.md",
         "docs/ai-agent-docs/review-checklists/configuration-review.md",
         "docs/ai-agent-docs/review-checklists/security-review.md"
       ],

@@ -4,7 +4,7 @@ This document defines anti-drift controls for Memory implementations.
 
 ## 1. Top Drift Patterns
 
-- Memory depends on Gateway/Engine/Auth internals.
+- Memory depends on Gateway/Agent Loop/Auth internals.
 - Components bypass Memory tools with direct filesystem/database reach-in.
 - Conversations or structured owner data live outside Memory contract.
 - Export surface is missing, partial, or non-portable.
@@ -16,7 +16,7 @@ This document defines anti-drift controls for Memory implementations.
 
 ## 2. Prohibited Implementation Shortcuts
 
-- Adding imports/dependencies from Memory to Gateway, Engine, or Auth.
+- Adding imports/dependencies from Memory to Gateway, Agent Loop, or Auth.
 - Direct external component writes into Memory internals bypassing tools/boundary interfaces.
 - Using ephemeral in-process conversation stores as source of truth.
 - Treating export/history as optional post-MVP features.
@@ -45,7 +45,7 @@ This document defines anti-drift controls for Memory implementations.
 
 ## 4. Contract-Break Indicators
 
-- Memory module imports or calls Gateway/Engine/Auth.
+- Memory module imports or calls Gateway/Agent Loop/Auth.
 - Non-Memory module writes directly to Memory storage internals.
 - Conversations unavailable after restart or not retrievable via Memory boundary.
 - Export missing conversations/history or failing to produce open archive.
@@ -53,7 +53,7 @@ This document defines anti-drift controls for Memory implementations.
 - Startup continues despite version-history initialization failure.
 - Path traversal and reserved path access succeed.
 - Secrets appear in normal Memory content or export surfaces.
-- Storage backend replacement forces Gateway/Engine contract changes.
+- Storage backend replacement forces Gateway/Agent Loop contract changes.
 
 ## 5. Fail Build If
 

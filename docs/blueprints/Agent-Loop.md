@@ -1,9 +1,9 @@
-# Engine Component Blueprint Specification
+# Agent Loop Component Blueprint Specification
 
 ## 1. Overview
 
 ### Purpose
-The Engine (Agent Loop) is the generic execution loop that processes one interaction request at a time by coordinating model inference and tool execution, then emitting structured stream events back to the caller.
+The Agent Loop is the generic execution loop that processes one interaction request at a time by coordinating model inference and tool execution, then emitting structured stream events back to the caller.
 
 ### High-Level Responsibilities
 - Accept bounded internal request payloads from Gateway (`messages + metadata`).
@@ -13,7 +13,7 @@ The Engine (Agent Loop) is the generic execution loop that processes one interac
 - Emit contract-visible stream events (`text-delta`, `tool-call`, `tool-result`, `done`, `error`, plus approval interaction events where implemented).
 
 ### System Context
-- Upstream: Gateway via the internal Gateway-Engine contract.
+- Upstream: Gateway via the internal Gateway ↔ Agent Loop contract.
 - Downstream:
   - Model API via adapters.
   - Tool runtime surface via tool executor.
@@ -22,19 +22,19 @@ The Engine (Agent Loop) is the generic execution loop that processes one interac
 
 ### Companion Artifact
 - Gateway component specification: `blueprints/Gateway.md`
-- Internal handoff contract context: `blueprints/Gateway-API.md` (external API context), plus Gateway-Engine contract docs in source layer.
+- Internal handoff contract context: `blueprints/Gateway-API.md` (external API context), plus Gateway ↔ Agent Loop contract docs in source layer.
 
 ---
 
 ## 2. Scope Definition
 
-### What the Engine **is**
+### What the Agent Loop **is**
 - A generic loop executor for model-tool interactions.
 - A stream event producer for interaction progress and completion.
 - A consumer of bounded request context and pre-authenticated actor context.
 - A dispatcher that executes available tools and captures outcomes for continuation turns.
 
-### What the Engine **is not**
+### What the Agent Loop **is not**
 - Not a conversation store or lifecycle manager.
 - Not an authentication boundary owner.
 - Not a provider-specific API formatter (adapters own provider-specific translation).
@@ -45,7 +45,7 @@ The Engine (Agent Loop) is the generic execution loop that processes one interac
 - Receives only contract-bounded request fields; no hidden runtime/provider/tool reconfiguration through request metadata.
 - Must preserve generic ownership (no product-specific logic hardcoded in loop behavior).
 - Must preserve event taxonomy and safe error surfaces.
-- Must allow Gateway and Engine to evolve independently while honoring contract shape.
+- Must allow Gateway and Agent Loop to evolve independently while honoring contract shape.
 
 ---
 
@@ -54,12 +54,12 @@ The Engine (Agent Loop) is the generic execution loop that processes one interac
 ### Domain Concepts
 - **Interaction Loop**: repeated cycle of model completion -> optional tool execution -> continuation.
 - **Completion Signal**: model indicates terminal finish condition (no further tool calls required).
-- **Tool Turn**: step where model requests one or more tools and Engine executes them.
+- **Tool Turn**: step where model requests one or more tools and Agent Loop executes them.
 - **Recoverable Tool Failure**: tool failure that can be returned to model as `tool-result` without terminating stream.
 - **Unrecoverable Failure**: failure requiring terminal `error` event and loop termination.
 
 ### Contract Concepts
-- **Gateway-Engine Request**: `messages[]` plus bounded `metadata`.
+- **Gateway ↔ Agent Loop Request**: `messages[]` plus bounded `metadata`.
 - **Stream Event**: typed output event consumed by Gateway/client stream proxy.
 - **Error Taxonomy**: `provider_error`, `tool_error`, `context_overflow`.
 - **Approval Interaction**: explicit request/result decision flow for sensitive tool calls.
@@ -83,8 +83,8 @@ The Engine (Agent Loop) is the generic execution loop that processes one interac
   - `client_context`
 
 #### Auth Context
-- Engine consumes already-authenticated actor context (identity + permission set).
-- Engine does not authenticate requests itself.
+- Agent Loop consumes already-authenticated actor context (identity + permission set).
+- Agent Loop does not authenticate requests itself.
 
 #### Loop Configuration Inputs
 - Tool registry/executor prepared at startup.
@@ -111,16 +111,16 @@ The Engine (Agent Loop) is the generic execution loop that processes one interac
 
 ### 4.4 Error Contract
 - Pre-stream errors: handled at caller boundary (typically Gateway HTTP response path).
-- Mid-stream errors: Engine emits `error` event with taxonomy:
+- Mid-stream errors: Agent Loop emits `error` event with taxonomy:
   - `provider_error`
   - `tool_error`
   - `context_overflow`
 - Message safety requirement: no raw stack traces, secret material, or unsafe internals.
 
 ### 4.5 Communication Pattern
-- Request-reply at boundary entry (Gateway -> Engine).
-- Event streaming from Engine back to Gateway.
-- Multi-call internal continuation between Engine and model within a single interaction stream.
+- Request-reply at boundary entry (Gateway -> Agent Loop).
+- Event streaming from Agent Loop back to Gateway.
+- Multi-call internal continuation between Agent Loop and model within a single interaction stream.
 
 ---
 
@@ -160,7 +160,7 @@ The Engine (Agent Loop) is the generic execution loop that processes one interac
 - **Approval wait state**:
   - pending approval map keyed by approval request ID
 - **No durable conversation state ownership**:
-  - Engine does not create/list/store conversations.
+  - Agent Loop does not create/list/store conversations.
 
 ### 5.3 Guard and Safety Behaviors (As Implemented)
 - Optional iteration safety bound: emits `context_overflow` and terminates when exceeded.
@@ -186,7 +186,7 @@ The Engine (Agent Loop) is the generic execution loop that processes one interac
 - Tool permission denied at execution boundary:
   - should be prevented by advertised tool filtering; if encountered, failure path must remain safe and classified.
 - Approval request resolution not found:
-  - handled by approval decision boundary (Gateway route), leaving Engine pending until resolved or interaction lifecycle ends.
+  - handled by approval decision boundary (Gateway route), leaving Agent Loop pending until resolved or interaction lifecycle ends.
 
 ---
 
@@ -210,16 +210,16 @@ The Engine (Agent Loop) is the generic execution loop that processes one interac
 
 ### Interaction Data Flow
 1. Gateway sends bounded request.
-2. Engine asks adapter for completion.
+2. Agent Loop asks adapter for completion.
 3. Adapter calls provider through Model API.
-4. Engine executes requested tools.
+4. Agent Loop executes requested tools.
 5. Tool outputs are injected into model context.
-6. Engine emits stream events back to Gateway.
+6. Agent Loop emits stream events back to Gateway.
 
 ### Dependency Assumptions
 - Adapter encapsulates provider-specific request/response details.
 - Tool registry is startup-prepared and stable during interaction.
-- Auth context is valid and trustworthy when Engine receives request.
+- Auth context is valid and trustworthy when Agent Loop receives request.
 - Correlation ID flows through logs/tools for traceability.
 
 ---
@@ -227,8 +227,8 @@ The Engine (Agent Loop) is the generic execution loop that processes one interac
 ## 7. Invariants & Rules
 
 ### Ownership Invariants
-- Engine remains generic and product-agnostic.
-- Engine never owns conversation persistence.
+- Agent Loop remains generic and product-agnostic.
+- Agent Loop never owns conversation persistence.
 - Provider-specific formatting logic remains in adapters.
 - Authorization policy ownership remains in Auth boundary.
 
@@ -307,14 +307,14 @@ The Engine (Agent Loop) is the generic execution loop that processes one interac
 ## 10. Validation Against AI Primer (`/docs/ai`)
 
 ### Confirmed Alignments
-- `E-01`: Engine loop remains generic in responsibility.
-- `E-02`: Conversation persistence remains outside Engine ownership.
+- `E-01`: Agent Loop remains generic in responsibility.
+- `E-02`: Conversation persistence remains outside Agent Loop ownership.
 - `E-03`: Provider-specific logic is adapter-bound.
 - `E-04`: Loop continues until model signals completion; safety bound is optional deployment control.
 - `GC-02`: Stream event semantics are explicit and typed.
 - `GC-03/GC-05/S-01`: Mid-stream error taxonomy and safe messaging are enforced.
 - `GC-06/S-05`: Approval semantics are contract-visible through `approval-request` and `approval-result`.
-- `T-02`: Tool execution occurs in Engine while auth checks remain Auth-governed.
+- `T-02`: Tool execution occurs in Agent Loop while auth checks remain Auth-governed.
 - `MO-01/MO-02/MO-03`: Model boundary stays external and swappable through adapters/config.
 
 ### Noted Primer/Implementation Tensions
@@ -326,21 +326,21 @@ The Engine (Agent Loop) is the generic execution loop that processes one interac
 ## 11. Validation Against Human Documentation (`/the-architecture/docs`)
 
 ### Confirmed Alignments
-- Engine remains a commodity/generic Agent Loop with no conversation ownership (`engine-spec.md`).
-- Internal request/stream contract boundary is honored (`gateway-engine-contract.md`).
+- Agent Loop remains a commodity/generic Agent Loop with no conversation ownership (`agent-loop-spec.md`).
+- Internal request/stream contract boundary is honored (`gateway-agent-loop-contract.md`).
 - Error taxonomy alignment (`provider_error`, `tool_error`, `context_overflow`) is implemented.
 - Optional safety iteration bound exists as deployment choice rather than architectural default.
 - Provider interactions remain adapter-mediated (`models-spec.md`, `adapter-spec.md`).
 
 ### Documented Discrepancies To Reconcile
 1. **Parallel tool execution expectation**
-   - Human Engine spec states tool calls in a turn should be executable concurrently.
+   - Human Agent Loop spec states tool calls in a turn should be executable concurrently.
    - Current implementation executes tool calls sequentially per turn.
 2. **Approval state ownership strictness**
-   - Human Engine spec says Agent Loop does not manage approval state.
-   - Current implementation maintains pending approval map inside Engine runtime to support coded enforcement flow.
+   - Human Agent Loop spec says Agent Loop does not manage approval state.
+   - Current implementation maintains pending approval map inside Agent Loop runtime to support coded enforcement flow.
 3. **Event payload naming conventions**
-   - Human Gateway-Engine examples show `text-delta.content` and `tool-call.arguments`.
+   - Human Gateway ↔ Agent Loop examples show `text-delta.content` and `tool-call.arguments`.
    - Current implementation/primer contract use `text-delta.delta` and `tool-call.input`.
 4. **Internal event set scope**
    - Human internal contract table lists core events (`text-delta`, `tool-call`, `tool-result`, `done`, `error`).
@@ -349,7 +349,7 @@ The Engine (Agent Loop) is the generic execution loop that processes one interac
 ### Rebuild Guidance When Sources Diverge
 - Preserve human-doc ownership boundaries as architectural authority.
 - Preserve primer/matrix event and payload conformance for MVP interoperability.
-- Resolve known divergences by publishing a single canonical internal event schema and concurrency expectation for Engine implementation targets.
+- Resolve known divergences by publishing a single canonical internal event schema and concurrency expectation for Agent Loop implementation targets.
 
 ---
 
@@ -357,46 +357,46 @@ The Engine (Agent Loop) is the generic execution loop that processes one interac
 
 | Conflict ID | Conflicting Statements | Chosen Resolution | Rationale | Risk if Unresolved |
 |---|---|---|---|---|
-| ENG-CF-001 | Human Engine spec expects concurrent tool execution in a turn; current implementation executes sequentially | Preserve correctness-first behavior as conformant baseline; mark concurrency as SHOULD-level enhancement | Maintains deterministic behavior while enabling phased concurrency support | Inconsistent performance/latency expectations across implementations |
-| ENG-CF-002 | Human spec says loop should not manage approval state; runtime implementation maintains pending approval map | Allow bounded in-loop approval wait state only for coded enforcement and event visibility; keep policy ownership in Auth/tools | Satisfies contract-visible approval semantics without transferring policy ownership | Approval ownership can creep into Engine policy logic |
-| ENG-CF-003 | Human examples use `text-delta.content` / `tool-call.arguments`; primer/runtime use `text-delta.delta` / `tool-call.input` | Use primer/runtime naming for MVP compatibility | Aligns with active contract and blueprints schemas | Event payload mismatch between Gateway and Engine implementations |
+| ENG-CF-001 | Human Agent Loop spec expects concurrent tool execution in a turn; current implementation executes sequentially | Preserve correctness-first behavior as conformant baseline; mark concurrency as SHOULD-level enhancement | Maintains deterministic behavior while enabling phased concurrency support | Inconsistent performance/latency expectations across implementations |
+| ENG-CF-002 | Human spec says loop should not manage approval state; runtime implementation maintains pending approval map | Allow bounded in-loop approval wait state only for coded enforcement and event visibility; keep policy ownership in Auth/tools | Satisfies contract-visible approval semantics without transferring policy ownership | Approval ownership can creep into Agent Loop policy logic |
+| ENG-CF-003 | Human examples use `text-delta.content` / `tool-call.arguments`; primer/runtime use `text-delta.delta` / `tool-call.input` | Use primer/runtime naming for MVP compatibility | Aligns with active contract and blueprints schemas | Event payload mismatch between Gateway and Agent Loop implementations |
 | ENG-CF-004 | Human internal contract table lists core events only; primer/runtime include approval events | Treat approval events as contract extension required for current MVP conformance | Matches compliance matrix and client contract requirements | Approval control path becomes non-portable and non-auditable |
 
 ## 13. Normative Requirements (MUST/SHOULD/MAY)
 
 ### MUST
 
-- `ENG-MUST-001`: Engine MUST accept only bounded request shape (`messages` + `metadata`).
-- `ENG-MUST-002`: Engine MUST require `metadata.correlation_id`.
-- `ENG-MUST-003`: Engine MUST reject request metadata that acts as runtime/provider/tool configuration side channel.
-- `ENG-MUST-004`: Engine MUST continue loop until model completion signal unless explicit configured safety bound triggers classified overflow termination.
-- `ENG-MUST-005`: Engine MUST emit only canonical stream event taxonomy.
-- `ENG-MUST-006`: Engine MUST preserve assistant text across tool-continuation turns.
-- `ENG-MUST-007`: Engine MUST emit `tool-call` and `tool-result` with stable call ID continuity.
-- `ENG-MUST-008`: Engine MUST treat recoverable tool failures as non-terminal (`tool-result` error/denied semantics with continuation).
-- `ENG-MUST-009`: Engine MUST emit terminal `error` and terminate for unrecoverable provider/tool failures.
-- `ENG-MUST-010`: Engine MUST classify mid-stream errors as `provider_error`, `tool_error`, or `context_overflow`, with safe messages.
-- `ENG-MUST-011`: Engine MUST apply Auth-derived permission filtering to advertised/executable tools.
-- `ENG-MUST-012`: Engine MUST keep approval interactions contract-visible (`approval-request`, `approval-result`) with explicit denied-result semantics.
-- `ENG-MUST-013`: Engine MUST NOT own conversation persistence/lifecycle behavior.
-- `ENG-MUST-014`: Engine core loop MUST NOT contain provider-specific wire formatting logic (adapter boundary ownership).
+- `ENG-MUST-001`: Agent Loop MUST accept only bounded request shape (`messages` + `metadata`).
+- `ENG-MUST-002`: Agent Loop MUST require `metadata.correlation_id`.
+- `ENG-MUST-003`: Agent Loop MUST reject request metadata that acts as runtime/provider/tool configuration side channel.
+- `ENG-MUST-004`: Agent Loop MUST continue loop until model completion signal unless explicit configured safety bound triggers classified overflow termination.
+- `ENG-MUST-005`: Agent Loop MUST emit only canonical stream event taxonomy.
+- `ENG-MUST-006`: Agent Loop MUST preserve assistant text across tool-continuation turns.
+- `ENG-MUST-007`: Agent Loop MUST emit `tool-call` and `tool-result` with stable call ID continuity.
+- `ENG-MUST-008`: Agent Loop MUST treat recoverable tool failures as non-terminal (`tool-result` error/denied semantics with continuation).
+- `ENG-MUST-009`: Agent Loop MUST emit terminal `error` and terminate for unrecoverable provider/tool failures.
+- `ENG-MUST-010`: Agent Loop MUST classify mid-stream errors as `provider_error`, `tool_error`, or `context_overflow`, with safe messages.
+- `ENG-MUST-011`: Agent Loop MUST apply Auth-derived permission filtering to advertised/executable tools.
+- `ENG-MUST-012`: Agent Loop MUST keep approval interactions contract-visible (`approval-request`, `approval-result`) with explicit denied-result semantics.
+- `ENG-MUST-013`: Agent Loop MUST NOT own conversation persistence/lifecycle behavior.
+- `ENG-MUST-014`: Agent Loop core loop MUST NOT contain provider-specific wire formatting logic (adapter boundary ownership).
 
 ### SHOULD
 
-- `ENG-SHOULD-001`: Engine SHOULD support concurrent tool execution when safe and deterministic for the implementation.
-- `ENG-SHOULD-002`: Engine SHOULD expose deterministic guard behavior for duplicate or conflicting tool-call patterns.
-- `ENG-SHOULD-003`: Engine SHOULD emit structured correlation-aware audit logs for loop transitions and failures.
+- `ENG-SHOULD-001`: Agent Loop SHOULD support concurrent tool execution when safe and deterministic for the implementation.
+- `ENG-SHOULD-002`: Agent Loop SHOULD expose deterministic guard behavior for duplicate or conflicting tool-call patterns.
+- `ENG-SHOULD-003`: Agent Loop SHOULD emit structured correlation-aware audit logs for loop transitions and failures.
 
 ### MAY
 
-- `ENG-MAY-001`: Engine MAY enforce implementation-defined loop safety bounds, if classified overflow semantics are preserved.
-- `ENG-MAY-002`: Engine MAY include additional completion metadata in `done` events, without breaking required fields.
+- `ENG-MAY-001`: Agent Loop MAY enforce implementation-defined loop safety bounds, if classified overflow semantics are preserved.
+- `ENG-MAY-002`: Agent Loop MAY include additional completion metadata in `done` events, without breaking required fields.
 
 ## 14. Acceptance Gates (Pass/Fail)
 
 - `ENG-GATE-01 Contract Gate`: Pass if request/event/result schemas validate against `contracts/Engine.schema.json`; fail otherwise.
-- `ENG-GATE-02 Conformance Gate`: Pass if all vectors in `tests/Engine-conformance.md` pass (14 positive + 14 negative); fail on any `ENG-MUST-*` failure.
-- `ENG-GATE-03 Drift Gate`: Pass if all Critical checks in `drift/Engine-drift-guard.md` pass; fail on any Critical check failure.
+- `ENG-GATE-02 Conformance Gate`: Pass if all vectors in `tests/Agent-Loop-conformance.md` pass (14 positive + 14 negative); fail on any `ENG-MUST-*` failure.
+- `ENG-GATE-03 Drift Gate`: Pass if all Critical checks in `drift/Agent-Loop-drift-guard.md` pass; fail on any Critical check failure.
 - `ENG-GATE-04 Boundary Gate`: Pass if static/runtime checks confirm no conversation persistence ownership and no provider-wire logic in core loop; fail on any ownership breach.
 - `ENG-GATE-05 Conflict Gate`: Pass if no unresolved High-risk conflict remains in Conflict Register.
 
@@ -404,19 +404,19 @@ The Engine (Agent Loop) is the generic execution loop that processes one interac
 
 | Requirement ID | Primary Source(s) | Conformance Test IDs |
 |---|---|---|
-| ENG-MUST-001 | Human `gateway-engine-contract.md`; AI matrix `GC-01` | `ENG-T001P`, `ENG-T001N` |
-| ENG-MUST-002 | AI `gateway-engine-contract.md`; contract required field | `ENG-T002P`, `ENG-T002N` |
+| ENG-MUST-001 | Human `gateway-agent-loop-contract.md`; AI matrix `GC-01` | `ENG-T001P`, `ENG-T001N` |
+| ENG-MUST-002 | AI `gateway-agent-loop-contract.md`; contract required field | `ENG-T002P`, `ENG-T002N` |
 | ENG-MUST-003 | Human `configuration-spec.md`; AI matrix `C-02` | `ENG-T003P`, `ENG-T003N` |
-| ENG-MUST-004 | Human `engine-spec.md`; AI matrix `E-04` | `ENG-T004P`, `ENG-T004N` |
-| ENG-MUST-005 | Human `gateway-engine-contract.md`; AI matrix `GC-02` | `ENG-T005P`, `ENG-T005N` |
-| ENG-MUST-006 | AI `engine.md` guarantees and drift notes | `ENG-T006P`, `ENG-T006N` |
-| ENG-MUST-007 | AI `gateway-engine-contract.md`; runtime continuity expectations | `ENG-T007P`, `ENG-T007N` |
-| ENG-MUST-008 | Human `gateway-engine-contract.md` error rules; AI matrix `GC-03` | `ENG-T008P`, `ENG-T008N` |
-| ENG-MUST-009 | Human `gateway-engine-contract.md`; AI matrix `GC-03` | `ENG-T009P`, `ENG-T009N` |
-| ENG-MUST-010 | Human `gateway-engine-contract.md`; AI matrix `GC-05`, `S-01` | `ENG-T010P`, `ENG-T010N` |
+| ENG-MUST-004 | Human `agent-loop-spec.md`; AI matrix `E-04` | `ENG-T004P`, `ENG-T004N` |
+| ENG-MUST-005 | Human `gateway-agent-loop-contract.md`; AI matrix `GC-02` | `ENG-T005P`, `ENG-T005N` |
+| ENG-MUST-006 | AI `agent-loop.md` guarantees and drift notes | `ENG-T006P`, `ENG-T006N` |
+| ENG-MUST-007 | AI `gateway-agent-loop-contract.md`; runtime continuity expectations | `ENG-T007P`, `ENG-T007N` |
+| ENG-MUST-008 | Human `gateway-agent-loop-contract.md` error rules; AI matrix `GC-03` | `ENG-T008P`, `ENG-T008N` |
+| ENG-MUST-009 | Human `gateway-agent-loop-contract.md`; AI matrix `GC-03` | `ENG-T009P`, `ENG-T009N` |
+| ENG-MUST-010 | Human `gateway-agent-loop-contract.md`; AI matrix `GC-05`, `S-01` | `ENG-T010P`, `ENG-T010N` |
 | ENG-MUST-011 | Human `auth-spec.md`, `tools-spec.md`; AI matrix `T-02`, `A-01` | `ENG-T011P`, `ENG-T011N` |
 | ENG-MUST-012 | AI `client-gateway-contract.md`; AI matrix `S-05`, `GC-06` | `ENG-T012P`, `ENG-T012N` |
-| ENG-MUST-013 | Human `engine-spec.md`, `foundation-spec.md`; AI matrix `E-02` | `ENG-T013P`, `ENG-T013N` |
+| ENG-MUST-013 | Human `agent-loop-spec.md`, `foundation-spec.md`; AI matrix `E-02` | `ENG-T013P`, `ENG-T013N` |
 | ENG-MUST-014 | Human `models-spec.md`, `adapter-spec.md`; AI matrix `E-03` | `ENG-T014P`, `ENG-T014N` |
 
 ## 16. Residual Risks & Open Decisions

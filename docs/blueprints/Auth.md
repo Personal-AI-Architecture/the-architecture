@@ -14,9 +14,9 @@ Auth is the independent boundary that establishes identity, enforces permissions
 
 ### System Context
 - Upstream: client requests entering through Gateway.
-- Downstream consumers: Gateway route handling, Engine tool filtering/execution path, approval decision path.
+- Downstream consumers: Gateway route handling, Agent Loop tool filtering/execution path, approval decision path.
 - Storage relationship: auth state is persisted in product-owned owner data (Memory preferences surface), but Auth does not own Memory internals.
-- Architecture position: cross-cutting boundary independent from Gateway, Engine, and model/provider boundaries.
+- Architecture position: cross-cutting boundary independent from Gateway, Agent Loop, and model/provider boundaries.
 
 ---
 
@@ -30,7 +30,7 @@ Auth is the independent boundary that establishes identity, enforces permissions
 
 ### What Auth **is not**
 - Not Gateway routing logic.
-- Not Engine loop logic.
+- Not Agent Loop logic.
 - Not conversation lifecycle management.
 - Not a model/provider adapter.
 - Not a general-purpose settings or workflow engine.
@@ -108,8 +108,8 @@ Auth is the independent boundary that establishes identity, enforces permissions
   - Auth failures are pre-stream for request-entry checks.
   - If an auth-related violation occurs during active stream execution, downstream emits classified safe error and terminates.
 
-#### Engine/tool integration
-- Engine consumes already-authenticated context.
+#### Agent Loop/tool integration
+- Agent Loop consumes already-authenticated context.
 - Tool visibility/execution is filtered by auth permissions.
 - Approval decision submission is additionally gated by approval authority permission.
 
@@ -218,7 +218,7 @@ Why invalid:
 
 ### 4.6 Communication Patterns
 - Request entry: synchronous auth check before protected handler execution.
-- Downstream propagation: context carried with request execution context to Engine/tools.
+- Downstream propagation: context carried with request execution context to Agent Loop/tools.
 - Auth tool access: model-driven tool calls with auth-aware execution context.
 
 ---
@@ -250,7 +250,7 @@ Why invalid:
 4. Denied actions stop execution on boundary.
 
 ### 5.4 Tool and Approval Workflow
-1. Engine/tool layer obtains auth context.
+1. Agent Loop/tool layer obtains auth context.
 2. Tool list is filtered to authorized set.
 3. Tool execution path re-checks authorization before execution.
 4. Approval decision path requires `approval_authority=true`.
@@ -278,7 +278,7 @@ Why invalid:
 ### Required Dependencies
 - **Gateway boundary**:
   - invokes Auth pre-handler on protected routes.
-- **Engine/tool execution path**:
+- **Agent Loop/tool execution path**:
   - consumes auth context for tool filtering and permission checks.
 - **Memory owner-data path**:
   - stores product-owned auth-state records.
@@ -289,7 +289,7 @@ Why invalid:
 1. Client request enters Gateway.
 2. Gateway invokes Auth boundary.
 3. Auth validates and attaches context or denies.
-4. Engine/tools consume context for downstream authorization.
+4. Agent Loop/tools consume context for downstream authorization.
 5. Auth tools expose actor/permission/export surfaces.
 
 ### Dependency Assumptions
@@ -303,7 +303,7 @@ Why invalid:
 
 ### Component Ownership Invariants
 - Auth owns authentication and authorization decisions.
-- Gateway/Engine must not own Auth policy semantics.
+- Gateway/Agent Loop must not own Auth policy semantics.
 - Auth does not own conversation routing, model operations, or memory internals.
 
 ### Contract Invariants
@@ -366,7 +366,7 @@ Why invalid:
 - Local-owner no-op auth mode.
 - Permission checks spread ad hoc through business logic.
 - Exporting provider-opaque auth records as canonical product state.
-- Coupling Auth to Gateway/Engine internals beyond contract surfaces.
+- Coupling Auth to Gateway/Agent Loop internals beyond contract surfaces.
 
 ---
 
@@ -378,7 +378,7 @@ Why invalid:
 - `A-03`: auth state is inspectable/exportable in product-owned form.
 - `A-04`: secrets excluded from normal inspectable owner data.
 - `A-05`: startup guarantees day-one auth state and export capability.
-- `GC-04`: Auth is on Gateway->Engine path.
+- `GC-04`: Auth is on Gateway->Agent Loop path.
 - `S-03`: approval enforcement is coded, not prompt-only.
 
 ### Noted Primer-Implementation Tightening
@@ -438,10 +438,10 @@ Why invalid:
 - `AUTH-MUST-007`: Startup MUST create/load product-owned auth state required for runtime and export.
 - `AUTH-MUST-008`: `auth_export` MUST return non-secret product-owned auth state.
 - `AUTH-MUST-009`: `auth_whoami`, `auth_check`, and `auth_export` MUST be available from day one.
-- `AUTH-MUST-010`: Auth context MUST propagate to Engine/tool execution path.
+- `AUTH-MUST-010`: Auth context MUST propagate to Agent Loop/tool execution path.
 - `AUTH-MUST-011`: Auth allow/deny outcomes MUST emit structured audit records.
 - `AUTH-MUST-012`: Local-owner mode MUST remain an enforced Auth boundary.
-- `AUTH-MUST-013`: Auth MUST remain ownership-scoped to identity/access concerns and MUST NOT absorb routing/engine responsibilities.
+- `AUTH-MUST-013`: Auth MUST remain ownership-scoped to identity/access concerns and MUST NOT absorb routing/agent loop responsibilities.
 
 ### SHOULD
 
@@ -475,7 +475,7 @@ Why invalid:
 | AUTH-MUST-007 | AI matrix `A-05`; Human `auth-spec.md` success/security requirements | `AUTH-T007P`, `AUTH-T007N` |
 | AUTH-MUST-008 | AI matrix `A-03`, `A-04`; Human `auth-spec.md` portability rules | `AUTH-T008P`, `AUTH-T008N` |
 | AUTH-MUST-009 | AI `auth.md` required day-one tools; auth checklist | `AUTH-T009P`, `AUTH-T009N` |
-| AUTH-MUST-010 | AI `gateway-engine-contract.md` auth-on-path semantics | `AUTH-T010P`, `AUTH-T010N` |
+| AUTH-MUST-010 | AI `gateway-agent-loop-contract.md` auth-on-path semantics | `AUTH-T010P`, `AUTH-T010N` |
 | AUTH-MUST-011 | Human `security-spec.md`; AI matrix `S-02` | `AUTH-T011P`, `AUTH-T011N` |
 | AUTH-MUST-012 | AI failure pattern `Auth Omitted On The Real Path`; human local-owner requirement | `AUTH-T012P`, `AUTH-T012N` |
 | AUTH-MUST-013 | Human `foundation-spec.md` responsibility boundaries; AI matrix `A-02` | `AUTH-T013P`, `AUTH-T013N` |

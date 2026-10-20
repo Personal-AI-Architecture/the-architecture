@@ -1,6 +1,6 @@
 # Tools
 
-> The callable capability surface defined by the environment, executed by Engine, and governed by Auth.
+> The callable capability surface defined by the environment, executed by Agent Loop, and governed by Auth.
 
 ## Purpose
 

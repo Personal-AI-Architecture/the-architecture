@@ -6,7 +6,7 @@ This document defines anti-drift controls for Models boundary implementations.
 
 - Models reclassified as an internal component.
 - Primary model path bypasses Model API and adapter boundaries.
-- Provider-specific request shaping leaks into Engine or Gateway code.
+- Provider-specific request shaping leaks into Agent Loop or Gateway code.
 - Primary model invocation is implemented as a tool bootstrap path.
 - Runtime config, adapter config, and preferences collapse into one layer.
 - Request payloads become hidden provider/model/runtime reconfiguration channels.
@@ -19,7 +19,7 @@ This document defines anti-drift controls for Models boundary implementations.
 
 ## 2. Prohibited Implementation Shortcuts
 
-- Hardcoding provider selection in Engine core flow.
+- Hardcoding provider selection in Agent Loop core flow.
 - Accepting `provider_adapter`, `provider`, `base_url`, `api_key`, `api_key_env`, or `model` in request payload contracts.
 - Treating primary model invocation as a required tool call.
 - Merging runtime, adapter, and preferences into a mutable request-time config object.
@@ -49,7 +49,7 @@ This document defines anti-drift controls for Models boundary implementations.
 ## 4. Contract-Break Indicators
 
 - Any runtime artifact classifies models as a component.
-- Engine imports provider-native SDK/request logic directly.
+- Agent Loop imports provider-native SDK/request logic directly.
 - Gateway introduces provider/model selection controls as boundary ownership.
 - Request contracts include forbidden reconfiguration fields.
 - Adapter config contains `api_key`, `token`, or `password` values.
@@ -73,7 +73,7 @@ This document defines anti-drift controls for Models boundary implementations.
 
 - [ ] All `MOD-MUST-*` vectors pass (positive and negative).
 - [ ] Models are still external and not runtime components.
-- [ ] Primary model path uses `Engine -> Model API -> Adapter -> Provider`.
+- [ ] Primary model path uses `Agent Loop -> Model API -> Adapter -> Provider`.
 - [ ] Provider-specific logic remains adapter-confined.
 - [ ] Primary model is not bootstrapped as a tool.
 - [ ] Runtime config, adapter config, and preferences remain separate.

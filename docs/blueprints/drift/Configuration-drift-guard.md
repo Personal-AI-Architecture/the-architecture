@@ -53,7 +53,7 @@ This document defines anti-drift controls for Configuration boundary implementat
 - `ready` emitted before tools/memory/preferences initialization.
 - Unsupported adapter/source does not fail startup.
 - Same-provider model change requires code edits.
-- Provider swap requires Gateway/Engine rewrite.
+- Provider swap requires Gateway/Agent Loop rewrite.
 - Runtime defaults expose non-localhost bind unintentionally.
 
 ## 5. Fail Build If

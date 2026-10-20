@@ -13,7 +13,7 @@ The guiding principle: **simple security that people use correctly beats complex
 
 Auth answers "who can do what." This spec answers "what can go wrong, what do we protect, and how do we enforce it." This is not a regulatory compliance spec (GDPR, data residency belong in a separate regulation spec), not a replacement for auth-spec (identity and permissions stay there), and not an implementation guide (requirements, not technology choices).
 
-This is an **Architecture** spec — it defines security mechanisms and requirements that apply to any system built on the Foundation, unopinionated about policy. Product-specific security defaults, managed hosting policies, and deployment-specific postures are implementation concerns documented in `research/security-product-design.md`.
+This is an **Architecture** spec — it defines security mechanisms and requirements that apply to any system built on the Foundation, unopinionated about policy. Product-specific security defaults, managed hosting policies, and deployment-specific postures are implementation concerns (not published in this repository).
 
 **Related documents:** [foundation-spec.md](./foundation-spec.md) (architecture overview, links to all component specs)
 
@@ -133,7 +133,7 @@ This is analogous to how operating systems separate code execution from data (NX
 
 **The foundation's answer:** The system is designed to run on hardware the owner physically controls (D148). Local deployment is the sovereign option — no one else has access. This is the Architecture's guarantee.
 
-When an implementation offers hosted deployment, the operator's access is a deployment trade-off the owner accepts by choosing that option. The security requirements for hosted deployment — operational access controls, audit logging, encryption, incident response — are implementation concerns documented in `research/security-product-design.md`.
+When an implementation offers hosted deployment, the operator's access is a deployment trade-off the owner accepts by choosing that option. The security requirements for hosted deployment — operational access controls, audit logging, encryption, incident response — are implementation concerns (not published in this repository).
 
 **What the foundation guarantees regardless of deployment:** Memory export always works. The owner can always leave with their data. No deployment choice creates permanent lock-in.
 
@@ -424,19 +424,6 @@ How do we test that content separation works? Adversarial test suites, red team 
 ## Related Documents
 
 [foundation-spec.md](./foundation-spec.md) (architecture overview, links to all component specs)
-
----
-
-## Changelog
-
-| Date | Change | Source |
-|------|--------|--------|
-| 2026-03-01 | Codex cross-reference audit fixes: (1) Resolved audit logging contradiction — Minimal level now logs action metadata for all events (not auth-only), configurable levels control content detail not whether actions are recorded, aligns with invariant "all tool calls regardless of logging level." (2) Untrusted tool isolation: confirmed "mandatory" language (tools-spec aligned separately). | Codex audit (Dave W + Claude) |
-| 2026-03-01 | "No users, only owners" language pass: user → owner throughout | Ownership model alignment (Dave W + Claude) |
-| 2026-03-01 | Cross-doc consistency fixes: (1) removed stale D152 parenthetical from Memory requirements — Gateway uses a conversation store tool, not direct access, so no exception needed. (2) Removed D17 row from Decisions — D17 is "MCP servers ship inside container" per decisions.md, not "security transparency" (that was a BrainDrive-specific commitment moved to research/security-product-design.md). (3) Synced Tools requirements with tools-spec — added "on local deployment" qualifier and managed hosting allow list item. | Cross-doc review (Dave W + Claude) |
-| 2026-03-01 | Rewritten as Level 1 foundation spec. All BrainDrive-specific content (managed hosting security posture, insider threat operational security, security transparency commitments, 6 user stories, MVP scope, technology references, product evolution timeline) moved to `research/security-product-design.md`. Structure aligned with other foundation specs. Threat model genericized. Evolution reframed as capability phases. 7 OQs reduced to 4. | Foundation alignment (Dave W + Claude) |
-| 2026-02-27 | Opener reframe + trim. Consistency with other specs. Removed redundant sections. | Reorder + trim pass (Dave W + Claude) |
-| 2026-02-26 | Initial security spec created | Security interview (Dave W + Claude) |
 
 ---
 

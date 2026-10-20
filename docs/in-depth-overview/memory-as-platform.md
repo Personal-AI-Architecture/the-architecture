@@ -54,7 +54,7 @@ An AI that knows your context beats a smarter AI that doesn't. And that gap only
 
 This is true regardless of what model you use, what interface you prefer, or where anything runs. The context advantage is universal. It's a property of how intelligence works — more context means better reasoning, better recommendations, better decisions.
 
-You can download a new model in minutes. You can install a new client in seconds. You can switch providers, swap engines, move from cloud to local. But the structured memory of your goals, decisions, plans, preferences, and history — that took your actual life to build. It's irreplaceable. Everything else is replaceable. That's what makes memory the platform.
+You can download a new model in minutes. You can install a new client in seconds. You can switch providers, swap agent loops, move from cloud to local. But the structured memory of your goals, decisions, plans, preferences, and history — that took your actual life to build. It's irreplaceable. Everything else is replaceable. That's what makes memory the platform.
 
 ### The flywheel
 

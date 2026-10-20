@@ -34,13 +34,13 @@ Each audience has a "start here" flow — the minimal set of files and first act
 
 **Implementation Builder** — building on the foundation:
 1. Read `AGENT.md` (repo root) — architecture overview
-2. Read [customization-spec.md](../customization-spec.md) — extension points and constraints
+2. Read [customization-spec.md](./customization-spec.md) — extension points and constraints
 3. Read `specs/openapi/` and `specs/schemas/` — the API shapes your product uses
 4. Start from the separate implementation template or your own conforming implementation
 
 **System Extender** — adding tools, skills, or clients:
 1. Read `AGENT.md` (repo root) — architecture overview
-2. Read [tools-spec.md](../tools-spec.md) — how tools work in the architecture
+2. Read [tools-spec.md](./tools-spec.md) — how tools work in the architecture
 3. Read the tool definition schema in `specs/schemas/`
 4. Register your tool and test it
 
@@ -122,7 +122,7 @@ A runnable test suite that validates *any* implementation against the architectu
 
 | Test ID | Test | Pass Criteria | Validates |
 |---------|------|---------------|-----------|
-| ARCH-1 | Memory zero dependencies | Stop all components except Memory storage → Memory is still readable with standard tools (text editor, file browser, DB viewer) | Principle 1, foundation-spec §Your Memory |
+| ARCH-1 | Memory zero dependencies | Stop all components except Memory storage → Memory is still readable with standard tools (text editor, file browser, DB viewer) | Principle 1, foundation-spec §1. Make Your Memory the platform |
 | ARCH-2 | Agent Loop swap | Replace Agent Loop implementation → Gateway/Memory/Auth/tools unaffected → system functions | D39, FS-7 |
 | ARCH-3 | Client swap | New client speaks Gateway API → system serves it identically | D57, FS-5 |
 | ARCH-4 | Schema conformance | All API payloads validate against canonical schemas in `specs/` | D16, Principle 3 |
@@ -142,7 +142,7 @@ A runnable test suite that validates *any* implementation against the architectu
 |---------|-------|---------------|-----------|
 | FS-1 | Move Your Memory | Export memory → import on fresh deployment → preferences honored, gaps reported, nothing lost | Principle 1, memory portability |
 | FS-2 | Add capability | Add a tool/skill/client/provider → Memory gains no outward dependencies → four-component structure holds | Principle 3, Principle 1, D64 |
-| FS-3 | Run on own hardware | Install on laptop/desktop/server → no external service required → full offline capability | D148, Pillars 2+3 |
+| FS-3 | Run on own hardware | Install on laptop/desktop/server → no external service required → full offline capability | D148, owner outcomes P-2 and P-3 |
 | FS-4 | Swap provider | = SWAP-1 | Model API |
 | FS-5 | Swap client | = ARCH-3 | Gateway API |
 | FS-6 | Evolve Memory | Add search capability → no other component changes | Principle 1 |
@@ -194,7 +194,7 @@ personal-ai-architecture/
 │   ├── doc-registry.json
 │   ├── in-depth-overview/                ← architecture specs + guides + conformance
 │   │   ├── foundation-spec.md
-│   │   ├── engine-spec.md
+│   │   ├── agent-loop-spec.md
 │   │   ├── ...
 │   │   ├── guides-spec.md                ← this file
 │   │   ├── implementers-reference.md     ← Deliverable 1
@@ -250,4 +250,4 @@ These items are important but premature to define now. Flagged for resolution be
 
 ## Related Documents
 
-[foundation-spec.md](../foundation-spec.md) (architecture overview, links to all component specs)
+[foundation-spec.md](./foundation-spec.md) (architecture overview, links to all component specs)

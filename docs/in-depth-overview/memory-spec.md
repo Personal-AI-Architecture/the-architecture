@@ -237,7 +237,7 @@ Memory starts as a filing system and adds smarter tools on top. It does NOT evol
 
 Each stage is additive. The substrate test ensures new operations are genuinely new storage capabilities, not content operations disguised as tools.
 
-Memory's scope expands with the expanding sphere (see [foundation-spec.md](./foundation-spec.md) §How the Architecture Evolves) — from library folder (V1) to full filesystem (V2) to external services (V3) to federated data (V4). At every phase: you USE everything the system can access, you OWN the subset under your control in an open format.
+Memory's scope expands with the expanding sphere (see [principles.md](./principles.md#5-start-constrained-expand-deliberately) §5 Start Constrained, Expand Deliberately) — from library folder (V1) to full filesystem (V2) to external services (V3) to federated data (V4). At every phase: you USE everything the system can access, you OWN the subset under your control in an open format.
 
 ---
 
@@ -250,9 +250,9 @@ Memory's scope expands with the expanding sphere (see [foundation-spec.md](./fou
 | D45 | Filing system is the correct starting substrate | Evolution adds smarter tools on top, not replaces the filing system. Filing system gives perfect recall + intelligent navigation — potentially permanently superior to biological memory. |
 | D46 | Core operations with substrate test for expansion | Storage operations → Memory. Content operations → the model. Healthy pressure to keep the set small. Analogous to POSIX — stable for 50 years. |
 | D47 | Memory includes all persistent storage accessed through tools | Not just files — files, databases, indexes are all Memory. Tools abstract the storage mechanism. |
-| D48 | USE any memory source, OWN the subset under your control | Ownership requires control + open format. Export must be in open formats (Level 1 requirement). Which specific open format is a Level 2 choice — the Foundation requires openness, not a particular format. |
-| D49 | Memory is Level 1, product conventions are Level 2 | The spec defines generic infrastructure. Product-specific conventions (entry-point files, skills, methodology) are the opinionated implementation built on it. |
-| D50 | Bootstrap prompt is Engine configuration, not Memory | One-line seed ("read AGENT.md") lets the model self-bootstrap from Memory. Like a BIOS. Level 2, not Foundation. |
+| D48 | USE any memory source, OWN the subset under your control | Ownership requires control + open format. Export must be in open formats (architecture requirement). Which specific open format is an implementation choice — the Foundation requires openness, not a particular format. |
+| D49 | Memory belongs to the architecture, product conventions belong to an implementation | The spec defines generic infrastructure. Product-specific conventions (entry-point files, skills, methodology) are the opinionated implementation built on it. |
+| D50 | Bootstrap prompt is Agent Loop configuration, not Memory | One-line seed ("read AGENT.md") lets the model self-bootstrap from Memory. Like a BIOS. An implementation choice, not Foundation. |
 | D135 | Memory/tool binary — if it's data, it's memory; if it's not data, it's a tool | All data, anywhere, is memory — the only question is whose. Extends D43 and D47 to their logical conclusion. |
 | D138 | Memory component renamed to "Your Memory" | Distinguishes the component (your owned local storage) from the concept (all data is memory per D135). |
 | D141-refined | Tool preferences are personal data in Your Memory; plumbing is environment config | Three-way split: tool definitions → self-describing (D146), plumbing (addresses, ports) → environment config, preferences (always-send, policies) → Your Memory. |
@@ -296,23 +296,6 @@ Per-component requirements from [security-spec.md](./security-spec.md). Security
 ## Related Documents
 
 [foundation-spec.md](./foundation-spec.md) (architecture overview, links to all component specs)
-
----
-
-## Changelog
-
-| Date | Change | Source |
-|------|--------|--------|
-| 2026-03-01 | Codex cross-reference audit fix: Reworded D48 rationale — clarified that Level 1 requires export in open formats, Level 2 picks which format. Previous wording ("Spec doesn't force open formats") appeared to contradict export requirement. | Codex audit (Dave W + Claude) |
-| 2026-03-01 | "No users, only owners" language pass: user → owner | Ownership model alignment (Dave W + Claude) |
-| 2026-03-01 | Added human vs digital brain analogy to "Why we define it this way" — biological brain has memory+intelligence fused; digital brain separates them for swappable intelligence, riding the exponential pace of model improvement. | Dave W + Claude |
-| 2026-03-01 | D152: Added infrastructure caller paragraph to Core Operations — Gateway uses conversation store tool, not direct access. D152 added to decisions. | Architecture review (Dave W + Claude) |
-| 2026-02-27 | Added Security Requirements section — cross-referenced from security-spec.md per T-219 | T-219 (Dave W + Claude) |
-| 2026-02-23 | Initial Memory spec created from interview | Memory interview session (Dave W + Claude) |
-| 2026-02-23 | Consistency pass — split tables into Components and External Dependencies per D64, added Gateway relationship | Cross-doc consistency audit (Dave W + Claude) |
-| 2026-02-27 | Added D135 (memory/tool binary) — "whose memory" framing in Scope and ownership | D135 propagation (Dave W + Claude) |
-| 2026-02-27 | Component renamed from "Memory" to "Your Memory" (D138) | Architecture discussion (Dave W + Claude) |
-| 2026-02-27 | Conciseness pass + reorder — merged redundant sections, reordered to What → Why → Where → How → Reference | Review session (Dave W + Claude) |
 
 ---
 

@@ -197,11 +197,11 @@ These verify that an implementation honors the deployment contract.
 | # | Decision | Rationale |
 |---|----------|-----------|
 | D14 | Docker-first deployment for V1 | Containers provide isolation, reproducibility, and cross-platform support. Docker is the default packaging, not an architectural requirement. |
-| D22 | Auth on both local and managed hosting | Auth is a memory concern (who can access your system), not a hosting concern. Even local deployments need auth for remote access scenarios and future multi-actor support. Under D148, managed hosting specifics are defined at Level 2. |
+| D22 | Auth on both local and managed hosting | Auth is a memory concern (who can access your system), not a hosting concern. Even local deployments need auth for remote access scenarios and future multi-actor support. Under D148, managed hosting specifics are defined by an implementation. |
 | D23 | Managed hosting is stricter, not just easier | Same code, different configuration. Managed hosting restricts tool access and enforces policies through configuration, not code forks. |
 | D29 | Zero lock-in by design | Risks are implementation discipline, not architectural. The deployment contract enforces this at the infrastructure level. |
-| D111 | Managed hosting is a deployment option, not a level | The same stack runs locally or hosted. Managed hosting is a Level 2 product decision — a convenience offered on top of the Level 1 foundation. |
-| D148 | Level 1 defines local deployment only — managed hosting is Level 2 | The foundation defines how the system runs on hardware the owner controls. Managed hosting, VPS, and cloud hosting are Level 2 product offerings. |
+| D111 | Managed hosting is a deployment option, not a level | The same stack runs locally or hosted. Managed hosting is a product decision — a convenience offered on top of the architecture. |
+| D148 | The architecture defines local deployment only — managed hosting is for implementations | The foundation defines how the system runs on hardware the owner controls. Managed hosting, VPS, and cloud hosting are product offerings. |
 
 ---
 
@@ -218,16 +218,6 @@ These verify that an implementation honors the deployment contract.
 ### ~~OQ-3: Port assignment convention~~ — RESOLVED
 
 **Resolution:** Implementation choice. The foundation defines that the Gateway listens on localhost (Network Posture section) but does not prescribe a port number. Each product built on the foundation chooses its own default. Port assignment is configuration, not architecture.
-
----
-
-## Changelog
-
-| Date | Change | Source |
-|------|--------|--------|
-| 2026-03-01 | "No users, only owners" language pass: multi-user → multi-actor (per D151) | Ownership model alignment (Dave W + Claude) |
-| 2026-03-01 | Brain analogy added to intro (skull vs servers). Conciseness pass: merged duplicate paragraphs in guarantees, trimmed L2 asides, tightened Container Runtime/Software Trust/Update Principles/Network Posture. | Dave W + Claude |
-| 2026-02-27 | Initial deployment spec created from interview | Deployment interview session (Dave W + Claude) |
 
 ---
 

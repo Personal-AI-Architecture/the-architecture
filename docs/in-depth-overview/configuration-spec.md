@@ -50,7 +50,7 @@ The thin bootstrap that tells the system what exists in this environment. Four f
 | `auth_mode` | How authentication works in this deployment | `local` (architecture default). Implementations may define additional modes (e.g., `managed`). |
 | `tool_sources` | Where the system finds installed tools | `["./tools/", "/usr/local/mcp-servers/"]` |
 
-`model_default` is intentionally not here — which model to use is a preference (implementation default or Level 3 owner choice), not an environment fact. It lives in preferences or adapter config.
+`model_default` is intentionally not here — which model to use is a preference (implementation default or owner choice), not an environment fact. It lives in preferences or adapter config.
 
 **Example runtime config:**
 
@@ -97,23 +97,23 @@ Tool definitions (name, description, parameters, capabilities) are not written b
 
 ## Layered Overrides (D110)
 
-Configuration follows the three-level model. Each level can override the one below it. Last layer wins.
+Configuration is layered: the architecture, then the implementation, then the owner. Each layer can override the one below it. Last layer wins.
 
 | Layer | What it provides | Example |
 |-------|-----------------|---------|
 | **Architecture — Foundation defaults** | Sensible defaults that make the system work out of the box | `auth_mode: "local"`, no tools pre-configured |
 | **Implementation — Product defaults** | Opinionated defaults from the product built on the architecture | BrainDrive sets `provider_adapter: "openrouter"`, ships starter tools, sets `model_default` |
-| **Level 3 — Owner overrides** | The owner's choices, always final | Owner changes model, adds tools, sets policies |
+| **Owner overrides** | The owner's choices, always final | Owner changes model, adds tools, sets policies |
 
-**Merge order is deterministic:** Architecture → Implementation → Level 3. A Level 3 override always wins. An implementation default applies unless the owner overrides it. An architecture default applies unless the product or owner overrides it.
+**Merge order is deterministic:** Architecture → Implementation → Owner preferences. An owner override always wins. An implementation default applies unless the owner overrides it. An architecture default applies unless the product or owner overrides it.
 
 **One exception: environment safety constraints always win.** An implementation may enforce security boundaries (D23) — tool allow lists, network restrictions, auth requirements — that override owner preferences. The full precedence chain:
 
-> **Environment safety constraints (Implementation-enforced)** > **Owner preferences (Level 3)** > **Product defaults (Implementation)** > **Foundation defaults (Architecture)**
+> **Environment safety constraints (Implementation-enforced)** > **Owner preferences** > **Product defaults (Implementation)** > **Foundation defaults (Architecture)**
 
 An owner can override a product default. An owner cannot override a product-enforced safety constraint. On local deployment in the architecture, the owner is the final authority — there are no provider-enforced constraints.
 
-**Preferences use the same layering:** The Architecture has no preferences (the foundation is unopinionated). Implementations ship product defaults ("require approval for writes"). Level 3 is the owner's choices ("don't require approval, I trust the model"). Preferences merge the same way — owner wins, safety constraints aside.
+**Preferences use the same layering:** The Architecture has no preferences (the foundation is unopinionated). Implementations ship product defaults ("require approval for writes"). Owner preferences are the owner's choices ("don't require approval, I trust the model"). Preferences merge the same way — owner wins, safety constraints aside.
 
 This means a product built on the foundation (like BrainDrive) ships with opinions that the owner can always override. The foundation itself ships with no opinions — just the mechanism.
 
@@ -168,7 +168,7 @@ At startup, the system reads configuration in a strict sequence. Each phase depe
 3. **Discover tools** — scan `tool_sources` paths. For each tool found: MCP servers announce their tools via protocol, manifest files are read, built-in tools are loaded from code. Now the system knows what tools are available.
 4. **Mount Your Memory** — use `memory_root` to locate Your Memory on the filesystem. At this point Your Memory is accessible but no preferences have been read yet.
 5. **Read preferences** — read the preferences file from Your Memory (direct file read, not through the Agent Loop — no tools required). Apply preference filters: always-send set, tool policies, approval requirements, model choice.
-6. **Ready** — the Agent Loop has tools, a provider, and preferences. The Gateway starts accepting connections (see [gateway-engine-contract.md](./gateway-engine-contract.md) for request flow).
+6. **Ready** — the Agent Loop has tools, a provider, and preferences. The Gateway starts accepting connections (see [gateway-agent-loop-contract.md](./gateway-agent-loop-contract.md) for request flow).
 
 **Phases 1-3 are environment.** They happen before Your Memory is involved. They describe the desk.
 **Phase 4-5 are personal.** They read from Your Memory. They describe you.
@@ -224,7 +224,7 @@ This is a CI test, not a guideline. It makes the principle enforceable. Run it o
 
 | # | Decision | Rationale |
 |---|----------|-----------|
-| D143 | Configuration is a cross-cutting concern — not owned by any single component, defined in its own spec | Every component has configuration. Burying it in the engine spec understates its importance and its lock-in risk. Same pattern as tools (not a component, but important enough for its own spec) and security (cross-cutting, peer to auth). |
+| D143 | Configuration is a cross-cutting concern — not owned by any single component, defined in its own spec | Every component has configuration. Burying it in the Agent Loop spec understates its importance and its lock-in risk. Same pattern as tools (not a component, but important enough for its own spec) and security (cross-cutting, peer to auth). |
 | D144 | Runtime config is a thin bootstrap — four fields, one file, describes the environment not the owner | Every field in runtime config is a field that can't travel with you. Thinner = more portable. Four fields is enough to bootstrap: where's Your Memory, which adapter, what auth mode, where are tools. Model choice is a preference, not an environment fact. Everything else is either a preference (in Your Memory) or discovered from the environment. |
 | D145 | Preferences live in Your Memory — they're personal data, not environment configuration | "Always load git tools" is about how you work, not about this desk. Preferences travel with you. The new environment tries to honor them. If it can't, it tells you. This is what makes local ↔ managed hosting migration real. |
 | D146 | Tools self-describe — config points to tool sources, not tool definitions | Tool definitions come from the tools themselves (MCP discovery, manifest files, code). Config only says where to find tools. This prevents drift between what config says and what tools actually do, and means adding a tool is install + point, not install + write definition + update config. |
@@ -270,17 +270,6 @@ Per-component requirements from [security-spec.md](./security-spec.md). Security
 - [ ] Preferences in Your Memory must not contain environment-specific references (server addresses, ports, paths) — only personal choices
 - [ ] Adapter config files must not leak across deployments — provider-specific settings stay with the deployment, not with Your Memory
 - [ ] The boot sequence must not require network access — Phases 1-5 complete without any outbound calls
-
----
-
-## Changelog
-
-| Date | Change | Source |
-|------|--------|--------|
-| 2026-03-01 | "No users, only owners" language pass: user → owner in 4 places | Ownership model alignment (Dave W + Claude) |
-| 2026-03-01 | Cross-spec alignment review: fixed secrets wording (tracked files, not "any file"), removed Impact on D141 section (absorbed by Decisions table), deferred 3 OQs (Level 2 / implementation / tools-spec), added Security Requirements section, named D147 in Anti-Lock-In Test, added gateway-engine-contract cross-reference to boot sequence, conciseness pass (cut repeated desk metaphor, bridge sentences). | Cross-spec review (Dave W + Claude) |
-| 2026-02-27 | Tightening pass: (1) precedence chain added — safety constraints > owner > product > foundation, (2) model_default moved to preferences (4 fields not 5), (3) boot sequence circularity fixed — 6 explicit phases, preferences read as direct file read, (4) JSON schema examples added for runtime + adapter config, (5) anti-lock-in test tightened — 3 defined swap types with CI steps, (6) cross-links verified | Dave W + Claude |
-| 2026-02-27 | Initial configuration spec created from interview — three categories (preferences, runtime config, tool self-description), layered overrides, anti-lock-in test, D141 refinement | Configuration interview session (Dave W + Claude) |
 
 ---
 

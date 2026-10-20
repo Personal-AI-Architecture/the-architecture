@@ -16,11 +16,11 @@ Implement **Tools** in **{{TARGET_LANGUAGE}}** so capability discovery and execu
 - `/home/hex/Project/PAA-MVP-Prod/blueprints/contracts/Tools.schema.json`
 - `/home/hex/Project/PAA-MVP-Prod/blueprints/tests/Tools-conformance.md`
 - `/home/hex/Project/PAA-MVP-Prod/blueprints/drift/Tools-drift-guard.md`
-- `/home/hex/Project/PAA-MVP-Prod/blueprints/Engine.md`
+- `/home/hex/Project/PAA-MVP-Prod/blueprints/Agent-Loop.md`
 - `/home/hex/Project/PAA-MVP-Prod/blueprints/Auth.md`
 - `/home/hex/Project/PAA-MVP-Prod/blueprints/Memory.md`
 - `/home/hex/Project/PAA-MVP-Prod/blueprints/Configuration.md`
-- `/home/hex/Project/PAA-MVP-Prod/blueprints/Gateway-Engine-Contract.md`
+- `/home/hex/Project/PAA-MVP-Prod/blueprints/Gateway-Agent-Loop-Contract.md`
 - `/home/hex/Project/PAA-MVP-Prod/blueprints/Security.md`
 
 ## Supporting Inputs (Authoritative for contracts/audit)
@@ -36,13 +36,13 @@ Implement **Tools** in **{{TARGET_LANGUAGE}}** so capability discovery and execu
 ## Human Architecture Inputs (Authoritative for ownership boundaries)
 
 - `/home/hex/Reference/the-architecture/docs/in-depth-overview/tools-spec.md`
-- `/home/hex/Reference/the-architecture/docs/in-depth-overview/engine-spec.md`
+- `/home/hex/Reference/the-architecture/docs/in-depth-overview/agent-loop-spec.md`
 - `/home/hex/Reference/the-architecture/docs/in-depth-overview/auth-spec.md`
 - `/home/hex/Reference/the-architecture/docs/in-depth-overview/security-spec.md`
 - `/home/hex/Reference/the-architecture/docs/in-depth-overview/configuration-spec.md`
 - `/home/hex/Reference/the-architecture/docs/in-depth-overview/memory-spec.md`
 - `/home/hex/Reference/the-architecture/docs/in-depth-overview/foundation-spec.md`
-- `/home/hex/Reference/the-architecture/docs/in-depth-overview/gateway-engine-contract.md`
+- `/home/hex/Reference/the-architecture/docs/in-depth-overview/gateway-agent-loop-contract.md`
 
 ## Source Precedence (Mandatory)
 
@@ -105,7 +105,7 @@ Use these for MVP consistency:
 
 - Do not create a fifth component called Tools.
 - Do not add a new public/internal Tool API boundary.
-- Do not execute tools outside Engine path.
+- Do not execute tools outside Agent Loop path.
 - Do not bypass Auth authorization for tool calls.
 - Do not accept request-side tool source or definition overrides.
 - Do not execute approval-required mutations before decision.
@@ -120,7 +120,7 @@ Implement automated tests proving all `TOL-MUST-*` requirements in `Tools-confor
 
 1. No fifth-component drift.
 2. No separate Tool API boundary.
-3. Engine execution + Auth authorization ownership.
+3. Agent Loop execution + Auth authorization ownership.
 4. Availability from config + permissions.
 5. Rejection of request-side tool reconfiguration.
 6. Canonical definition schema enforcement.

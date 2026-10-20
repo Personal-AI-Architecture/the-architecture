@@ -27,7 +27,7 @@ These files are compressed, AI-friendly versions of the [full architecture specs
 
 1. `foundation.md`
 2. `configuration.md`
-3. `gateway-engine-contract.md`
+3. `gateway-agent-loop-contract.md`
 4. The component primer for the area you are reviewing
 
 ## Operational Layer
@@ -48,10 +48,10 @@ These files are compressed, AI-friendly versions of the [full architecture specs
 
 - `foundation.md` - system shape, invariants, what counts as a component
 - `gateway.md` - conversation ownership, routing, client boundary
-- `engine.md` - loop ownership, tool execution, forbidden responsibilities
+- `agent-loop.md` - loop ownership, tool execution, forbidden responsibilities
 - `configuration.md` - boot-time vs request-time rules, config taxonomy
 - `client-gateway-contract.md` - exact external client request, conversation, and approval contract
-- `gateway-engine-contract.md` - exact internal request/stream contract
+- `gateway-agent-loop-contract.md` - exact internal request/stream contract
 - `compliance-matrix.md` - pass/fail rules for audits
 
 ## Review And Audit Routing

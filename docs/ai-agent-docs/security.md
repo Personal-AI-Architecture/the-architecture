@@ -93,6 +93,6 @@ These are MVP requirements, not post-MVP hardening.
 - `docs/in-depth-overview/security-spec.md`
 - `docs/in-depth-overview/auth-spec.md`
 - `docs/in-depth-overview/memory-spec.md`
-- `docs/in-depth-overview/gateway-engine-contract.md`
+- `docs/in-depth-overview/gateway-agent-loop-contract.md`
 - `docs/in-depth-overview/foundation-verification.md`
 - `docs/in-depth-overview/configuration-spec.md`

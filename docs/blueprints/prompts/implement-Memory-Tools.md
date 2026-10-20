@@ -18,11 +18,11 @@ Implement **Memory-Tools** in **{{TARGET_LANGUAGE}}** so memory operations are a
 - `/home/hex/Project/PAA-MVP-Prod/blueprints/drift/Memory-Tools-drift-guard.md`
 - `/home/hex/Project/PAA-MVP-Prod/blueprints/Memory.md`
 - `/home/hex/Project/PAA-MVP-Prod/blueprints/Tools.md`
-- `/home/hex/Project/PAA-MVP-Prod/blueprints/Engine.md`
+- `/home/hex/Project/PAA-MVP-Prod/blueprints/Agent-Loop.md`
 - `/home/hex/Project/PAA-MVP-Prod/blueprints/Auth.md`
 - `/home/hex/Project/PAA-MVP-Prod/blueprints/Configuration.md`
 - `/home/hex/Project/PAA-MVP-Prod/blueprints/Security.md`
-- `/home/hex/Project/PAA-MVP-Prod/blueprints/Gateway-Engine-Contract.md`
+- `/home/hex/Project/PAA-MVP-Prod/blueprints/Gateway-Agent-Loop-Contract.md`
 
 ## Supporting Inputs (Authoritative for contracts/audit)
 
@@ -40,7 +40,7 @@ Implement **Memory-Tools** in **{{TARGET_LANGUAGE}}** so memory operations are a
 - `/home/hex/Reference/the-architecture/docs/in-depth-overview/tools-spec.md`
 - `/home/hex/Reference/the-architecture/docs/in-depth-overview/security-spec.md`
 - `/home/hex/Reference/the-architecture/docs/in-depth-overview/configuration-spec.md`
-- `/home/hex/Reference/the-architecture/docs/in-depth-overview/gateway-engine-contract.md`
+- `/home/hex/Reference/the-architecture/docs/in-depth-overview/gateway-agent-loop-contract.md`
 - `/home/hex/Reference/the-architecture/docs/in-depth-overview/foundation-spec.md`
 
 ## Source Precedence (Mandatory)
@@ -110,7 +110,7 @@ Use these for MVP consistency:
 - Do not leak secret-like tokens unredacted in search output.
 - Do not collapse failure taxonomy into generic/untyped errors.
 - Do not continue startup in warning-only mode if version/history readiness fails.
-- Do not access memory storage directly from Gateway/Engine/Auth outside approved boundary paths.
+- Do not access memory storage directly from Gateway/Agent Loop/Auth outside approved boundary paths.
 
 ## Required Tests (Minimum)
 

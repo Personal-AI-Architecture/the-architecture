@@ -60,7 +60,7 @@
 
 ## SWAP-3: Tool Swap
 
-**Validates:** D51 (tools are data in the environment), Principle 3 (interfaces over implementations)
+**Validates:** D51 (tools are data in the environment), Principle 2 (Keep Everything Else Swappable)
 
 ### SWAP-3a: Add a Tool
 

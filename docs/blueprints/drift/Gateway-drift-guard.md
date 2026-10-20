@@ -5,8 +5,8 @@ This document defines anti-drift controls for Gateway implementations.
 ## 1. Top Drift Patterns
 
 - Conversation lifecycle logic moved out of Gateway or split across ad hoc modules.
-- External client payloads allowed to submit internal Engine contract shape.
-- Gateway-to-Engine payload expanded into request-time configuration channel.
+- External client payloads allowed to submit internal Agent Loop contract shape.
+- Gateway-to-Agent-Loop payload expanded into request-time configuration channel.
 - Auth omitted on protected routes.
 - Approval semantics implemented only in UI/client flow, not API/stream contract.
 - Conversation endpoints leaking raw storage rows.
@@ -28,7 +28,7 @@ This document defines anti-drift controls for Gateway implementations.
 | GWD-CHK-001 | Protected routes require Auth | Integration tests for unauthorized calls on `POST /message`, `GET /conversations`, `GET /conversations/:id`, `POST /approvals/:request_id` | Critical |
 | GWD-CHK-002 | Client request schema is canonical | Schema test against `Gateway.schema.json` `client_message_request` | Critical |
 | GWD-CHK-003 | Internal fields rejected from external payload | Negative tests with `messages`, provider/tool fields | Critical |
-| GWD-CHK-004 | Gateway->Engine handoff remains bounded | Adapter boundary inspection test and payload snapshot check | Critical |
+| GWD-CHK-004 | Gateway->Agent Loop handoff remains bounded | Adapter boundary inspection test and payload snapshot check | Critical |
 | GWD-CHK-005 | Conversation responses are canonical envelopes | Contract tests for list/detail response schemas | Critical |
 | GWD-CHK-006 | Stream includes `X-Conversation-ID` and terminal IDs | Stream/header assertions for `X-Conversation-ID`, `done.conversation_id`, `done.message_id` | Critical |
 | GWD-CHK-007 | Approval contract is visible and canonical | Stream + route tests for approval event pair and route payload shape | Critical |
@@ -59,7 +59,7 @@ This document defines anti-drift controls for Gateway implementations.
 - [ ] Gateway contract schema checks pass for request, response, and stream events.
 - [ ] Protected route auth checks pass.
 - [ ] Client payload cannot include internal/hidden config fields.
-- [ ] Gateway->Engine payload snapshot contains only bounded fields.
+- [ ] Gateway->Agent Loop payload snapshot contains only bounded fields.
 - [ ] `X-Conversation-ID` and `done` reconciliation IDs are present.
 - [ ] Approval route and event semantics are canonical.
 - [ ] Error taxonomy and sanitization checks pass.

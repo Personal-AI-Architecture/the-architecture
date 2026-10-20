@@ -5,13 +5,13 @@ hide_table_of_contents: true
 # Lock-In Risk Analysis: Foundation Architecture
 
 > **Purpose:** Explain how the architecture achieves zero lock-in at every layer, and identify the implementation disciplines required to keep it that way.
-> **Architecture:** [Foundation Spec](../foundation-spec.md) — component definitions, 12 architecture specs, decisions D1-D159
+> **Architecture:** [Foundation Spec](./foundation-spec.md) — component definitions, 12 architecture specs, decisions D1-D159
 
 ---
 
 ## Why This Document Exists
 
-The foundation spec ([foundation-spec.md](../foundation-spec.md)) makes a specific architectural argument: every component communicates through defined interfaces, so any component can be replaced without touching anything else. You can take everything with you, and you can swap anything out.
+The foundation spec ([foundation-spec.md](./foundation-spec.md)) makes a specific architectural argument: every component communicates through defined interfaces, so any component can be replaced without touching anything else. You can take everything with you, and you can swap anything out.
 
 This document explains how the architecture achieves zero lock-in and what disciplines maintain it. The audience is implementers building on the Foundation and evaluators assessing the architecture's portability claims. The architecture is designed for zero lock-in at every layer — including no lock-in to the architecture itself. It's your AI system. Implementation drift from the design isn't inherently wrong — it may be intentional and that's your freedom. The risk is *unintentional* drift, where lock-in creeps in without you realizing it. That's what the recommendations guard against: not preventing change, but making sure you know when you're making a trade-off.
 
@@ -405,7 +405,7 @@ The probability of needing to replace MCP is near zero. MCP is the default but n
 
 ### Contract Swappability (D139)
 
-The contracts themselves could be a lock-in vector — if the Gateway API binds tightly to OpenAI Chat Completions and that standard shifts, both sides must change. Adapters solve this: components speak an internal interface, and a thin adapter translates to/from the current external standard. Swap the standard → swap the adapter → nothing else changes. This completes the swappability chain: Memory via tools, components via contracts, contracts via adapters. See [adapter-spec.md](../adapter-spec.md).
+The contracts themselves could be a lock-in vector — if the Gateway API binds tightly to OpenAI Chat Completions and that standard shifts, both sides must change. Adapters solve this: components speak an internal interface, and a thin adapter translates to/from the current external standard. Swap the standard → swap the adapter → nothing else changes. This completes the swappability chain: Memory via tools, components via contracts, contracts via adapters. See [adapter-spec.md](./adapter-spec.md).
 
 ---
 
@@ -597,18 +597,18 @@ The D147 anti-lock-in CI test is the concrete enforcement mechanism: three swaps
 
 | Document | Relationship |
 |----------|-------------|
-| [foundation-spec.md](../foundation-spec.md) | The architecture being analyzed |
-| [engine-spec.md](../engine-spec.md) | Agent Loop component spec — generic agent loop |
-| [memory-spec.md](../memory-spec.md) | Your Memory component spec — portable substrate |
-| [gateway-spec.md](../gateway-spec.md) | Gateway component spec — conversation management |
-| [auth-spec.md](../auth-spec.md) | Auth component spec — identity, access, permissions |
-| [security-spec.md](../security-spec.md) | Security spec — Foundation mechanisms |
-| [tools-spec.md](../tools-spec.md) | Tools spec — capabilities in the environment |
-| [models-spec.md](../models-spec.md) | Models spec — external intelligence |
-| [configuration-spec.md](../configuration-spec.md) | Configuration spec — runtime config and preferences |
-| [deployment-spec.md](../deployment-spec.md) | Deployment spec — local-first guarantees |
-| [customization-spec.md](../customization-spec.md) | Customization spec — Architecture/Implementation/Personalization ecosystem |
-| [adapter-spec.md](../adapter-spec.md) | How contracts are made swappable via adapters (D139) |
-| [gateway-engine-contract.md](../gateway-engine-contract.md) | Gateway ↔ Agent Loop internal contract (D137) |
-| [lockin-gate.md](../lockin-gate.md) | PR-level lock-in checklist — fast gate for every non-trivial PR |
-| [lockin-audit.md](../lockin-audit.md) | Deep architecture audit — milestone/release gate |
+| [foundation-spec.md](./foundation-spec.md) | The architecture being analyzed |
+| [agent-loop-spec.md](./agent-loop-spec.md) | Agent Loop component spec — generic agent loop |
+| [memory-spec.md](./memory-spec.md) | Your Memory component spec — portable substrate |
+| [gateway-spec.md](./gateway-spec.md) | Gateway component spec — conversation management |
+| [auth-spec.md](./auth-spec.md) | Auth component spec — identity, access, permissions |
+| [security-spec.md](./security-spec.md) | Security spec — Foundation mechanisms |
+| [tools-spec.md](./tools-spec.md) | Tools spec — capabilities in the environment |
+| [models-spec.md](./models-spec.md) | Models spec — external intelligence |
+| [configuration-spec.md](./configuration-spec.md) | Configuration spec — runtime config and preferences |
+| [deployment-spec.md](./deployment-spec.md) | Deployment spec — local-first guarantees |
+| [customization-spec.md](./customization-spec.md) | Customization spec — Architecture/Implementation/Personalization ecosystem |
+| [adapter-spec.md](./adapter-spec.md) | How contracts are made swappable via adapters (D139) |
+| [gateway-agent-loop-contract.md](./gateway-agent-loop-contract.md) | Gateway ↔ Agent Loop internal contract (D137) |
+| [lockin-gate.md](./lockin-gate.md) | PR-level lock-in checklist — fast gate for every non-trivial PR |
+| [lockin-audit.md](./lockin-audit.md) | Deep architecture audit — milestone/release gate |

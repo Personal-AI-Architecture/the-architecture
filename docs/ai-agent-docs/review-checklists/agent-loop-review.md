@@ -1,15 +1,15 @@
-# Engine Review Checklist
+# Agent Loop Review Checklist
 
-> Fast targeted review checklist for loop behavior, contract fidelity, error taxonomy, and generic Engine ownership.
+> Fast targeted review checklist for loop behavior, contract fidelity, error taxonomy, and generic Agent Loop ownership.
 
 ## Purpose
 
-Use this when reviewing Agent Loop behavior, stream semantics, provider integration, or whether Engine remains generic and bounded.
+Use this when reviewing Agent Loop behavior, stream semantics, provider integration, or whether Agent Loop remains generic and bounded.
 
 ## Checklist
 
-- [ ] Engine remains generic and product-agnostic.
-- [ ] Engine does not own conversation persistence.
+- [ ] Agent Loop remains generic and product-agnostic.
+- [ ] Agent Loop does not own conversation persistence.
 - [ ] Provider-specific logic stays in adapters rather than core loop code.
 - [ ] The loop continues until the model signals completion through the defined finish behavior.
 - [ ] Stream events follow the internal contract event types.
@@ -33,15 +33,15 @@ Use this when reviewing Agent Loop behavior, stream semantics, provider integrat
 ## Common Failure Patterns
 
 - iteration cap stops the loop early
-- provider-specific request shaping appears inside Engine
+- provider-specific request shaping appears inside Agent Loop
 - all errors collapse to `provider_error`
 - raw runtime errors leak through stream events
 - tool continuation loses assistant text or approval semantics
 
 ## Read Next
 
-- `docs/ai-agent-docs/engine.md`
-- `docs/ai-agent-docs/gateway-engine-contract.md`
+- `docs/ai-agent-docs/agent-loop.md`
+- `docs/ai-agent-docs/gateway-agent-loop-contract.md`
 - `docs/ai-agent-docs/security.md`
 - `docs/ai-agent-docs/compliance-matrix.md`
 
@@ -53,7 +53,7 @@ Use this when reviewing Agent Loop behavior, stream semantics, provider integrat
 ## Source Docs
 
 - `docs/ai-agent-docs/primer-audit-playbook.md`
-- `docs/ai-agent-docs/engine.md`
-- `docs/ai-agent-docs/gateway-engine-contract.md`
+- `docs/ai-agent-docs/agent-loop.md`
+- `docs/ai-agent-docs/gateway-agent-loop-contract.md`
 - `docs/ai-agent-docs/security.md`
 - `docs/ai-agent-docs/compliance-matrix.md`

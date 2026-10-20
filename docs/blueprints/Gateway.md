@@ -3,13 +3,13 @@
 ## 1. Overview
 
 ### Purpose
-The Gateway is the system's external interaction boundary. It accepts client requests, manages conversation lifecycle, and routes bounded interaction payloads to the Agent Loop through the internal Gateway-Engine contract.
+The Gateway is the system's external interaction boundary. It accepts client requests, manages conversation lifecycle, and routes bounded interaction payloads to the Agent Loop through the internal Gateway ↔ Agent Loop contract.
 
 ### High-Level Responsibilities
 - Expose the client-facing API for messaging, conversation retrieval, and approval decisions.
 - Own conversation lifecycle: create, append, list, and fetch conversation detail.
 - Normalize client input into internal `messages + metadata` handoff.
-- Stream Engine output events back to clients as server-sent events (SSE).
+- Stream Agent Loop output events back to clients as server-sent events (SSE).
 - Persist conversation state in Memory through an approved conversation-store boundary.
 - Ensure authentication is enforced on protected routes via the Auth boundary.
 
@@ -29,7 +29,7 @@ The Gateway is the system's external interaction boundary. It accepts client req
 ### What the Gateway **is**
 - A conversation and routing component.
 - The owner of client contract surfaces.
-- A contract translator between external client request shapes and internal Engine handoff shapes.
+- A contract translator between external client request shapes and internal Agent Loop handoff shapes.
 - A stream proxy that forwards contract-visible event semantics.
 
 ### What the Gateway **is not**
@@ -42,8 +42,8 @@ The Gateway is the system's external interaction boundary. It accepts client req
 
 ### Boundaries and Constraints
 - Conversation data source of truth must be in Memory, not in process-local ephemeral maps.
-- Gateway-to-Engine payload must remain bounded (`messages + metadata`) and must not carry runtime/provider/tool configuration.
-- Client payloads must stay in client contract shape; clients must not fabricate internal Engine payloads.
+- Gateway-to-Agent-Loop payload must remain bounded (`messages + metadata`) and must not carry runtime/provider/tool configuration.
+- Client payloads must stay in client contract shape; clients must not fabricate internal Agent Loop payloads.
 - Approval interactions must be contract-visible (stream events + explicit decision endpoint), not hidden in client-local UI flow.
 
 ---
@@ -56,7 +56,7 @@ The Gateway is the system's external interaction boundary. It accepts client req
 - **SSE Stream**: event stream transport for incremental interaction outputs.
 
 ### Internal Concepts
-- **Internal Contract**: bounded Gateway-to-Engine request/response contract.
+- **Internal Contract**: bounded Gateway-to-Agent-Loop request/response contract.
 - **Conversation Store Boundary**: dedicated memory access path for conversation operations.
 - **Correlation ID**: per-request trace identifier propagated across components/logs.
 - **Approval Interaction**: explicit request/decision/result flow for sensitive tool actions.
@@ -109,7 +109,7 @@ The Gateway is the system's external interaction boundary. It accepts client req
 - Purpose: liveness probe.
 - Typical behavior: unauthenticated health status response.
 
-### 4.2 Internal Gateway-Engine Interface (Conceptual)
+### 4.2 Internal Gateway ↔ Agent Loop Interface (Conceptual)
 
 #### Request: `POST /engine/chat`
 - Required:
@@ -154,7 +154,7 @@ The Gateway is the system's external interaction boundary. It accepts client req
   - `content: string`
   - `timestamp: ISO-8601 string`
 
-#### Gateway Engine request
+#### Gateway Agent Loop request
 - `GatewayEngineRequest`:
   - `messages: GatewayMessage[]`
   - `metadata: { correlation_id, conversation_id?, trigger?, client_context? }`
@@ -197,12 +197,12 @@ Gateway readiness depends on deterministic startup sequence:
   - create new if no conversation identifier supplied
   - verify existence if continuation requested
 4. Persist incoming user message in conversation store.
-5. Reconstruct Engine message array:
+5. Reconstruct Agent Loop message array:
   - system prompt
   - stored history replay
   - current user message
 6. Create internal metadata with new correlation ID and contextual data.
-7. Open SSE response and emit stream events as Engine loop progresses.
+7. Open SSE response and emit stream events as Agent Loop progresses.
 8. Persist assistant/tool outputs while streaming.
 9. Emit completion (`done`) with stable conversation/message identifiers.
 10. Close stream.
@@ -215,12 +215,12 @@ Gateway readiness depends on deterministic startup sequence:
   - Keep `tool_call_id` linkage stable across replay.
 
 ### 5.4 Approval Workflow
-1. Engine emits `approval-request`.
+1. Agent Loop emits `approval-request`.
 2. Gateway forwards event to client stream.
 3. Client submits `POST /approvals/:request_id` with decision.
 4. Gateway validates approval authority via Auth context.
 5. Gateway resolves pending approval record and returns decision payload.
-6. Engine continues with approved or denied path.
+6. Agent Loop continues with approved or denied path.
 
 ### 5.5 State Management
 - Durable state:
@@ -268,16 +268,16 @@ Gateway readiness depends on deterministic startup sequence:
 ### Interaction Data Flow
 1. Client -> Gateway: message + metadata.
 2. Gateway -> Memory boundary: load/persist conversation.
-3. Gateway -> Engine: bounded `messages + metadata`.
-4. Engine -> Gateway: stream events.
+3. Gateway -> Agent Loop: bounded `messages + metadata`.
+4. Agent Loop -> Gateway: stream events.
 5. Gateway -> Client: proxied SSE events.
 6. Client -> Gateway: approval decisions.
-7. Gateway -> Engine approval state: resolve pending approval.
+7. Gateway -> Agent Loop approval state: resolve pending approval.
 
 ### Dependency Assumptions
 - Auth context is available before protected route handlers execute.
 - Conversation store operations are durable and queryable.
-- Internal Engine stream events follow contract event taxonomy.
+- Internal Agent Loop stream events follow contract event taxonomy.
 - Tool/provider runtime configuration is loaded at startup, not request time.
 
 ---
@@ -286,13 +286,13 @@ Gateway readiness depends on deterministic startup sequence:
 
 ### Component Ownership Invariants
 - Gateway always owns conversation lifecycle.
-- Engine never owns conversation persistence.
+- Agent Loop never owns conversation persistence.
 - Memory remains the storage substrate; Gateway accesses it only through approved boundary.
 - Auth remains an independent boundary on request path.
 
 ### Contract Invariants
 - Client request shape remains external (`content`, optional `metadata`), never internal `messages`.
-- Gateway-to-Engine request remains bounded; no provider secrets/config in metadata.
+- Gateway-to-Agent-Loop request remains bounded; no provider secrets/config in metadata.
 - Completion semantics remain contract-visible:
   - stream includes `done`
   - completion identifiers are externally reconcilable
@@ -318,7 +318,7 @@ Gateway readiness depends on deterministic startup sequence:
 ### Scalability
 - Must support multiple concurrent client conversations.
 - Must remain client-agnostic (same behavior across UI channels).
-- Internal contract must allow Gateway and Engine evolution independently.
+- Internal contract must allow Gateway and Agent Loop evolution independently.
 
 ### Reliability and Fault Tolerance
 - Conversation writes must be durable.
@@ -354,7 +354,7 @@ Gateway readiness depends on deterministic startup sequence:
 
 ### Anti-Patterns to Avoid
 - Private in-process conversation state as source of truth.
-- Letting clients submit internal Engine payload format directly.
+- Letting clients submit internal Agent Loop payload format directly.
 - Recomputing provider/tool configuration from request payloads.
 - Embedding Auth policy logic into Gateway handlers.
 - Returning raw storage records or internal exception text directly to clients.
@@ -385,10 +385,10 @@ Gateway readiness depends on deterministic startup sequence:
 
 ### Confirmed Alignments
 - Gateway is content-agnostic and interface-agnostic (`gateway-spec.md`).
-- Gateway manages conversations and routes to Agent Loop; Engine remains loop owner (`gateway-spec.md`, `foundation-spec.md`).
+- Gateway manages conversations and routes to Agent Loop; Agent Loop remains loop owner (`gateway-spec.md`, `foundation-spec.md`).
 - Auth is cross-cutting and independent (`gateway-spec.md`, `auth-spec.md`).
 - Memory dependency direction is preserved; Gateway uses conversation-store boundary (`gateway-spec.md`, `memory-spec.md`).
-- Internal contract remains single bounded interface (`gateway-engine-contract.md`).
+- Internal contract remains single bounded interface (`gateway-agent-loop-contract.md`).
 
 ### Documented Discrepancies To Reconcile
 1. **Stream event payload naming**
@@ -426,8 +426,8 @@ Gateway readiness depends on deterministic startup sequence:
 
 - `GW-MUST-001`: Gateway MUST own conversation lifecycle operations (create, append, list, detail).
 - `GW-MUST-002`: `POST /message` MUST accept only canonical external request shape `{ content, metadata? }`.
-- `GW-MUST-003`: Clients MUST NOT submit internal Engine request fields (`messages`, provider/tool config fields).
-- `GW-MUST-004`: Gateway->Engine payload MUST remain bounded to `messages + metadata`; metadata MUST NOT carry runtime/provider/tool configuration.
+- `GW-MUST-003`: Clients MUST NOT submit internal Agent Loop request fields (`messages`, provider/tool config fields).
+- `GW-MUST-004`: Gateway->Agent Loop payload MUST remain bounded to `messages + metadata`; metadata MUST NOT carry runtime/provider/tool configuration.
 - `GW-MUST-005`: Gateway MUST enforce Auth on all protected routes.
 - `GW-MUST-006`: Conversation endpoints MUST return canonical envelopes, not raw storage rows.
 - `GW-MUST-007`: Stream response MUST include `X-Conversation-ID` once conversation is resolved.
@@ -441,7 +441,7 @@ Gateway readiness depends on deterministic startup sequence:
 
 ### SHOULD
 
-- `GW-SHOULD-001`: Gateway SHOULD propagate correlation ID across logs, Memory operations, and Engine handoff.
+- `GW-SHOULD-001`: Gateway SHOULD propagate correlation ID across logs, Memory operations, and Agent Loop handoff.
 - `GW-SHOULD-002`: Conversation listing SHOULD support stable pagination semantics under concurrent writes.
 - `GW-SHOULD-003`: Approval decision processing SHOULD be idempotent for retried client submissions.
 
@@ -465,14 +465,14 @@ Gateway readiness depends on deterministic startup sequence:
 | GW-MUST-001 | Human `gateway-spec.md`; AI matrix `G-01` | `GW-T001P`, `GW-T001N` |
 | GW-MUST-002 | AI `client-gateway-contract.md`; AI matrix `G-05` | `GW-T002P`, `GW-T002N` |
 | GW-MUST-003 | AI `client-gateway-contract.md`; AI matrix `G-05` | `GW-T003P`, `GW-T003N` |
-| GW-MUST-004 | Human `gateway-engine-contract.md`; AI matrix `GC-01`, `C-02` | `GW-T004P`, `GW-T004N` |
+| GW-MUST-004 | Human `gateway-agent-loop-contract.md`; AI matrix `GC-01`, `C-02` | `GW-T004P`, `GW-T004N` |
 | GW-MUST-005 | Human `auth-spec.md`; AI matrix `A-01`, `GC-04` | `GW-T005P`, `GW-T005N` |
 | GW-MUST-006 | AI `client-gateway-contract.md`; AI matrix `G-06` | `GW-T006P`, `GW-T006N` |
 | GW-MUST-007 | AI `client-gateway-contract.md`; AI matrix `G-07` | `GW-T007P`, `GW-T007N` |
 | GW-MUST-008 | AI `client-gateway-contract.md`; AI matrix `G-07` | `GW-T008P`, `GW-T008N` |
 | GW-MUST-009 | AI `client-gateway-contract.md`; AI matrix `G-08` | `GW-T009P`, `GW-T009N` |
 | GW-MUST-010 | AI `client-gateway-contract.md`; AI matrix `S-05`, `GC-06` | `GW-T010P`, `GW-T010N` |
-| GW-MUST-011 | Human `gateway-engine-contract.md`; AI matrix `GC-03`, `GC-05` | `GW-T011P`, `GW-T011N` |
+| GW-MUST-011 | Human `gateway-agent-loop-contract.md`; AI matrix `GC-03`, `GC-05` | `GW-T011P`, `GW-T011N` |
 | GW-MUST-012 | Human `security-spec.md`; AI matrix `S-01` | `GW-T012P`, `GW-T012N` |
 | GW-MUST-013 | AI `client-gateway-contract.md`; Human `gateway-spec.md` error output rules | `GW-T013P`, `GW-T013N` |
 | GW-MUST-014 | Human `gateway-spec.md`, `memory-spec.md`; AI matrix `G-03`, `G-04` | `GW-T014P`, `GW-T014N` |

@@ -1,10 +1,10 @@
-# Engine Drift Guard
+# Agent Loop Drift Guard
 
-This document defines anti-drift controls for Engine (Agent Loop) implementations.
+This document defines anti-drift controls for Agent Loop implementations.
 
 ## 1. Top Drift Patterns
 
-- Engine accumulates product-specific business logic.
+- Agent Loop accumulates product-specific business logic.
 - Request metadata becomes a hidden runtime reconfiguration channel.
 - Provider-specific payload formatting leaks into loop core.
 - Event taxonomy drifts from contract set.
@@ -13,7 +13,7 @@ This document defines anti-drift controls for Engine (Agent Loop) implementation
 - Error taxonomy collapses to a single generic code.
 - Auth context ignored for tool availability.
 - Approval semantics moved out of contract-visible events.
-- Engine starts owning conversation persistence.
+- Agent Loop starts owning conversation persistence.
 
 ## 2. Prohibited Implementation Shortcuts
 
@@ -22,7 +22,7 @@ This document defines anti-drift controls for Engine (Agent Loop) implementation
 - Skipping `tool-call`/`tool-result` event emission for speed.
 - Converting all errors to one generic code.
 - Using prompt-only approval intent instead of coded controls/events.
-- Adding conversation storage reads/writes in Engine runtime paths.
+- Adding conversation storage reads/writes in Agent Loop runtime paths.
 
 ## 3. Auto-Check Assertions
 
@@ -40,7 +40,7 @@ This document defines anti-drift controls for Engine (Agent Loop) implementation
 | ENGD-CHK-010 | Error taxonomy and sanitization enforced | Error mapping tests for all taxonomy codes | Critical |
 | ENGD-CHK-011 | Auth context filters tool availability | Permission-scoped tool advertisement tests | Critical |
 | ENGD-CHK-012 | Approval interactions remain contract-visible | Approval-required tool path event tests | Critical |
-| ENGD-CHK-013 | Engine has no conversation persistence ownership | Static + runtime dependency checks | Critical |
+| ENGD-CHK-013 | Agent Loop has no conversation persistence ownership | Static + runtime dependency checks | Critical |
 | ENGD-CHK-014 | Provider specifics isolated to adapters | Static architecture boundary checks | Critical |
 
 ## 4. Contract-Break Indicators
@@ -52,14 +52,14 @@ This document defines anti-drift controls for Engine (Agent Loop) implementation
 - Recoverable tool failures terminate stream.
 - `error` events leak raw exception internals.
 - Unauthorized actor receives privileged tools.
-- Conversation create/list/store behavior appears in Engine module.
+- Conversation create/list/store behavior appears in Agent Loop module.
 
 ## 5. Fail Build If
 
 - Any Critical auto-check fails.
 - Any `ENG-MUST-*` conformance vector fails.
-- Engine emits off-contract events or missing required completion/error events.
-- Engine loop includes provider-specific formatting logic.
+- Agent Loop emits off-contract events or missing required completion/error events.
+- Agent Loop includes provider-specific formatting logic.
 - Any auth/approval drift-critical control fails.
 - Conflict register contains unresolved High-risk boundary conflicts.
 
@@ -77,5 +77,5 @@ This document defines anti-drift controls for Engine (Agent Loop) implementation
 - [ ] Error messages are safe and taxonomy-correct.
 - [ ] Auth-scoped tool filtering enforced.
 - [ ] Approval request/result events emitted for approval-required actions.
-- [ ] No conversation persistence responsibilities in Engine.
+- [ ] No conversation persistence responsibilities in Agent Loop.
 - [ ] Provider-specific formatting isolated to adapters.

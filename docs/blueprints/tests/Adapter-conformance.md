@@ -29,8 +29,8 @@ This file defines language-agnostic pass/fail vectors for the Adapter boundary.
 | ADP-T002N | ADP-MUST-002 | Negative | Inject `provider_adapter` override in request metadata | Request rejected/ignored for selection | Request-time selection accepted | Request-time reconfiguration |
 | ADP-T003P | ADP-MUST-003 | Positive | Set unsupported adapter key | Startup/load fails with explicit message | Silent fallback behavior | Failure-masking drift |
 | ADP-T003N | ADP-MUST-003 | Negative | Unknown adapter auto-mapped to default adapter | Conformance gate fails | Silent fallback accepted | Adapter masking drift |
-| ADP-T004P | ADP-MUST-004 | Positive | Inspect model call path and module boundaries | Provider protocol logic found only in adapter modules | Provider logic found in Engine core | Provider-logic leak |
-| ADP-T004N | ADP-MUST-004 | Negative | Move provider payload shaping into Engine loop | Conformance gate fails | Leak accepted | Core-loop coupling |
+| ADP-T004P | ADP-MUST-004 | Positive | Inspect model call path and module boundaries | Provider protocol logic found only in adapter modules | Provider logic found in Agent Loop core | Provider-logic leak |
+| ADP-T004N | ADP-MUST-004 | Negative | Move provider payload shaping into Agent Loop | Conformance gate fails | Leak accepted | Core-loop coupling |
 | ADP-T005P | ADP-MUST-005 | Positive | Validate gateway-side normalization path | Translation preserves client contract and keeps conversation/auth ownership in Gateway/Auth boundaries | Gateway translation owns conversation/auth policy | Ownership bleed |
 | ADP-T005N | ADP-MUST-005 | Negative | Add conversation state or auth decisions inside adapter layer | Conformance gate fails | Adapter ownership creep accepted | Boundary misassignment |
 | ADP-T006P | ADP-MUST-006 | Positive | Inspect loaders and schema boundaries | Runtime/adapter/preferences layers are distinct | Layer collapse observed | Config taxonomy drift |
@@ -38,9 +38,9 @@ This file defines language-agnostic pass/fail vectors for the Adapter boundary.
 | ADP-T007P | ADP-MUST-007 | Positive | Validate adapter config content | Uses secret reference key only (for example `api_key_env`) | Raw secret value present | Secret handling drift |
 | ADP-T007N | ADP-MUST-007 | Negative | Store `api_key` literal in tracked adapter config | Conformance/security gate fails | Secret-in-config accepted | Secret leakage |
 | ADP-T008P | ADP-MUST-008 | Positive | Change model preference with same provider adapter | Active model changes without component code edits | Component code edits required | Model-swap lock-in |
-| ADP-T008N | ADP-MUST-008 | Negative | Require Engine/Gateway changes for same-provider model swap | Conformance gate fails | Code-coupled swap accepted | Preference bypass |
+| ADP-T008N | ADP-MUST-008 | Negative | Require Agent Loop/Gateway changes for same-provider model swap | Conformance gate fails | Code-coupled swap accepted | Preference bypass |
 | ADP-T009P | ADP-MUST-009 | Positive | Switch runtime adapter key and adapter config | Provider swap succeeds without unrelated component rewrites | Unrelated rewrites required | Provider lock-in |
-| ADP-T009N | ADP-MUST-009 | Negative | Hardcode provider in Engine/Gateway for swap path | Conformance gate fails | Hardcoding accepted | Swap-path drift |
+| ADP-T009N | ADP-MUST-009 | Negative | Hardcode provider in Agent Loop/Gateway for swap path | Conformance gate fails | Hardcoding accepted | Swap-path drift |
 | ADP-T010P | ADP-MUST-010 | Positive | Change external protocol mapping in adapter only | Internal contract remains unchanged | Internal contracts changed for external protocol update | Contract instability |
 | ADP-T010N | ADP-MUST-010 | Negative | External standard change requires component contract rewrite | Conformance gate fails | Rewrite accepted | Adapter ineffectiveness |
 | ADP-T011P | ADP-MUST-011 | Positive | Inject adapter/protocol failures | Safe classified errors emitted | Raw external errors surfaced | Error-safety drift |

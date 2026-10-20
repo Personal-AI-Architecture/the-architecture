@@ -27,7 +27,7 @@ This document defines anti-drift controls for Memory Tool Surface implementation
 - Removing prior-state support from history output to simplify implementation.
 - Returning raw exceptions directly from runtime/tool layer.
 - Allowing startup to continue when version/history guarantees fail.
-- Accessing memory storage directly from Gateway/Engine/Auth paths.
+- Accessing memory storage directly from Gateway/Agent Loop/Auth paths.
 
 ## 3. Auto-Check Assertions
 
@@ -60,7 +60,7 @@ This document defines anti-drift controls for Memory Tool Surface implementation
 - `memory_export` returns empty path or non-owner-scoped destination.
 - Failure messages contain stack traces or internal file paths.
 - Startup reaches ready-state after history/version readiness failure.
-- Gateway/Engine/Auth paths show direct filesystem/database memory access.
+- Gateway/Agent Loop/Auth paths show direct filesystem/database memory access.
 
 ## 5. Fail Build If
 

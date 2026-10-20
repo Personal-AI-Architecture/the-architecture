@@ -16,9 +16,9 @@ Adapters are translation boundaries that keep internal contracts stable while ex
 - Adapter boundary sits between internal contracts and external standards.
 - It touches both external APIs:
   - Gateway API adapter (client standard <-> Gateway internal request/response shape).
-  - Model API adapter (Engine internal completion shape <-> provider-native model format).
+  - Model API adapter (Agent Loop internal completion shape <-> provider-native model format).
 - Adapter behavior depends on Configuration for adapter selection and adapter config loading.
-- Adapter behavior must preserve Security and Gateway-Engine contract safety surfaces.
+- Adapter behavior must preserve Security and Gateway ↔ Agent Loop contract safety surfaces.
 
 ### Companion Artifacts
 - Gateway API contract: `blueprints/Gateway-API.md`
@@ -57,7 +57,7 @@ Adapters are translation boundaries that keep internal contracts stable while ex
 ### Key Domain Concepts
 - **Adapter Boundary**: architecture layer that translates internal contracts to external standards and back.
 - **Gateway API Adapter**: translation between client protocol standard and Gateway internal external contract usage.
-- **Model API Adapter**: translation between Engine internal completion contract and provider-native model protocol.
+- **Model API Adapter**: translation between Agent Loop internal completion contract and provider-native model protocol.
 - **Internal Contract**: system-owned stable interface consumed by components.
 - **External Standard**: third-party/public protocol format not controlled by system architecture.
 - **Adapter Swap**: replacing one adapter implementation/config with another while keeping component code stable.
@@ -483,7 +483,7 @@ Adapters are translation boundaries that keep internal contracts stable while ex
 4. Preserve contract-visible approval semantics and stable identifiers.
 
 ### 5.3 Model-Side Translation Behavior
-1. Accept Engine generic completion request envelope.
+1. Accept Agent Loop generic completion request envelope.
 2. Translate to provider-native request payload.
 3. Parse provider response.
 4. Normalize response to internal `assistantText/toolCalls/finishReason`.
@@ -520,9 +520,9 @@ Adapters are translation boundaries that keep internal contracts stable while ex
 
 ### Internal Interactions
 - Gateway API contract and Gateway component for client-side translation.
-- Model API contract and Engine component for provider-side translation.
+- Model API contract and Agent Loop component for provider-side translation.
 - Configuration loaders for runtime and adapter config.
-- Security and Gateway-Engine contract for safe error/event behavior.
+- Security and Gateway ↔ Agent Loop contract for safe error/event behavior.
 
 ### Data Flow
 1. Runtime config selects adapter keys.
@@ -543,7 +543,7 @@ Adapters are translation boundaries that keep internal contracts stable while ex
 ### Boundary Invariants
 - Adapter boundary is not a component and not an API boundary.
 - External contract count remains Gateway API and Model API only.
-- Provider-specific logic remains outside Engine core and inside adapters.
+- Provider-specific logic remains outside Agent Loop core and inside adapters.
 
 ### Configuration Invariants
 - Runtime config, adapter config, and preferences are distinct layers.
@@ -553,7 +553,7 @@ Adapters are translation boundaries that keep internal contracts stable while ex
 ### Swap Invariants
 - Same-provider model swap remains preference-level.
 - Provider swap remains runtime-adapter-key plus adapter-config change.
-- Adapter swaps do not require unrelated Gateway/Engine/Auth/Memory rewrites.
+- Adapter swaps do not require unrelated Gateway/Agent Loop/Auth/Memory rewrites.
 
 ### Translation Invariants
 - Internal contract remains stable and bounded.
@@ -731,7 +731,7 @@ Adapters are translation boundaries that keep internal contracts stable while ex
 | ADP-MUST-008 | Human `adapter-spec.md`, `models-spec.md`; AI matrix `MO-02` | `ADP-T008P`, `ADP-T008N` |
 | ADP-MUST-009 | Human `adapter-spec.md`; AI matrix `MO-03` | `ADP-T009P`, `ADP-T009N` |
 | ADP-MUST-010 | Human `adapter-spec.md` D139; AI `models.md` | `ADP-T010P`, `ADP-T010N` |
-| ADP-MUST-011 | Human `security-spec.md`, `gateway-engine-contract.md`; AI matrix `GC-03`, `S-01` | `ADP-T011P`, `ADP-T011N` |
+| ADP-MUST-011 | Human `security-spec.md`, `gateway-agent-loop-contract.md`; AI matrix `GC-03`, `S-01` | `ADP-T011P`, `ADP-T011N` |
 | ADP-MUST-012 | Human `configuration-spec.md`; AI matrix `C-02`, `GC-01` | `ADP-T012P`, `ADP-T012N` |
 | ADP-MUST-013 | Human `configuration-spec.md`; AI matrix `D-06` | `ADP-T013P`, `ADP-T013N` |
 | ADP-MUST-014 | Human `foundation-spec.md`; AI matrix `F-01`, `F-02`, `CU-02` | `ADP-T014P`, `ADP-T014N` |

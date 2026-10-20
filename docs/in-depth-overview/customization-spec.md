@@ -13,7 +13,7 @@ An implementation follows the Architecture's specifications and contracts. Runna
 
 The audience is builders — product developers, AI agents, or product team members who want to know what ships by default, what's customizable, and how. Without this doc, every builder has to reverse-engineer the customization model from six component specs.
 
-> **Architecture:** This spec defines customization mechanisms that apply to any system built on the Architecture — the same mechanisms implementers and Level 3 owners both use.
+> **Architecture:** This spec defines customization mechanisms that apply to any system built on the Architecture — the same mechanisms implementers and owners both use.
 
 **Related documents:** [foundation-spec.md](./foundation-spec.md) (architecture overview, links to all component specs)
 
@@ -35,15 +35,15 @@ The only fixed contracts are the two APIs:
 
 This is the same "drop-down menu" principle from the foundation spec (Principle 2) applied to the Foundation's own internals. Bootstrap via minimal Agent Loop config? That's the default. Tool discovery via configured sources + self-description? That's the default. Change either if your product needs something different.
 
-### What the Levels Mean (Working Model)
+### Who Customizes What
 
-| Level | What it is | Functional? | Who provides it |
+| Layer | What it is | Functional? | Who provides it |
 |-------|-----------|-------------|-----------------|
 | **Architecture** | Components + APIs + sensible defaults. The working generic system. | Yes — minimal but working | Architecture repo |
 | **Implementation** | Architecture + product opinions (methodology, skills, starter content, branded client, default tools). | Yes — opinionated product | Product repo (e.g., BrainDrive) |
-| **Level 3 — Personalization** | Implementation + owner customization (life pages, custom skills, preferences, industry packages). | Yes — personalized | The owner |
+| **Owner personalization** | Implementation + owner customization (life pages, custom skills, preferences, industry packages). | Yes — personalized | The owner |
 
-Implementation and Level 3 use **the same customization mechanisms**. The difference is who does it and when — a product builder ships implementation opinions as a product, an owner adds Level 3 opinions after the fact. The technical operations are identical.
+Implementation and owner preferences use **the same customization mechanisms**. The difference is who does it and when — a product builder ships implementation opinions as a product, an owner adds their own preferences after the fact. The technical operations are identical.
 
 **Every recipient is an owner, not a user.** When a coach ships a coaching product, each coaching client gets their own personal AI system with the coach's defaults. The client owns their data, their Memory, their system. They're not registering for the coach's platform — they're receiving their own system that happens to start with the coach's methodology. This is the fundamental difference from traditional SaaS.
 
@@ -53,7 +53,7 @@ An implementation can be as thin as "Architecture + specialized Your Memory for 
 
 ## The Four Customization Mechanisms
 
-There are four ways to customize the Architecture. All implementation and Level 3 customization works through these mechanisms.
+There are four ways to customize the Architecture. All implementation and owner customization works through these mechanisms.
 
 ### 1. Your Memory Content
 
@@ -325,7 +325,7 @@ Because both share the same APIs and contracts
 
 </details>
 
-### CS-6: Owner Personalization (Level 3) — **Open**
+### CS-6: Owner Personalization — **Open**
 
 As an owner, I want to customize my system beyond the implementation defaults so that it fits my specific needs.
 
@@ -344,17 +344,17 @@ As an owner, I want to customize my system beyond the implementation defaults so
 **Acceptance Criteria (Given-When-Then):**
 
 ```gherkin
-Given an implementation with Level 3 personalization
+Given an implementation with owner personalization
 When the system runs
-Then it reflects both the product opinions (Implementation) and owner preferences (Level 3)
+Then it reflects both the product opinions (Implementation) and owner preferences
 And the customization mechanisms are identical to what the product builder used
 ```
 
 ```gherkin
 Given an owner who personalizes their BrainDrive
 When BrainDrive ships a product update (Implementation)
-Then the owner's personalizations (Level 3) are preserved
-And the update applies cleanly because Level 3 content doesn't conflict with implementation defaults
+Then the owner's personalizations are preserved
+And the update applies cleanly because owner content doesn't conflict with implementation defaults
 ```
 
 **Status:** Open
@@ -370,7 +370,7 @@ And the update applies cleanly because Level 3 content doesn't conflict with imp
 - [ ] Architecture code is never modified by an implementation — all customization is through Your Memory, tools, config, and client
 - [ ] Any Agent Loop that implements the architecture contract can boot any implementation — the product's behavior comes from Your Memory, not from Agent Loop customization
 - [ ] Removing all implementation customization leaves a working architecture system — the Architecture stands alone
-- [ ] Implementation and Level 3 customization use identical mechanisms — there is no technical difference between product builder customization and owner customization
+- [ ] Implementation and owner customization use identical mechanisms — there is no technical difference between product builder customization and owner customization
 - [ ] Architecture updates can be adopted by implementations without merge conflicts — because an implementation is a dependency layer, not a fork
 - [ ] Multiple implementations can run on the same Architecture without interfering with each other
 - [ ] All customization must work through the four mechanisms — no backdoor code-level modification of architecture components
@@ -382,7 +382,7 @@ And the update applies cleanly because Level 3 content doesn't conflict with imp
 - [ ] Implementation ships no bootstrap file — overrides the default with a different bootstrap mechanism. System should still work.
 - [ ] Implementation overrides an architecture default (e.g., different bootstrap path) — the override takes precedence cleanly.
 - [ ] Two implementations ship conflicting configuration for the same Architecture instance — should be impossible (each implementation is its own deployment).
-- [ ] Owner (Level 3) overrides an implementation default — owner preference takes precedence.
+- [ ] Owner overrides an implementation default — owner preference takes precedence.
 - [ ] Architecture ships a new default that conflicts with an existing implementation override — implementation override should continue to work.
 
 ### Failure Modes
@@ -400,7 +400,7 @@ And the update applies cleanly because Level 3 content doesn't conflict with imp
 
 - [x] **OQ-1: What exactly are the architecture defaults?** **Partially resolved (D153, D158).** Runtime config: `memory_root: ./your-memory`, `provider_adapter: openai-compatible`, `auth_mode: local`, `tool_sources: [built-in memory tools]`. Bootstrap: minimal generic system prompt, implementations override via `bootstrapTarget`. Memory tools: native read/write/edit/delete/search/list/history. Default `your-memory/` is empty on first boot. Remaining defaults will emerge during implementation.
 - [x] **OQ-2: How does an implementation depend on the Architecture technically?** **Superseded by the documentation-first repository split.** Implementations follow the published specifications and contracts; the separate TypeScript template supplies runnable starting code.
-- ~~**OQ-3: How do implementation and Level 3 content coexist without conflicts?**~~ Partially answered: [configuration-spec.md](./configuration-spec.md) defines layered overrides (Architecture → Implementation → Level 3, owner wins). Remaining conventions (file-level coexistence) deferred to implementation.
+- ~~**OQ-3: How do implementation and owner content coexist without conflicts?**~~ Partially answered: [configuration-spec.md](./configuration-spec.md) defines layered overrides (Architecture → Implementation → Owner preferences, owner wins). Remaining conventions (file-level coexistence) deferred to implementation.
 - [x] **OQ-4: Does the Architecture repo ship runnable code or specs + contracts?** **Superseded by the documentation-first repository split.** This repository ships specifications, contracts, blueprints, and conformance guidance. Runnable code lives in implementation repositories such as the TypeScript architecture template.
 - ~~**OQ-5: How do we handle versioning across two repos?**~~ Deferred to implementation. Depends on delivery mechanism (see OQ-2).
 
@@ -422,27 +422,16 @@ And the update applies cleanly because Level 3 content doesn't conflict with imp
 | # | Decision | Rationale |
 |---|----------|-----------|
 | D43 | Your Memory is an unopinionated substrate — it stores anything, has no opinions about structure | Customization content (bootstrap, skills, folders) lives in Your Memory, but Your Memory doesn't know what any of it means. The model gives it meaning. |
-| D51 | Tools are data — definitions, code, instructions that live in the environment | Products ship tools for their use case. The Engine executes tool calls without knowing what the tools do. |
-| D50 | Bootstrap prompt is Engine configuration; product entrypoint content lives in Your Memory | Foundation provides minimal bootstrap mechanism. Level 2 products provide/override entrypoint content and conventions. |
+| D51 | Tools are data — definitions, code, instructions that live in the environment | Products ship tools for their use case. The Agent Loop executes tool calls without knowing what the tools do. |
+| D50 | Bootstrap prompt is Agent Loop configuration; product entrypoint content lives in Your Memory | Foundation provides minimal bootstrap mechanism. Products provide/override entrypoint content and conventions. |
 | D57 | Clients are external — not a system component | Products ship branded clients that connect through the Gateway API. The system doesn't know or care what the client looks like. |
 | D109 | Always-send tool set vs. discoverable set | Products configure which tools appear in every prompt (always-send) and which are available on demand (discoverable). |
-| D110 | Three-level ecosystem: Foundation → Product → Personalization | Level 1 provides mechanisms. Level 2 provides product opinions. Level 3 provides owner preferences. All use the same four customization mechanisms. |
-| D112 | Level 2 is a dependency relationship, not a fork | Product repos import Level 1 as a package. Foundation updates flow to every Level 2 product automatically. |
+| D110 | Three layers: architecture → product → owner personalization | The architecture provides mechanisms. An implementation provides product opinions. The owner provides owner preferences. All use the same four customization mechanisms. |
+| D112 | A product depends on the architecture; it does not fork it | Superseded in mechanism by the repository split (OQ-2): products follow the published specs and contracts rather than importing a package. |
 | D141-refined | Tool definitions/plumbing/preferences are split across source/mechanism/owner | Definitions self-describe from tools (D146), plumbing is runtime environment config, preferences are personal data in Your Memory (D145). |
-| D153 | Foundation repo ships runnable code — working runtime with sensible defaults | Level 2 builders `npm install`, configure, run. Specs/schemas/conformance ship alongside. |
-| D155 | Level 2 depends on Level 1 via npm package | Standard dependency management, semver, `npm update` for Foundation improvements. |
-| D158 | Level 1 default bootstrap is a minimal generic system prompt | Level 2 overrides via `bootstrapTarget` pointing to product content in Your Memory (e.g., AGENT.md). |
-
----
-
-## Changelog
-
-| Date | Change | Reason |
-|------|--------|--------|
-| 2026-03-01 | "No users, only owners" pass: added ownership framing paragraph (every recipient is an owner), reframed CS-5 (ship systems to clients, not offer platform), CS-3/CS-4/CS-6 language fixes, "end users" → "owners" throughout, "coaching platform" → "coaching product" | Ownership model alignment (Dave W + Claude) |
-| 2026-03-01 | Cross-doc alignment: fixed §Config (API key references not values, removed technology names from auth, added cross-references to configuration-spec and adapter-spec), added security invariant, consolidated invariants, deferred OQs 1-3/5, consolidated success criteria, removed feature-spec boilerplate sections | Cross-spec review (Dave W + Claude) |
-| 2026-02-27 | Opener reframe + trim | Consistency with other specs: "How we define customization" opener, folded "Runtime, Not a Framework" into opener, added Level 1 note + related docs line, removed Security Considerations + Conversation References |
-| 2026-02-26 | Initial spec created | `/interview` + `/feature-spec` |
+| D153 | Foundation repo ships runnable code — working runtime with sensible defaults | Superseded by the repository split (OQ-4): this repo ships specs and contracts; runnable code lives in the separate TypeScript template. |
+| D155 | Products depend on the architecture via an npm package | Superseded by the repository split (OQ-2). |
+| D158 | The architecture's default bootstrap is a minimal generic system prompt | Products override it with their own entry point content in Your Memory (e.g., AGENT.md). |
 
 ---
 

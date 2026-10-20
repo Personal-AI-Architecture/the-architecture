@@ -110,13 +110,13 @@ Use these terms consistently. The "Don't Use" column lists old terms that should
 
 | Use | Don't Use | Notes |
 |-----|-----------|-------|
-| **Agent Loop** | Engine | Describes what it does: send to model, get tool calls, execute, loop |
+| **Agent Loop** | Engine | Describes what it does: send to model, get tool calls, execute, loop. Engine is the former name; it is still used in contract paths (`/engine/chat`, `gateway-engine.yaml`) until the next contract revision |
 | **APIs** | Connectors | Gateway API, Model API — just call them what they are |
 | **Model API** | Provider API | "Model API" is immediately clear |
 | **Clients** | External clients | Interfaces that communicate with a system through the Gateway API |
 | **Apps** | — | Compositions of instructions, tools, context, configuration, and optional client resources for a bounded outcome |
-| **Architecture** | Level 1 | The product-independent specifications, contracts, guidance, and requirements |
-| **Implementation** | Level 2 | A product or system that follows the Architecture (e.g., BrainDrive) |
+| **Architecture** | Level 1, Foundation | The product-independent specifications, contracts, guidance, and requirements |
+| **Implementation** | Level 2, product | A product or system that follows the Architecture (e.g., BrainDrive) |
 
 Terms that are correct as-is: **Gateway**, **Auth**, **Your Memory**, **Tools**, **Adapters**, **Contracts**.
 

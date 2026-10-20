@@ -1,6 +1,6 @@
 # Deployment Invariant Tests
 
-> Validates the architecture deployment contract from [deployment-spec.md](../../deployment-spec.md).
+> Validates the architecture deployment contract from [deployment-spec.md](../deployment-spec.md).
 
 ---
 

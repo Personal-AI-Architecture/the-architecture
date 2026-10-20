@@ -36,12 +36,12 @@ Understand the architecture well enough to implement it.
 |----------|-------------------|
 | [Architecture Overview](in-depth-overview/foundation-spec.md) | **Start here.** How it works in six steps, the four components and two APIs, and who does what |
 | [Implementer's Reference](in-depth-overview/implementers-reference.md) | Condensed contracts — "tell me what to build," no rationale |
-| [Gateway-Engine Contract](in-depth-overview/gateway-engine-contract.md) | The internal handoff between Gateway and Agent Loop — the key boundary |
+| [Gateway ↔ Agent Loop Contract](in-depth-overview/gateway-agent-loop-contract.md) | The internal handoff between Gateway and Agent Loop — the key boundary |
 
 **Formal specs** (OpenAPI + JSON Schema) live in [`specs/`](https://github.com/Personal-AI-Architecture/the-architecture/tree/main/specs):
 - `openapi/gateway-api.yaml` — client-facing API
 - `openapi/gateway-engine.yaml` — internal contract
-- `openapi/model-api.yaml` — model provider API
+- `openapi/model-api.yaml` — Model API
 - `schemas/` — configuration, identity, message, policy, tool definition
 
 ---
@@ -54,7 +54,7 @@ Each component has a dedicated spec. Read the foundation spec first, then the co
 |-----------|------|----------------|
 | **Your Memory** | [memory-spec.md](in-depth-overview/memory-spec.md) | Owner-controlled storage, zero outbound dependencies, portability, inspectability |
 | **Gateway** | [gateway-spec.md](in-depth-overview/gateway-spec.md) | Conversation management, routing, client boundary, content-agnostic |
-| **Agent Loop** | [engine-spec.md](in-depth-overview/engine-spec.md) | AI reasoning cycle — model calls, tool execution, no product logic |
+| **Agent Loop** | [agent-loop-spec.md](in-depth-overview/agent-loop-spec.md) | AI reasoning cycle — model calls, tool execution, no product logic |
 | **Auth** | [auth-spec.md](in-depth-overview/auth-spec.md) | Identity, authorization, permissions, cross-cutting boundary |
 | **Tools** | [tools-spec.md](in-depth-overview/tools-spec.md) | Callable capabilities (verbs), tool definitions, execution model |
 | **Models** | [models-spec.md](in-depth-overview/models-spec.md) | External intelligence via Model API — not an architectural component |

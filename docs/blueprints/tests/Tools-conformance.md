@@ -6,7 +6,7 @@ This file defines language-agnostic pass/fail vectors for Tools capability-bound
 
 - `TOL-MUST-001`: Tools must not be implemented as a standalone architecture component.
 - `TOL-MUST-002`: Tools must not introduce a separate Tool API boundary.
-- `TOL-MUST-003`: Tool execution must occur in Engine and authorization must occur in Auth.
+- `TOL-MUST-003`: Tool execution must occur in Agent Loop and authorization must occur in Auth.
 - `TOL-MUST-004`: Tool availability must be environment/configuration plus Auth permission driven.
 - `TOL-MUST-005`: Request payloads must not override runtime tool source/availability truth.
 - `TOL-MUST-006`: Tool definitions must expose canonical fields (`name`, `description`, `input_schema`, `read_only`, `requires_approval`).
@@ -25,10 +25,10 @@ This file defines language-agnostic pass/fail vectors for Tools capability-bound
 |---|---|---|---|---|---|---|
 | TOL-T001P | TOL-MUST-001 | Positive | Inspect architecture/runtime boundaries for tool ownership | Tools appear as capability surface only | Tool runtime registered as component | Fifth-component drift |
 | TOL-T001N | TOL-MUST-001 | Negative | Add dedicated `Tools` component ownership in architecture/runtime | Conformance gate fails | Dedicated component accepted | Foundation boundary drift |
-| TOL-T002P | TOL-MUST-002 | Positive | Route tool-call flow via Model API -> Engine execution path | No extra Tool API contract introduced | Unexpected additional API surfaced | API-surface drift |
+| TOL-T002P | TOL-MUST-002 | Positive | Route tool-call flow via Model API -> Agent Loop execution path | No extra Tool API contract introduced | Unexpected additional API surfaced | API-surface drift |
 | TOL-T002N | TOL-MUST-002 | Negative | Introduce standalone `/tools/*` execution API | Conformance gate fails | Tool API accepted | API proliferation drift |
-| TOL-T003P | TOL-MUST-003 | Positive | Trigger tool call with valid auth context | Execution runs in Engine after Auth check | Auth skipped or execution outside Engine | Ownership split drift |
-| TOL-T003N | TOL-MUST-003 | Negative | Execute tool without Auth decision or from Gateway path | Request denied or conformance fails | Tool executes without Auth/Engine path | Authorization bypass drift |
+| TOL-T003P | TOL-MUST-003 | Positive | Trigger tool call with valid auth context | Execution runs in Agent Loop after Auth check | Auth skipped or execution outside Agent Loop | Ownership split drift |
+| TOL-T003N | TOL-MUST-003 | Negative | Execute tool without Auth decision or from Gateway path | Request denied or conformance fails | Tool executes without Auth/Agent Loop path | Authorization bypass drift |
 | TOL-T004P | TOL-MUST-004 | Positive | Configure runtime tool sources and actor permissions | Callable tools equal env-available intersection with permitted set | Availability ignores config/permissions | Availability drift |
 | TOL-T004N | TOL-MUST-004 | Negative | Hardcode tool availability in request path/business logic | Conformance gate fails | Hardcoded availability accepted | Ad hoc availability drift |
 | TOL-T005P | TOL-MUST-005 | Positive | Send normal metadata free of runtime tool overrides | Request accepted | Safe metadata rejected | Over-restrictive metadata gate |
@@ -43,14 +43,14 @@ This file defines language-agnostic pass/fail vectors for Tools capability-bound
 | TOL-T009N | TOL-MUST-009 | Negative | Force mutation execution without approval decision | Conformance gate fails | Unapproved mutation accepted | Control-plane drift |
 | TOL-T010P | TOL-MUST-010 | Positive | Trigger tool failure (e.g., not found/path invalid) | Structured safe failure output with code/message/recoverable | Failure lacks classification | Error-taxonomy drift |
 | TOL-T010N | TOL-MUST-010 | Negative | Emit raw stack trace/internal path in tool failure message | Conformance gate fails | Unsafe message exposed | Error-sanitization drift |
-| TOL-T011P | TOL-MUST-011 | Positive | Verify component memory operations occur through tools/boundaries | No direct storage reach-in from Gateway/Engine/Auth | Direct access detected | Memory-boundary drift |
+| TOL-T011P | TOL-MUST-011 | Positive | Verify component memory operations occur through tools/boundaries | No direct storage reach-in from Gateway/Agent Loop/Auth | Direct access detected | Memory-boundary drift |
 | TOL-T011N | TOL-MUST-011 | Negative | Add direct filesystem/database access in component path | Conformance gate fails | Direct access accepted | Boundary-bypass drift |
 | TOL-T012P | TOL-MUST-012 | Positive | Apply restrictive tool isolation profile with Auth allow | Tool remains confined to configured scope | Auth allow grants out-of-scope access | Isolation drift |
 | TOL-T012N | TOL-MUST-012 | Negative | Configure untrusted tool as in-process/full network | Policy validation fails | Unsafe isolation accepted | Trust-boundary drift |
 | TOL-T013P | TOL-MUST-013 | Positive | Simulate timeout/unavailable/crash in tool runtime | Explicit structured unavailability/failure surfaced | Failure is swallowed silently | Reliability drift |
 | TOL-T013N | TOL-MUST-013 | Negative | Drop failed tool calls without emitting tool failure | Conformance gate fails | Silent failure accepted | Observability drift |
 | TOL-T014P | TOL-MUST-014 | Positive | Add/remove tool by config/source + preference updates only | Capability change succeeds without architecture rewrite | Code rewrite required | Swap lock-in drift |
-| TOL-T014N | TOL-MUST-014 | Negative | Require Gateway/Engine redesign for normal tool swap | Conformance gate fails | Rewrite accepted as normal | Architecture lock-in drift |
+| TOL-T014N | TOL-MUST-014 | Negative | Require Gateway/Agent Loop redesign for normal tool swap | Conformance gate fails | Rewrite accepted as normal | Architecture lock-in drift |
 
 ## Coverage Summary
 

@@ -81,9 +81,9 @@ These criteria verify that the implementation matches the architectural topology
 
 ---
 
-## 2. Pillar Verification
+## 2. Owner Outcome Verification
 
-The four pillars are values, not code — but they produce observable properties. A system either exhibits these properties or it doesn't.
+These four owner outcomes are values, not code — but they produce observable properties. A system either exhibits these properties or it doesn't.
 
 ### P-1. Empowerment — AI that works for you
 
@@ -189,7 +189,7 @@ The four pillars are values, not code — but they produce observable properties
 **Claim:** Products don't use all capabilities at once. Each expansion is a deliberate step. Scope is a tool configuration decision, not an architecture decision.
 
 **Verification:**
-- (a) The system can run with minimal tool scope (e.g., library folder only) and function correctly.
+- (a) The system can run with minimal tool scope (e.g., one folder only) and function correctly.
 - (b) Adding broader tool scope (filesystem, APIs, services) does not require architecture changes — only tool configuration.
 - (c) Each scope expansion is independently reversible — removing tools reduces capability without breaking the system.
 - (d) The evolution table holds: V1 → V2 → V3 → V4 each changes only tool configuration, not architecture.
@@ -238,7 +238,7 @@ The four pillars are values, not code — but they produce observable properties
 
 **Verification:** Inspect the internal contract. Confirm the request/response format matches the spec. Confirm the Agent Loop does not receive per-request configuration (tools, provider, model) from the Gateway.
 
-**Fail condition:** The Gateway sends per-request configuration that changes Agent Loop behavior. Or the internal contract carries data not specified in [gateway-engine-contract.md](./gateway-engine-contract.md).
+**Fail condition:** The Gateway sends per-request configuration that changes Agent Loop behavior. Or the internal contract carries data not specified in [gateway-agent-loop-contract.md](./gateway-agent-loop-contract.md).
 
 ---
 
@@ -352,13 +352,13 @@ Foundation decisions are architectural commitments. Each is verifiable.
 | D39 | Agent Loop is generic — no product-specific logic | Agent Loop contains no product-specific conditionals, feature flags, or domain logic | Agent Loop contains product-specific behavior |
 | D40 | Prompts and skills live in Memory | Prompt assembly reads from files in Memory; skills are Memory content | Prompts are hardcoded in Agent Loop source; skills are compiled code |
 | D51 | Tools = definitions in Memory + execution in the Agent Loop + permissions in Auth | No standalone tools component | A tools service exists outside these three |
-| D53 | No tool protocol API | Tool calls flow Agent Loop → Provider API → Model, execution is internal to the Agent Loop | A third API exists for tool communication |
+| D53 | No tool protocol API | Tool calls flow Agent Loop → Model API → Model, execution is internal to the Agent Loop | A third API exists for tool communication |
 | D60 | Auth is independent of Gateway | Auth and Gateway have no mutual dependencies; either can be swapped independently | Auth imports Gateway code or vice versa |
 | D135 | Memory/tool binary holds | Every new capability maps to memory (data) or tools (actions), not new infrastructure | A capability requires a new component or API |
 | D139 | Swappability chain is complete | For every element: Memory → tools, components → contracts, contracts → adapters | An element exists with no intermediary absorbing change |
 | D143 | Configuration is cross-cutting, three categories | Preferences in Memory, runtime config is thin bootstrap, tool self-description — no single component owns all config | Configuration is owned by one component or requires a config service |
 | D147 | Three swaps pass config-only | Provider swap, model swap, tool swap — each with config/adapter changes only | Any swap requires cross-component code changes |
-| D148 | Level 1 = local only | System runs on owner-controlled hardware without external services | Level 1 requires cloud services, managed hosting, or external APIs to function |
+| D148 | The architecture = local only | System runs on owner-controlled hardware without external services | The architecture requires cloud services, managed hosting, or external APIs to function |
 
 ---
 
@@ -496,7 +496,7 @@ Each story is an acceptance test for the architecture itself.
 
 **Fail condition:** The system makes outbound network calls not attributable to explicitly configured services.
 
-### DEP-5. Level boundary respected
+### DEP-5. Deployment boundary respected
 
 **Claim:** The Architecture defines local deployment. Managed hosting is Implementation.
 
@@ -564,17 +564,8 @@ Each story is an acceptance test for the architecture itself.
 | [deployment-spec.md](./deployment-spec.md) | Source for section 9 (Deployment Verification) |
 | [configuration-spec.md](./configuration-spec.md) | Source for X-1 (Configuration Verification) |
 | [adapter-spec.md](./adapter-spec.md) | Source for C-4 (Adapter Verification) |
-| [gateway-engine-contract.md](./gateway-engine-contract.md) | Source for C-5 (Internal Contract Verification) |
+| [gateway-agent-loop-contract.md](./gateway-agent-loop-contract.md) | Source for C-5 (Internal Contract Verification) |
 | [security-spec.md](./security-spec.md) | Source for X-2 (Secrets Verification) and deployment network posture |
-
----
-
-## Changelog
-
-| Date | Change | Source |
-|------|--------|--------|
-| 2026-03-01 | Codex audit: 5 fixes — S-2 (Engine↔Tools not a connector violation), S-3 (externals = Clients/Models/Tools per D64), C-3 (security boundary validation is not business logic), R-1 (full matrix coverage: 11→17 rows), P-4c + PR-5b (measurable proxies replace subjective checks). Finding #6 (evidence format) deferred to run package. | Codex review (Dave W + Claude) |
-| 2026-03-01 | "No users, only owners" language pass | Ownership model alignment (Dave W + Claude) |
 
 ---
 

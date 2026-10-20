@@ -8,7 +8,7 @@ Use this when reviewing Gateway code paths, routes, conversation handling, or cl
 
 ## Checklist
 
-- [ ] Gateway owns conversation lifecycle rather than delegating it to Engine.
+- [ ] Gateway owns conversation lifecycle rather than delegating it to Agent Loop.
 - [ ] Conversation operations use the approved Memory boundary.
 - [ ] No private in-process conversation store exists as source of truth.
 - [ ] Gateway does not choose models or own provider selection.
@@ -41,7 +41,7 @@ Use this when reviewing Gateway code paths, routes, conversation handling, or cl
 
 - `docs/ai-agent-docs/gateway.md`
 - `docs/ai-agent-docs/client-gateway-contract.md`
-- `docs/ai-agent-docs/gateway-engine-contract.md`
+- `docs/ai-agent-docs/gateway-agent-loop-contract.md`
 - `docs/ai-agent-docs/compliance-matrix.md`
 
 ## Example Files
@@ -62,5 +62,5 @@ Use this when reviewing Gateway code paths, routes, conversation handling, or cl
 - `docs/ai-agent-docs/primer-audit-playbook.md`
 - `docs/ai-agent-docs/gateway.md`
 - `docs/ai-agent-docs/client-gateway-contract.md`
-- `docs/ai-agent-docs/gateway-engine-contract.md`
+- `docs/ai-agent-docs/gateway-agent-loop-contract.md`
 - `docs/ai-agent-docs/compliance-matrix.md`

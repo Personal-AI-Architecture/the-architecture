@@ -33,7 +33,7 @@ Files outside these locations (e.g., `tasks/*.md`, `node_modules/`) are excluded
 {
   "docs": [
     {
-      "path": "docs/in-depth-overview/engine-spec.md",
+      "path": "docs/in-depth-overview/agent-loop-spec.md",
       "covers": ["src/engine/"],
       "tier": 1,
       "update_trigger": "code",
@@ -56,7 +56,7 @@ Files outside these locations (e.g., `tasks/*.md`, `node_modules/`) are excluded
 | Tier | What | Examples | Update expectation |
 |------|------|----------|-------------------|
 | **1 — Contracts** | Define what the system *is*. Machine-readable where possible. | OpenAPI specs, JSON Schemas, foundation-spec | Must be updated in the same PR as the code change |
-| **2 — Component specs** | Define how each piece works. Human-readable architecture docs. | engine-spec, gateway-spec, memory-spec, auth-spec, security-spec | Must be updated in the same PR as the code change |
+| **2 — Component specs** | Define how each piece works. Human-readable architecture docs. | agent-loop-spec, gateway-spec, memory-spec, auth-spec, security-spec | Must be updated in the same PR as the code change |
 | **3 — Guides & reference** | Help people use the system. Derived from Tier 1 and 2. | README, AGENT.md, implementers-reference, conformance docs | Updated by AI agent in the same PR, verified in CI |
 
 Tier 1 and 2 docs block merge if stale. Tier 3 docs are auto-updated by AI agents and should not block merge, but CI will warn if they lag.
@@ -163,7 +163,7 @@ Added to the `baseline` pipeline. The `check:docs` script uses exit code 1 for T
 ```
 check:docs — documentation freshness check
 
-  STALE  docs/in-depth-overview/engine-spec.md
+  STALE  docs/in-depth-overview/agent-loop-spec.md
          covers: src/engine/
          changed: src/engine/agent-loop.ts (+42 -18)
          action: Tier 2 — update required before merge
@@ -352,7 +352,7 @@ The `check:docs` script validates registry integrity:
 The doc maintenance system is working correctly when:
 
 1. `npm run check:docs` exits 0 on a clean main branch
-2. A PR that modifies `src/engine/` without modifying `docs/in-depth-overview/engine-spec.md` causes `check:docs` to exit 2
+2. A PR that modifies `src/engine/` without modifying `docs/in-depth-overview/agent-loop-spec.md` causes `check:docs` to exit 2
 3. A PR that modifies a Tier 1 doc triggers cascade detection on dependent Tier 2/3 docs
 4. The doc registry has an entry for every markdown file in `docs/**/*.md` and `*.md` at the repo root
 5. The AI agent can read the registry, identify stale docs, and produce valid updates

@@ -1,19 +1,19 @@
-# Gateway-Engine Contract Drift Guard
+# Gateway ↔ Agent Loop Contract Drift Guard
 
-This document defines anti-drift controls for the internal Gateway-Engine handoff contract.
+This document defines anti-drift controls for the internal Gateway ↔ Agent Loop handoff contract.
 
 ## 1. Top Drift Patterns
 
-- Gateway sends non-contract fields to Engine (config leakage).
+- Gateway sends non-contract fields to Agent Loop (config leakage).
 - Metadata becomes a hidden runtime/provider/tool configuration channel.
-- Auth bypass path appears between Gateway and Engine.
+- Auth bypass path appears between Gateway and Agent Loop.
 - Stream event taxonomy diverges from canonical event set.
 - Error taxonomy collapses or uses unsafe raw messages.
 - Pre-stream and mid-stream error channels become ambiguous.
 - Tool-call/result ID continuity breaks.
 - Approval interaction is handled off-contract in local UI/CLI flow only.
 - Internal contract is promoted into a third external API.
-- Gateway and Engine become code-coupled beyond contract shape.
+- Gateway and Agent Loop become code-coupled beyond contract shape.
 
 ## 2. Prohibited Implementation Shortcuts
 
@@ -42,25 +42,25 @@ This document defines anti-drift controls for the internal Gateway-Engine handof
 | GECD-CHK-011 | Completion event has reconciliation identifiers | Done-payload contract tests | Critical |
 | GECD-CHK-012 | Contract remains internal boundary | Architecture/boundary classification tests | Critical |
 | GECD-CHK-013 | Approval represented in contract interaction flow | Approval-required stream and decision path tests | Critical |
-| GECD-CHK-014 | Gateway and Engine remain independently swappable | Contract-compatibility swap tests | High |
+| GECD-CHK-014 | Gateway and Agent Loop remain independently swappable | Contract-compatibility swap tests | High |
 
 ## 4. Contract-Break Indicators
 
 - Request payloads include `provider`, `model`, `api_key`, `tool_sources`, or similar config fields.
-- Engine processes requests with missing `correlation_id`.
-- Unauthorized requests reach Engine loop.
+- Agent Loop processes requests with missing `correlation_id`.
+- Unauthorized requests reach Agent Loop.
 - Event names outside canonical set are emitted.
 - Error codes not in `provider_error/tool_error/context_overflow` appear.
 - `error.message` contains filesystem paths, stack traces, or secrets.
 - `done` lacks `conversation_id` or `message_id`.
 - Approval-required actions occur without contract-visible approval signals.
-- Gateway-Engine contract appears in external/public API listing.
+- Gateway ↔ Agent Loop contract appears in external/public API listing.
 
 ## 5. Fail Build If
 
 - Any Critical auto-check fails.
 - Any `GEC-MUST-*` conformance vector fails.
-- Auth bypass on Gateway -> Engine path is detected.
+- Auth bypass on Gateway -> Agent Loop path is detected.
 - Hidden request-time configuration channels are accepted.
 - Any unsafe stream error leakage is detected.
 - Contract is exposed as a third external API boundary.
@@ -80,4 +80,4 @@ This document defines anti-drift controls for the internal Gateway-Engine handof
 - [ ] `done` includes reconciliation identifiers and finish semantics.
 - [ ] Approval remains contract-visible in interaction flow.
 - [ ] Contract remains internal, not promoted to external API.
-- [ ] Gateway and Engine can be swapped independently with contract compatibility.
+- [ ] Gateway and Agent Loop can be swapped independently with contract compatibility.

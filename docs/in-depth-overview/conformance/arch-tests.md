@@ -6,7 +6,7 @@
 
 ## ARCH-1: Memory Zero Dependencies
 
-**Validates:** Principle 1 (Memory is the platform), foundation-spec §Your Memory
+**Validates:** Principle 1 (Memory is the platform), foundation-spec §1. Make Your Memory the platform
 
 **Setup:**
 1. System running with data in Your Memory (files, conversations, preferences)
@@ -131,7 +131,7 @@
 
 ## ARCH-5: Error Taxonomy Compliance
 
-**Validates:** gateway-engine-contract.md §Mid-Stream Errors, engine-spec.md §Error output
+**Validates:** gateway-agent-loop-contract.md §Mid-Stream Errors, agent-loop-spec.md §Error output
 
 **Setup:**
 1. System running with active traffic
@@ -159,7 +159,7 @@
 
 ## ARCH-6: Error Message Sanitization
 
-**Validates:** gateway-engine-contract.md §Security Requirements, security-spec.md
+**Validates:** gateway-agent-loop-contract.md §Security Requirements, security-spec.md
 
 **Setup:**
 1. System running with various failure conditions triggerable
@@ -185,7 +185,7 @@
 
 ## ARCH-7: Memory Export
 
-**Validates:** memory-spec.md §Export, security-spec.md §Owner Data Rights
+**Validates:** memory-spec.md §Export is non-negotiable, security-spec.md §Owner Data Rights
 
 **Setup:**
 1. System running with data in Your Memory (files, conversations, preferences, version history)
@@ -238,7 +238,7 @@
 
 ## ARCH-9: Version History Reliability
 
-**Validates:** memory-spec.md §Guarantees, security-spec.md §Version History
+**Validates:** memory-spec.md §What Memory Guarantees, security-spec.md §6. Version History as Security Net
 
 **Setup:**
 1. Fresh system install (no prior data)
