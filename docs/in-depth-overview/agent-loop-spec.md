@@ -15,7 +15,7 @@ Why this matters: a generic agent loop can pick up any tool the ecosystem produc
 
 AI tool use collapsed the engineering cost of capabilities from "build across four layers" to "add a tool." The model is now good enough at deciding which tools to use and how to compose them without being told. This means the agent loop itself doesn't need to be smart — it just needs to reliably connect a model to tools and get out of the way.
 
-The Agent Loop sits in the middle of the foundation's flow: clients connect through the Gateway, the Gateway routes to the Agent Loop, the Agent Loop calls models through the Model API and executes tools from the environment. Your Memory is the platform — the Agent Loop reads and writes to it through tools. The Gateway ↔ Agent Loop interface is defined in [gateway-agent-loop-contract.md](./gateway-agent-loop-contract.md) (D137). The Agent Loop receives a messages array (system prompt + conversation history + current message) and metadata via `POST /engine/chat`, then returns an SSE stream of events (text-delta, tool-call, tool-result, done, error). Auth middleware authenticates requests before they reach the Agent Loop.
+The Agent Loop sits in the middle of the foundation's flow: clients connect through the Gateway, the Gateway routes to the Agent Loop, the Agent Loop calls models through the Model API and executes tools from the environment. Your Memory is the platform — the Agent Loop reads and writes to it through tools. The Gateway ↔ Agent Loop interface is defined in [gateway-agent-loop-contract.md](./gateway-agent-loop-contract.md) (D137). The Agent Loop receives a messages array (conversation history + current message), the model to use for this request, and metadata via `POST /engine/chat` (the path keeps its older name until the next contract revision), then returns an SSE stream of events (text-delta, tool-call, tool-result, done, error). The Agent Loop adds its own bootstrap prompt from its configuration. Messages use one shape across all three contracts: tool calls and tool results are ordinary parts of messages, so they travel in conversation history like everything else. The Gateway calls Auth on every request before anything reaches the Agent Loop, and the Agent Loop asks Auth before each tool call.
 
 **Related documents:** [foundation-spec.md](./foundation-spec.md) (architecture overview, links to all component specs)
 
@@ -29,13 +29,13 @@ These are explicit boundaries. They exist to prevent product-specific logic from
 |---------------|---------------|-------------------|
 | Prompt assembly | **The model** reads context files from Your Memory through tools | Agent Loop does not construct product-specific prompts |
 | Skill execution | Your Memory (skill files read and followed by the model) | Agent Loop does not have a skill framework |
-| Approval flow | Tools (write tools require confirmation) + model instructions | Agent Loop does not manage approval state |
-| Scope constraints | Tool configuration (which tools are available) | Agent Loop does not enforce boundaries |
+| Approval flow | Auth (the owner's rules) + tools + model instructions. Whether anything asks the owner first is the product's choice; the architecture default is that the owner can do everything | Agent Loop does not manage approval state |
+| Scope constraints | Tool configuration (which tools are available) + Auth (which tools this actor may call) | Agent Loop asks Auth before each tool call and honours the answer; it does not decide permissions itself |
 | Context loading | Model reads files through tools based on its instructions | Agent Loop does not decide what context to load |
 | Conversation persistence | External storage (SQLite, files) accessed through tools or configuration | Agent Loop does not own conversation storage |
 | Context window management | Model/provider handles compaction, or instructions tell the model how to summarize | Agent Loop does not decide what to cut |
 | Error recovery | Agent Loop reports failures; the model or caller decides what to do | Agent Loop does not retry or recover |
-| Authentication | Auth layer sits in front of the Agent Loop | Agent Loop does not authenticate requests |
+| Authentication | The Gateway calls Auth on every request before it reaches the Agent Loop | Agent Loop does not authenticate requests |
 | Product personality | System prompt and memory files | Agent Loop has no personality |
 
 ---
@@ -45,8 +45,8 @@ These are explicit boundaries. They exist to prevent product-specific logic from
 The Agent Loop runs a loop:
 
 1. **Accept a message** — from the Gateway (which routes requests from clients, API calls, scheduled triggers, or other agents)
-2. **Send it to a model** — along with a system prompt, tool definitions, and conversation history, through the Model API
-3. **Execute tool calls** — whatever the model decides to do, through the tool protocol
+2. **Send it to a model** — the model named in the request, along with a system prompt, tool definitions, and conversation history, through the Model API
+3. **Execute tool calls** — whatever the model decides to do, through the tool protocol. Before each call, the Agent Loop asks Auth whether this actor may make it; a call Auth refuses is not run, and the model is told it was not permitted
 4. **Stream the response back** — to the Gateway
 5. **Repeat** — until the model signals it's done
 
@@ -90,15 +90,16 @@ This is the only concurrency the Agent Loop needs to handle: **parallel tool exe
 | Field | Description | Required |
 |-------|-------------|----------|
 | Message | The owner's message (or system trigger) | Yes |
-| Bootstrap message | Minimal startup instructions for the model (e.g., "Read AGENT.md for your instructions"). The model constructs its working context by reading Memory through tools. | Yes |
-| Conversation history | Prior messages in this conversation | No (first message has none) |
+| Conversation history | Prior messages in this conversation, including the tool calls and tool results they contain | No (first message has none) |
+| Model | The model to use for this request. The Gateway reads the owner's current model choice on every message and passes it here, so a changed choice applies to the next message with no restart | Yes |
 
-### Boot-Time Configuration (via runtime config)
+### Boot-Time Configuration
 
 | Field | Description | Source |
 |-------|-------------|--------|
+| Bootstrap prompt | Minimal startup instructions for the model (e.g., "Read AGENT.md for your instructions"). The model constructs its working context by reading Memory through tools. | Agent Loop configuration (D50) |
 | Tool definitions | What tools are available | Pre-configured from tool sources (D143 — does not change per-request) |
-| Provider configuration | Which model, which provider, API key | Runtime config + adapter (D143 — does not change per-request) |
+| Provider configuration | Which provider adapter, and a reference to the API key | Runtime config + adapter. The model is not boot-time configuration: it arrives with each request |
 
 See [configuration-spec.md](./configuration-spec.md) for the full boot sequence (D143).
 
@@ -116,6 +117,7 @@ See [configuration-spec.md](./configuration-spec.md) for the full boot sequence 
 |-----------|----------------|
 | Model unreachable | Report failure to caller |
 | Tool execution fails | Report failure to model (model decides next step) |
+| Tool call not permitted by Auth | Report to the model that the call was not permitted (model decides next step) |
 | Provider timeout | Report failure to caller |
 | Invalid input | Reject with error |
 
@@ -131,7 +133,7 @@ See [configuration-spec.md](./configuration-spec.md) for the full boot sequence 
 | D42 | Engine renamed from "Harness" — "Engine" reflects that it's a commodity component | Every engine does the same thing. What makes the car different is everything around it. The Engine is the boring, interchangeable part. |
 | D50 | Bootstrap prompt is Agent Loop configuration — minimal seed that lets the model self-bootstrap from Your Memory | One line: "Read the entry point in the current folder." Everything else the model discovers from Your Memory by following that instruction. |
 | D108 | Model API must remain an API, not a tool | The model decides what tools to call — you can't use a tool to call the thing that decides which tools to use. Circular dependency. The Model API is structurally different from tools. |
-| D137 | Gateway ↔ Agent Loop is a plain HTTP API contract | POST /agent loop/chat with messages array + metadata. Agent Loop returns SSE stream. Auth middleware on path. See [gateway-agent-loop-contract.md](./gateway-agent-loop-contract.md). |
+| D137 | Gateway ↔ Agent Loop is a plain HTTP API contract | `POST /engine/chat` with messages array + metadata. Agent Loop returns SSE stream. See [gateway-agent-loop-contract.md](./gateway-agent-loop-contract.md). |
 
 ---
 
@@ -161,6 +163,17 @@ Per-component requirements from [security-spec.md](./security-spec.md). Security
 - [ ] Tool call results must be passed to the model without modification — the Agent Loop must not inject, filter, or alter tool results
 - [ ] The Agent Loop must report tool execution failures to the model, not silently retry or recover
 - [ ] The Agent Loop must enforce configured timeouts on tool calls — a slow or hung tool cannot block the loop indefinitely
+
+---
+
+## Contract alignment
+
+The text above is ahead of `specs/openapi/gateway-engine.yaml` in these places, pending the next contract revision:
+
+- The request has no field for the model to use. This spec requires one on every request.
+- The request's message shape has no tool calls or tool-call references, although it allows a `tool` role. This spec requires the single shared message shape in `specs/schemas/message.json`, with tool calls and tool results as message parts.
+- The yaml describes the system message as assembled by the Gateway from configuration. This spec makes the bootstrap prompt Agent Loop configuration, so the request carries no system message.
+- The `/engine/chat` path and the `engine` schema names still carry the component's old name.
 
 ---
 

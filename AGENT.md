@@ -61,7 +61,7 @@ Before merging any non-trivial change, verify:
 2. **Memory has zero outward dependencies** -- removing any component leaves Memory readable
 3. **Adding a tool requires zero code changes** -- only configuration/environment changes
 4. **Swapping a provider requires zero code changes** -- only config + adapter file
-5. **No secrets in Memory or config files** -- secrets live in environment variables only
+5. **No secrets in Memory or tracked config files** -- secrets live outside Your Memory and are never tracked by git (environment variables, an untracked config file, or a secret store)
 6. **Agent Loop has zero product-specific logic** -- product behavior emerges from what's in Memory
 7. **Gateway doesn't interpret content** -- it passes through, it doesn't understand
 8. **Auth is independent of Gateway** -- swapping either doesn't affect the other
@@ -74,7 +74,7 @@ Runtime config is 4 fields: `memory_root`, `provider_adapter`, `auth_mode`, `too
 
 Preferences (model choice, tool policies) live in Your Memory.
 Tool definitions are self-describing (from tools themselves).
-Secrets live in environment variables only.
+Secrets live outside Your Memory and are never tracked by git: environment variables, an untracked config file, or a secret store.
 
 ## Conformance
 

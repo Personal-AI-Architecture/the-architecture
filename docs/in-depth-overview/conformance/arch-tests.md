@@ -21,8 +21,8 @@
 
 **Pass criteria:**
 - [ ] All files in Your Memory are readable with a text editor
-- [ ] SQLite databases are readable with a standard SQLite viewer
-- [ ] Git history is browsable with standard git commands
+- [ ] Structured data (for example, conversations in a database) is readable with a standard viewer for its open format
+- [ ] Version history is browsable with standard tools for its format (for example, git commands if the implementation uses Git)
 - [ ] No component needs to be running to access Your Memory
 - [ ] Content makes sense to a human reader without the system
 
@@ -247,25 +247,28 @@
 1. Start the system for the first time
 2. Write a file to Your Memory
 3. Modify the file
-4. Call `memory_history` on the file
+4. Call the memory history operation on the file (whatever the implementation names it)
 5. Request a previous state using the returned version identifier
+6. Restore that previous state, then read the file
 
 **Pass criteria:**
 - [ ] System starts successfully on first run with version history initialized
-- [ ] `memory_history` returns at least two change records (create + modify)
+- [ ] The history operation returns at least two change records (create + modify)
 - [ ] Previous state is retrievable and matches the original file content
+- [ ] After the restore, the file's current content matches the original, and the history still shows the modification
 - [ ] If version history cannot be initialized at startup, the system fails with a clear error (not a warning)
 
 **Failure indicators:**
 - System starts but version history silently fails
-- `memory_history` returns only metadata without access to previous states
+- The history operation returns only metadata without access to previous states
+- There is no way to make an earlier state current again
 - First-run initialization produces warnings instead of deterministic setup
 
 ---
 
 ## DEPLOY-5: Default Bind Address
 
-**Validates:** Security-spec.md §Network Boundaries
+**Validates:** [deployment-spec.md](../deployment-spec.md) §Network Posture
 
 **Setup:**
 1. Fresh system install with default configuration

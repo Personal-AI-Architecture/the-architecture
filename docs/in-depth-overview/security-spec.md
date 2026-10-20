@@ -77,7 +77,8 @@ This is analogous to how operating systems separate code execution from data (NX
 **Additional mitigations (defense in depth):**
 - Scope enforcement limits what damage an injection can cause (see Enforcement Mechanisms below)
 - Audit logging captures what the model read and did, enabling detection after the fact
-- Approval gates prevent injected write operations from executing without owner consent
+- Approval gates, where the owner or product turns them on, can stop injected write operations before they run
+- Version history lets the owner see and undo any change an injection caused
 - Output filtering (future, Implementation) can inspect responses before they reach clients
 
 **What this doesn't solve:** A sophisticated injection that asks the model to include sensitive data in a seemingly normal response. Content separation reduces this risk but cannot eliminate it. This is an acknowledged limitation that improves as models improve at distinguishing instructions from data.
@@ -92,12 +93,12 @@ This is analogous to how operating systems separate code execution from data (NX
 |------------|-------------|-----------|---------|
 | **System-shipped** | Shipped with the system, code-reviewed | In-process, no isolation | Core memory tools, approval gate |
 | **Owner-installed** | The owner chose to install it | Isolated by default (container), owner can override | Third-party MCP servers, community tools |
-| **Untrusted** | Unknown provenance | Mandatory isolation (dedicated container, restricted network, resource limits) | Marketplace tools, unverified packages |
+| **Untrusted** | Unknown provenance | Isolated by default (dedicated container, restricted network, resource limits). The owner decides what they trust | Marketplace tools, unverified packages |
 
 **Foundation requirements:**
 - System-shipped tools: no additional verification needed
 - Owner-installed tools: warn on unverified tools, isolate by default, override available
-- Untrusted tools: mandatory isolation, no override
+- Untrusted tools: isolated by default; the owner can change this on their own hardware (D171)
 
 **Future provenance (when ecosystem matures):**
 - Hash verification (tool matches published checksum)
@@ -113,7 +114,7 @@ This is analogous to how operating systems separate code execution from data (NX
 
 **Implementation:** Products configure rate limiting policies, request size limits, and abuse detection thresholds as appropriate for their deployment model.
 
-**Auth integration:** Every request must be authenticated before it reaches the Gateway's routing logic (D22, D60). Unauthenticated requests are rejected. Auth is the first line of defense. See [auth-spec.md](./auth-spec.md).
+**Auth integration:** The Gateway calls Auth on every request before it routes anything to the Agent Loop (D22), and the Agent Loop asks Auth before each tool call. Unauthenticated requests are rejected. Auth is the first line of defense. See [auth-spec.md](./auth-spec.md).
 
 #### 4. Model Provider Data Flow
 
@@ -122,7 +123,7 @@ This is analogous to how operating systems separate code execution from data (NX
 **This is not a bug — it's how cloud models work.** The model needs context to function. Restricting what goes in the prompt cripples the system. The mitigation is transparency and choice, not restriction.
 
 **Requirements:**
-- **Document the risk clearly.** Owners must understand: when you use a cloud model provider, your data goes to that provider. This should be stated during first-run setup and accessible in settings.
+- **Document the risk clearly.** Owners must understand: when you use a cloud model provider, your data goes to that provider. The owner must be able to find this out before their data is sent.
 - **Make the provider choice visible.** The owner should always know which provider is processing their data.
 - **Local models are the sovereign option.** Support for local model providers means owners who want zero data leaving their machine have that choice. The system works identically with local or cloud models.
 - **Future (configurable in implementations):** If feasible, allow implementation builders to configure what Memory content can be included in prompts.
@@ -142,11 +143,12 @@ When an implementation offers hosted deployment, the operator's access is a depl
 **The threat:** The model makes unintended decisions — reads files it shouldn't (within its scope), calls tools in unexpected ways, or produces responses that include sensitive data the owner didn't ask for. This can happen through prompt injection (threat #1) or through normal model behavior (hallucination, misinterpretation).
 
 **Mitigations:**
-- **Approval gates** catch unintended writes — the owner must confirm before any write operation executes
+- **Version history** lets the owner see what changed and restore an earlier state after an unintended write
+- **Approval gates** (optional) can catch unintended writes before they run, where the owner or product turns them on
 - **Scope enforcement** limits what the model can access — it can only use available tools within Auth's boundaries
 - **Audit logging** captures everything the model does — reads, writes, tool calls — enabling after-the-fact detection
 - **Content separation** (threat #1) reduces the chance of the model following injected instructions
-- **Progressive trust model** — start with approval for everything, relax as trust builds
+- **Owner-set trust** — the owner decides how much to approve up front; products may offer stricter starting points
 
 ---
 
@@ -171,16 +173,16 @@ The Foundation provides both mechanisms. Implementations configure defaults. The
 
 ### 2. Approval Gates
 
-Write operations require owner confirmation before execution. This is enforced by a coded tool (not a prompt instruction), as established in tools-spec.md. The model cannot bypass it because the approval gate is software that intercepts the write operation, not a suggestion the model might ignore.
+The architecture default is that the owner can do everything: nothing requires approval unless the owner's rules say so. Approval prompts, and how strict a product's starting defaults are, are a product choice. Where the owner's rules do require approval, it is enforced by code (not a prompt instruction), as established in tools-spec.md. The model cannot bypass it because the approval gate is software that intercepts the operation, not a suggestion the model might ignore.
 
-**What's gated:** All write operations to Your Memory — create, edit, delete.
+**What can be gated:** Write operations to Your Memory — create, edit, delete — and any other tool call the owner's rules name.
 
 **What's not gated:** Read operations. The model reads freely within its scope. Reads are logged (see Audit Logging below) but not gated — gating reads would cripple the experience.
 
 **The approval spectrum** (from auth-spec.md, formalized here):
-- **Ask everything** — default for new configurations
+- **Ask nothing** — the architecture default; version history is the safety net
 - **Ask some things** — owner defines which operations need approval
-- **Ask nothing** — owner trusts the system fully; version history is the safety net
+- **Ask everything** — every write needs the owner's confirmation
 
 The spectrum is configurable per actor when multiple actors exist (owner might auto-approve their own agent but require approval for a collaborator's changes).
 
@@ -216,16 +218,16 @@ The system distinguishes between instructions and data at the prompt level. See 
 Detailed in [tools-spec.md](./tools-spec.md). Formalized here as security controls:
 
 - **System-shipped tools**: in-process, no isolation. Code-reviewed, shipped with the system.
-- **Owner-installed tools**: isolated by default (separate container), owner can override. Warning displayed on install.
-- **Untrusted tools** (future marketplace): mandatory isolation, dedicated container, restricted network, resource limits.
+- **Owner-installed tools**: isolated by default (separate container), owner can override. The owner is warned that a tool is unverified before it runs.
+- **Untrusted tools** (future marketplace): isolated by default with a dedicated container, restricted network and resource limits. The owner decides what they trust.
 
 Container isolation protects against: unauthorized filesystem access, unauthorized network calls, inter-tool interference, resource exhaustion. See [tools-spec.md](./tools-spec.md) for the full isolation spectrum.
 
 ### 6. Version History as Security Net
 
-Version control provides history for Memory files. Combined with approval gates, this creates a safety net: if something goes wrong, you can see what changed and roll back.
+Version history is required for Your Memory. It records what changed, not only that something changed, and the owner can restore an earlier state. This is the safety net: if something goes wrong, you can see what changed and roll back. It is what makes the "owner can do everything" default safe.
 
-The Foundation provides the mechanism. Implementations configure whether version history is a feature (recommended, configurable) or a security control (always on, not configurable downward).
+How version history is built is up to the implementation (Git is one option).
 
 ---
 
@@ -234,7 +236,7 @@ The Foundation provides the mechanism. Implementations configure whether version
 ### Data at Rest
 
 The Foundation requires that Memory storage supports encryption at rest. The specific mechanism is deployment-dependent:
-- **Local deployment:** OS-level encryption (FileVault, BitLocker, LUKS). Recommended during first-run setup.
+- **Local deployment:** OS-level encryption (FileVault, BitLocker, LUKS). Recommended; the owner must be able to find out whether it is on.
 - **Hosted deployment:** Infrastructure-level encryption. The operator's responsibility.
 
 **Why no mandatory app-level encryption:** The application needs to decrypt data to use it, so encryption keys must be on the same machine. App-level encryption adds complexity without meaningful security gain over OS/infrastructure encryption — the threat it would protect against (someone with disk access but not OS access) is already covered by the lower layer.
@@ -251,12 +253,11 @@ The Foundation requires that Memory storage supports encryption at rest. The spe
 
 ### Secrets Management
 
-**Invariant:** API keys, credentials, and tokens are never stored in library files (Your Memory). Secrets live in configuration, not in Memory. This ensures Memory export never leaks credentials.
+**Invariant:** API keys, credentials, and tokens are never stored in Your Memory and never in anything git tracks. Secrets live outside Your Memory: in environment variables, an untracked config file, or a secret store (a secrets manager, OS keychain, KMS or equivalent). This ensures Memory export never leaks credentials.
 
-| Deployment | Storage | Lifecycle |
-|-----------|---------|-----------|
-| **Local** | Environment variables or config files outside the library folder. Never in Memory. | Owner's responsibility — rotation, revocation, backup. |
-| **Hosted** | Proper secrets infrastructure (secrets manager, KMS, or equivalent). | Operator manages — rotation, revocation, secure storage. Per-instance isolation. |
+| Where | Lifecycle |
+|-------|-----------|
+| Environment variables, an untracked config file, or a secret store — never in Memory, never in tracked configuration | Whoever runs the system (the owner, on their own hardware) handles rotation, revocation and backup. |
 
 ### Conversations
 
@@ -287,9 +288,10 @@ These requirements apply to each component. Cross-referenced into component spec
 
 - [ ] Memory must support full export in open formats — the owner can always get everything out
 - [ ] Memory must be independent of all other components — removing any component leaves Memory intact and readable
-- [ ] API keys, credentials, and tokens must never be stored in Memory (library files). Secrets live in configuration.
+- [ ] API keys, credentials, and tokens must never be stored in Memory. Secrets live outside Your Memory, somewhere git never tracks: environment variables, an untracked config file, or a secret store.
 - [ ] Memory access must be mediated by tools — no component accesses storage directly
-- [ ] Concurrent access must not corrupt data — tool implementations must handle concurrent writes safely
+- [ ] Concurrent access must not corrupt data — tool implementations must handle concurrent writes safely and report conflicts
+- [ ] Version history and restore must be available — the owner can see what changed and make an earlier state current again
 
 ### Gateway
 
@@ -301,10 +303,11 @@ These requirements apply to each component. Cross-referenced into component spec
 
 ### Auth
 
-- [ ] Every request must be authenticated before interacting with the system (D22)
+- [ ] Every request must be authenticated before interacting with the system — the Gateway calls Auth on every request (D22)
+- [ ] Every tool call must be authorized — the Agent Loop asks Auth before each tool call
 - [ ] Unauthenticated requests must be rejected — fail closed
 - [ ] Auth state must be exportable — the owner's identity and policy data belongs to them
-- [ ] Auth must be independent of the Gateway — swapping either doesn't affect the other (D60)
+- [ ] Auth must be swappable independently of the Gateway — neither depends on how the other is built (D60)
 - [ ] Auth data format must be product-owned, not provider-specific — enabling migration between auth providers
 
 ### Tools
@@ -312,7 +315,6 @@ These requirements apply to each component. Cross-referenced into component spec
 - [ ] Untrusted tools must run in isolated containers by default — restricted filesystem, restricted network, resource limits
 - [ ] Tool isolation must be independent of Auth — even if Auth fails, the tool can't escape its container
 - [ ] The system must warn the owner when installing unverified tools on local deployment
-- [ ] Managed hosting must enforce a curated tool allow list — no unvetted tools
 - [ ] Tool crashes must not take down the Agent Loop — containerized tools fail independently
 
 ---
@@ -321,13 +323,14 @@ These requirements apply to each component. Cross-referenced into component spec
 
 ### Properties That Must Always Hold
 
-- [ ] API keys, credentials, and tokens are never stored in Memory (library files) — secrets live in configuration
+- [ ] API keys, credentials, and tokens are never stored in Memory or tracked configuration — secrets live in environment variables, an untracked config file, or a secret store
 - [ ] Unauthenticated requests are always rejected — the system fails closed
-- [ ] Write operations require approval (unless the owner has explicitly disabled approval for that operation)
+- [ ] Operations the owner's rules mark as needing approval never run without it
+- [ ] Version history records every change to Memory, and the owner can restore an earlier state
 - [ ] The audit log records all tool calls — reads, writes, and execution — regardless of logging level
 - [ ] Memory export always works — the owner can get their data out regardless of system state
 - [ ] A tool crash in a container does not crash the Agent Loop — isolation prevents cascade failure
-- [ ] Auth and Gateway are independent — swapping either doesn't affect the other's security properties
+- [ ] Every request passes an Auth check called by the Gateway, and every tool call passes an Auth check asked by the Agent Loop
 - [ ] Content separation is active by default — Memory content is treated as data, not instructions
 
 ### Edge Cases to Test
@@ -359,7 +362,7 @@ Security expands with capability phases. Each phase adds attack surface and matc
 
 | Phase | New Attack Surface | New Security Requirements |
 |-------|-------------------|--------------------------|
-| **Owner only** | Small. One owner, one agent, scoped tools. | Auth required, sandbox (Auth + tool config), approval gates, content separation, audit logging, secrets outside Memory, TLS |
+| **Owner only** | Small. One owner, one agent, scoped tools. | Auth required, sandbox (Auth + tool config), version history, content separation, audit logging, secrets outside Memory, TLS |
 | **Internal agents** | Background agents run without the owner watching. | Per-agent permission scoping, background agent audit trail, per-agent approval policies |
 | **Collaborators** | Multiple humans with different trust levels. | Per-actor Memory access, per-actor tool restrictions, delegation controls, resource limits, cross-actor audit trail |
 | **External actors** | Non-human external actors connecting from outside. Fundamentally different trust model. | Time-bound scoped tokens, spending limits, external action scope controls, full audit trails, anomaly detection, output filtering, application-level rate limiting |
@@ -412,9 +415,9 @@ How do we test that content separation works? Adversarial test suites, red team 
 - [ ] Audit trail captures all model actions for accountability and investigation
 - [ ] Content separation is active — instructions vs data marked at the Model API level
 - [ ] Untrusted tools run in isolated containers
-- [ ] Secrets never live in Memory — always in configuration
-- [ ] Approval gates enforce write confirmation (configurable spectrum)
-- [ ] Version history available for Memory files
+- [ ] Secrets never live in Memory or tracked configuration — always in environment variables, an untracked config file, or a secret store
+- [ ] Approval gates enforce the owner's approval rules (none by default; configurable spectrum)
+- [ ] Version history and restore available for Your Memory — always on
 - [ ] TLS for all external communication
 - [ ] Warning on unverified tool installation
 - [ ] The security model is simple enough for one developer + AI agents to understand and maintain

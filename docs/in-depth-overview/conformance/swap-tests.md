@@ -20,6 +20,8 @@
 5. Start the system
 6. Run the same test conversation
 
+A restart is allowed here: the provider adapter is startup configuration. Changing only the model never needs a restart (see SWAP-2).
+
 **Pass criteria:**
 - [ ] Test conversation completes successfully with Provider B
 - [ ] Zero code changes were required between steps 1 and 6
@@ -42,18 +44,20 @@
 2. Standard test conversation completing successfully
 
 **Procedure:**
-1. Change the model preference in Your Memory preferences file (or adapter config model list)
-2. Send a new message (no restart required)
+1. While the system keeps running, change the model preference in Your Memory
+2. Send a new message
 
 **Pass criteria:**
 - [ ] Next message is processed by Model B
+- [ ] No component was stopped, restarted or reloaded between the change and that message
 - [ ] Zero code changes were required
 - [ ] Only a preference or config value was changed
 - [ ] Response format is identical from the Gateway's perspective (same SSE events)
 
 **Failure indicators:**
 - The Agent Loop required modification to support the new model
-- The Gateway needed to know which model was in use
+- A restart was needed before Model B was used
+- A later message, not the next one, was the first to use Model B
 - Tool definitions needed modification for the new model
 
 ---

@@ -274,7 +274,7 @@ One HTTP endpoint. Not a third API.
 |------|-------|
 | Preferences | Your Memory (personal data, travels with you) |
 | Tool definitions | Self-describing (from the tools themselves) |
-| Secrets | Environment variables only (never in files) |
+| Secrets | Outside Your Memory, never in a git-tracked file: environment variables, an untracked config file, or a secret store |
 | Skills | Prompts in Your Memory |
 | Bootstrap prompt | One line in Agent Loop config: "Read AGENT.md for your instructions" |
 | Bind address | Default `127.0.0.1` (localhost only). Network binding (`0.0.0.0`) requires explicit configuration. See DEPLOY-3, DEPLOY-5. |

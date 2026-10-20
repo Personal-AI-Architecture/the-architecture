@@ -104,7 +104,7 @@ Four components, two APIs, and three things outside the system.
 | **Model API** | API | How the Agent Loop reaches models. Switch providers with a config change. | [model-api.yaml](../../specs/openapi/model-api.yaml) |
 | **Clients** | Outside | Any interface: web app, CLI, mobile, bot, voice. | [gateway-spec.md](./gateway-spec.md) |
 | **Models** | Outside | The intelligence. The system calls a model; it doesn't contain one. | [models-spec.md](./models-spec.md) |
-| **Tools** | Outside | Capabilities in the environment, described in Your Memory, run by the Agent Loop, permitted by Auth. | [tools-spec.md](./tools-spec.md) |
+| **Tools** | Outside | Capabilities in the environment. They describe themselves; the Agent Loop runs them; Auth permits them. | [tools-spec.md](./tools-spec.md) |
 
 **Gateway.** Conversations live in the system, not in any client, so you can start on the web, continue on your phone, and pick up in a terminal. The Gateway stores and loads them through a dedicated internal tool, like any other component that needs Your Memory.
 
@@ -209,7 +209,9 @@ sequenceDiagram
         AL->>Model: Messages + tool definitions
         Model-->>AL: Text and/or tool calls
         opt Model asked for tools
-            AL->>Tools: Run tool calls (permitted by Auth)
+            AL->>Auth: May this actor make this tool call?
+            Auth-->>AL: Allowed or not permitted
+            AL->>Tools: Run permitted tool calls
             Tools->>Memory: Memory tools (read, write, search...)
             Tools-->>AL: Results
         end

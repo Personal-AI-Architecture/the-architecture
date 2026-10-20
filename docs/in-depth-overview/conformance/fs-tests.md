@@ -13,7 +13,7 @@
 1. System A running with populated Your Memory:
    - Documents, skills, configuration preferences
    - Conversation history
-   - Version history (git)
+   - Version history (for example, a Git repository)
    - Custom preferences (always-send tools, model choice, approval settings)
 2. System B — a fresh deployment on different hardware (or different deployment mode)
 
@@ -107,7 +107,8 @@
 **Equivalent to:** SWAP-1
 
 **Pass criteria:**
-- [ ] Change provider config → next message uses new provider → no code changes
+- [ ] Change provider config → after a restart (allowed for a provider swap), messages use the new provider → no code changes
+- [ ] Change only the model preference → the next message uses the new model with no restart (see SWAP-2)
 
 ---
 

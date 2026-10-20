@@ -1,5 +1,5 @@
 ---
-sidebar_label: Gateway API
+sidebar_label: Gateway ↔ Agent Loop contract
 hide_table_of_contents: true
 ---
 
@@ -9,11 +9,11 @@ hide_table_of_contents: true
 
 Every system with more than one component has to answer a basic question: how do they talk to each other? In this architecture, the two external boundaries — the Gateway API (how clients connect) and the Model API (how the Agent Loop connects to models) — were defined from the start. But there was one internal handoff left undefined: how does the Gateway pass a request to the Agent Loop, and how does the Agent Loop send results back?
 
-A protocol evaluation (D136) looked at every communication gap in the architecture — 29+ potential interfaces — and found that all of them resolve through things that already exist (contracts, tools, configuration). All except this one. The Gateway needs to hand off a conversation to the Agent Loop. The Agent Loop needs to stream results back. Auth needs to sit on the path between them. That's the entire scope.
+A protocol evaluation (D136) looked at every communication gap in the architecture — 29+ potential interfaces — and found that all of them resolve through things that already exist (contracts, tools, configuration). All except this one. The Gateway needs to hand off a conversation to the Agent Loop. The Agent Loop needs to stream results back. Auth must check every request before it reaches the Agent Loop. That's the entire scope.
 
 This is **not** a third API. The Gateway API and Model API are the swappability boundaries — external things plug into them. This is an internal contract between two components we control, inside the same deployment. It just needs to be well-defined so the components stay decoupled — you should be able to swap the Agent Loop without touching the Gateway, and vice versa (FS-5, FS-7).
 
-The design principle: **the simplest contract that fills the one gap.** One endpoint. One stream format. Auth on the path. No protocol envelope, no routing, no node registration, no versioning scheme. Two components in the same deployment don't need the ceremony of an external API — they need a clear agreement about the shape of the data and what to expect back.
+The design principle: **the simplest contract that fills the one gap.** One endpoint. One stream format. An Auth check before every request. No protocol envelope, no routing, no node registration, no versioning scheme. Two components in the same deployment don't need the ceremony of an external API — they need a clear agreement about the shape of the data and what to expect back.
 
 **Related documents:** [foundation-spec.md](./foundation-spec.md) (architecture overview, links to all component specs)
 
@@ -21,20 +21,21 @@ The design principle: **the simplest contract that fills the one gap.** One endp
 
 ## The Contract
 
-One HTTP endpoint. Gateway POSTs a request, Agent Loop returns an SSE stream. Auth middleware sits on the path.
+One HTTP endpoint. Gateway POSTs a request, Agent Loop returns an SSE stream. The Gateway calls Auth on every request before it POSTs, and the Agent Loop asks Auth before each tool call.
 
 ```
-Client → Gateway API → Gateway → [Auth] → POST /engine/chat → Agent Loop → Model API → Model
-                                                                    ↓
-                                                                  Tools
+Client → Gateway API → Gateway → POST /engine/chat → Agent Loop → Model API → Model
+                          ↓                               ↓
+                   Auth (every request)          Auth (each tool call) → Tools
 ```
+
+The path `/engine/chat` and the `engine` schema names keep the component's older name until the next contract revision.
 
 ### Request: `POST /engine/chat`
 
 ```json
 {
   "messages": [
-    { "role": "system", "content": "Read /AGENT.md for your instructions." },
     { "role": "user", "content": "Help me plan my finances" },
     { "role": "assistant", "content": "I'll read your finance page..." },
     { "role": "user", "content": "Focus on budgeting" }
@@ -48,29 +49,40 @@ Client → Gateway API → Gateway → [Auth] → POST /engine/chat → Agent Lo
 }
 ```
 
-**Messages** follow the industry-standard `role` + `content` format (consistent with D16: use the prevailing standard, not a custom protocol). The Gateway packages this array from three sources:
+**Messages** follow the industry-standard `role` + `content` format (consistent with D16: use the prevailing standard, not a custom protocol). All three contracts (Gateway API, this contract, Model API) use one message shape, defined in `specs/schemas/message.json`:
 
-1. **System message** — from configuration (the bootstrap prompt that tells the model to read Your Memory)
-2. **Conversation history** — from Your Memory, via the Gateway's conversation store tool (D152)
-3. **Current message** — from the client request
+- **Content is a list of parts.** Text comes first; images, files and other types are further parts. (The example above shows text-only content in its shorter string form.)
+- **Tool calls and tool results are ordinary parts of messages.** An assistant message can carry the text the model wrote and the tool calls it made; a tool message carries a tool result. They are saved in conversation history like any other message, so a resumed conversation sends them back to the Agent Loop unchanged.
+
+The Gateway packages this array from two sources:
+
+1. **Conversation history** — from Your Memory, via the Gateway's conversation store tool (D152)
+2. **Current message** — from the client request
+
+The bootstrap prompt (the short system message that tells the model to read Your Memory) is not in the request. It is part of the Agent Loop's own configuration, and the Agent Loop puts it first when it calls the model.
+
+**Model.** Every request also carries the model to use. The Gateway reads the owner's current model choice on every message and passes it here, so a changed choice applies to the next message with no restart of either component.
 
 **Metadata** is pass-through context. The Agent Loop can use it or ignore it.
 
 | Field | Description | Required |
 |-------|-------------|----------|
-| `messages` | System prompt + conversation history + current message | Yes |
+| `messages` | Conversation history (including tool calls and tool results) + current message | Yes |
+| Model | The model to use for this request, from the owner's current choice | Yes |
 | `metadata.conversation_id` | Which conversation this belongs to | No (Agent Loop doesn't need it — Gateway tracks this) |
 | `metadata.correlation_id` | Request trace ID, generated by Gateway | Yes |
+| Request timestamp | When the Gateway sent the request, in ISO 8601 (see [communication-principles.md](./communication-principles.md) P2) | Yes |
 | `metadata.trigger` | `"message"` \| `"webhook"` \| `"schedule"` | No (default: `"message"`) |
 | `metadata.client_context` | Client-provided context (path, folder) | No |
 
 **What is NOT in the request** — the Agent Loop is pre-configured with:
 
+- **Bootstrap prompt** — the short system message that tells the model to read Your Memory
 - **Tool definitions** — which tool sources (MCP servers, CLI tools, native functions), which tools are always-send (D109)
-- **Provider configuration** — model, API key, base URL
+- **Provider configuration** — provider adapter, API key reference, base URL
 - **Optional implementation bounds** — implementations MAY pass a `maxIterations` safety bound. This is an optional, implementation-provided parameter with no default. The Agent Loop itself does not impose an iteration cap — it loops until the model signals completion. If an implementation provides `maxIterations`, that is the implementation's deployment choice, not an architectural constraint.
 
-These are Agent Loop startup configuration, not per-request data. They don't change between requests.
+These are Agent Loop startup configuration, not per-request data. They don't change between requests. The model is not in this list: it travels with each request.
 
 ### Trigger Types
 
@@ -113,14 +125,16 @@ data: {"finish_reason":"stop","usage":{"prompt_tokens":150,"completion_tokens":7
 |-------|------|------|
 | `text-delta` | Model generates text | `{ content: string }` |
 | `tool-call` | Model initiates a tool call | `{ id: string, name: string, arguments: object }` |
-| `tool-result` | Tool execution completes | `{ id: string, output: string }` or `{ id: string, error: string }` |
+| `tool-result` | Tool execution completes, or Auth refused the call | `{ id: string, output: string }` or `{ id: string, error: string }` |
 | `done` | Agent loop complete | `{ finish_reason: string, usage: { prompt_tokens, completion_tokens } }` |
 | `error` | Unrecoverable failure mid-stream | `{ code: string, message: string }` |
 
 Tool calls are visible in the stream because:
 - Clients use them for status display ("Reading file...", "Searching library...")
-- Approval gates need the client to see and approve tool calls (D104-D106)
+- Products that add approval prompts can show the owner a tool call before it runs (whether to ask is the product's choice)
 - Observability — the full interaction is traceable
+
+When Auth refuses a tool call, the Agent Loop does not run it and returns a `tool-result` error saying the call was not permitted, so the model can tell "not permitted" apart from "failed".
 
 The Agent Loop may call the model multiple times in one stream (model calls tools, Agent Loop executes them, sends results back to model, model continues). This multi-turn loop is internal to the Agent Loop — the stream captures everything that happens.
 
@@ -135,10 +149,10 @@ The request never started processing. No SSE stream opened.
 | Code | When |
 |------|------|
 | 400 | Invalid request — missing messages, bad format |
-| 401 | Auth middleware rejected the request |
+| 401 | Auth rejected the request |
 | 503 | Agent Loop unavailable |
 
-Response body: `{ "code": "...", "message": "..." }`
+Response body: `{ "code": "...", "message": "..." }`, plus the request's correlation ID.
 
 ### Mid-Stream Errors (SSE Error Events)
 
@@ -154,19 +168,20 @@ The Agent Loop must classify errors correctly — no catch-all error code. Recov
 
 **Error message safety:** The `message` field in error events must be safe for client display. Never forward raw `Error.message`, stack traces, or file paths. Map each error code to a fixed safe message. Log raw diagnostic detail to structured stdout only. See Security Requirements below.
 
+Every error, whether an HTTP response or an SSE error event, carries the request's correlation ID, so a failure can be traced to the request that caused it ([communication-principles.md](./communication-principles.md) P2, P5).
+
 After an `error` event, the stream closes. The Gateway decides how to communicate the failure to the client.
 
 ---
 
 ## Auth Middleware
 
-Auth sits between the Gateway and the Agent Loop as HTTP middleware. It is not part of either component (D60: Auth is independent and cross-cutting).
+Auth is a separate component, not part of the Gateway or the Agent Loop (D60). Permissions live only in Auth. It is called at two points:
 
-1. **Validates** the request (token, session, API key)
-2. **Attaches** identity to the request via headers: `X-Actor-ID`, `X-Actor-Permissions`
-3. **Rejects** unauthorized requests with HTTP 401
+1. **Every request.** The Gateway calls Auth before it POSTs to the Agent Loop. Auth validates the request (token, session, API key) and identifies the actor. The Gateway attaches that identity to the request (today via headers: `X-Actor-ID`, `X-Actor-Permissions`) or rejects the request with HTTP 401.
+2. **Each tool call.** Before running a tool call, the Agent Loop asks Auth whether this actor may make it. A refused call is not run; the model is told it was not permitted.
 
-The Agent Loop receives pre-authenticated requests. It never validates identity — Auth already did. The Agent Loop can read the identity headers if tool permissions depend on the actor, but it doesn't enforce authentication.
+The Agent Loop receives pre-authenticated requests. It never validates identity — Auth already did — and it never decides permissions itself: it asks Auth and honours the answer.
 
 ---
 
@@ -213,7 +228,7 @@ Most AI SDKs produce streaming events that map directly to this contract's SSE e
 
 ## Open Questions
 
-- **OQ-1: Approval gates and mid-stream interaction.** When the model calls the approval tool and needs owner confirmation, the stream must pause or complete. Simplest approach: the stream completes with the approval request in the response, the client sends a new message with the decision through the normal Gateway API, and the Agent Loop continues in a new stream. This handles approval at the conversation level, not the stream level. Needs validation when Dave J implements approval gates.
+- **OQ-1: Approval gates and mid-stream interaction.** Approval prompts are a product choice; the architecture default is that the owner can do everything. For a product that adds them: when the model calls the approval tool and needs owner confirmation, the stream must pause or complete. Simplest approach: the stream completes with the approval request in the response, the client sends a new message with the decision through the normal Gateway API, and the Agent Loop continues in a new stream. This handles approval at the conversation level, not the stream level. It has not yet been validated against an implementation.
 
 ---
 
@@ -222,8 +237,11 @@ Most AI SDKs produce streaming events that map directly to this contract's SSE e
 - [ ] The Gateway can send a request to the Agent Loop and receive a streamed response
 - [ ] Swapping the Agent Loop does not require Gateway changes — the contract shape is the only dependency
 - [ ] Swapping the Gateway does not require Agent Loop changes — the Agent Loop accepts any caller that sends the right shape
-- [ ] Auth middleware can authenticate requests without either component knowing how authentication works
-- [ ] Tool calls are visible in the stream — clients can display status and present approval gates
+- [ ] The Gateway calls Auth on every request and the Agent Loop asks Auth before each tool call, without either component knowing how Auth decides
+- [ ] A changed model choice applies to the next request with no restart
+- [ ] Tool calls and tool results use the shared message shape and are saved in conversation history
+- [ ] Tool calls are visible in the stream — clients can display status, and products that add approval prompts can present them
+- [ ] Every request carries a correlation ID and a timestamp, and every error carries the correlation ID
 - [ ] All trigger types (message, webhook, schedule) produce the same request shape — the Agent Loop genuinely cannot tell the difference
 - [ ] Pre-stream errors return HTTP status codes; mid-stream errors return SSE error events — no ambiguity about which failure mode applies
 - [ ] The contract works as both an HTTP endpoint and a direct function call (V1 same-process) without changing the shape
@@ -234,11 +252,27 @@ Most AI SDKs produce streaming events that map directly to this contract's SSE e
 
 Per-component requirements from [security-spec.md](./security-spec.md). Security-spec owns the "why" (D131); this section owns the "what" for the Gateway ↔ Agent Loop interface.
 
-- [ ] Every request must pass through Auth middleware before reaching the Agent Loop — no bypass path
+- [ ] Every request must pass an Auth check, called by the Gateway, before reaching the Agent Loop — no bypass path
+- [ ] Every tool call must pass an Auth check, asked by the Agent Loop, before it runs
 - [ ] Credentials (tokens, API keys, session IDs) must never appear in the request body — Auth validates and attaches identity via headers (`X-Actor-ID`, `X-Actor-Permissions`)
-- [ ] The Agent Loop must treat identity headers as read-only — it can use them for tool-level permission checks but must not modify, forge, or strip them
+- [ ] The Agent Loop must treat identity headers as read-only — it passes the identity to Auth for tool-level checks but must not modify, forge, or strip it
 - [ ] Correlation IDs must flow end-to-end (Gateway → Auth → Agent Loop → tools → logs) for full request traceability
 - [ ] The SSE stream must not leak internal system paths, stack traces, or credentials in error events — error messages must be safe for client display
+
+---
+
+## Contract alignment
+
+The text above is ahead of `specs/openapi/gateway-engine.yaml` (and `specs/schemas/message.json`) in these places, pending the next contract revision:
+
+- **Model per request.** The request has no field for the model. This spec requires one on every request.
+- **One message shape.** The request's message schema has no tool calls or tool-call references, although it allows a `tool` role. This spec requires the shared shape in `specs/schemas/message.json`, with tool calls and tool results as message parts; `finish_reason` and the tool-result shape should match across the three contracts.
+- **Content as parts.** `specs/schemas/message.json` defines content as a string. This spec requires a list of parts.
+- **Auth placement.** The contract describes Auth as middleware between the Gateway and the Agent Loop. This spec has the Gateway call Auth on every request and the Agent Loop ask Auth before each tool call.
+- **Timestamp.** The request metadata has no timestamp. This spec requires one.
+- **Correlation ID on errors.** The error body and error event carry only `code` and `message`. This spec requires the correlation ID as well. `metadata` is optional in the yaml, so `correlation_id` is not yet enforced either.
+- **Bootstrap prompt.** The yaml describes the system message as assembled by the Gateway from configuration. This spec makes the bootstrap prompt Agent Loop configuration, so the request carries no system message.
+- **Old name.** The `/engine/chat` path and `engine` schema names still use the component's old name.
 
 ---
 
@@ -247,8 +281,8 @@ Per-component requirements from [security-spec.md](./security-spec.md). Security
 | # | Decision | Rationale |
 |---|----------|-----------|
 | D136 | Protocol evaluation — 29+ communication gaps collapsed to one interface | Systematic review identified that all inter-component communication concerns resolve through existing architecture (contracts, tools, configuration). Only one gap remained: how the Gateway passes requests to the Agent Loop. |
-| D137 | Gateway ↔ Agent Loop is a plain HTTP API contract | Not a third API — an internal interface between two components we control. One endpoint, SSE streaming, auth middleware on path. No protocol envelope, no routing, no node registration. Fills the one gap identified by D136. |
+| D137 | Gateway ↔ Agent Loop is a plain HTTP API contract | Not a third API — an internal interface between two components we control. One endpoint, SSE streaming, an Auth check before every request. No protocol envelope, no routing, no node registration. Fills the one gap identified by D136. |
 
 ---
 
-*One endpoint. One stream. Auth on the path. This is the simplest contract that fills the one gap between the Gateway and the Agent Loop that the protocol evaluation identified.*
+*One endpoint. One stream. Auth checks every request and every tool call. This is the simplest contract that fills the one gap between the Gateway and the Agent Loop that the protocol evaluation identified.*
