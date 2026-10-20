@@ -37,7 +37,7 @@ Once Your Memory is the platform, you can own it. All other components of your A
 
 See [memory-spec.md](./memory-spec.md) and [memory-as-platform.md](./memory-as-platform.md).
 
-### 2. Add the Intelligence (The AI Model)
+### 2. Add the intelligence (the AI model)
 
 In a physical brain, memory and intelligence cannot be separated. You can't swap in better reasoning. A digital brain doesn't have that constraint. Your Memory persists, and intelligence arrives through the Model API, from any provider or your own hardware, swapped with a config change.
 
