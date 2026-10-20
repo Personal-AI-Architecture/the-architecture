@@ -29,6 +29,10 @@ In traditional software, Your Memory cannot be separated from the code that powe
 
 We can get rid of the Big Tech platforms, and make Your Memory the platform instead.
 
+<p align="center">
+  <img src="../assets/memory-is-the-platform.svg" alt="Today's AI apps: Your Memory is locked inside the app with its models, interfaces and tools, so leaving the app means losing your memory. With PAA: Your Memory is the platform, in files you own, and models, interfaces and tools plug into it, so you can swap anything and your memory stays." width="860" />
+</p>
+
 Once Your Memory is the platform, you can own it. All other components of your AI system can plug into it, and become swappable components. Your Memory persists when everything else is swapped, upgraded, or removed, and stays readable with standard tools (a text editor, a file browser, a database viewer) even when the system isn't running.
 
 See [memory-spec.md](./memory-spec.md) and [memory-as-platform.md](./memory-as-platform.md).
