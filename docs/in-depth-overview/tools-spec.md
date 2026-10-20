@@ -246,7 +246,7 @@ The Agent Loop doesn't interpret, filter, or modify tool calls or results. It's 
 
 ### Tool registration — how the Agent Loop knows what's available
 
-There's no special registration system. The Agent Loop's normal loop (see [engine-spec.md](./engine-spec.md)) already includes tool definitions as an input alongside the system prompt and conversation history. "Registration" is just how those definitions get there.
+There's no special registration system. The Agent Loop's normal loop (see [agent-loop-spec.md](./agent-loop-spec.md)) already includes tool definitions as an input alongside the system prompt and conversation history. "Registration" is just how those definitions get there.
 
 Tool plumbing — where tools live, what addresses to connect to — is environment configuration that travels with the deployment. Tool preferences — which tools to always-send, what policies to apply — are personal data in Your Memory. At startup, the Agent Loop reads environment config to know where to find tools, then discovers what they offer. How it gets the actual definitions depends on the tool:
 

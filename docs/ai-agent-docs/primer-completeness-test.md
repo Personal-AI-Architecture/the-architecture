@@ -23,7 +23,7 @@ If any necessary judgment requires fallback, that is a `primer failure`.
 ### 1. Choose The Audit Slice
 
 - Pick a real implementation or a meaningful subsystem.
-- Prefer areas with known drift risk: Gateway, Memory, Auth, Configuration, Engine, or startup readiness.
+- Prefer areas with known drift risk: Gateway, Memory, Auth, Configuration, Agent Loop, or startup readiness.
 
 ### 2. Read Only Primer Authority
 
@@ -81,7 +81,7 @@ Why this is valid:
 ## Invalid Example
 
 ```text
-Area: Engine
+Area: Agent Loop
 Finding: maybe drift
 Reason: I remember the deeper docs said something stronger
 ```
@@ -129,5 +129,5 @@ If the test fails:
 - `docs/ai-agent-docs/review-checklists/memory-review.md`
 - `docs/ai-agent-docs/review-checklists/auth-review.md`
 - `docs/ai-agent-docs/review-checklists/configuration-review.md`
-- `docs/ai-agent-docs/review-checklists/engine-review.md`
+- `docs/ai-agent-docs/review-checklists/agent-loop-review.md`
 - `docs/ai-agent-docs/review-checklists/security-review.md`

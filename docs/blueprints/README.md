@@ -29,12 +29,12 @@ For implementation-ready status, each artifact should have:
   - [Conformance](./tests/Gateway-API-conformance.md)
   - [Drift Guard](./drift/Gateway-API-drift-guard.md)
   - [Implement Prompt](./prompts/implement-Gateway-API.md)
-- Engine:
-  - [Blueprint](./Engine.md)
+- Agent Loop:
+  - [Blueprint](./Agent-Loop.md)
   - [Schema](./contracts/Engine.schema.json)
-  - [Conformance](./tests/Engine-conformance.md)
-  - [Drift Guard](./drift/Engine-drift-guard.md)
-  - [Implement Prompt](./prompts/implement-Engine.md)
+  - [Conformance](./tests/Agent-Loop-conformance.md)
+  - [Drift Guard](./drift/Agent-Loop-drift-guard.md)
+  - [Implement Prompt](./prompts/implement-Agent-Loop.md)
 - Auth:
   - [Blueprint](./Auth.md)
   - [Schema](./contracts/Auth.schema.json)
@@ -65,12 +65,12 @@ For implementation-ready status, each artifact should have:
   - [Conformance](./tests/Models-conformance.md)
   - [Drift Guard](./drift/Models-drift-guard.md)
   - [Implement Prompt](./prompts/implement-Models.md)
-- Gateway-Engine Contract:
-  - [Blueprint](./Gateway-Engine-Contract.md)
+- Gateway ↔ Agent Loop Contract:
+  - [Blueprint](./Gateway-Agent-Loop-Contract.md)
   - [Schema](./contracts/Gateway-Engine-Contract.schema.json)
-  - [Conformance](./tests/Gateway-Engine-Contract-conformance.md)
-  - [Drift Guard](./drift/Gateway-Engine-Contract-drift-guard.md)
-  - [Implement Prompt](./prompts/implement-Gateway-Engine-Contract.md)
+  - [Conformance](./tests/Gateway-Agent-Loop-Contract-conformance.md)
+  - [Drift Guard](./drift/Gateway-Agent-Loop-Contract-drift-guard.md)
+  - [Implement Prompt](./prompts/implement-Gateway-Agent-Loop-Contract.md)
 - Security:
   - [Blueprint](./Security.md)
   - [Schema](./contracts/Security.schema.json)
@@ -109,12 +109,12 @@ For implementation-ready status, each artifact should have:
 | Artifact | Type | Blueprint | Schema | Conformance | Drift Guard | Implement Prompt | Status |
 |---|---|---|---|---|---|---|---|
 | Gateway | Component | [Gateway.md](./Gateway.md) | [Gateway.schema.json](./contracts/Gateway.schema.json) | [Gateway-conformance.md](./tests/Gateway-conformance.md) | [Gateway-drift-guard.md](./drift/Gateway-drift-guard.md) | [implement-Gateway.md](./prompts/implement-Gateway.md) | Complete |
-| Engine (Agent Loop) | Component | [Engine.md](./Engine.md) | [Engine.schema.json](./contracts/Engine.schema.json) | [Engine-conformance.md](./tests/Engine-conformance.md) | [Engine-drift-guard.md](./drift/Engine-drift-guard.md) | [implement-Engine.md](./prompts/implement-Engine.md) | Complete |
+| Agent Loop | Component | [Agent-Loop.md](./Agent-Loop.md) | [Engine.schema.json](./contracts/Engine.schema.json) | [Agent-Loop-conformance.md](./tests/Agent-Loop-conformance.md) | [Agent-Loop-drift-guard.md](./drift/Agent-Loop-drift-guard.md) | [implement-Agent-Loop.md](./prompts/implement-Agent-Loop.md) | Complete |
 | Gateway API | API Boundary | [Gateway-API.md](./Gateway-API.md) | [Gateway-API.schema.json](./contracts/Gateway-API.schema.json) | [Gateway-API-conformance.md](./tests/Gateway-API-conformance.md) | [Gateway-API-drift-guard.md](./drift/Gateway-API-drift-guard.md) | [implement-Gateway-API.md](./prompts/implement-Gateway-API.md) | Complete |
 | Auth | Component | [Auth.md](./Auth.md) | [Auth.schema.json](./contracts/Auth.schema.json) | [Auth-conformance.md](./tests/Auth-conformance.md) | [Auth-drift-guard.md](./drift/Auth-drift-guard.md) | [implement-Auth.md](./prompts/implement-Auth.md) | Complete |
 | Memory | Component | [Memory.md](./Memory.md) | [Memory.schema.json](./contracts/Memory.schema.json) | [Memory-conformance.md](./tests/Memory-conformance.md) | [Memory-drift-guard.md](./drift/Memory-drift-guard.md) | [implement-Memory.md](./prompts/implement-Memory.md) | Complete |
 | Model API | API Boundary | [Model-API.md](./Model-API.md) | [Model-API.schema.json](./contracts/Model-API.schema.json) | [Model-API-conformance.md](./tests/Model-API-conformance.md) | [Model-API-drift-guard.md](./drift/Model-API-drift-guard.md) | [implement-Model-API.md](./prompts/implement-Model-API.md) | Complete |
-| Gateway-Engine Contract | Internal Contract Boundary | [Gateway-Engine-Contract.md](./Gateway-Engine-Contract.md) | [Gateway-Engine-Contract.schema.json](./contracts/Gateway-Engine-Contract.schema.json) | [Gateway-Engine-Contract-conformance.md](./tests/Gateway-Engine-Contract-conformance.md) | [Gateway-Engine-Contract-drift-guard.md](./drift/Gateway-Engine-Contract-drift-guard.md) | [implement-Gateway-Engine-Contract.md](./prompts/implement-Gateway-Engine-Contract.md) | Complete |
+| Gateway ↔ Agent Loop Contract | Internal Contract Boundary | [Gateway-Agent-Loop-Contract.md](./Gateway-Agent-Loop-Contract.md) | [Gateway-Engine-Contract.schema.json](./contracts/Gateway-Engine-Contract.schema.json) | [Gateway-Agent-Loop-Contract-conformance.md](./tests/Gateway-Agent-Loop-Contract-conformance.md) | [Gateway-Agent-Loop-Contract-drift-guard.md](./drift/Gateway-Agent-Loop-Contract-drift-guard.md) | [implement-Gateway-Agent-Loop-Contract.md](./prompts/implement-Gateway-Agent-Loop-Contract.md) | Complete |
 
 Progress (core scope):
 - 7/7 blueprints complete

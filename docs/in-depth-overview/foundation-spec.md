@@ -57,7 +57,7 @@ Your Memory and the models you use with it are the brain. The Agent Loop is the 
 
 The Agent Loop is deliberately generic. Everything that makes a product unique (methodology, personality, skills, folder structure) lives in Your Memory, not in the loop. So the Agent Loop isn't part of a platform you're locked into. It's another swappable component.
 
-See [engine-spec.md](./engine-spec.md).
+See [agent-loop-spec.md](./agent-loop-spec.md).
 
 ### 4. Add the tools
 
@@ -97,7 +97,7 @@ Four components, two APIs, and three things outside the system.
 | Part | Kind | What it does | Spec |
 |------|------|--------------|------|
 | **Your Memory** | Component | All your data, in files you own. Everything else depends on it; it depends on nothing. | [memory-spec.md](./memory-spec.md) |
-| **Agent Loop** | Component | Calls the model, runs the tools it asks for, and repeats until the job is done. | [engine-spec.md](./engine-spec.md) |
+| **Agent Loop** | Component | Calls the model, runs the tools it asks for, and repeats until the job is done. | [agent-loop-spec.md](./agent-loop-spec.md) |
 | **Gateway** | Component | One front door for every interface. Manages conversations and hands each message to the Agent Loop. | [gateway-spec.md](./gateway-spec.md) |
 | **Auth** | Component | Controls who and what gets in. Every request passes through it. | [auth-spec.md](./auth-spec.md) |
 | **Gateway API** | API | How interfaces connect. Anything that speaks it plugs in. | [gateway-api.yaml](../../specs/openapi/gateway-api.yaml) |
@@ -121,7 +121,7 @@ Both APIs are deliberately thin. They pass information forward with as little op
 
 Tool calls travel through the Model API and are run by the Agent Loop. How the Agent Loop talks to tools (MCP today, something better tomorrow) is internal to the Agent Loop, so there is no third API for tools.
 
-Between the Gateway and the Agent Loop there is one internal contract, not a third API: the Gateway posts the messages and metadata, and the Agent Loop streams back text, tool calls, results and completion. See [gateway-engine-contract.md](./gateway-engine-contract.md) and [gateway-engine.yaml](../../specs/openapi/gateway-engine.yaml).
+Between the Gateway and the Agent Loop there is one internal contract, not a third API: the Gateway posts the messages and metadata, and the Agent Loop streams back text, tool calls, results and completion. See [gateway-agent-loop-contract.md](./gateway-agent-loop-contract.md) and [gateway-engine.yaml](../../specs/openapi/gateway-engine.yaml).
 
 ---
 
@@ -265,9 +265,9 @@ These stories test the architecture itself. Each has a test procedure in [confor
 |----------|----------------|
 | [principles.md](./principles.md) | The five architecture principles in full |
 | [memory-as-platform.md](./memory-as-platform.md) | Why memory is the center of the architecture |
-| [memory-spec.md](./memory-spec.md), [engine-spec.md](./engine-spec.md), [gateway-spec.md](./gateway-spec.md), [auth-spec.md](./auth-spec.md) | The four components |
+| [memory-spec.md](./memory-spec.md), [agent-loop-spec.md](./agent-loop-spec.md), [gateway-spec.md](./gateway-spec.md), [auth-spec.md](./auth-spec.md) | The four components |
 | [models-spec.md](./models-spec.md), [tools-spec.md](./tools-spec.md) | Models and tools |
-| [adapter-spec.md](./adapter-spec.md), [communication-principles.md](./communication-principles.md), [gateway-engine-contract.md](./gateway-engine-contract.md) | How the parts connect |
+| [adapter-spec.md](./adapter-spec.md), [communication-principles.md](./communication-principles.md), [gateway-agent-loop-contract.md](./gateway-agent-loop-contract.md) | How the parts connect |
 | [configuration-spec.md](./configuration-spec.md), [deployment-spec.md](./deployment-spec.md), [security-spec.md](./security-spec.md) | Running the system |
 | [customization-spec.md](./customization-spec.md) | How implementations build on the Architecture |
 | [implementers-reference.md](./implementers-reference.md) | Condensed contracts: what each component must do |

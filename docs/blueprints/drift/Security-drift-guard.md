@@ -46,7 +46,7 @@ This document defines anti-drift controls for Security cross-cutting implementat
 | SECD-CHK-009 | Tool boundaries enforce scope independent of Auth-only checks | Runtime boundary and isolation tests | Critical |
 | SECD-CHK-010 | Auth export excludes secret-bearing fields | Export schema + forbidden-field checks | Critical |
 | SECD-CHK-011 | Security controls active at startup readiness | Startup gate tests (auth/audit/safe-errors/approval) | Critical |
-| SECD-CHK-012 | Correlation IDs propagate across boundaries | End-to-end trace tests Gateway->Auth->Engine->tools->audit | High |
+| SECD-CHK-012 | Correlation IDs propagate across boundaries | End-to-end trace tests Gateway->Auth->Agent Loop->tools->audit | High |
 | SECD-CHK-013 | Export/history safety-net guarantees remain active | Memory export/history readiness tests | Critical |
 | SECD-CHK-014 | Security properties survive swap scenarios | Adapter/provider/component swap regression suite | High |
 
@@ -56,7 +56,7 @@ This document defines anti-drift controls for Security cross-cutting implementat
 - Any mid-stream error code is outside approved taxonomy.
 - Approval-required write executes before decision.
 - Approval decision can be made without approval authority.
-- Unauthorized request reaches Engine loop execution.
+- Unauthorized request reaches Agent Loop execution.
 - Hidden request fields alter adapter/provider/tool/runtime behavior.
 - Tool runtime accesses out-of-scope resources despite auth policy.
 - Auth export response contains secret-like fields.

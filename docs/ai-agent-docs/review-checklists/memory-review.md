@@ -8,7 +8,7 @@ Use this when reviewing Memory tools, export/history behavior, persistent conver
 
 ## Checklist
 
-- [ ] Memory has zero outward dependencies on Gateway, Engine, or Auth.
+- [ ] Memory has zero outward dependencies on Gateway, Agent Loop, or Auth.
 - [ ] Components access Memory through approved tools or boundaries rather than direct storage reach-in.
 - [ ] Conversations are inside the Memory contract rather than side storage.
 - [ ] Structured or queryable owner data is not hidden outside the model-facing Memory surface.

@@ -194,7 +194,7 @@ personal-ai-architecture/
 │   ├── doc-registry.json
 │   ├── in-depth-overview/                ← architecture specs + guides + conformance
 │   │   ├── foundation-spec.md
-│   │   ├── engine-spec.md
+│   │   ├── agent-loop-spec.md
 │   │   ├── ...
 │   │   ├── guides-spec.md                ← this file
 │   │   ├── implementers-reference.md     ← Deliverable 1

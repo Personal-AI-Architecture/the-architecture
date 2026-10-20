@@ -28,7 +28,7 @@ Some decisions use older names: **Engine** is now the Agent Loop, **Provider API
 | D64 | Four components, two connectors, three external dependencies | The final architecture resolved through six component interviews. |
 | D65 | Level 2 is composable lego blocks — each piece independently usable | A Level 2 product is a box of legos, not a monolith. No piece requires another piece. |
 | D135 | Memory/tool binary — if it's data, it's memory; if it's not data, it's a tool | Everything is either a noun (memory) or a verb (tool). New capabilities compose from existing primitives. "Your Memory" (D138) distinguishes the component from the concept. |
-| D137 | Gateway ↔ Engine is a plain HTTP API contract — not a third connector | One internal endpoint between two components we control. See [gateway-engine-contract.md](./gateway-engine-contract.md). |
+| D137 | Gateway ↔ Engine is a plain HTTP API contract — not a third connector | One internal endpoint between two components we control. See [gateway-agent-loop-contract.md](./gateway-agent-loop-contract.md). |
 | D138 | Memory component renamed to "Your Memory" | Distinguishes the component (your owned local storage) from the concept (all data is memory per D135). |
 | D139 | Contracts are swappable via adapters — completing zero-lock-in | Components via contracts, contracts via adapters, Memory via tools. The swappability chain is structurally complete. See [adapter-spec.md](./adapter-spec.md). |
 | D143 | Configuration is a cross-cutting concern with its own spec | Not owned by any single component. Three categories: preferences (Your Memory), runtime config (thin bootstrap), tool self-description. See [configuration-spec.md](./configuration-spec.md). |

@@ -17,7 +17,7 @@ Make common architecture failures easier to recognize quickly during implementat
 
 - Symptom: requests work with no auth middleware, no identity headers, or a “local mode” that bypasses the boundary.
 - Likely cause: implementer treated permissive policy as equivalent to no Auth component.
-- Read next: `docs/ai-agent-docs/auth.md`, `docs/ai-agent-docs/gateway-engine-contract.md`
+- Read next: `docs/ai-agent-docs/auth.md`, `docs/ai-agent-docs/gateway-agent-loop-contract.md`
 - Matrix IDs: `A-01`, `A-02`, `A-05`, `GC-04`
 
 ## Pattern: Config Layer Collapse
@@ -31,7 +31,7 @@ Make common architecture failures easier to recognize quickly during implementat
 
 - Symptom: approval works only through local readline/UI branches and does not appear in the contract.
 - Likely cause: approval was treated as UX behavior instead of contract-visible interaction plus coded enforcement.
-- Read next: `docs/ai-agent-docs/client-gateway-contract.md`, `docs/ai-agent-docs/gateway-engine-contract.md`, `docs/ai-agent-docs/security.md`
+- Read next: `docs/ai-agent-docs/client-gateway-contract.md`, `docs/ai-agent-docs/gateway-agent-loop-contract.md`, `docs/ai-agent-docs/security.md`
 - Matrix IDs: `S-03`, `S-05`, `GC-06`
 
 ## Pattern: Version History Is Best-Effort
@@ -51,15 +51,15 @@ Make common architecture failures easier to recognize quickly during implementat
 ## Pattern: Error Taxonomy Collapse
 
 - Symptom: every mid-stream failure becomes `provider_error`, or raw exception text leaks into client-visible events.
-- Likely cause: Engine error behavior was implemented without the contract taxonomy and sanitization rules.
-- Read next: `docs/ai-agent-docs/gateway-engine-contract.md`, `docs/ai-agent-docs/security.md`
+- Likely cause: Agent Loop error behavior was implemented without the contract taxonomy and sanitization rules.
+- Read next: `docs/ai-agent-docs/gateway-agent-loop-contract.md`, `docs/ai-agent-docs/security.md`
 - Matrix IDs: `GC-03`, `GC-05`, `S-01`
 
-## Pattern: Engine Stops Early
+## Pattern: Agent Loop Stops Early
 
 - Symptom: the loop exits because of an internal iteration cap before the model signals completion.
-- Likely cause: safety bounds were embedded in Engine rather than made explicit and externalized.
-- Read next: `docs/ai-agent-docs/engine.md`, `docs/ai-agent-docs/gateway-engine-contract.md`
+- Likely cause: safety bounds were embedded in Agent Loop rather than made explicit and externalized.
+- Read next: `docs/ai-agent-docs/agent-loop.md`, `docs/ai-agent-docs/gateway-agent-loop-contract.md`
 - Matrix IDs: `E-04`
 
 ## Pattern: Raw Storage Shape Leaks Through Client API
@@ -90,7 +90,7 @@ Make common architecture failures easier to recognize quickly during implementat
 - `docs/ai-agent-docs/auth.md`
 - `docs/ai-agent-docs/security.md`
 - `docs/ai-agent-docs/client-gateway-contract.md`
-- `docs/ai-agent-docs/gateway-engine-contract.md`
+- `docs/ai-agent-docs/gateway-agent-loop-contract.md`
 - `docs/ai-agent-docs/configuration.md`
 - `docs/ai-agent-docs/primer-audit-playbook.md`
 - `docs/ai-agent-docs/build-sequence.md`

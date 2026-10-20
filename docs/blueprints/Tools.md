@@ -3,7 +3,7 @@
 ## 1. Overview
 
 ### Purpose
-Tools define the callable capability surface of the system: operations executed by Engine against Memory and external systems under Auth and security constraints.
+Tools define the callable capability surface of the system: operations executed by Agent Loop against Memory and external systems under Auth and security constraints.
 
 ### High-Level Responsibilities
 - Define what a tool is and is not in architecture terms.
@@ -14,9 +14,9 @@ Tools define the callable capability surface of the system: operations executed 
 
 ### System Context
 - Tools are not a standalone runtime component.
-- Tools are an external capability surface consumed by Engine.
+- Tools are an external capability surface consumed by Agent Loop.
 - Tool availability is controlled by Configuration (what exists) and Auth (who can use what).
-- Tool execution outcomes are exposed through the Gateway-Engine stream contract.
+- Tool execution outcomes are exposed through the Gateway ↔ Agent Loop stream contract.
 
 ---
 
@@ -25,7 +25,7 @@ Tools define the callable capability surface of the system: operations executed 
 ### What Tools **are**
 - A capability boundary made of callable operations (verbs).
 - A contract surface spanning discovery metadata, callable definitions, invocation shapes, and execution results.
-- A cross-component integration point connecting Engine, Auth, Memory, Configuration, and Security.
+- A cross-component integration point connecting Agent Loop, Auth, Memory, Configuration, and Security.
 
 ### What Tools **are not**
 - Not a fifth architecture component.
@@ -35,7 +35,7 @@ Tools define the callable capability surface of the system: operations executed 
 - Not product-specific workflow logic.
 
 ### Boundaries and Constraints
-- Tool execution belongs to Engine.
+- Tool execution belongs to Agent Loop.
 - Authorization belongs to Auth.
 - Tool availability comes from environment/runtime config plus permissions.
 - Tool definitions must be deterministic and machine-validated.
@@ -56,7 +56,7 @@ Tools define the callable capability surface of the system: operations executed 
 - **Trust level**: security posture tier (`system_shipped`, `owner_installed`, `untrusted`).
 
 ### Internal Concepts
-- **Execution boundary**: Engine executes calls; tool runtime performs operation.
+- **Execution boundary**: Agent Loop executes calls; tool runtime performs operation.
 - **Authorization boundary**: Auth allow/deny decision before execution.
 - **Approval boundary**: coded runtime interception before mutating operations.
 - **Granularity control**: read/write/parameter-level capability scoping.
@@ -513,7 +513,7 @@ Tools define the callable capability surface of the system: operations executed 
 2. System discovers tool definitions from configured sources.
 3. Unknown sources fail startup clearly.
 4. Tool definitions are validated before becoming available.
-5. Tool catalog is handed to Engine for request-time listing/execution.
+5. Tool catalog is handed to Agent Loop for request-time listing/execution.
 
 ### 5.2 Availability Resolution
 - Environment layer decides physically available tools.
@@ -529,11 +529,11 @@ Tools define the callable capability surface of the system: operations executed 
 
 ### 5.4 Execution Workflow
 1. Model emits `tool-call` with stable call ID.
-2. Engine verifies tool exists.
+2. Agent Loop verifies tool exists.
 3. Auth authorizes invocation.
-4. If tool requires approval, Engine emits `approval-request` and waits for `approved|denied`.
-5. Engine executes tool and emits `tool-result`.
-6. Engine re-injects tool result into model context and continues loop.
+4. If tool requires approval, Agent Loop emits `approval-request` and waits for `approved|denied`.
+5. Agent Loop executes tool and emits `tool-result`.
+6. Agent Loop re-injects tool result into model context and continues loop.
 
 ### 5.5 Failure and Recovery Behavior
 - Recoverable tool failures return structured `tool-result` (`status=error`, `recoverable=true`).
@@ -569,7 +569,7 @@ Tools define the callable capability surface of the system: operations executed 
 - Host/container runtime used for tool isolation.
 
 ### Component Interactions
-- **Engine -> Tools**: execution ownership.
+- **Agent Loop -> Tools**: execution ownership.
 - **Auth -> Tools**: authorization policy enforcement before execution.
 - **Tools -> Memory**: read/write/query via approved boundaries.
 - **Configuration -> Tools**: source registration and startup discovery.
@@ -578,9 +578,9 @@ Tools define the callable capability surface of the system: operations executed 
 ### Data Flow
 1. Config supplies tool sources.
 2. Discovery builds tool definitions.
-3. Engine provides callable subset to model.
+3. Agent Loop provides callable subset to model.
 4. Model emits tool call.
-5. Engine/Auth gate execution.
+5. Agent Loop/Auth gate execution.
 6. Tool output returns as stream/tool message.
 
 ### Dependency Assumptions
@@ -595,7 +595,7 @@ Tools define the callable capability surface of the system: operations executed 
 
 - Tools must not be implemented as a standalone architecture component.
 - Tools must not be exposed as a third API.
-- Tool execution must remain in Engine.
+- Tool execution must remain in Agent Loop.
 - Authorization must remain in Auth.
 - Tool availability must be environment/config + Auth driven.
 - Request metadata must not reconfigure runtime tool sources.
@@ -650,7 +650,7 @@ Tools define the callable capability surface of the system: operations executed 
 - Prefer deterministic ordering for tool lists and discovery outputs.
 
 ### Anti-Patterns to Avoid
-- Building a dedicated Tool API layer between Model API and Engine.
+- Building a dedicated Tool API layer between Model API and Agent Loop.
 - Embedding auth decisions inside tool definition payloads.
 - Letting request payload metadata mutate runtime tool configuration.
 - Collapsing all tool failures to generic untyped errors.
@@ -662,7 +662,7 @@ Tools define the callable capability surface of the system: operations executed 
 
 ### Confirmed Alignments
 - `T-01`: tools are not a component and not a separate API.
-- `T-02`: execution in Engine, authorization in Auth.
+- `T-02`: execution in Agent Loop, authorization in Auth.
 - `T-03`: availability via config/environment + Auth permissions.
 - `S-03`: approval must be coded enforcement.
 - `S-04`: tool scope/isolation must enforce runtime boundaries.
@@ -679,7 +679,7 @@ Tools define the callable capability surface of the system: operations executed 
 
 ### Confirmed Alignments
 - Tools are capability surface, not component (`tools-spec.md`, `foundation-spec.md`).
-- Model API + Engine execution path removes need for separate tool API (`tools-spec.md`).
+- Model API + Agent Loop execution path removes need for separate tool API (`tools-spec.md`).
 - Scope is driven by available tools plus Auth permissions (`tools-spec.md`, `auth-spec.md`).
 - Approval for sensitive writes must be coded, not prompt-only (`tools-spec.md`, `security-spec.md`).
 - Memory access is mediated by tools (`memory-spec.md`, `security-spec.md`).
@@ -713,7 +713,7 @@ Tools define the callable capability surface of the system: operations executed 
 | TOL-CF-002 | Human docs D56: model should know tools that exist but are not permissioned; MVP evidence filters tool list by permission before model call | Keep this as SHOULD-level in MVP, not MUST-level | Avoids overclaiming current behavior while retaining future architecture intent | Model may produce less informative permission feedback |
 | TOL-CF-003 | Human docs define always-send/discoverable + discovery meta-tool; MVP evidence sends configured tools directly | Treat split as SHOULD-level readiness pattern and MUST-level when tool count/scale requires | Maintains MVP simplicity while preventing scale-time drift | Context bloat and degraded tool selection at higher tool counts |
 | TOL-CF-004 | Security/tools docs require mandatory isolation for untrusted tools; MVP evidence uses curated in-process tools and no full trust policy surface | Keep mandatory untrusted isolation as MUST policy in contract; document current gap as implementation backlog | Ensures future marketplace/third-party integration stays safe | Untrusted tool compromise could breach host/data boundaries |
-| TOL-CF-005 | Engine spec guarantees concurrent execution for parallel tool calls; current loop evidence processes calls sequentially | Keep concurrent capability as SHOULD for MVP and MUST for scale/performance profiles | Avoids contradicting current implementation while preserving spec intent | Latency and throughput degradation for multi-tool turns |
+| TOL-CF-005 | Agent Loop spec guarantees concurrent execution for parallel tool calls; current loop evidence processes calls sequentially | Keep concurrent capability as SHOULD for MVP and MUST for scale/performance profiles | Avoids contradicting current implementation while preserving spec intent | Latency and throughput degradation for multi-tool turns |
 
 ## 13. Normative Requirements (MUST/SHOULD/MAY)
 
@@ -721,7 +721,7 @@ Tools define the callable capability surface of the system: operations executed 
 
 - `TOL-MUST-001`: Tools MUST NOT be implemented as a standalone architecture component.
 - `TOL-MUST-002`: Tools MUST NOT introduce a separate Tool API boundary.
-- `TOL-MUST-003`: Tool execution MUST occur in Engine and authorization MUST occur in Auth.
+- `TOL-MUST-003`: Tool execution MUST occur in Agent Loop and authorization MUST occur in Auth.
 - `TOL-MUST-004`: Tool availability MUST be determined by environment/configuration plus Auth permissions.
 - `TOL-MUST-005`: Request payloads MUST NOT override runtime tool sources, tool definitions, or availability policy.
 - `TOL-MUST-006`: Tool definitions MUST include canonical fields (`name`, `description`, `input_schema`, `read_only`, `requires_approval`).
@@ -759,17 +759,17 @@ Tools define the callable capability surface of the system: operations executed 
 |---|---|---|
 | TOL-MUST-001 | Human `tools-spec.md`, `foundation-spec.md`; AI matrix `T-01`, `F-03` | `TOL-T001P`, `TOL-T001N` |
 | TOL-MUST-002 | Human `tools-spec.md`, `foundation-spec.md`; AI matrix `T-01`, `F-02` | `TOL-T002P`, `TOL-T002N` |
-| TOL-MUST-003 | Human `tools-spec.md`, `auth-spec.md`, `engine-spec.md`; AI matrix `T-02`, `A-02` | `TOL-T003P`, `TOL-T003N` |
+| TOL-MUST-003 | Human `tools-spec.md`, `auth-spec.md`, `agent-loop-spec.md`; AI matrix `T-02`, `A-02` | `TOL-T003P`, `TOL-T003N` |
 | TOL-MUST-004 | Human `tools-spec.md`, `configuration-spec.md`; AI matrix `T-03`, `C-01` | `TOL-T004P`, `TOL-T004N` |
-| TOL-MUST-005 | Human `configuration-spec.md`, `gateway-engine-contract.md`; AI matrix `C-02`, `GC-01` | `TOL-T005P`, `TOL-T005N` |
+| TOL-MUST-005 | Human `configuration-spec.md`, `gateway-agent-loop-contract.md`; AI matrix `C-02`, `GC-01` | `TOL-T005P`, `TOL-T005N` |
 | TOL-MUST-006 | Human `tools-spec.md`; AI `tools.md` | `TOL-T006P`, `TOL-T006N` |
 | TOL-MUST-007 | Human `configuration-spec.md`, `tools-spec.md`; AI checklist `configuration-review.md` | `TOL-T007P`, `TOL-T007N` |
-| TOL-MUST-008 | Human `engine-spec.md`, `gateway-engine-contract.md`; AI matrix `GC-02` | `TOL-T008P`, `TOL-T008N` |
+| TOL-MUST-008 | Human `agent-loop-spec.md`, `gateway-agent-loop-contract.md`; AI matrix `GC-02` | `TOL-T008P`, `TOL-T008N` |
 | TOL-MUST-009 | Human `tools-spec.md`, `security-spec.md`; AI matrix `S-03`, `S-05` | `TOL-T009P`, `TOL-T009N` |
-| TOL-MUST-010 | Human `security-spec.md`, `gateway-engine-contract.md`; AI matrix `S-01`, `GC-05` | `TOL-T010P`, `TOL-T010N` |
+| TOL-MUST-010 | Human `security-spec.md`, `gateway-agent-loop-contract.md`; AI matrix `S-01`, `GC-05` | `TOL-T010P`, `TOL-T010N` |
 | TOL-MUST-011 | Human `memory-spec.md`, `gateway-spec.md`; AI matrix `M-02` | `TOL-T011P`, `TOL-T011N` |
 | TOL-MUST-012 | Human `security-spec.md`, `tools-spec.md`; AI matrix `S-04` | `TOL-T012P`, `TOL-T012N` |
-| TOL-MUST-013 | Human `tools-spec.md`, `engine-spec.md`; AI matrix `GC-03` | `TOL-T013P`, `TOL-T013N` |
+| TOL-MUST-013 | Human `tools-spec.md`, `agent-loop-spec.md`; AI matrix `GC-03` | `TOL-T013P`, `TOL-T013N` |
 | TOL-MUST-014 | Human `configuration-spec.md` (D147), `tools-spec.md`; AI matrix `T-03`, `MO-03` | `TOL-T014P`, `TOL-T014N` |
 
 ## 16. Residual Risks & Open Decisions

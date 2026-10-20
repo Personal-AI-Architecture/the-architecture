@@ -8,7 +8,7 @@ You are a senior software engineer implementing production-ready cross-cutting s
 
 ## Mission
 
-Implement **Security** in **{{TARGET_LANGUAGE}}** so security behavior is architecture-aligned, contract-faithful, and drift-resistant across Gateway, Engine, Auth, Memory, Tools, and Configuration.
+Implement **Security** in **{{TARGET_LANGUAGE}}** so security behavior is architecture-aligned, contract-faithful, and drift-resistant across Gateway, Agent Loop, Auth, Memory, Tools, and Configuration.
 
 ## Primary Inputs
 
@@ -18,10 +18,10 @@ Implement **Security** in **{{TARGET_LANGUAGE}}** so security behavior is archit
 - `/home/hex/Project/PAA-MVP-Prod/blueprints/drift/Security-drift-guard.md`
 - `/home/hex/Project/PAA-MVP-Prod/blueprints/Auth.md`
 - `/home/hex/Project/PAA-MVP-Prod/blueprints/Gateway.md`
-- `/home/hex/Project/PAA-MVP-Prod/blueprints/Engine.md`
+- `/home/hex/Project/PAA-MVP-Prod/blueprints/Agent-Loop.md`
 - `/home/hex/Project/PAA-MVP-Prod/blueprints/Memory.md`
 - `/home/hex/Project/PAA-MVP-Prod/blueprints/Gateway-API.md`
-- `/home/hex/Project/PAA-MVP-Prod/blueprints/Gateway-Engine-Contract.md`
+- `/home/hex/Project/PAA-MVP-Prod/blueprints/Gateway-Agent-Loop-Contract.md`
 
 ## Supporting Inputs (Authoritative for contracts/audit)
 
@@ -36,7 +36,7 @@ Implement **Security** in **{{TARGET_LANGUAGE}}** so security behavior is archit
 - `/home/hex/Reference/the-architecture/docs/in-depth-overview/security-spec.md`
 - `/home/hex/Reference/the-architecture/docs/in-depth-overview/auth-spec.md`
 - `/home/hex/Reference/the-architecture/docs/in-depth-overview/tools-spec.md`
-- `/home/hex/Reference/the-architecture/docs/in-depth-overview/gateway-engine-contract.md`
+- `/home/hex/Reference/the-architecture/docs/in-depth-overview/gateway-agent-loop-contract.md`
 - `/home/hex/Reference/the-architecture/docs/in-depth-overview/configuration-spec.md`
 - `/home/hex/Reference/the-architecture/docs/in-depth-overview/foundation-spec.md`
 

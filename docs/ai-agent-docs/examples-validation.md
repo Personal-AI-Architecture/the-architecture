@@ -37,5 +37,5 @@ If a contract or config shape changes, update the matching valid and invalid sta
 - `docs/ai-agent-docs/primer-change-policy.md`
 - `docs/ai-agent-docs/traceability-map.md`
 - `docs/ai-agent-docs/client-gateway-contract.md`
-- `docs/ai-agent-docs/gateway-engine-contract.md`
+- `docs/ai-agent-docs/gateway-agent-loop-contract.md`
 - `docs/ai-agent-docs/configuration.md`

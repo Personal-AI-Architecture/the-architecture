@@ -14,14 +14,14 @@ Models define the external-intelligence boundary of the architecture. The system
 
 ### System Context
 - Models are one of three external dependencies in the foundation architecture.
-- Engine is the caller of model intelligence through the Model API boundary.
+- Agent Loop is the caller of model intelligence through the Model API boundary.
 - Adapter layer translates between internal generic contracts and provider-specific wire formats.
 - Configuration and preferences determine binding to a provider and model.
 - Security and deployment constraints apply to model access safety and offline-path viability.
 
 ### Companion Artifacts
 - Model API boundary details: `blueprints/Model-API.md`
-- Engine loop ownership: `blueprints/Engine.md`
+- Agent Loop ownership: `blueprints/Agent-Loop.md`
 - Configuration layering and startup order: `blueprints/Configuration.md`
 
 ---
@@ -37,7 +37,7 @@ Models define the external-intelligence boundary of the architecture. The system
 ### What Models **are not**
 - Not a fifth runtime component.
 - Not an additional external API beyond Gateway API and Model API.
-- Not an implementation of provider-specific transport logic inside Engine or Gateway.
+- Not an implementation of provider-specific transport logic inside Agent Loop or Gateway.
 - Not a request payload channel for runtime provider/model reconfiguration.
 - Not the same artifact as Model API contract details (which are defined separately).
 
@@ -54,14 +54,14 @@ Models define the external-intelligence boundary of the architecture. The system
 
 ### Key Domain Concepts
 - **Models Boundary**: architecture-level definition of model intelligence as external.
-- **Model API**: external connector contract between Engine and external models.
+- **Model API**: external API contract between Agent Loop and external models.
 - **Adapter**: translation layer between generic internal model contract and provider-native protocols.
 - **Model Binding**: resolved provider adapter plus active model selection.
 - **Same-Provider Swap**: model change within same provider path.
 - **Provider Swap**: provider path change by adapter/runtime config update.
 
 ### Internal Concepts
-- **Generic Model Contract**: stable internal request/response shape consumed by Engine.
+- **Generic Model Contract**: stable internal request/response shape consumed by Agent Loop.
 - **Request Guard**: forbidden-field policy preventing request-time config drift.
 - **Binding Resolution**: deterministic selection between adapter default and owner preference.
 
@@ -499,7 +499,7 @@ Models define the external-intelligence boundary of the architecture. The system
 - Configuration-time pattern:
   - runtime config + adapter config + preferences resolve model binding before ready state.
 - Request-time pattern:
-  - Engine submits generic model request through Model API contract to adapter.
+  - Agent Loop submits generic model request through Model API contract to adapter.
 - Failure pattern:
   - Model/provider failures are classified and sanitized before stream exposure.
 
@@ -517,11 +517,11 @@ Models define the external-intelligence boundary of the architecture. The system
 7. Declare ready only after all required phases succeed.
 
 ### 5.2 Model Invocation Behavior
-1. Engine builds generic completion request (`messages`, `tools`, metadata).
+1. Agent Loop builds generic completion request (`messages`, `tools`, metadata).
 2. Request guard enforces forbidden request-field policy.
 3. Adapter translates request to provider-native shape.
 4. Provider response is parsed and normalized.
-5. Normalized result is returned to Engine for loop continuation.
+5. Normalized result is returned to Agent Loop for loop continuation.
 
 ### 5.3 Swap Behavior
 - Same-provider model swap:
@@ -566,7 +566,7 @@ Models define the external-intelligence boundary of the architecture. The system
 - Environment variable secret stores for adapter auth references.
 
 ### Internal Interactions
-- Engine calls adapters using generic model contract.
+- Agent Loop calls adapters using generic model contract.
 - Model API artifact defines request/response payload details.
 - Configuration loaders provide runtime + adapter + preference layers.
 - Security boundary constrains exposed error surfaces.
@@ -576,7 +576,7 @@ Models define the external-intelligence boundary of the architecture. The system
 2. Adapter config supplies endpoint/auth reference/default model.
 3. Preferences supply owner model preference.
 4. Binding resolver selects active model.
-5. Engine requests completion through adapter.
+5. Agent Loop requests completion through adapter.
 6. Adapter returns normalized model result or classified failure.
 
 ### Dependency Assumptions
@@ -591,7 +591,7 @@ Models define the external-intelligence boundary of the architecture. The system
 ### Architecture Invariants
 - Models remain external, never reclassified as a component (`MO-01`, `F-01`).
 - External API set remains exactly Gateway API and Model API (`F-02`, `CU-02`).
-- Provider-specific logic stays in adapters, not Engine/Gateway (`E-03`).
+- Provider-specific logic stays in adapters, not Agent Loop/Gateway (`E-03`).
 
 ### Configuration Invariants
 - Runtime config, adapter config, and preferences remain distinct (`C-01`).
@@ -618,7 +618,7 @@ Models define the external-intelligence boundary of the architecture. The system
 - Adapter translation should avoid redundant payload transformations.
 
 ### Scalability
-- Multiple adapters/providers should be supportable without Engine core rewrites.
+- Multiple adapters/providers should be supportable without Agent Loop core rewrites.
 - Model swap behavior should remain config/preference driven at larger deployment scale.
 
 ### Reliability
@@ -650,7 +650,7 @@ Models define the external-intelligence boundary of the architecture. The system
 - Keep sub-agent model-tool behavior explicitly separate from primary model boundary.
 
 ### Anti-Patterns to Avoid
-- Hardcoding provider selection in Engine or Gateway code paths.
+- Hardcoding provider selection in Agent Loop or Gateway code paths.
 - Accepting per-request provider/model/base URL overrides.
 - Merging runtime, adapter, and preference configuration into a single mutable object.
 - Silent fallback to default adapter on unsupported adapter key.
@@ -771,8 +771,8 @@ Models define the external-intelligence boundary of the architecture. The system
 |---|---|---|
 | MOD-MUST-001 | Human `models-spec.md`, `foundation-spec.md`; AI matrix `MO-01`, `F-01` | `MOD-T001P`, `MOD-T001N` |
 | MOD-MUST-002 | Human `models-spec.md`, `adapter-spec.md`; AI matrix `MO-01` | `MOD-T002P`, `MOD-T002N` |
-| MOD-MUST-003 | Human `adapter-spec.md`, `engine-spec.md`; AI matrix `E-03` | `MOD-T003P`, `MOD-T003N` |
-| MOD-MUST-004 | Human `models-spec.md` connector-not-tool rule | `MOD-T004P`, `MOD-T004N` |
+| MOD-MUST-003 | Human `adapter-spec.md`, `agent-loop-spec.md`; AI matrix `E-03` | `MOD-T003P`, `MOD-T003N` |
+| MOD-MUST-004 | Human `models-spec.md` API-not-tool rule | `MOD-T004P`, `MOD-T004N` |
 | MOD-MUST-005 | Human `configuration-spec.md`; AI matrix `C-01` | `MOD-T005P`, `MOD-T005N` |
 | MOD-MUST-006 | Human `models-spec.md`, `adapter-spec.md`, `configuration-spec.md`; AI matrix `MO-02` | `MOD-T006P`, `MOD-T006N` |
 | MOD-MUST-007 | Human `models-spec.md`, `adapter-spec.md`; AI matrix `MO-03` | `MOD-T007P`, `MOD-T007N` |
@@ -780,7 +780,7 @@ Models define the external-intelligence boundary of the architecture. The system
 | MOD-MUST-009 | Human `configuration-spec.md`, `security-spec.md`; AI matrix `C-03` | `MOD-T009P`, `MOD-T009N` |
 | MOD-MUST-010 | Human `configuration-spec.md`; AI checklist `configuration-review.md` | `MOD-T010P`, `MOD-T010N` |
 | MOD-MUST-011 | Human `deployment-spec.md`; AI matrix `D-02` | `MOD-T011P`, `MOD-T011N` |
-| MOD-MUST-012 | Human `security-spec.md`, `gateway-engine-contract.md`; AI matrix `S-01`, `GC-05` | `MOD-T012P`, `MOD-T012N` |
+| MOD-MUST-012 | Human `security-spec.md`, `gateway-agent-loop-contract.md`; AI matrix `S-01`, `GC-05` | `MOD-T012P`, `MOD-T012N` |
 | MOD-MUST-013 | Human `gateway-spec.md`, `configuration-spec.md`; AI matrix `G-02` | `MOD-T013P`, `MOD-T013N` |
 | MOD-MUST-014 | Human `foundation-spec.md`; AI matrix `F-02`, `CU-02` | `MOD-T014P`, `MOD-T014N` |
 
@@ -807,12 +807,12 @@ Models define the external-intelligence boundary of the architecture. The system
   - `blueprints/tests/Configuration-conformance.md`
   - `blueprints/drift/Configuration-drift-guard.md`
   - `blueprints/prompts/implement-Configuration.md`
-- `Engine` owns generic loop execution and consumes this boundary through adapters:
-  - `blueprints/Engine.md`
+- `Agent Loop` owns generic loop execution and consumes this boundary through adapters:
+  - `blueprints/Agent-Loop.md`
   - `blueprints/contracts/Engine.schema.json`
-  - `blueprints/tests/Engine-conformance.md`
-  - `blueprints/drift/Engine-drift-guard.md`
-  - `blueprints/prompts/implement-Engine.md`
+  - `blueprints/tests/Agent-Loop-conformance.md`
+  - `blueprints/drift/Agent-Loop-drift-guard.md`
+  - `blueprints/prompts/implement-Agent-Loop.md`
 - Overlap precedence:
   - payload-shape conflicts resolve to `Model-API`; boundary-classification and swap-policy conflicts resolve to `Models`.
 

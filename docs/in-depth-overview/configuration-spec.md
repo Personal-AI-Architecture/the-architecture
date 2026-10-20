@@ -168,7 +168,7 @@ At startup, the system reads configuration in a strict sequence. Each phase depe
 3. **Discover tools** — scan `tool_sources` paths. For each tool found: MCP servers announce their tools via protocol, manifest files are read, built-in tools are loaded from code. Now the system knows what tools are available.
 4. **Mount Your Memory** — use `memory_root` to locate Your Memory on the filesystem. At this point Your Memory is accessible but no preferences have been read yet.
 5. **Read preferences** — read the preferences file from Your Memory (direct file read, not through the Agent Loop — no tools required). Apply preference filters: always-send set, tool policies, approval requirements, model choice.
-6. **Ready** — the Agent Loop has tools, a provider, and preferences. The Gateway starts accepting connections (see [gateway-engine-contract.md](./gateway-engine-contract.md) for request flow).
+6. **Ready** — the Agent Loop has tools, a provider, and preferences. The Gateway starts accepting connections (see [gateway-agent-loop-contract.md](./gateway-agent-loop-contract.md) for request flow).
 
 **Phases 1-3 are environment.** They happen before Your Memory is involved. They describe the desk.
 **Phase 4-5 are personal.** They read from Your Memory. They describe you.

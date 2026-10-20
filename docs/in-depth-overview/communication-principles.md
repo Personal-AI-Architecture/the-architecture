@@ -60,7 +60,7 @@ If every internal interface has its own message shape, field names, and type con
 
 This applies to errors too. When every interface invents its own error shape, error handling becomes per-interface custom code. Errors are part of the contract, not an afterthought — machine-readable codes, correlation context, no leaked internals. Same structural conventions as normal messages.
 
-At minimum, every internal request carries: a correlation ID (P5), a timestamp, and enough context for the receiver to process it without ambient state. Events within a stream (like SSE events) inherit the request's correlation context — they don't each carry their own. The [gateway-engine-contract.md](./gateway-engine-contract.md) is one application of this — its `metadata` object and field conventions should be the starting point for other internal interfaces, not an island.
+At minimum, every internal request carries: a correlation ID (P5), a timestamp, and enough context for the receiver to process it without ambient state. Events within a stream (like SSE events) inherit the request's correlation context — they don't each carry their own. The [gateway-agent-loop-contract.md](./gateway-agent-loop-contract.md) is one application of this — its `metadata` object and field conventions should be the starting point for other internal interfaces, not an island.
 
 Consistency means one swap, not N. Can a developer reading any internal message recognize the structure without checking which interface produced it? If not, each interface is its own lock-in surface.
 
@@ -108,10 +108,10 @@ Can one component add new fields to its messages without breaking any other comp
 |-------|---------|---------------|
 | Specific message format (JSON-RPC, custom envelope, etc.) | Implementation choice | Product spec / implementation |
 | Specific transport (HTTP, gRPC, queues) | Deployment choice | [deployment-spec.md](./deployment-spec.md), component specs |
-| Semantic routing / task dispatch | The model decides (P4) | [engine-spec.md](./engine-spec.md) |
-| Specific error codes | Interface-specific | Each contract (e.g., [gateway-engine-contract.md](./gateway-engine-contract.md)) |
+| Semantic routing / task dispatch | The model decides (P4) | [agent-loop-spec.md](./agent-loop-spec.md) |
+| Specific error codes | Interface-specific | Each contract (e.g., [gateway-agent-loop-contract.md](./gateway-agent-loop-contract.md)) |
 | Authentication mechanism | Auth's responsibility | [auth-spec.md](./auth-spec.md) |
-| The Gateway ↔ Agent Loop contract details | Already defined | [gateway-engine-contract.md](./gateway-engine-contract.md) |
+| The Gateway ↔ Agent Loop contract details | Already defined | [gateway-agent-loop-contract.md](./gateway-agent-loop-contract.md) |
 
 ---
 
@@ -126,7 +126,7 @@ Can one component add new fields to its messages without breaking any other comp
 ## Open Questions
 
 - **OQ-1: ~~Does this spec warrant a new foundation decision number?~~** Resolved → D169.
-- **OQ-2: Should gateway-engine-contract.md be updated to explicitly reference these principles?** The contract already follows them — the question is whether to make the relationship explicit.
+- **OQ-2: Should gateway-agent-loop-contract.md be updated to explicitly reference these principles?** The contract already follows them — the question is whether to make the relationship explicit.
 - **OQ-3: Should D16 be annotated to distinguish transport-level protocols (always use standards) from internal communication conventions (principles-based, implementation flexible)?** This would clarify the tension Dave J's work surfaced.
 
 ---

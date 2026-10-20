@@ -4,7 +4,7 @@ This file defines language-agnostic pass/fail vectors for Memory component confo
 
 ## Requirement Set (MUST)
 
-- `MEM-MUST-001`: Memory has zero outward dependencies on Gateway, Engine, and Auth.
+- `MEM-MUST-001`: Memory has zero outward dependencies on Gateway, Agent Loop, and Auth.
 - `MEM-MUST-002`: Components access Memory only through approved tools/boundary interfaces (no direct storage reach-in).
 - `MEM-MUST-003`: Memory exposes core operations (`read`, `write`, `edit`, `delete`, `search`, `list`, `history`).
 - `MEM-MUST-004`: Path resolution enforces memory-root boundaries and blocks reserved/internal paths.
@@ -23,9 +23,9 @@ This file defines language-agnostic pass/fail vectors for Memory component confo
 
 | Test ID | Requirement ID | Test Type | Input / Setup | Expected Output / Event / Error | Failure Signal | Drift Category |
 |---|---|---|---|---|---|---|
-| MEM-T001P | MEM-MUST-001 | Positive | Static dependency scan for Memory module | No imports/runtime dependencies on Gateway/Engine/Auth modules | Dependency edge found | Boundary dependency drift |
+| MEM-T001P | MEM-MUST-001 | Positive | Static dependency scan for Memory module | No imports/runtime dependencies on Gateway/Agent Loop/Auth modules | Dependency edge found | Boundary dependency drift |
 | MEM-T001N | MEM-MUST-001 | Negative | Introduce Memory import from Gateway code path | Conformance/static gate fails | Violation accepted | Outward dependency drift |
-| MEM-T002P | MEM-MUST-002 | Positive | Exercise Gateway/Engine memory operations via approved tools/repositories | Operations succeed only via declared interfaces | Direct reach-in path used | Boundary bypass |
+| MEM-T002P | MEM-MUST-002 | Positive | Exercise Gateway/Agent Loop memory operations via approved tools/repositories | Operations succeed only via declared interfaces | Direct reach-in path used | Boundary bypass |
 | MEM-T002N | MEM-MUST-002 | Negative | Add direct file/database access from non-Memory component | Conformance/static gate fails | Direct access accepted | Storage reach-in drift |
 | MEM-T003P | MEM-MUST-003 | Positive | Invoke all core operations with valid inputs | Each operation returns contract-valid response | Missing operation or invalid response shape | Surface incompleteness |
 | MEM-T003N | MEM-MUST-003 | Negative | Remove `memory_history` or `memory_search` from tool surface | Conformance test fails | Missing operation accepted | Tool contract erosion |
@@ -50,7 +50,7 @@ This file defines language-agnostic pass/fail vectors for Memory component confo
 | MEM-T013P | MEM-MUST-013 | Positive | Stop runtime and inspect data directly on disk with standard tools | Owner data remains readable/inspectable | Data unreadable without runtime | Inspectability drift |
 | MEM-T013N | MEM-MUST-013 | Negative | Require proprietary runtime-only format to inspect content | Conformance test fails | Opaque storage accepted | Ownership erosion |
 | MEM-T014P | MEM-MUST-014 | Positive | Swap storage backend implementation behind Memory interfaces | Existing Memory tool/boundary contracts still pass | Consumer contracts break on backend swap | Backend lock-in drift |
-| MEM-T014N | MEM-MUST-014 | Negative | Backend swap requires API changes in Gateway/Engine | Conformance gate fails | Breaking change accepted | Contract instability |
+| MEM-T014N | MEM-MUST-014 | Negative | Backend swap requires API changes in Gateway/Agent Loop | Conformance gate fails | Breaking change accepted | Contract instability |
 
 ## Coverage Summary
 

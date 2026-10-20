@@ -28,7 +28,7 @@ Provide local, inspectable, portable storage and access primitives without depen
 
 ## Required Behaviors
 
-- Have zero outward dependencies on Gateway, Engine, or Auth.
+- Have zero outward dependencies on Gateway, Agent Loop, or Auth.
 - Stay inspectable with standard tools when the system is not running.
 - Support the core storage contract through approved access paths.
 - Treat conversations and structured/queryable owner data as part of Memory rather than side storage outside the Memory contract.
@@ -56,7 +56,7 @@ Provide local, inspectable, portable storage and access primitives without depen
 
 ## Forbidden Behaviors
 
-- Depending outward on Gateway, Engine, or Auth.
+- Depending outward on Gateway, Agent Loop, or Auth.
 - Requiring proprietary runtime access to inspect owner data.
 - Hiding required owner data in third-party-only systems.
 - Letting components bypass the Memory boundary through direct storage reach-in.

@@ -92,7 +92,7 @@ Use these for MVP implementation consistency:
 
 ## Non-Negotiable Constraints
 
-- Do not add outward dependency from Memory to Gateway, Engine, or Auth.
+- Do not add outward dependency from Memory to Gateway, Agent Loop, or Auth.
 - Do not allow direct storage reach-in from non-Memory components.
 - Do not store conversations as ephemeral-only in-process state.
 - Do not omit export/history guarantees.
@@ -121,7 +121,7 @@ Implement automated tests that prove:
 
 ## Drift-Critical Fail Conditions (Fail Build If Any True)
 
-- Memory depends outward on Gateway/Engine/Auth.
+- Memory depends outward on Gateway/Agent Loop/Auth.
 - Non-Memory components bypass Memory boundaries for storage access.
 - Export or history guarantees are missing/partial.
 - Startup readiness degrades version-history guarantee to warning-only behavior.

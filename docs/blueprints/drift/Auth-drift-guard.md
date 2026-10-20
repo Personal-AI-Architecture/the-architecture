@@ -6,12 +6,12 @@ This document defines anti-drift controls for Auth implementations.
 
 - Auth middleware missing or bypassed on protected paths.
 - Local-owner mode implemented as no-auth mode.
-- Authorization logic scattered across Gateway/Engine/tool modules.
+- Authorization logic scattered across Gateway/Agent Loop/tool modules.
 - Permission checks degraded to implicit allow behavior.
 - Auth-state export omitted, opaque, or provider-owned.
 - Secret material written into inspectable owner data.
 - Missing auth tools (`auth_whoami`, `auth_check`, `auth_export`).
-- Actor context not propagated to Engine/tool execution.
+- Actor context not propagated to Agent Loop/tool execution.
 - Audit records missing for denied or approved auth decisions.
 
 ## 2. Prohibited Implementation Shortcuts
@@ -36,7 +36,7 @@ This document defines anti-drift controls for Auth implementations.
 | AUTHD-CHK-007 | Product-owned auth-state file created/loaded at startup | Startup readiness tests | Critical |
 | AUTHD-CHK-008 | `auth_export` returns non-secret product-owned state | Export schema and secret-field rejection tests | Critical |
 | AUTHD-CHK-009 | Required auth tools are available | Tool discovery tests | High |
-| AUTHD-CHK-010 | Actor context reaches Engine/tool runtime | End-to-end context propagation tests | High |
+| AUTHD-CHK-010 | Actor context reaches Agent Loop/tool runtime | End-to-end context propagation tests | High |
 | AUTHD-CHK-011 | Structured auth audit events exist | Audit sink assertions for authorized + denied paths | High |
 | AUTHD-CHK-012 | Auth remains boundary-scoped in ownership | Static architecture-boundary checks | Critical |
 
@@ -70,6 +70,6 @@ This document defines anti-drift controls for Auth implementations.
 - [ ] Startup creates/loads product-owned auth state.
 - [ ] `auth_export` excludes secret material.
 - [ ] `auth_whoami`, `auth_check`, and `auth_export` are present.
-- [ ] Actor context propagates to Engine/tool execution.
+- [ ] Actor context propagates to Agent Loop/tool execution.
 - [ ] Structured auth audit records exist for allow + deny paths.
 - [ ] Auth module remains ownership-clean (identity/access only).

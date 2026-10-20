@@ -39,7 +39,7 @@ Define the boundary between runtime config, adapter config, preferences, and req
 - Collapsing all config types into one loader.
 - Treating request-time logic as the main configuration mechanism.
 - Storing preference-owned choices in the wrong layer.
-- Leaking provider/tool configuration through Gateway -> Engine requests.
+- Leaking provider/tool configuration through Gateway -> Agent Loop requests.
 
 ## Boot Sequence
 
@@ -137,5 +137,5 @@ Why this is drift:
 - `docs/in-depth-overview/configuration-spec.md`
 - `docs/in-depth-overview/adapter-spec.md`
 - `docs/in-depth-overview/models-spec.md`
-- `docs/in-depth-overview/gateway-engine-contract.md`
+- `docs/in-depth-overview/gateway-agent-loop-contract.md`
 - `docs/in-depth-overview/foundation-spec.md`

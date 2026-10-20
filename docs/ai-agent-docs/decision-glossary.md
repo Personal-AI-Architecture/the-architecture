@@ -26,7 +26,7 @@ A mismatch between the implementation and a primer or matrix rule that is not co
 
 ### internal contract
 
-The bounded interface between Gateway and Engine described in `gateway-engine-contract.md`. Clients must not fabricate or bypass it.
+The bounded interface between Gateway and Agent Loop described in `gateway-agent-loop-contract.md`. Clients must not fabricate or bypass it.
 
 ### primer failure
 
@@ -46,7 +46,7 @@ See `accepted limitation`. This term should not be used to excuse missing requir
 
 ### client contract
 
-The external API between client and Gateway described in `client-gateway-contract.md`, distinct from the internal Gateway-Engine contract.
+The external API between client and Gateway described in `client-gateway-contract.md`, distinct from the internal Gateway ↔ Agent Loop contract.
 
 ### conformance gate
 
@@ -75,5 +75,5 @@ An implementation pass designed to avoid structural rework by fixing architectur
 - `docs/ai-agent-docs/compliance-matrix.md`
 - `docs/ai-agent-docs/accepted-mvp-limits.md`
 - `docs/ai-agent-docs/client-gateway-contract.md`
-- `docs/ai-agent-docs/gateway-engine-contract.md`
+- `docs/ai-agent-docs/gateway-agent-loop-contract.md`
 - `docs/ai-agent-docs/build-sequence.md`

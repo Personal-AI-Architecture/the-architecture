@@ -29,7 +29,7 @@ Define how the system talks to external models without turning models or provide
 
 ## Forbidden Behaviors
 
-- Provider-specific logic leaking into Gateway or core Engine logic.
+- Provider-specific logic leaking into Gateway or core Agent Loop logic.
 - Treating a provider API as an internal component.
 - Collapsing adapter config, runtime config, and preferences into one layer.
 - Treating the primary model as a tool in the execution architecture.
@@ -49,7 +49,7 @@ Define how the system talks to external models without turning models or provide
 
 ## Common Drift Patterns
 
-- Request-time provider reconfiguration in Engine.
+- Request-time provider reconfiguration in Agent Loop.
 - Missing adapter-config layer.
 - Provider defaults or fallback behavior hidden in the wrong layer.
 - Internal contract carrying too much implementation-specific state.

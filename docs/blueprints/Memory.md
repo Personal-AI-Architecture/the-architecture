@@ -15,13 +15,13 @@ Memory is the owner-controlled durable substrate for system data. It preserves i
 ### System Context
 - Upstream callers:
   - Gateway conversation boundary.
-  - Engine tool execution path.
+  - Agent Loop tool execution path.
   - Auth state/export path.
 - Cross-cutting interactions:
   - Auth controls who can access Memory operations.
   - Security controls constrain secret handling and auditability.
 - Architectural position:
-  - foundational substrate with zero outward dependency on Gateway, Engine, or Auth.
+  - foundational substrate with zero outward dependency on Gateway, Agent Loop, or Auth.
 
 ---
 
@@ -41,7 +41,7 @@ Memory is the owner-controlled durable substrate for system data. It preserves i
 - Not a proprietary opaque storage service that blocks owner inspection/export.
 
 ### Boundaries and Constraints
-- Memory must not depend outward on Gateway, Engine, or Auth modules.
+- Memory must not depend outward on Gateway, Agent Loop, or Auth modules.
 - Non-Memory components must not bypass Memory boundaries with direct storage reach-in.
 - Conversation and required structured owner data must not be moved to side stores outside Memory contract.
 - Export and history guarantees are required from day one.
@@ -320,13 +320,13 @@ Why invalid:
 ### Interaction Boundaries
 - Gateway:
   - uses dedicated conversation boundary for persistence/list/detail.
-- Engine:
+- Agent Loop:
   - uses Memory tools for model-driven operations.
 - Auth:
   - governs access to Memory operations but does not alter Memory ownership.
 
 ### Dependency Assumptions
-- Memory is usable independently from Gateway/Engine/Auth.
+- Memory is usable independently from Gateway/Agent Loop/Auth.
 - Tool/boundary contracts remain stable across backend changes.
 - Startup sequence ensures Memory readiness before request processing.
 
@@ -336,7 +336,7 @@ Why invalid:
 
 ### Component Ownership Invariants
 - Memory owns data substrate guarantees; it does not own interpretation/routing/auth policy.
-- Memory has zero outward dependencies on Gateway, Engine, and Auth.
+- Memory has zero outward dependencies on Gateway, Agent Loop, and Auth.
 
 ### Contract Invariants
 - Access occurs through approved Memory boundaries/tools.
@@ -462,7 +462,7 @@ Why invalid:
 ## 13. Normative Requirements (MUST/SHOULD/MAY)
 
 ### MUST
-- `MEM-MUST-001`: Memory MUST have zero outward dependencies on Gateway, Engine, and Auth.
+- `MEM-MUST-001`: Memory MUST have zero outward dependencies on Gateway, Agent Loop, and Auth.
 - `MEM-MUST-002`: Memory access MUST occur through approved tools/boundary interfaces only.
 - `MEM-MUST-003`: Memory MUST expose core operation surface (`read`, `write`, `edit`, `delete`, `search`, `list`, `history`).
 - `MEM-MUST-004`: Memory MUST enforce memory-root and reserved-path protections.

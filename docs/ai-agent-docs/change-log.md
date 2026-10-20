@@ -10,7 +10,7 @@ Track how the primer layer evolves so examples, matrix rows, glossary terms, lim
 
 ### Initial Primer Layer
 
-- Added core primers for foundation, gateway, engine, configuration, memory, auth, security, models, tools, deployment, customization, and the Gateway-Engine contract.
+- Added core primers for foundation, gateway, agent loop, configuration, memory, auth, security, models, tools, deployment, customization, and the Gateway ↔ Agent Loop contract.
 - Added `compliance-matrix.md` as the machine-friendly audit spine.
 
 ### Audit-Grade Strengthening

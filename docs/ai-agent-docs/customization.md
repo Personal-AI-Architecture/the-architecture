@@ -54,7 +54,7 @@ Define what can change safely across products and owner setups without turning c
 
 ## Common Drift Patterns
 
-- Product logic pushed into Engine or Gateway under the label of customization.
+- Product logic pushed into Agent Loop or Gateway under the label of customization.
 - Config or customization used to smuggle architectural changes.
 - Tool or prompt customization that changes ownership boundaries.
 - Forking the architecture for changes that should be content or config.

@@ -238,7 +238,7 @@ The four pillars are values, not code — but they produce observable properties
 
 **Verification:** Inspect the internal contract. Confirm the request/response format matches the spec. Confirm the Agent Loop does not receive per-request configuration (tools, provider, model) from the Gateway.
 
-**Fail condition:** The Gateway sends per-request configuration that changes Agent Loop behavior. Or the internal contract carries data not specified in [gateway-engine-contract.md](./gateway-engine-contract.md).
+**Fail condition:** The Gateway sends per-request configuration that changes Agent Loop behavior. Or the internal contract carries data not specified in [gateway-agent-loop-contract.md](./gateway-agent-loop-contract.md).
 
 ---
 
@@ -564,7 +564,7 @@ Each story is an acceptance test for the architecture itself.
 | [deployment-spec.md](./deployment-spec.md) | Source for section 9 (Deployment Verification) |
 | [configuration-spec.md](./configuration-spec.md) | Source for X-1 (Configuration Verification) |
 | [adapter-spec.md](./adapter-spec.md) | Source for C-4 (Adapter Verification) |
-| [gateway-engine-contract.md](./gateway-engine-contract.md) | Source for C-5 (Internal Contract Verification) |
+| [gateway-agent-loop-contract.md](./gateway-agent-loop-contract.md) | Source for C-5 (Internal Contract Verification) |
 | [security-spec.md](./security-spec.md) | Source for X-2 (Secrets Verification) and deployment network posture |
 
 ---

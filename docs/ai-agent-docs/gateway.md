@@ -49,7 +49,7 @@ Accept external requests, manage conversation lifecycle, run Auth on the path, a
 - Executing tools itself.
 - Reaching directly into Memory storage internals.
 - Embedding Auth as Gateway-owned logic instead of boundary use.
-- Turning the internal Engine handoff into a third public API.
+- Turning the internal Agent Loop handoff into a third public API.
 
 ## Lifecycle Rules
 
@@ -63,7 +63,7 @@ Accept external requests, manage conversation lifecycle, run Auth on the path, a
 - Is model/provider choice leaking into Gateway?
 - Is Gateway talking to Memory through the right boundary?
 - Is Auth on the real request path?
-- Does Gateway send only contract-bounded data to Engine?
+- Does Gateway send only contract-bounded data to Agent Loop?
 
 ## Common Drift Patterns
 
@@ -82,7 +82,7 @@ Accept external requests, manage conversation lifecycle, run Auth on the path, a
 ## Source Docs
 
 - `docs/in-depth-overview/gateway-spec.md`
-- `docs/in-depth-overview/gateway-engine-contract.md`
+- `docs/in-depth-overview/gateway-agent-loop-contract.md`
 - `docs/in-depth-overview/foundation-spec.md`
 - `docs/in-depth-overview/auth-spec.md`
 - `docs/in-depth-overview/memory-spec.md`

@@ -1,10 +1,10 @@
-# Engine Conformance Test Vectors
+# Agent Loop Conformance Test Vectors
 
-This file defines language-agnostic pass/fail vectors for the Engine (Agent Loop) component.
+This file defines language-agnostic pass/fail vectors for the Agent Loop component.
 
 ## Requirement Set (MUST)
 
-- `ENG-MUST-001`: Engine accepts bounded internal request shape (`messages` + `metadata`) only.
+- `ENG-MUST-001`: Agent Loop accepts bounded internal request shape (`messages` + `metadata`) only.
 - `ENG-MUST-002`: `metadata.correlation_id` is required on every request.
 - `ENG-MUST-003`: Request metadata cannot be used as a hidden runtime/provider/tool configuration channel.
 - `ENG-MUST-004`: Loop continues until model completion signal, unless an explicit configured safety bound terminates with classified overflow behavior.
@@ -16,7 +16,7 @@ This file defines language-agnostic pass/fail vectors for the Engine (Agent Loop
 - `ENG-MUST-010`: Mid-stream errors are classified to taxonomy (`provider_error`, `tool_error`, `context_overflow`) with safe messages.
 - `ENG-MUST-011`: Tool availability is filtered by Auth-derived actor permissions before model tool advertisement/execution.
 - `ENG-MUST-012`: Approval interactions are contract-visible (`approval-request`, `approval-result`) and denied decisions produce denied tool-result semantics.
-- `ENG-MUST-013`: Engine does not own conversation persistence or lifecycle operations.
+- `ENG-MUST-013`: Agent Loop does not own conversation persistence or lifecycle operations.
 - `ENG-MUST-014`: Provider-specific wire formatting remains in adapters, not in core loop logic.
 
 ## Test Vectors
@@ -47,7 +47,7 @@ This file defines language-agnostic pass/fail vectors for the Engine (Agent Loop
 | ENG-T011N | ENG-MUST-011 | Negative | Ignore Auth context and advertise all tools | Conformance test fails | Permission bypass accepted | Auth-context bypass |
 | ENG-T012P | ENG-MUST-012 | Positive | Sensitive tool call requires approval; decision denied | `approval-request`, then `approval-result`, then denied `tool-result` semantics | Missing approval events or denied handling | Approval contract drift |
 | ENG-T012N | ENG-MUST-012 | Negative | Approval handled outside stream with no approval events | Conformance test fails | Client-only approval accepted | Approval invisibility |
-| ENG-T013P | ENG-MUST-013 | Positive | Run interaction and inspect dependencies/storage usage | No conversation create/list/store operations in Engine | Conversation API/storage calls present | Ownership drift |
+| ENG-T013P | ENG-MUST-013 | Positive | Run interaction and inspect dependencies/storage usage | No conversation create/list/store operations in Agent Loop | Conversation API/storage calls present | Ownership drift |
 | ENG-T013N | ENG-MUST-013 | Negative | Add conversation persistence in loop path | Conformance test fails | Persistence ownership violation accepted | Conversation ownership drift |
 | ENG-T014P | ENG-MUST-014 | Positive | Core loop calls adapter abstraction only | Provider wire details isolated in adapter module | Provider payload formatting in loop | Adapter boundary drift |
 | ENG-T014N | ENG-MUST-014 | Negative | Hardcode provider-specific fields in loop | Conformance test fails | Provider leakage accepted | Provider lock-in drift |

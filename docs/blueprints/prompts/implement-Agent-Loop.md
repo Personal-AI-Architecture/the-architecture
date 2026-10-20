@@ -1,6 +1,6 @@
-# Implement Engine (AI Coding Prompt)
+# Implement Agent Loop (AI Coding Prompt)
 
-Use this prompt with a coding AI to implement the **Engine** component in a target language.
+Use this prompt with a coding AI to implement the **Agent Loop** component in a target language.
 
 ---
 
@@ -8,29 +8,29 @@ You are a senior software engineer implementing a production-ready component.
 
 ## Mission
 
-Implement the **Engine (Agent Loop)** component in **{{TARGET_LANGUAGE}}** so it is architecture-aligned, contract-faithful, and drift-resistant.
+Implement the **Agent Loop** component in **{{TARGET_LANGUAGE}}** so it is architecture-aligned, contract-faithful, and drift-resistant.
 
 ## Primary Inputs
 
-- `/home/hex/Project/PAA-MVP-Prod/blueprints/Engine.md`
+- `/home/hex/Project/PAA-MVP-Prod/blueprints/Agent-Loop.md`
 - `/home/hex/Project/PAA-MVP-Prod/blueprints/Gateway.md`
 - `/home/hex/Project/PAA-MVP-Prod/blueprints/Gateway-API.md`
 - `/home/hex/Project/PAA-MVP-Prod/blueprints/contracts/Engine.schema.json`
-- `/home/hex/Project/PAA-MVP-Prod/blueprints/tests/Engine-conformance.md`
-- `/home/hex/Project/PAA-MVP-Prod/blueprints/drift/Engine-drift-guard.md`
+- `/home/hex/Project/PAA-MVP-Prod/blueprints/tests/Agent-Loop-conformance.md`
+- `/home/hex/Project/PAA-MVP-Prod/blueprints/drift/Agent-Loop-drift-guard.md`
 
 ## Supporting Inputs (Authoritative for contracts/audit)
 
-- `/home/hex/Project/PAA-MVP-Prod/docs/ai-agent-docs/engine.md`
-- `/home/hex/Project/PAA-MVP-Prod/docs/ai-agent-docs/gateway-engine-contract.md`
+- `/home/hex/Project/PAA-MVP-Prod/docs/ai-agent-docs/agent-loop.md`
+- `/home/hex/Project/PAA-MVP-Prod/docs/ai-agent-docs/gateway-agent-loop-contract.md`
 - `/home/hex/Project/PAA-MVP-Prod/docs/ai-agent-docs/compliance-matrix.md`
 - `/home/hex/Project/PAA-MVP-Prod/docs/ai-agent-docs/traceability-map.md`
-- `/home/hex/Project/PAA-MVP-Prod/docs/ai-agent-docs/review-checklists/engine-review.md`
+- `/home/hex/Project/PAA-MVP-Prod/docs/ai-agent-docs/review-checklists/agent-loop-review.md`
 
 ## Human Architecture Inputs (Authoritative for ownership boundaries)
 
-- `/home/hex/Reference/the-architecture/docs/in-depth-overview/engine-spec.md`
-- `/home/hex/Reference/the-architecture/docs/in-depth-overview/gateway-engine-contract.md`
+- `/home/hex/Reference/the-architecture/docs/in-depth-overview/agent-loop-spec.md`
+- `/home/hex/Reference/the-architecture/docs/in-depth-overview/gateway-agent-loop-contract.md`
 - `/home/hex/Reference/the-architecture/docs/in-depth-overview/foundation-spec.md`
 - `/home/hex/Reference/the-architecture/docs/in-depth-overview/models-spec.md`
 - `/home/hex/Reference/the-architecture/docs/in-depth-overview/tools-spec.md`
@@ -50,10 +50,10 @@ If conflicts exist, do not guess silently. Create `conflict_register.md` and doc
 - rationale
 - residual risk
 
-## Required Engine Capabilities
+## Required Agent Loop Capabilities
 
 Implement these behaviors:
-- Accept internal bounded Gateway -> Engine requests (`messages + metadata`).
+- Accept internal bounded Gateway -> Agent Loop requests (`messages + metadata`).
 - Run model-tool loop until model signals completion.
 - Invoke models through adapter boundary only.
 - Execute model-requested tools via tool executor/runtime.
@@ -107,14 +107,14 @@ Use these for MVP implementation consistency:
 2. Approval visibility:
    - Keep approval request/result contract-visible in stream where required by matrix/compliance artifacts.
 3. Loop completion:
-   - Engine must continue until model completion signal unless an explicit configured safety bound triggers classified termination.
+   - Agent Loop must continue until model completion signal unless an explicit configured safety bound triggers classified termination.
 4. Parallelism:
    - If parallel tool execution is not implemented initially, preserve deterministic sequential correctness and document deviation in `conflict_register.md` with a planned compatibility path.
 
 ## Non-Negotiable Constraints
 
-- Do not implement conversation persistence inside Engine.
-- Do not embed product-specific prompt/workflow logic into Engine loop.
+- Do not implement conversation persistence inside Agent Loop.
+- Do not embed product-specific prompt/workflow logic into Agent Loop.
 - Do not place provider-specific wire formatting in core loop logic (adapters own this).
 - Do not bypass Auth boundary ownership for permission decisions.
 - Do not collapse all failures into `provider_error`.
@@ -126,7 +126,7 @@ Use these for MVP implementation consistency:
 Implement automated tests that prove:
 
 1. Loop remains generic (no product-owned behavior dependencies).
-2. Engine handles request with bounded contract fields only.
+2. Agent Loop handles request with bounded contract fields only.
 3. Assistant text is preserved during tool-continuation turns.
 4. `done` is emitted when model signals completion.
 5. Recoverable tool errors produce `tool-result` and allow continuation.
@@ -140,7 +140,7 @@ Implement automated tests that prove:
 
 ## Drift-Critical Fail Conditions (Fail Build If Any True)
 
-- Engine stores/manages conversation truth.
+- Agent Loop stores/manages conversation truth.
 - Provider-specific request shaping appears in core loop.
 - Stream emits off-contract event names or payload classes.
 - Mid-stream errors are unclassified or taxonomy-collapsed.
@@ -150,7 +150,7 @@ Implement automated tests that prove:
 
 ## Deliverables
 
-1. Engine implementation code in `{{TARGET_LANGUAGE}}`.
+1. Agent Loop implementation code in `{{TARGET_LANGUAGE}}`.
 2. Test suite covering all required tests above.
 3. `implementation-report.md`:
    - requirement coverage map

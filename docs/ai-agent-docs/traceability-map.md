@@ -27,21 +27,21 @@ Make it easy to trace any audit rule back to the primer text, targeted review su
 | `G-06` | `docs/ai-agent-docs/client-gateway-contract.md` | `docs/ai-agent-docs/review-checklists/gateway-review.md` | `docs/ai-agent-docs/examples/conversation-list-response.json`, `docs/ai-agent-docs/examples/conversation-detail-response.json`, `docs/ai-agent-docs/examples/invalid-conversation-list-response.json`, `docs/ai-agent-docs/examples/invalid-conversation-detail-response.json` | `client contract`, `drift` |
 | `G-07` | `docs/ai-agent-docs/client-gateway-contract.md` | `docs/ai-agent-docs/review-checklists/gateway-review.md` | `docs/ai-agent-docs/examples/conversation-list-response.json`, `docs/ai-agent-docs/examples/conversation-detail-response.json` | `client contract`, `contract-visible` |
 
-## Engine Rows
+## Agent Loop Rows
 
 | Matrix ID | Owning Primer | Related Checklist | Example Location | Glossary Terms |
 |---|---|---|---|---|
-| `E-01` | `docs/ai-agent-docs/engine.md` | `docs/ai-agent-docs/review-checklists/engine-review.md` | - | `drift` |
-| `E-02` | `docs/ai-agent-docs/engine.md` | `docs/ai-agent-docs/review-checklists/engine-review.md` | - | `approved boundary`, `drift` |
-| `E-03` | `docs/ai-agent-docs/engine.md`, `docs/ai-agent-docs/models.md` | `docs/ai-agent-docs/review-checklists/engine-review.md`, `docs/ai-agent-docs/review-checklists/configuration-review.md` | - | `drift` |
-| `E-04` | `docs/ai-agent-docs/engine.md`, `docs/ai-agent-docs/gateway-engine-contract.md` | `docs/ai-agent-docs/review-checklists/engine-review.md` | `docs/ai-agent-docs/failure-patterns.md` | `conformance gate`, `drift` |
+| `E-01` | `docs/ai-agent-docs/agent-loop.md` | `docs/ai-agent-docs/review-checklists/agent-loop-review.md` | - | `drift` |
+| `E-02` | `docs/ai-agent-docs/agent-loop.md` | `docs/ai-agent-docs/review-checklists/agent-loop-review.md` | - | `approved boundary`, `drift` |
+| `E-03` | `docs/ai-agent-docs/agent-loop.md`, `docs/ai-agent-docs/models.md` | `docs/ai-agent-docs/review-checklists/agent-loop-review.md`, `docs/ai-agent-docs/review-checklists/configuration-review.md` | - | `drift` |
+| `E-04` | `docs/ai-agent-docs/agent-loop.md`, `docs/ai-agent-docs/gateway-agent-loop-contract.md` | `docs/ai-agent-docs/review-checklists/agent-loop-review.md` | `docs/ai-agent-docs/failure-patterns.md` | `conformance gate`, `drift` |
 
 ## Configuration Rows
 
 | Matrix ID | Owning Primer | Related Checklist | Example Location | Glossary Terms |
 |---|---|---|---|---|
 | `C-01` | `docs/ai-agent-docs/configuration.md` | `docs/ai-agent-docs/review-checklists/configuration-review.md` | `docs/ai-agent-docs/examples/runtime-config.json`, `docs/ai-agent-docs/examples/adapter-config.json`, `docs/ai-agent-docs/examples/invalid-runtime-config.json`, `docs/ai-agent-docs/examples/invalid-adapter-config.json` | `startup readiness`, `drift` |
-| `C-02` | `docs/ai-agent-docs/configuration.md`, `docs/ai-agent-docs/gateway-engine-contract.md` | `docs/ai-agent-docs/review-checklists/configuration-review.md`, `docs/ai-agent-docs/review-checklists/gateway-review.md` | `docs/ai-agent-docs/examples/runtime-config.json`, `docs/ai-agent-docs/examples/gateway-engine-request.json`, `docs/ai-agent-docs/examples/invalid-runtime-config.json`, `docs/ai-agent-docs/examples/invalid-gateway-engine-request.json` | `internal contract`, `drift` |
+| `C-02` | `docs/ai-agent-docs/configuration.md`, `docs/ai-agent-docs/gateway-agent-loop-contract.md` | `docs/ai-agent-docs/review-checklists/configuration-review.md`, `docs/ai-agent-docs/review-checklists/gateway-review.md` | `docs/ai-agent-docs/examples/runtime-config.json`, `docs/ai-agent-docs/examples/gateway-engine-request.json`, `docs/ai-agent-docs/examples/invalid-runtime-config.json`, `docs/ai-agent-docs/examples/invalid-gateway-engine-request.json` | `internal contract`, `drift` |
 | `C-03` | `docs/ai-agent-docs/configuration.md`, `docs/ai-agent-docs/security.md` | `docs/ai-agent-docs/review-checklists/configuration-review.md`, `docs/ai-agent-docs/review-checklists/security-review.md` | `docs/ai-agent-docs/examples/runtime-config.json`, `docs/ai-agent-docs/examples/adapter-config.json`, `docs/ai-agent-docs/examples/invalid-runtime-config.json`, `docs/ai-agent-docs/examples/invalid-adapter-config.json` | `product-owned state`, `startup readiness` |
 
 ## Memory Rows
@@ -69,19 +69,19 @@ Make it easy to trace any audit rule back to the primer text, targeted review su
 
 | Matrix ID | Owning Primer | Related Checklist | Example Location | Glossary Terms |
 |---|---|---|---|---|
-| `S-01` | `docs/ai-agent-docs/security.md`, `docs/ai-agent-docs/gateway-engine-contract.md` | `docs/ai-agent-docs/review-checklists/security-review.md`, `docs/ai-agent-docs/review-checklists/engine-review.md` | `docs/ai-agent-docs/examples/invalid-gateway-engine-request.json`, `docs/ai-agent-docs/failure-patterns.md` | `contract-visible`, `drift` |
+| `S-01` | `docs/ai-agent-docs/security.md`, `docs/ai-agent-docs/gateway-agent-loop-contract.md` | `docs/ai-agent-docs/review-checklists/security-review.md`, `docs/ai-agent-docs/review-checklists/agent-loop-review.md` | `docs/ai-agent-docs/examples/invalid-gateway-engine-request.json`, `docs/ai-agent-docs/failure-patterns.md` | `contract-visible`, `drift` |
 | `S-02` | `docs/ai-agent-docs/security.md` | `docs/ai-agent-docs/review-checklists/security-review.md` | - | `startup readiness`, `drift` |
 | `S-03` | `docs/ai-agent-docs/security.md` | `docs/ai-agent-docs/review-checklists/security-review.md`, `docs/ai-agent-docs/review-checklists/auth-review.md` | `docs/ai-agent-docs/failure-patterns.md` | `contract-visible`, `approved boundary` |
 | `S-04` | `docs/ai-agent-docs/security.md`, `docs/ai-agent-docs/tools.md` | `docs/ai-agent-docs/review-checklists/security-review.md` | - | `approved boundary`, `startup readiness` |
-| `S-05` | `docs/ai-agent-docs/client-gateway-contract.md`, `docs/ai-agent-docs/gateway-engine-contract.md` | `docs/ai-agent-docs/review-checklists/security-review.md`, `docs/ai-agent-docs/review-checklists/gateway-review.md` | `docs/ai-agent-docs/examples/approval-request-event.json`, `docs/ai-agent-docs/examples/approval-result-event.json`, `docs/ai-agent-docs/examples/invalid-approval-request-event.json`, `docs/ai-agent-docs/examples/invalid-approval-result-event.json`, `docs/ai-agent-docs/failure-patterns.md` | `contract-visible`, `client contract` |
+| `S-05` | `docs/ai-agent-docs/client-gateway-contract.md`, `docs/ai-agent-docs/gateway-agent-loop-contract.md` | `docs/ai-agent-docs/review-checklists/security-review.md`, `docs/ai-agent-docs/review-checklists/gateway-review.md` | `docs/ai-agent-docs/examples/approval-request-event.json`, `docs/ai-agent-docs/examples/approval-result-event.json`, `docs/ai-agent-docs/examples/invalid-approval-request-event.json`, `docs/ai-agent-docs/examples/invalid-approval-result-event.json`, `docs/ai-agent-docs/failure-patterns.md` | `contract-visible`, `client contract` |
 
 ## Models Rows
 
 | Matrix ID | Owning Primer | Related Checklist | Example Location | Glossary Terms |
 |---|---|---|---|---|
-| `MO-01` | `docs/ai-agent-docs/models.md` | `docs/ai-agent-docs/review-checklists/engine-review.md`, `docs/ai-agent-docs/review-checklists/configuration-review.md` | - | `drift` |
+| `MO-01` | `docs/ai-agent-docs/models.md` | `docs/ai-agent-docs/review-checklists/agent-loop-review.md`, `docs/ai-agent-docs/review-checklists/configuration-review.md` | - | `drift` |
 | `MO-02` | `docs/ai-agent-docs/models.md`, `docs/ai-agent-docs/configuration.md` | `docs/ai-agent-docs/review-checklists/configuration-review.md` | `docs/ai-agent-docs/examples/runtime-config.json`, `docs/ai-agent-docs/examples/adapter-config.json` | `product-owned state`, `startup readiness` |
-| `MO-03` | `docs/ai-agent-docs/models.md`, `docs/ai-agent-docs/configuration.md` | `docs/ai-agent-docs/review-checklists/configuration-review.md`, `docs/ai-agent-docs/review-checklists/engine-review.md` | - | `drift` |
+| `MO-03` | `docs/ai-agent-docs/models.md`, `docs/ai-agent-docs/configuration.md` | `docs/ai-agent-docs/review-checklists/configuration-review.md`, `docs/ai-agent-docs/review-checklists/agent-loop-review.md` | - | `drift` |
 
 ## Tools Rows
 
@@ -111,16 +111,16 @@ Make it easy to trace any audit rule back to the primer text, targeted review su
 | `CU-02` | `docs/ai-agent-docs/customization.md` | - | - | `client contract`, `internal contract` |
 | `CU-03` | `docs/ai-agent-docs/customization.md` | - | - | `one-shot build`, `drift` |
 
-## Gateway-Engine Contract Rows
+## Gateway ↔ Agent Loop Contract Rows
 
 | Matrix ID | Owning Primer | Related Checklist | Example Location | Glossary Terms |
 |---|---|---|---|---|
-| `GC-01` | `docs/ai-agent-docs/gateway-engine-contract.md` | `docs/ai-agent-docs/review-checklists/engine-review.md` | `docs/ai-agent-docs/examples/gateway-engine-request.json`, `docs/ai-agent-docs/examples/invalid-gateway-engine-request.json` | `internal contract` |
-| `GC-02` | `docs/ai-agent-docs/gateway-engine-contract.md` | `docs/ai-agent-docs/review-checklists/engine-review.md` | `docs/ai-agent-docs/examples/gateway-engine-request.json` | `contract-visible`, `internal contract` |
-| `GC-03` | `docs/ai-agent-docs/gateway-engine-contract.md`, `docs/ai-agent-docs/security.md` | `docs/ai-agent-docs/review-checklists/engine-review.md`, `docs/ai-agent-docs/review-checklists/security-review.md` | `docs/ai-agent-docs/examples/invalid-gateway-engine-request.json`, `docs/ai-agent-docs/failure-patterns.md` | `contract-visible`, `drift` |
-| `GC-04` | `docs/ai-agent-docs/gateway-engine-contract.md`, `docs/ai-agent-docs/auth.md` | `docs/ai-agent-docs/review-checklists/auth-review.md`, `docs/ai-agent-docs/review-checklists/gateway-review.md` | - | `approved boundary`, `internal contract` |
-| `GC-05` | `docs/ai-agent-docs/gateway-engine-contract.md` | `docs/ai-agent-docs/review-checklists/engine-review.md`, `docs/ai-agent-docs/review-checklists/security-review.md` | `docs/ai-agent-docs/examples/invalid-gateway-engine-request.json`, `docs/ai-agent-docs/failure-patterns.md` | `contract-visible`, `drift` |
-| `GC-06` | `docs/ai-agent-docs/gateway-engine-contract.md`, `docs/ai-agent-docs/client-gateway-contract.md` | `docs/ai-agent-docs/review-checklists/engine-review.md`, `docs/ai-agent-docs/review-checklists/security-review.md`, `docs/ai-agent-docs/review-checklists/gateway-review.md` | `docs/ai-agent-docs/examples/approval-request-event.json`, `docs/ai-agent-docs/examples/approval-result-event.json`, `docs/ai-agent-docs/examples/invalid-approval-request-event.json`, `docs/ai-agent-docs/examples/invalid-approval-result-event.json`, `docs/ai-agent-docs/failure-patterns.md` | `contract-visible`, `client contract` |
+| `GC-01` | `docs/ai-agent-docs/gateway-agent-loop-contract.md` | `docs/ai-agent-docs/review-checklists/agent-loop-review.md` | `docs/ai-agent-docs/examples/gateway-engine-request.json`, `docs/ai-agent-docs/examples/invalid-gateway-engine-request.json` | `internal contract` |
+| `GC-02` | `docs/ai-agent-docs/gateway-agent-loop-contract.md` | `docs/ai-agent-docs/review-checklists/agent-loop-review.md` | `docs/ai-agent-docs/examples/gateway-engine-request.json` | `contract-visible`, `internal contract` |
+| `GC-03` | `docs/ai-agent-docs/gateway-agent-loop-contract.md`, `docs/ai-agent-docs/security.md` | `docs/ai-agent-docs/review-checklists/agent-loop-review.md`, `docs/ai-agent-docs/review-checklists/security-review.md` | `docs/ai-agent-docs/examples/invalid-gateway-engine-request.json`, `docs/ai-agent-docs/failure-patterns.md` | `contract-visible`, `drift` |
+| `GC-04` | `docs/ai-agent-docs/gateway-agent-loop-contract.md`, `docs/ai-agent-docs/auth.md` | `docs/ai-agent-docs/review-checklists/auth-review.md`, `docs/ai-agent-docs/review-checklists/gateway-review.md` | - | `approved boundary`, `internal contract` |
+| `GC-05` | `docs/ai-agent-docs/gateway-agent-loop-contract.md` | `docs/ai-agent-docs/review-checklists/agent-loop-review.md`, `docs/ai-agent-docs/review-checklists/security-review.md` | `docs/ai-agent-docs/examples/invalid-gateway-engine-request.json`, `docs/ai-agent-docs/failure-patterns.md` | `contract-visible`, `drift` |
+| `GC-06` | `docs/ai-agent-docs/gateway-agent-loop-contract.md`, `docs/ai-agent-docs/client-gateway-contract.md` | `docs/ai-agent-docs/review-checklists/agent-loop-review.md`, `docs/ai-agent-docs/review-checklists/security-review.md`, `docs/ai-agent-docs/review-checklists/gateway-review.md` | `docs/ai-agent-docs/examples/approval-request-event.json`, `docs/ai-agent-docs/examples/approval-result-event.json`, `docs/ai-agent-docs/examples/invalid-approval-request-event.json`, `docs/ai-agent-docs/examples/invalid-approval-result-event.json`, `docs/ai-agent-docs/failure-patterns.md` | `contract-visible`, `client contract` |
 
 ## Source Docs
 
@@ -129,7 +129,7 @@ Make it easy to trace any audit rule back to the primer text, targeted review su
 - `docs/ai-agent-docs/primer-audit-playbook.md`
 - `docs/ai-agent-docs/failure-patterns.md`
 - `docs/ai-agent-docs/client-gateway-contract.md`
-- `docs/ai-agent-docs/gateway-engine-contract.md`
+- `docs/ai-agent-docs/gateway-agent-loop-contract.md`
 - `docs/ai-agent-docs/configuration.md`
 - `docs/ai-agent-docs/examples/README.md`
 - `docs/ai-agent-docs/review-checklists/gateway-review.md`

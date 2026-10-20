@@ -14,7 +14,7 @@ Deployment defines where and how the system runs, with owner control as the defa
 
 ### System Context
 - Deployment is a cross-cutting operational boundary, not a runtime component.
-- Deployment constrains how Gateway, Engine, Memory, Auth, and model adapters are hosted.
+- Deployment constrains how Gateway, Agent Loop, Memory, Auth, and model adapters are hosted.
 - Deployment interacts with Configuration, Security, Models, and startup-readiness guarantees.
 - Deployment does not alter component responsibility matrix or API contract ownership.
 

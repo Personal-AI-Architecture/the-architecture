@@ -16,7 +16,7 @@ Important: Gateway API is an external contract boundary, not a standalone archit
 
 - `/home/hex/Project/PAA-MVP-Prod/blueprints/Gateway-API.md`
 - `/home/hex/Project/PAA-MVP-Prod/blueprints/Gateway.md`
-- `/home/hex/Project/PAA-MVP-Prod/blueprints/Engine.md`
+- `/home/hex/Project/PAA-MVP-Prod/blueprints/Agent-Loop.md`
 - `/home/hex/Project/PAA-MVP-Prod/blueprints/contracts/Gateway-API.schema.json`
 - `/home/hex/Project/PAA-MVP-Prod/blueprints/tests/Gateway-API-conformance.md`
 - `/home/hex/Project/PAA-MVP-Prod/blueprints/drift/Gateway-API-drift-guard.md`
@@ -32,7 +32,7 @@ Important: Gateway API is an external contract boundary, not a standalone archit
 ## Human Architecture Inputs (Authoritative for boundary ownership)
 
 - `/home/hex/Reference/the-architecture/docs/in-depth-overview/gateway-spec.md`
-- `/home/hex/Reference/the-architecture/docs/in-depth-overview/gateway-engine-contract.md`
+- `/home/hex/Reference/the-architecture/docs/in-depth-overview/gateway-agent-loop-contract.md`
 - `/home/hex/Reference/the-architecture/docs/in-depth-overview/foundation-spec.md`
 - `/home/hex/Reference/the-architecture/docs/in-depth-overview/security-spec.md`
 - `/home/hex/Reference/the-architecture/docs/in-depth-overview/auth-spec.md`
@@ -111,7 +111,7 @@ Use these for MVP implementation consistency:
 ## Non-Negotiable Constraints
 
 - Do not treat Gateway API as a separate component with new ownership.
-- Do not expose internal Gateway-Engine request format to clients.
+- Do not expose internal Gateway ↔ Agent Loop request format to clients.
 - Do not create undocumented helper routes/payloads for approvals.
 - Do not bypass Auth on protected routes.
 - Do not leak raw storage records to client responses.
@@ -136,7 +136,7 @@ Implement automated contract tests that prove:
 
 ## Drift-Critical Fail Conditions (Fail Build If Any True)
 
-- Client can submit internal Engine contract directly.
+- Client can submit internal Agent Loop contract directly.
 - Conversation endpoints leak raw storage/database shape.
 - Approval semantics exist only in UI flow, not contract-visible API behavior.
 - Event names/payloads drift from canonical contract.

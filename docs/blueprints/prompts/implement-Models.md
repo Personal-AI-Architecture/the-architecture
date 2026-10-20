@@ -16,7 +16,7 @@ Important: `Models` is an external dependency boundary, not a runtime component 
 
 - `/home/hex/Project/PAA-MVP-Prod/blueprints/Models.md`
 - `/home/hex/Project/PAA-MVP-Prod/blueprints/Model-API.md`
-- `/home/hex/Project/PAA-MVP-Prod/blueprints/Engine.md`
+- `/home/hex/Project/PAA-MVP-Prod/blueprints/Agent-Loop.md`
 - `/home/hex/Project/PAA-MVP-Prod/blueprints/Configuration.md`
 - `/home/hex/Project/PAA-MVP-Prod/blueprints/contracts/Models.schema.json`
 - `/home/hex/Project/PAA-MVP-Prod/blueprints/tests/Models-conformance.md`
@@ -28,9 +28,9 @@ Important: `Models` is an external dependency boundary, not a runtime component 
 - `/home/hex/Project/PAA-MVP-Prod/docs/ai-agent-docs/compliance-matrix.md`
 - `/home/hex/Project/PAA-MVP-Prod/docs/ai-agent-docs/traceability-map.md`
 - `/home/hex/Project/PAA-MVP-Prod/docs/ai-agent-docs/review-checklists/configuration-review.md`
-- `/home/hex/Project/PAA-MVP-Prod/docs/ai-agent-docs/review-checklists/engine-review.md`
+- `/home/hex/Project/PAA-MVP-Prod/docs/ai-agent-docs/review-checklists/agent-loop-review.md`
 - `/home/hex/Project/PAA-MVP-Prod/docs/ai-agent-docs/configuration.md`
-- `/home/hex/Project/PAA-MVP-Prod/docs/ai-agent-docs/engine.md`
+- `/home/hex/Project/PAA-MVP-Prod/docs/ai-agent-docs/agent-loop.md`
 
 ## Human Architecture Inputs (Authoritative for ownership boundaries)
 
@@ -102,13 +102,13 @@ Use these for implementation consistency:
 
 - Do not implement Models as a fifth runtime component.
 - Do not introduce a third external API.
-- Do not bypass adapters from Engine core model path.
-- Do not place provider-specific logic in Gateway or Engine core loop.
+- Do not bypass adapters from Agent Loop core model path.
+- Do not place provider-specific logic in Gateway or Agent Loop core loop.
 - Do not accept request payload fields that reconfigure provider/model/runtime binding.
 - Do not store raw credentials in tracked runtime/adapter/preference files.
 - Do not silently fallback on unsupported adapter selection.
 - Do not make same-provider swap require unrelated component code changes.
-- Do not make provider swap require Gateway/Auth/Memory/Engine-core rewrites.
+- Do not make provider swap require Gateway/Auth/Memory/Agent Loop core rewrites.
 
 ## Required Tests (Minimum)
 

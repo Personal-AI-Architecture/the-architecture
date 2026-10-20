@@ -15,8 +15,8 @@ Security defines the cross-cutting controls that protect secrets, enforce trust 
 
 ### System Context
 - Security is not a standalone runtime component.
-- Security is an architecture-level control plane enforced through Gateway, Auth, Engine, Memory, Tools, Configuration, and Deployment posture.
-- Security sits across both external contracts (Gateway API and Model API) and the internal Gateway-Engine contract.
+- Security is an architecture-level control plane enforced through Gateway, Auth, Agent Loop, Memory, Tools, Configuration, and Deployment posture.
+- Security sits across both external contracts (Gateway API and Model API) and the internal Gateway ↔ Agent Loop contract.
 
 ---
 
@@ -59,7 +59,7 @@ Security defines the cross-cutting controls that protect secrets, enforce trust 
 - **Correlation-aware auditability**: link security-relevant actions/events via request correlation.
 
 ### External Concepts
-- **Protected request path**: request path requiring Auth before Gateway/Engine work.
+- **Protected request path**: request path requiring Auth before Gateway/Agent Loop work.
 - **Contract-visible approval**: approval appears in stream/API contract (`approval-request`, `approval-result`, decision route).
 - **Product-owned state**: inspectable/exportable owner-controlled data format.
 
@@ -400,7 +400,7 @@ Security defines the cross-cutting controls that protect secrets, enforce trust 
   - stream events (`approval-request`, `approval-result`, `error`).
   - audit event emission to structured sink.
 - Cross-component propagation:
-  - correlation IDs across Gateway, Auth, Engine, tools, and audit logs.
+  - correlation IDs across Gateway, Auth, Agent Loop, tools, and audit logs.
 
 ---
 
@@ -420,16 +420,16 @@ Security defines the cross-cutting controls that protect secrets, enforce trust 
 4. On success: attach normalized auth context and continue.
 
 ### 5.3 Mid-Stream Security Behavior
-1. Engine runs model/tool loop under actor permissions.
+1. Agent Loop runs model/tool loop under actor permissions.
 2. Errors are classified to contract taxonomy and sanitized.
 3. Unrecoverable failures emit terminal `error` event and close stream.
 4. Recoverable tool failures remain `tool-result` errors and continue loop.
 
 ### 5.4 Approval Enforcement Flow
 1. Approval-required tool requested.
-2. Engine emits `approval-request` event.
+2. Agent Loop emits `approval-request` event.
 3. Approval decision endpoint accepts only `{ decision }` with auth/permission check.
-4. Engine emits `approval-result`.
+4. Agent Loop emits `approval-result`.
 5. Denied decision returns non-mutating `tool-result` status `denied` and continues safely.
 
 ### 5.5 Tool Boundary Behavior
@@ -472,7 +472,7 @@ Security defines the cross-cutting controls that protect secrets, enforce trust 
 ### External Systems or Components
 - Auth boundary for identity and permission decisions.
 - Gateway for pre-stream validation and contract responses.
-- Engine for loop execution, approval events, and error taxonomy.
+- Agent Loop for loop execution, approval events, and error taxonomy.
 - Tools runtime for capability execution and scope enforcement.
 - Memory boundary for durable owner state, history, and export.
 - Configuration/adapter layer for secret references and startup profile.
@@ -481,7 +481,7 @@ Security defines the cross-cutting controls that protect secrets, enforce trust 
 ### Data Flow
 1. Client request enters Gateway.
 2. Auth validates and annotates request context.
-3. Engine executes loop with filtered tool set.
+3. Agent Loop executes loop with filtered tool set.
 4. Tool/runtime boundaries enforce scope and approval.
 5. Stream events and audit logs provide contract-visible and forensic surfaces.
 6. Memory/export/history remain available as owner safety controls.
@@ -586,7 +586,7 @@ Security defines the cross-cutting controls that protect secrets, enforce trust 
 ### Confirmed Alignments
 - Security is explicitly cross-cutting and not a new component (`security-spec.md`).
 - Approval gates are coded controls and not prompt instructions (`security-spec.md`, `tools-spec.md`).
-- Auth is first-line protected-route boundary (`auth-spec.md`, `gateway-engine-contract.md`).
+- Auth is first-line protected-route boundary (`auth-spec.md`, `gateway-agent-loop-contract.md`).
 - Secrets live in configuration references, not memory content (`security-spec.md`, `configuration-spec.md`).
 - Version history and export are part of the security safety net (`security-spec.md`).
 
@@ -663,17 +663,17 @@ Security defines the cross-cutting controls that protect secrets, enforce trust 
 | Requirement ID | Primary Source(s) | Conformance Test IDs |
 |---|---|---|
 | SEC-MUST-001 | Human `security-spec.md`, `configuration-spec.md`; AI matrix `C-03`, `A-04` | `SEC-T001P`, `SEC-T001N` |
-| SEC-MUST-002 | Human `security-spec.md`, `gateway-engine-contract.md`; AI matrix `S-01`, `GC-03` | `SEC-T002P`, `SEC-T002N` |
-| SEC-MUST-003 | Human `gateway-engine-contract.md`; AI matrix `GC-05` | `SEC-T003P`, `SEC-T003N` |
+| SEC-MUST-002 | Human `security-spec.md`, `gateway-agent-loop-contract.md`; AI matrix `S-01`, `GC-03` | `SEC-T002P`, `SEC-T002N` |
+| SEC-MUST-003 | Human `gateway-agent-loop-contract.md`; AI matrix `GC-05` | `SEC-T003P`, `SEC-T003N` |
 | SEC-MUST-004 | Human `security-spec.md`; AI matrix `S-02` | `SEC-T004P`, `SEC-T004N` |
 | SEC-MUST-005 | Human `security-spec.md`, `tools-spec.md`; AI matrix `S-03` | `SEC-T005P`, `SEC-T005N` |
-| SEC-MUST-006 | Human `gateway-engine-contract.md`; AI matrix `S-05`, `GC-06`, `G-08` | `SEC-T006P`, `SEC-T006N` |
-| SEC-MUST-007 | Human `auth-spec.md`, `gateway-engine-contract.md`; AI matrix `A-01`, `GC-04` | `SEC-T007P`, `SEC-T007N` |
+| SEC-MUST-006 | Human `gateway-agent-loop-contract.md`; AI matrix `S-05`, `GC-06`, `G-08` | `SEC-T006P`, `SEC-T006N` |
+| SEC-MUST-007 | Human `auth-spec.md`, `gateway-agent-loop-contract.md`; AI matrix `A-01`, `GC-04` | `SEC-T007P`, `SEC-T007N` |
 | SEC-MUST-008 | Human `configuration-spec.md`; AI matrix `C-02`, `GC-01` | `SEC-T008P`, `SEC-T008N` |
 | SEC-MUST-009 | Human `security-spec.md`, `tools-spec.md`; AI matrix `S-04`, `T-02`, `T-03` | `SEC-T009P`, `SEC-T009N` |
 | SEC-MUST-010 | Human `auth-spec.md`, `security-spec.md`; AI matrix `A-03`, `A-04` | `SEC-T010P`, `SEC-T010N` |
 | SEC-MUST-011 | Human `security-spec.md`; AI matrix `S-02`, `S-03`, `A-05` | `SEC-T011P`, `SEC-T011N` |
-| SEC-MUST-012 | Human `gateway-engine-contract.md`; AI matrix `GC-01` plus security checklist traceability requirements | `SEC-T012P`, `SEC-T012N` |
+| SEC-MUST-012 | Human `gateway-agent-loop-contract.md`; AI matrix `GC-01` plus security checklist traceability requirements | `SEC-T012P`, `SEC-T012N` |
 | SEC-MUST-013 | Human `security-spec.md`, `memory-spec.md`; AI matrix `M-03`, `M-04`, `D-05`, `D-07` | `SEC-T013P`, `SEC-T013N` |
 | SEC-MUST-014 | Human `foundation-spec.md`, `security-spec.md`; AI matrix `MO-03`, `CU-02` | `SEC-T014P`, `SEC-T014N` |
 

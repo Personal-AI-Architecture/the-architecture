@@ -33,7 +33,7 @@ This file defines language-agnostic pass/fail vectors for cross-cutting Security
 | SEC-T004N | SEC-MUST-004 | Negative | Disable audit sink for sensitive actions | Conformance fails | Missing audit accepted | Silent action drift |
 | SEC-T005P | SEC-MUST-005 | Positive | Attempt write action requiring approval | Runtime blocks write until coded approval decision | Write executes without approval control | Prompt-only approval drift |
 | SEC-T005N | SEC-MUST-005 | Negative | Remove approval interception logic, keep prompt text only | Conformance fails | Prompt-only behavior accepted | Enforcement bypass |
-| SEC-T006P | SEC-MUST-006 | Positive | Approval-required interaction through Gateway/Engine contracts | `approval-request` + `approval-result` are contract-visible | Approval hidden in local UI path only | Contract invisibility |
+| SEC-T006P | SEC-MUST-006 | Positive | Approval-required interaction through Gateway/Agent Loop contracts | `approval-request` + `approval-result` are contract-visible | Approval hidden in local UI path only | Contract invisibility |
 | SEC-T006N | SEC-MUST-006 | Negative | Handle approval only inside CLI/local state | Conformance fails | Local-only approval accepted | Approval drift |
 | SEC-T007P | SEC-MUST-007 | Positive | Call protected routes with valid auth context | Requests succeed under valid auth | Valid auth blocked unexpectedly | Auth regression |
 | SEC-T007N | SEC-MUST-007 | Negative | Call protected routes without auth | 401/deny and no downstream execution | Unauthorized access allowed | Auth bypass |
@@ -45,7 +45,7 @@ This file defines language-agnostic pass/fail vectors for cross-cutting Security
 | SEC-T010N | SEC-MUST-010 | Negative | Include token/hash/secret in auth export response | Conformance fails | Secret-in-export accepted | Export secrecy drift |
 | SEC-T011P | SEC-MUST-011 | Positive | Fresh startup path audit against MVP gates | Security controls present and active at startup | Security controls deferred/disabled until later | Day-one readiness drift |
 | SEC-T011N | SEC-MUST-011 | Negative | Start system with approval/audit/safe-error controls disabled as post-MVP TODOs | Conformance fails | Deferred controls accepted | Hardening deferral drift |
-| SEC-T012P | SEC-MUST-012 | Positive | Trace one request across gateway/auth/engine/tool/audit | Correlation IDs present and linked in events/logs | Untraceable sensitive operations | Traceability drift |
+| SEC-T012P | SEC-MUST-012 | Positive | Trace one request across gateway/auth/agent loop/tool/audit | Correlation IDs present and linked in events/logs | Untraceable sensitive operations | Traceability drift |
 | SEC-T012N | SEC-MUST-012 | Negative | Strip correlation propagation before tool/audit layers | Conformance fails | Correlation loss accepted | Forensics gap drift |
 | SEC-T013P | SEC-MUST-013 | Positive | Exercise memory export/history under normal operation | Export/history available and complete | Export/history unavailable | Recovery-net drift |
 | SEC-T013N | SEC-MUST-013 | Negative | Disable version-history readiness or omit export path | Conformance fails | Missing recovery net accepted | Resilience drift |

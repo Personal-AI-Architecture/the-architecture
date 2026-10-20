@@ -598,7 +598,7 @@ The D147 anti-lock-in CI test is the concrete enforcement mechanism: three swaps
 | Document | Relationship |
 |----------|-------------|
 | [foundation-spec.md](./foundation-spec.md) | The architecture being analyzed |
-| [engine-spec.md](./engine-spec.md) | Agent Loop component spec — generic agent loop |
+| [agent-loop-spec.md](./agent-loop-spec.md) | Agent Loop component spec — generic agent loop |
 | [memory-spec.md](./memory-spec.md) | Your Memory component spec — portable substrate |
 | [gateway-spec.md](./gateway-spec.md) | Gateway component spec — conversation management |
 | [auth-spec.md](./auth-spec.md) | Auth component spec — identity, access, permissions |
@@ -609,6 +609,6 @@ The D147 anti-lock-in CI test is the concrete enforcement mechanism: three swaps
 | [deployment-spec.md](./deployment-spec.md) | Deployment spec — local-first guarantees |
 | [customization-spec.md](./customization-spec.md) | Customization spec — Architecture/Implementation/Personalization ecosystem |
 | [adapter-spec.md](./adapter-spec.md) | How contracts are made swappable via adapters (D139) |
-| [gateway-engine-contract.md](./gateway-engine-contract.md) | Gateway ↔ Agent Loop internal contract (D137) |
+| [gateway-agent-loop-contract.md](./gateway-agent-loop-contract.md) | Gateway ↔ Agent Loop internal contract (D137) |
 | [lockin-gate.md](./lockin-gate.md) | PR-level lock-in checklist — fast gate for every non-trivial PR |
 | [lockin-audit.md](./lockin-audit.md) | Deep architecture audit — milestone/release gate |

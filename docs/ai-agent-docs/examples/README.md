@@ -18,7 +18,7 @@ Provide copyable valid and invalid example files so implementers, reviewers, and
 - `invalid-approval-request-event.json` - drift example missing required approval context
 - `approval-result-event.json` - canonical client-facing approval result event payload
 - `invalid-approval-result-event.json` - drift example missing required decision linkage
-- `gateway-engine-request.json` - canonical internal Gateway -> Engine request
+- `gateway-engine-request.json` - canonical internal Gateway -> Agent Loop request
 - `invalid-gateway-engine-request.json` - drift example that leaks config and secrets into metadata
 - `runtime-config.json` - canonical startup-ready runtime config
 - `invalid-runtime-config.json` - drift example with collapsed config and embedded secret values
@@ -28,7 +28,7 @@ Provide copyable valid and invalid example files so implementers, reviewers, and
 ## Authority Mapping
 
 - Client-facing payloads -> `docs/ai-agent-docs/client-gateway-contract.md`
-- Internal Engine handoff -> `docs/ai-agent-docs/gateway-engine-contract.md`
+- Internal Agent Loop handoff -> `docs/ai-agent-docs/gateway-agent-loop-contract.md`
 - Startup/runtime config -> `docs/ai-agent-docs/configuration.md`
 - Pass/fail enforcement -> `docs/ai-agent-docs/compliance-matrix.md`
 - Cross-reference map -> `docs/ai-agent-docs/traceability-map.md`
@@ -42,7 +42,7 @@ Provide copyable valid and invalid example files so implementers, reviewers, and
 ## Source Docs
 
 - `docs/ai-agent-docs/client-gateway-contract.md`
-- `docs/ai-agent-docs/gateway-engine-contract.md`
+- `docs/ai-agent-docs/gateway-agent-loop-contract.md`
 - `docs/ai-agent-docs/configuration.md`
 - `docs/ai-agent-docs/compliance-matrix.md`
 - `docs/ai-agent-docs/traceability-map.md`

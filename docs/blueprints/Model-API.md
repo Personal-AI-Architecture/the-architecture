@@ -3,7 +3,7 @@
 ## 1. Overview
 
 ### Purpose
-The Model API is the external intelligence boundary through which the Engine requests model completions and receives model output. It keeps models external and swappable.
+The Model API is the external intelligence boundary through which the Agent Loop requests model completions and receives model output. It keeps models external and swappable.
 
 ### High-Level Responsibilities
 - Define the generic internal completion contract (`messages + tools` in, normalized completion out).
@@ -14,25 +14,25 @@ The Model API is the external intelligence boundary through which the Engine req
 
 ### System Context
 - Boundary type: external API boundary, not a standalone architecture component.
-- Upstream caller: Engine (Agent Loop).
+- Upstream caller: Agent Loop.
 - Downstream targets: model providers (cloud or local endpoints) through adapters.
 - Cross-cutting dependencies: runtime config, adapter config, preferences, and secret references.
 
 ### Companion Artifact
-- Engine component specification: `blueprints/Engine.md`
+- Agent Loop component specification: `blueprints/Agent-Loop.md`
 
 ---
 
 ## 2. Scope Definition
 
 ### What the Model API **is**
-- A connector boundary between Engine and external models.
+- An API boundary between Agent Loop and external models.
 - A stable internal contract for model completion requests/responses.
 - An adapter-mediated translation layer between internal and provider-native formats.
 - A swappability mechanism for model/provider changes without broad code rewrites.
 
 ### What the Model API **is not**
-- Not a runtime component with business ownership like Gateway/Engine/Auth/Memory.
+- Not a runtime component with business ownership like Gateway/Agent Loop/Auth/Memory.
 - Not a tool subsystem or a callable tool by default.
 - Not a request-time provider reconfiguration channel.
 - Not a place for Gateway conversation logic or Auth policy ownership.
@@ -48,7 +48,7 @@ The Model API is the external intelligence boundary through which the Engine req
 ## 3. Core Concepts & Terminology
 
 ### Key Concepts
-- **Model API**: the connector contract from Engine to external models.
+- **Model API**: the API contract from Agent Loop to external models.
 - **Adapter**: thin translator between internal contract and provider format.
 - **Generic Completion Contract**: normalized request/response shape independent of provider.
 - **Runtime Binding**: runtime-selected adapter plus preference-selected model.
@@ -143,9 +143,9 @@ Defined interfaces:
   - `provider: string`
 
 ### 4.8 Communication Patterns
-- Engine -> adapter -> provider call pattern.
+- Agent Loop -> adapter -> provider call pattern.
 - Internal contract is request/response at adapter boundary.
-- Engine may still stream externally to Gateway while adapter call is non-streaming internally.
+- Agent Loop may still stream externally to Gateway while adapter call is non-streaming internally.
 
 ### 4.9 Pre-Stream vs Mid-Stream Failure Behavior
 - Pre-stream/binding failures:
@@ -153,7 +153,7 @@ Defined interfaces:
   - fail clearly during startup/load or first call with classified configuration/provider error.
 - Mid-stream/interaction failures:
   - provider timeout, invalid provider payload, rate limits, unavailable provider.
-  - surfaced as classified safe errors through Engine stream error taxonomy.
+  - surfaced as classified safe errors through Agent Loop stream error taxonomy.
 
 ### 4.10 Example Valid Payload
 ```json
@@ -207,12 +207,12 @@ Why invalid:
 6. Fail clearly if adapter key/config is unsupported or invalid.
 
 ### 5.2 Completion Workflow
-1. Engine builds generic completion request from conversation messages and tool definitions.
+1. Agent Loop builds generic completion request from conversation messages and tool definitions.
 2. Adapter converts generic request into provider-native payload.
 3. Adapter sends provider request.
 4. Adapter parses provider response.
 5. Adapter normalizes response to generic `assistantText/toolCalls/finishReason`.
-6. Engine continues loop using normalized output.
+6. Agent Loop continues loop using normalized output.
 
 ### 5.3 Tool-Call Roundtrip Behavior
 - Tool call IDs from provider are preserved where present.
@@ -222,7 +222,7 @@ Why invalid:
 ### 5.4 Model Swap Behavior
 - Same provider:
   - update model preference or adapter model binding only.
-  - no Engine/Gateway/Auth/Memory code rewrite.
+  - no Agent Loop/Gateway/Auth/Memory code rewrite.
 - Different provider:
   - change runtime adapter key + adapter config file.
   - no unrelated component rewrite.
@@ -248,7 +248,7 @@ Why invalid:
 - Secret material referenced by environment variable names.
 
 ### Internal Dependencies
-- Engine completion caller.
+- Agent Loop completion caller.
 - Adapter factory and adapter implementations.
 - Runtime config loader, adapter config loader, preferences loader.
 - Error classification module for provider failure mapping.
@@ -256,10 +256,10 @@ Why invalid:
 ### Data Flow
 1. Runtime config chooses adapter.
 2. Adapter config and preferences resolve target model.
-3. Engine sends generic request.
+3. Agent Loop sends generic request.
 4. Adapter translates and calls provider.
 5. Adapter returns normalized output.
-6. Engine emits stream events to Gateway.
+6. Agent Loop emits stream events to Gateway.
 
 ### Dependency Assumptions
 - Adapter contract remains stable as provider integrations evolve.
@@ -272,7 +272,7 @@ Why invalid:
 
 ### Boundary Invariants
 - Models remain external intelligence (`MO-01`).
-- Model API remains an external connector boundary, not a component/tool.
+- Model API remains an external API boundary, not a component/tool.
 - Provider-specific logic is adapter-contained (`E-03`).
 
 ### Configuration Invariants
@@ -287,7 +287,7 @@ Why invalid:
 ### Validation Rules
 - Reject forbidden request fields.
 - Validate adapter configuration and binding before use.
-- Validate normalized response shape before returning to Engine.
+- Validate normalized response shape before returning to Agent Loop.
 - Validate safe error mapping before exposing failures upstream.
 
 ---
@@ -329,7 +329,7 @@ Why invalid:
 - Keep swap paths testable as configuration-only changes.
 
 ### Anti-Patterns to Avoid
-- Provider SDK or wire formatting code in Engine core loop.
+- Provider SDK or wire formatting code in Agent Loop core loop.
 - Request-time model/provider overrides hidden in metadata.
 - Collapsing runtime+adapter+preference config into one payload.
 - Secret value storage in adapter config or preferences.
@@ -351,7 +351,7 @@ Why invalid:
 - `CU-02`: fixed external contracts remain Gateway API and Model API.
 
 ### Primer/Implementation Tightening Notes
-- Current adapter call path is non-streaming provider request while Engine still emits stream events; this is acceptable for MVP but should remain implementation-detail, not contract-lock.
+- Current adapter call path is non-streaming provider request while Agent Loop still emits stream events; this is acceptable for MVP but should remain implementation-detail, not contract-lock.
 - Error taxonomy should keep `invalid_provider_response` and `adapter_misconfigured` distinguishable in diagnostics even if user-facing stream taxonomy is coarser.
 
 ---
@@ -362,7 +362,7 @@ Why invalid:
 - Model boundary is external intelligence, not a component (`models-spec.md`, `foundation-spec.md`).
 - Adapter is a translation boundary and swappability mechanism (`adapter-spec.md`).
 - Model/provider swaps are intended to be configuration-driven.
-- Model API remains connector boundary, not tool/component collapse.
+- Model API remains API boundary, not tool/component collapse.
 
 ### Documented Discrepancies To Reconcile
 1. **Naming variation**
@@ -395,7 +395,7 @@ Why invalid:
 
 ### MUST
 - `MAPI-MUST-001`: Models MUST remain external intelligence accessed only through the Model API boundary.
-- `MAPI-MUST-002`: Engine MUST interact with models through adapter abstraction only.
+- `MAPI-MUST-002`: Agent Loop MUST interact with models through adapter abstraction only.
 - `MAPI-MUST-003`: Provider-specific payload translation MUST be isolated to adapter implementations.
 - `MAPI-MUST-004`: Internal completion contract MUST remain generic (`messages + tools` in, normalized completion out).
 - `MAPI-MUST-005`: Same-provider model swap MUST require preference/model-binding change only.
@@ -406,7 +406,7 @@ Why invalid:
 - `MAPI-MUST-010`: Provider failures MUST be surfaced as safe classified errors at consuming boundaries.
 - `MAPI-MUST-011`: Unsupported or misconfigured adapters MUST fail clearly.
 - `MAPI-MUST-012`: Local/offline provider endpoints MUST remain supportable through adapter config.
-- `MAPI-MUST-013`: Model API MUST remain a connector boundary and MUST NOT collapse into component/tool ownership.
+- `MAPI-MUST-013`: Model API MUST remain an API boundary and MUST NOT collapse into component/tool ownership.
 - `MAPI-MUST-014`: Tool-call roundtrip continuity MUST preserve stable `id`, `name`, and structured input shape.
 
 ### SHOULD
@@ -443,7 +443,7 @@ Why invalid:
 | MAPI-MUST-011 | Human `adapter-spec.md`; AI checklist `configuration-review.md` | `MAPI-T011P`, `MAPI-T011N` |
 | MAPI-MUST-012 | Human `models-spec.md`, `deployment-spec.md`; AI checklist `configuration-review.md` | `MAPI-T012P`, `MAPI-T012N` |
 | MAPI-MUST-013 | Human `foundation-spec.md`, `models-spec.md`; AI matrix `F-02`, `MO-01` | `MAPI-T013P`, `MAPI-T013N` |
-| MAPI-MUST-014 | Human `models-spec.md`, `adapter-spec.md`; AI `models.md` + engine/tool contract behavior | `MAPI-T014P`, `MAPI-T014N` |
+| MAPI-MUST-014 | Human `models-spec.md`, `adapter-spec.md`; AI `models.md` + agent loop/tool contract behavior | `MAPI-T014P`, `MAPI-T014N` |
 
 ## 16. Residual Risks & Open Decisions
 

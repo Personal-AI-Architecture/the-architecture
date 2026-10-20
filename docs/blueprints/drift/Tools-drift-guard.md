@@ -6,7 +6,7 @@ This document defines anti-drift controls for the Tools capability boundary.
 
 - Tools promoted into a fifth architecture component.
 - Introduction of a separate Tool API boundary.
-- Tool execution logic moved outside Engine.
+- Tool execution logic moved outside Agent Loop.
 - Authorization logic embedded ad hoc in tool handlers or Gateway paths.
 - Request payloads used to reconfigure tool sources/availability.
 - Invalid tool definitions accepted without strict validation.
@@ -37,7 +37,7 @@ This document defines anti-drift controls for the Tools capability boundary.
 |---|---|---|---|
 | TOLD-CHK-001 | Tools are not modeled as standalone component | Architecture conformance checks | Critical |
 | TOLD-CHK-002 | No separate Tool API boundary exists | Contract/API surface inspection | Critical |
-| TOLD-CHK-003 | Tool execution occurs in Engine after Auth decision | Runtime path/integration tests | Critical |
+| TOLD-CHK-003 | Tool execution occurs in Agent Loop after Auth decision | Runtime path/integration tests | Critical |
 | TOLD-CHK-004 | Tool availability derives from config + permissions only | Startup + permission tests | Critical |
 | TOLD-CHK-005 | Request metadata cannot override tool sources/availability | Negative metadata tests | Critical |
 | TOLD-CHK-006 | Tool definitions enforce canonical required/forbidden fields | Schema validation tests | Critical |
@@ -56,7 +56,7 @@ This document defines anti-drift controls for the Tools capability boundary.
 - Stream emits tool-result without matching tool-call ID.
 - Approval-request/result events missing for mutating operations.
 - Tool failures expose internal stack traces, credentials, or raw payloads.
-- Gateway/Engine/Auth directly access Memory storage without tools.
+- Gateway/Agent Loop/Auth directly access Memory storage without tools.
 - Request metadata includes and accepts `tool_sources` overrides.
 - Untrusted tools run with `in_process` or unrestricted network mode.
 - Normal tool add/remove requires code rewrites in core components.
@@ -75,7 +75,7 @@ This document defines anti-drift controls for the Tools capability boundary.
 
 - [ ] Tools are treated as capability surface, not standalone component.
 - [ ] No separate Tool API boundary has been introduced.
-- [ ] Engine executes tools; Auth authorizes usage.
+- [ ] Agent Loop executes tools; Auth authorizes usage.
 - [ ] Tool availability is config + permission driven.
 - [ ] Request metadata cannot reconfigure tool sources or visibility.
 - [ ] Tool definitions validate against canonical schema.

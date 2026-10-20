@@ -10,13 +10,13 @@ The Gateway API is the external contract through which clients interact with the
 - Support conversation creation, continuation, listing, and retrieval.
 - Stream interaction outputs as server-sent events (SSE).
 - Expose approval interactions as explicit, auditable API behavior.
-- Keep external contract shape separate from internal Gateway-Engine handoff.
+- Keep external contract shape separate from internal Gateway ↔ Agent Loop handoff.
 
 ### Architectural Context
 - Boundary type: external API boundary, not a standalone component.
 - Component owner: Gateway component.
 - Upstream callers: clients (CLI, web, mobile, bots, other agents).
-- Downstream effect: Gateway normalizes this API into internal `messages + metadata` contract for the Engine.
+- Downstream effect: Gateway normalizes this API into internal `messages + metadata` contract for the Agent Loop.
 
 ### Companion Artifact
 - Gateway component specification: `blueprints/Gateway.md`
@@ -32,13 +32,13 @@ The Gateway API is the external contract through which clients interact with the
 
 ### What the Gateway API **is not**
 - Not a component with independent runtime ownership.
-- Not the internal Gateway-Engine contract.
+- Not the internal Gateway ↔ Agent Loop contract.
 - Not a model/provider configuration surface.
 - Not an authorization policy definition layer.
 
 ### Boundaries and Constraints
 - Client payloads must remain client-facing and simple.
-- Clients must not send internal Engine request format directly.
+- Clients must not send internal Agent Loop request format directly.
 - Approval semantics must be contract-visible, not client-local hidden flow.
 - Error and event surfaces must be safe for external display.
 
@@ -48,7 +48,7 @@ The Gateway API is the external contract through which clients interact with the
 
 ### Contract Concepts
 - **Client Contract**: external API shape between clients and Gateway.
-- **Internal Contract**: bounded Gateway-to-Engine shape (`messages + metadata`).
+- **Internal Contract**: bounded Gateway-to-Agent-Loop shape (`messages + metadata`).
 - **Conversation Resolution**: process by which a message is tied to an existing or new conversation ID.
 - **Contract-visible Interaction**: behavior represented in actual API routes/events.
 
@@ -215,7 +215,7 @@ The Gateway API is the external contract through which clients interact with the
 - Gateway runtime implementation.
 - Auth boundary on protected routes.
 - Conversation persistence boundary in Memory.
-- Internal Gateway-Engine stream contract.
+- Internal Gateway ↔ Agent Loop stream contract.
 
 ### Interaction Boundaries
 - External clients depend on Gateway API stability.
@@ -277,7 +277,7 @@ The Gateway API is the external contract through which clients interact with the
 
 ### Suggested Design Approach
 - Define API schema contracts first, then route handlers.
-- Keep external DTOs separate from internal Engine DTOs.
+- Keep external DTOs separate from internal Agent Loop DTOs.
 - Use event adapter layer to map internal stream events to client contract.
 - Keep approval decision handling explicit and idempotent where possible.
 
@@ -287,7 +287,7 @@ The Gateway API is the external contract through which clients interact with the
 - Enforce strict validation on request shape and known metadata allowlist.
 
 ### Anti-Patterns to Avoid
-- Treating Gateway API as a thin passthrough to internal Engine payload format.
+- Treating Gateway API as a thin passthrough to internal Agent Loop payload format.
 - Exposing provider or runtime configuration fields in client requests.
 - Allowing non-canonical approval helper routes.
 - Returning non-deterministic event names or payload shapes.
@@ -381,7 +381,7 @@ The Gateway API is the external contract through which clients interact with the
 | GAPI-MUST-007 | AI `client-gateway-contract.md`; matrix `G-06` | `GAPI-T007P`, `GAPI-T007N` |
 | GAPI-MUST-008 | AI `client-gateway-contract.md`; matrix `G-08` | `GAPI-T008P`, `GAPI-T008N` |
 | GAPI-MUST-009 | AI `client-gateway-contract.md`; matrix `S-05`, `GC-06` | `GAPI-T009P`, `GAPI-T009N` |
-| GAPI-MUST-010 | Human `gateway-engine-contract.md` error handling; AI matrix `GC-03` | `GAPI-T010P`, `GAPI-T010N` |
+| GAPI-MUST-010 | Human `gateway-agent-loop-contract.md` error handling; AI matrix `GC-03` | `GAPI-T010P`, `GAPI-T010N` |
 | GAPI-MUST-011 | Human `security-spec.md`; AI matrix `GC-05`, `S-01` | `GAPI-T011P`, `GAPI-T011N` |
 | GAPI-MUST-012 | Human `auth-spec.md`; AI matrix `A-01` | `GAPI-T012P`, `GAPI-T012N` |
 | GAPI-MUST-013 | Human `gateway-spec.md`; AI contract guidance for not-found behavior | `GAPI-T013P`, `GAPI-T013N` |

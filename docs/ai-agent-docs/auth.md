@@ -4,7 +4,7 @@
 
 ## Purpose
 
-Authenticate requests, carry actor identity, and enforce permissions without collapsing into Gateway, Engine, or product logic.
+Authenticate requests, carry actor identity, and enforce permissions without collapsing into Gateway, Agent Loop, or product logic.
 
 ## Owns
 
@@ -16,7 +16,7 @@ Authenticate requests, carry actor identity, and enforce permissions without col
 ## Does Not Own
 
 - Gateway routing.
-- Engine loop behavior.
+- Agent Loop behavior.
 - Conversation management.
 - Memory storage internals.
 - Product-specific workflow logic outside authorization.
@@ -95,5 +95,5 @@ These are MVP requirements, not later hardening work.
 - `docs/in-depth-overview/auth-spec.md`
 - `docs/in-depth-overview/security-spec.md`
 - `docs/in-depth-overview/foundation-spec.md`
-- `docs/in-depth-overview/gateway-engine-contract.md`
+- `docs/in-depth-overview/gateway-agent-loop-contract.md`
 - `docs/in-depth-overview/foundation-verification.md`

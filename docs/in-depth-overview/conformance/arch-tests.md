@@ -131,7 +131,7 @@
 
 ## ARCH-5: Error Taxonomy Compliance
 
-**Validates:** gateway-engine-contract.md §Mid-Stream Errors, engine-spec.md §Error output
+**Validates:** gateway-agent-loop-contract.md §Mid-Stream Errors, agent-loop-spec.md §Error output
 
 **Setup:**
 1. System running with active traffic
@@ -159,7 +159,7 @@
 
 ## ARCH-6: Error Message Sanitization
 
-**Validates:** gateway-engine-contract.md §Security Requirements, security-spec.md
+**Validates:** gateway-agent-loop-contract.md §Security Requirements, security-spec.md
 
 **Setup:**
 1. System running with various failure conditions triggerable

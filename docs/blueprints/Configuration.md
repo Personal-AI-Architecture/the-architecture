@@ -14,7 +14,7 @@ Configuration defines how runtime truth is split across environment bootstrap, a
 
 ### System Context
 - Configuration is a cross-cutting boundary, not a standalone component.
-- Configuration influences Gateway, Engine, Auth, Memory, Tools, and model adapters.
+- Configuration influences Gateway, Agent Loop, Auth, Memory, Tools, and model adapters.
 - Configuration participates directly in startup-readiness and anti-lock-in guarantees.
 
 ---
@@ -386,7 +386,7 @@ Configuration defines how runtime truth is split across environment bootstrap, a
 1. Runtime config selects adapter and tool sources.
 2. Adapter config provides provider connection details.
 3. Preferences provide owner model and policy defaults.
-4. Gateway and Engine consume resolved startup state.
+4. Gateway and Agent Loop consume resolved startup state.
 
 ### Dependency Assumptions
 - Config files are readable and schema-valid.
@@ -554,7 +554,7 @@ Configuration defines how runtime truth is split across environment bootstrap, a
 | Requirement ID | Primary Source(s) | Conformance Test IDs |
 |---|---|---|
 | CFG-MUST-001 | Human `configuration-spec.md`; AI matrix `C-01` | `CFG-T001P`, `CFG-T001N` |
-| CFG-MUST-002 | Human `configuration-spec.md`, `gateway-engine-contract.md`; AI matrix `C-02`, `GC-01` | `CFG-T002P`, `CFG-T002N` |
+| CFG-MUST-002 | Human `configuration-spec.md`, `gateway-agent-loop-contract.md`; AI matrix `C-02`, `GC-01` | `CFG-T002P`, `CFG-T002N` |
 | CFG-MUST-003 | Human `configuration-spec.md`; AI matrix `C-03` | `CFG-T003P`, `CFG-T003N` |
 | CFG-MUST-004 | Human `configuration-spec.md` (thin bootstrap); AI `configuration.md` | `CFG-T004P`, `CFG-T004N` |
 | CFG-MUST-005 | Human `adapter-spec.md`, `configuration-spec.md`; AI `configuration.md` | `CFG-T005P`, `CFG-T005N` |

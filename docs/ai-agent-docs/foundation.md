@@ -64,7 +64,7 @@ Define the fixed structure, ownership boundaries, dependency model, and anti-loc
 ## Common Drift Patterns
 
 - Gateway absorbs model/provider responsibilities.
-- Engine absorbs prompt or product logic.
+- Agent Loop absorbs prompt or product logic.
 - Auth disappears from the real runtime path.
 - Memory is treated as storage detail rather than platform.
 - Tools are promoted into a pseudo-component.

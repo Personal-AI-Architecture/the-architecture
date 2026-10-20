@@ -17,7 +17,7 @@ Implement **Configuration** in **{{TARGET_LANGUAGE}}** so runtime bootstrap, ada
 - `/home/hex/Project/PAA-MVP-Prod/blueprints/tests/Configuration-conformance.md`
 - `/home/hex/Project/PAA-MVP-Prod/blueprints/drift/Configuration-drift-guard.md`
 - `/home/hex/Project/PAA-MVP-Prod/blueprints/Gateway.md`
-- `/home/hex/Project/PAA-MVP-Prod/blueprints/Engine.md`
+- `/home/hex/Project/PAA-MVP-Prod/blueprints/Agent-Loop.md`
 - `/home/hex/Project/PAA-MVP-Prod/blueprints/Model-API.md`
 - `/home/hex/Project/PAA-MVP-Prod/blueprints/Memory.md`
 
@@ -35,7 +35,7 @@ Implement **Configuration** in **{{TARGET_LANGUAGE}}** so runtime bootstrap, ada
 - `/home/hex/Reference/the-architecture/docs/in-depth-overview/configuration-spec.md`
 - `/home/hex/Reference/the-architecture/docs/in-depth-overview/adapter-spec.md`
 - `/home/hex/Reference/the-architecture/docs/in-depth-overview/models-spec.md`
-- `/home/hex/Reference/the-architecture/docs/in-depth-overview/gateway-engine-contract.md`
+- `/home/hex/Reference/the-architecture/docs/in-depth-overview/gateway-agent-loop-contract.md`
 - `/home/hex/Reference/the-architecture/docs/in-depth-overview/foundation-spec.md`
 - `/home/hex/Reference/the-architecture/docs/in-depth-overview/deployment-spec.md`
 
@@ -99,7 +99,7 @@ Use these for MVP consistency:
 - Do not allow request metadata to override runtime/provider/tool bootstrap.
 - Do not store raw secrets in tracked config or Memory preference files.
 - Do not move owner preferences into runtime/adapter config.
-- Do not hardcode provider/model selection in Gateway or Engine code.
+- Do not hardcode provider/model selection in Gateway or Agent Loop code.
 - Do not mark startup ready before canonical startup phases complete.
 - Do not allow provider/model/tool swaps to require code edits.
 

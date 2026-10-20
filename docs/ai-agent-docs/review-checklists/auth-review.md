@@ -10,8 +10,8 @@ Use this when reviewing runtime auth wiring, identity propagation, permission en
 
 - [ ] Every protected request passes through Auth before system interaction.
 - [ ] Auth remains a real boundary even in local-owner-mode.
-- [ ] Identity context is attached consistently on the path between Gateway and Engine.
-- [ ] Authorization decisions are made in Auth rather than scattered through Gateway, Engine, or tools.
+- [ ] Identity context is attached consistently on the path between Gateway and Agent Loop.
+- [ ] Authorization decisions are made in Auth rather than scattered through Gateway, Agent Loop, or tools.
 - [ ] Product-owned auth state exists and is inspectable/exportable.
 - [ ] `auth_whoami`, `auth_check`, and `auth_export` exist in the runtime.
 - [ ] Secrets are not written into normal inspectable Memory.
@@ -39,7 +39,7 @@ Use this when reviewing runtime auth wiring, identity propagation, permission en
 
 - `docs/ai-agent-docs/auth.md`
 - `docs/ai-agent-docs/security.md`
-- `docs/ai-agent-docs/gateway-engine-contract.md`
+- `docs/ai-agent-docs/gateway-agent-loop-contract.md`
 - `docs/ai-agent-docs/compliance-matrix.md`
 
 ## Source Docs
@@ -47,5 +47,5 @@ Use this when reviewing runtime auth wiring, identity propagation, permission en
 - `docs/ai-agent-docs/primer-audit-playbook.md`
 - `docs/ai-agent-docs/auth.md`
 - `docs/ai-agent-docs/security.md`
-- `docs/ai-agent-docs/gateway-engine-contract.md`
+- `docs/ai-agent-docs/gateway-agent-loop-contract.md`
 - `docs/ai-agent-docs/compliance-matrix.md`
