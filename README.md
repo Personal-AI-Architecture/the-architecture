@@ -41,7 +41,7 @@ Four components and two APIs:
 
 | I want to... | Start here |
 |--------------|------------|
-| Understand the architecture | [Foundation spec](docs/in-depth-overview/foundation-spec.md) |
+| Understand the architecture | [Architecture overview](docs/in-depth-overview/foundation-spec.md) |
 | Build a system | [TypeScript template](https://github.com/Personal-AI-Architecture/ts-architecture-template) |
 | Build with an AI coding agent | [AGENT.md](AGENT.md) and the [architecture primer](docs/ai-agent-docs/) |
 | Build one component | [Blueprints](docs/blueprints/) |

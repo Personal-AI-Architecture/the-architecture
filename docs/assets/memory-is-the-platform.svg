@@ -1,0 +1,25 @@
+<svg viewBox="0 0 860 330" xmlns="http://www.w3.org/2000/svg" font-family="Inter, Helvetica, Arial, sans-serif">
+<rect x="0" y="0" width="100%" height="100%" rx="16" fill="#141920"/>
+<svg x="10" y="10" width="420" height="310" viewBox="0 0 420 310">
+<text x="210" y="28" text-anchor="middle" fill="#94A3B8" font-size="13" font-weight="600" letter-spacing="2">TODAY'S AI APPS</text>
+<rect x="30" y="50" width="360" height="200" rx="12" fill="#FFFFFF" fill-opacity="0.03" stroke="#94A3B8" stroke-width="1.5"/>
+<text x="210" y="88" text-anchor="middle" fill="#FFFFFF" font-size="20" font-weight="700">The app</text>
+<text x="210" y="114" text-anchor="middle" fill="#FFFFFF" font-size="13">Models · Interfaces · Tools</text>
+<rect x="70" y="140" width="280" height="84" rx="8" fill="#141920" stroke="#334155" stroke-width="1.5"/>
+<text x="210" y="177" text-anchor="middle" fill="#FFFFFF" font-size="17" font-weight="700">Your Memory</text>
+<text x="210" y="201" text-anchor="middle" fill="#94A3B8" font-size="12">locked inside the app</text>
+<text x="210" y="290" text-anchor="middle" fill="#FFFFFF" font-size="15" font-weight="600">Leave the app, lose your memory.</text>
+</svg>
+<svg x="430" y="10" width="420" height="310" viewBox="0 0 420 310">
+<defs><marker id="a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#94A3B8"/></marker></defs>
+<text x="210" y="28" text-anchor="middle" fill="#94A3B8" font-size="13" font-weight="600" letter-spacing="2">WITH PAA</text>
+<g fill="none" stroke="#94A3B8" stroke-width="1.5" stroke-dasharray="5 4">
+<rect x="30" y="50" width="104" height="46" rx="8"/><rect x="158" y="50" width="104" height="46" rx="8"/><rect x="286" y="50" width="104" height="46" rx="8"/></g>
+<g fill="#FFFFFF" font-size="14" font-weight="600" text-anchor="middle"><text x="82" y="78">Models</text><text x="210" y="78">Interfaces</text><text x="338" y="78">Tools</text></g>
+<g stroke="#94A3B8" stroke-width="1.5"><line x1="82" y1="104" x2="82" y2="138" marker-start="url(#a)" marker-end="url(#a)"/><line x1="210" y1="104" x2="210" y2="138" marker-start="url(#a)" marker-end="url(#a)"/><line x1="338" y1="104" x2="338" y2="138" marker-start="url(#a)" marker-end="url(#a)"/></g>
+<rect x="30" y="146" width="360" height="104" rx="12" fill="none" stroke="#FFFFFF" stroke-width="2.5"/>
+<text x="210" y="190" text-anchor="middle" fill="#FFFFFF" font-size="20" font-weight="700">Your Memory</text>
+<text x="210" y="216" text-anchor="middle" fill="#FFFFFF" font-size="13">is the platform, in files you own</text>
+<text x="210" y="290" text-anchor="middle" fill="#FFFFFF" font-size="15" font-weight="600">Swap anything. Your memory stays.</text>
+</svg>
+</svg>
