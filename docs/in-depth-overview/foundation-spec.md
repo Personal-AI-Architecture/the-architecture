@@ -194,7 +194,7 @@ sequenceDiagram
     participant Gateway
     participant Auth
     participant Memory as Your Memory
-    participant Loop as Agent Loop
+    participant AL as Agent Loop
     participant Model as Model (via Model API)
     participant Tools
 
@@ -203,19 +203,19 @@ sequenceDiagram
     Auth-->>Gateway: Allowed, with actor context
     Gateway->>Memory: Load the conversation (conversation tool)
     Memory-->>Gateway: Conversation history
-    Gateway->>Loop: Messages + metadata
+    Gateway->>AL: Messages + metadata
 
     loop Until the job is done
-        Loop->>Model: Messages + tool definitions
-        Model-->>Loop: Text and/or tool calls
+        AL->>Model: Messages + tool definitions
+        Model-->>AL: Text and/or tool calls
         opt Model asked for tools
-            Loop->>Tools: Run tool calls (permitted by Auth)
+            AL->>Tools: Run tool calls (permitted by Auth)
             Tools->>Memory: Memory tools (read, write, search...)
-            Tools-->>Loop: Results
+            Tools-->>AL: Results
         end
     end
 
-    Loop-->>Gateway: Streamed text, tool calls, results, done
+    AL-->>Gateway: Streamed text, tool calls, results, done
     Gateway->>Memory: Save the reply (conversation tool)
     Gateway-->>Client: Streamed response + conversation ID
 ```
