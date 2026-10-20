@@ -39,11 +39,11 @@ See [memory-spec.md](./memory-spec.md) and [memory-as-platform.md](./memory-as-p
 
 ### 2. Add the AI model
 
-In a biological brain, memory and intelligence are fused. You can't swap in better reasoning. A digital brain doesn't have that constraint. Your Memory persists, and intelligence arrives through the Model API, from any provider or your own hardware, swapped with a config change.
+In a physical brain, memory and intelligence cannot be separated. You can't swap in better reasoning. A digital brain doesn't have that constraint. Your Memory persists, and intelligence arrives through the Model API, from any provider or your own hardware, swapped with a config change.
 
 When you want state of the art performance, use the most powerful cloud models. When you want complete privacy, switch to local models running on your own hardware. Use different models for different tasks.
 
-The fastest-changing part of AI, model capability, is the cheapest thing to change in this system.
+The architecture makes the fastest-changing part of AI, model capability, the cheapest thing to change.
 
 See [models-spec.md](./models-spec.md).
 
