@@ -57,7 +57,7 @@ These criteria verify that the implementation matches the architectural topology
 
 ### S-5. Tools are not a component (D51)
 
-**Claim:** Tools are capabilities in the environment, not a component. Tool definitions live in Memory, tool execution lives in the Agent Loop, tool permissions live in Auth.
+**Claim:** Tools are capabilities in the environment, not a component. Tools describe themselves, tool execution lives in the Agent Loop, tool permissions live in Auth (the Agent Loop asks Auth before each tool call).
 
 **Verification:** Confirm there is no standalone "tools service" or "tools component" that must be independently deployed or managed. Confirm tool concerns map to existing components.
 
@@ -91,8 +91,9 @@ These four owner outcomes are values, not code — but they produce observable p
 
 **Verification:**
 - (a) The owner can define, modify, and remove skills/behaviors through Memory content without code changes.
-- (b) The owner can restrict tool access through Auth configuration.
+- (b) The owner can restrict tool access through Auth permissions.
 - (c) The system does not take actions the owner has not enabled.
+- (d) On the owner's own hardware, no product rule overrides the owner's choice.
 
 **Fail condition:** System behavior requires code changes to modify. Or the system performs actions (network calls, data access, tool execution) that the owner cannot observe, configure, or disable.
 
@@ -202,7 +203,7 @@ These four owner outcomes are values, not code — but they produce observable p
 
 ### C-1. Gateway API carries only what it claims
 
-**Claim:** In: message content + conversation ID (optional) + metadata. Out: streamed response + conversation ID + message record.
+**Claim:** In: message content (a list of parts) + conversation ID (optional) + metadata. Out: streamed response + conversation ID + message record. Tool calls and tool results are ordinary message parts and come back in conversation history.
 
 **Verification:** Inspect the Gateway API. Confirm the payload matches the spec. Confirm no component-internal state leaks through the API (agent loop configuration, auth tokens in responses, memory paths).
 
@@ -234,11 +235,11 @@ These four owner outcomes are values, not code — but they produce observable p
 
 ### C-5. Gateway ↔ Agent Loop contract is bounded (D137)
 
-**Claim:** Gateway POSTs a request (messages array + metadata) to the Agent Loop. The Agent Loop returns an SSE stream (text, tool calls, results, completion). Auth middleware sits on the path. The Agent Loop is pre-configured — tools and provider don't change per-request.
+**Claim:** Gateway calls Auth, then POSTs a request (messages array + the owner's current model choice + metadata) to the Agent Loop. The Agent Loop returns an SSE stream (text, tool calls, results, completion) and asks Auth before each tool call. The Agent Loop is pre-configured with its bootstrap prompt, tools and provider adapter; these don't change per-request. The model travels with each request.
 
-**Verification:** Inspect the internal contract. Confirm the request/response format matches the spec. Confirm the Agent Loop does not receive per-request configuration (tools, provider, model) from the Gateway.
+**Verification:** Inspect the internal contract. Confirm the request/response format matches the spec. Confirm the only per-request choice the Gateway passes is the model. Confirm the request carries no system message (the bootstrap prompt is Agent Loop configuration). Confirm a changed model choice applies to the next message with no restart.
 
-**Fail condition:** The Gateway sends per-request configuration that changes Agent Loop behavior. Or the internal contract carries data not specified in [gateway-agent-loop-contract.md](./gateway-agent-loop-contract.md).
+**Fail condition:** The Gateway sends per-request configuration other than the model (tools, provider, bootstrap prompt) that changes Agent Loop behavior. Or a model change needs a restart. Or the internal contract carries data not specified in [gateway-agent-loop-contract.md](./gateway-agent-loop-contract.md).
 
 ---
 
@@ -346,18 +347,21 @@ Foundation decisions are architectural commitments. Each is verifiable.
 | D16 | Zero custom protocols | Gateway API uses an industry standard protocol | A proprietary protocol was invented |
 | D20 | Client metadata flows through Gateway API | Client sends context, Gateway passes it, the Agent Loop uses it — no coupling | Gateway interprets or acts on client metadata |
 | D22 | Auth on both local and managed | Auth works identically in both deployment modes (config differs, code doesn't) | Separate auth code paths for local vs managed |
-| D23 | Managed hosting = same code, stricter config | No code forks between local and managed | Managed hosting requires different code |
 | D24 | Agent Loop ceiling matches best-in-class agents | Agent Loop supports multi-turn tool use, parallel execution, context management at parity with leading agent frameworks | Agent Loop caps below Claude Code / Open Claw capability level |
 | D26 | Skills are multi-turn, adaptive, judgment-based | Skill execution supports real agentic behavior, not scripted sequences | Skills are hardcoded sequences that don't use model judgment |
 | D39 | Agent Loop is generic — no product-specific logic | Agent Loop contains no product-specific conditionals, feature flags, or domain logic | Agent Loop contains product-specific behavior |
 | D40 | Prompts and skills live in Memory | Prompt assembly reads from files in Memory; skills are Memory content | Prompts are hardcoded in Agent Loop source; skills are compiled code |
-| D51 | Tools = definitions in Memory + execution in the Agent Loop + permissions in Auth | No standalone tools component | A tools service exists outside these three |
+| D51 | Tools = self-describing capabilities + execution in the Agent Loop + permissions in Auth | No standalone tools component | A tools service exists outside these |
 | D53 | No tool protocol API | Tool calls flow Agent Loop → Model API → Model, execution is internal to the Agent Loop | A third API exists for tool communication |
 | D60 | Auth is independent of Gateway | Auth and Gateway have no mutual dependencies; either can be swapped independently | Auth imports Gateway code or vice versa |
 | D135 | Memory/tool binary holds | Every new capability maps to memory (data) or tools (actions), not new infrastructure | A capability requires a new component or API |
 | D139 | Swappability chain is complete | For every element: Memory → tools, components → contracts, contracts → adapters | An element exists with no intermediary absorbing change |
 | D143 | Configuration is cross-cutting, three categories | Preferences in Memory, runtime config is thin bootstrap, tool self-description — no single component owns all config | Configuration is owned by one component or requires a config service |
-| D147 | Three swaps pass config-only | Provider swap, model swap, tool swap — each with config/adapter changes only | Any swap requires cross-component code changes |
+| D147 | Three swaps pass config-only | Provider swap, model swap, tool swap — each with config/adapter changes only; a model swap applies to the next message with no restart (D175) | Any swap requires cross-component code changes, or a model swap requires a restart |
+| D176 | The Gateway calls Auth on every request; the Agent Loop asks Auth before each tool call | Permissions live only in Auth; no request or tool call bypasses the check | A request path or tool call skips Auth, or permissions are stored in configuration |
+| D177 | The default policy is that the owner can do everything | No approval prompt is required by the architecture | The architecture requires approval for the owner's own actions by default |
+| D178 | One message shape across the three contracts | Tool calls and tool results are saved in conversation history and replayed on resume | Tool calls or results are dropped from history |
+| D180 | Version history and restore are required for Your Memory | The owner can see what changed and restore an earlier state | No history, or history without restore |
 | D148 | The architecture = local only | System runs on owner-controlled hardware without external services | The architecture requires cloud services, managed hosting, or external APIs to function |
 
 ---
@@ -510,27 +514,27 @@ Each story is an acceptance test for the architecture itself.
 
 ### X-1. Configuration follows the three-category model (D143)
 
-**Claim:** Preferences in Memory, runtime config is thin bootstrap (4 fields), tool self-description.
+**Claim:** Preferences in Memory, runtime config is thin bootstrap (4 fields), tool self-description. Permissions are not configuration: they live only in Auth. The model choice is a preference, read on every message.
 
-**Verification:** Enumerate all configuration in the system. Classify each into one of the three categories. Confirm runtime bootstrap is thin (connection info only). Confirm preferences are stored in Memory.
+**Verification:** Enumerate all configuration in the system. Classify each into one of the three categories. Confirm runtime bootstrap is thin (connection info only). Confirm preferences are stored in Memory. Confirm no permissions are stored in configuration or preferences.
 
-**Fail condition:** Configuration exists that doesn't fit the three categories. Or runtime bootstrap grows beyond thin connection setup. Or preferences are stored outside Memory.
+**Fail condition:** Configuration exists that doesn't fit the three categories. Or runtime bootstrap grows beyond thin connection setup. Or preferences are stored outside Memory. Or configuration stores or applies permissions.
 
 ### X-2. No secrets in source or Memory files
 
-**Claim:** Secrets remain in env/secret infrastructure, not in source control or owner memory content.
+**Claim:** Secrets live outside Your Memory and are never tracked by git: environment variables, an untracked config file, or a secret store.
 
-**Verification:** Scan source code and Memory content for API keys, passwords, tokens, private keys.
+**Verification:** Scan source code, tracked config files and Memory content for API keys, passwords, tokens, private keys.
 
-**Fail condition:** Secrets found in source-controlled files or Memory content.
+**Fail condition:** Secrets found in source-controlled or git-tracked files or Memory content.
 
 ### X-3. Auth is cross-cutting and independent (D60)
 
-**Claim:** Auth applies to all requests, independent of Gateway and the Agent Loop. Auth and Gateway don't know about each other.
+**Claim:** Auth applies to all requests and all tool calls, and is independent of the Gateway and the Agent Loop. The Gateway calls Auth on every request before anything reaches the Agent Loop; the Agent Loop asks Auth before each tool call. Both use only the Auth contract. Permissions live only in Auth.
 
-**Verification:** Confirm Auth middleware sits on the request path without being called by or calling Gateway/Agent Loop directly. Confirm swapping Auth doesn't require Gateway or Agent Loop changes. Confirm swapping Gateway doesn't require Auth changes.
+**Verification:** Confirm every Gateway request (including list and history reads) passes an Auth check before reaching the Agent Loop or conversation data. Confirm every tool call passes an Auth check before it runs, and a refused call is reported as not permitted. Confirm swapping Auth doesn't require Gateway or Agent Loop changes. Confirm swapping Gateway doesn't require Auth changes. Confirm no permissions are stored in configuration.
 
-**Fail condition:** Auth is embedded in Gateway or the Agent Loop. Or Auth and Gateway have mutual dependencies.
+**Fail condition:** Auth is embedded in Gateway or the Agent Loop. Or Auth and Gateway depend on each other's implementation. Or a request or tool call bypasses Auth. Or permissions are stored outside Auth.
 
 ### X-4. Memory/tool binary completeness (D135)
 

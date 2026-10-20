@@ -24,10 +24,10 @@ That's why this system is built around memory as the platform.
     (external)        (API)       (component)   (component)        (API)          (external)
                                                       │
                         ─── Auth ───                  └──→ Tools (verbs)  ──→  External Memory (nouns)
-                        (cross-cutting                     ├── MCP servers      ├── Salesforce data
-                         component,                        ├── CLI tools        ├── Weather services
-                         applies to all                    └── Native functions └── The internet
-                         requests)
+                        (separate component:               ├── MCP servers      ├── Salesforce data
+                         Gateway calls it on               ├── CLI tools        ├── Weather services
+                         every request; Agent              └── Native functions └── The internet
+                         Loop before each tool call)
 ```
 
 Every other component — the client, the agent loop, the models, the tools — depends on memory to be useful. Memory depends on none of them to exist. Everything else is infrastructure built on top of it.

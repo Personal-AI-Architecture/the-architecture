@@ -55,7 +55,9 @@ If conflicts exist, do not guess silently. Create `conflict_register.md` and doc
 
 Implement these behaviors:
 - Keep models external and reachable only through Model API adapter boundary.
-- Accept generic completion requests (`messages + tools`) and return normalized completion responses.
+- Accept generic completion requests (`messages + tools` plus the model for this call) and return normalized completion responses.
+- Name the model that came with the request in each call, so a changed choice applies to the next message with no restart.
+- Use the shared message shape: content as a list of parts, tool calls and tool results as message parts.
 - Isolate provider-specific wire translation inside adapters.
 - Keep runtime config, adapter config, and preferences as distinct layers.
 - Support same-provider model swaps via preference/model-binding change only.
@@ -71,6 +73,7 @@ Implement these behaviors:
 - Required:
   - `messages[]`
   - `tools[]`
+  - the model for this call (the current schema still forbids `model`; implement the behaviour and report the gap)
 - Optional:
   - `metadata.correlation_id`
 - Forbidden:
@@ -79,7 +82,6 @@ Implement these behaviors:
   - `base_url`
   - `api_key`
   - `api_key_env`
-  - `model`
 
 ### Completion response
 - Required:
@@ -140,11 +142,14 @@ Implement automated tests that prove:
 12. Local/offline provider endpoint works via adapter config.
 13. Boundary classification remains API (not component/tool).
 14. Tool-call roundtrip continuity is preserved.
+15. Each call names the per-request model; no restart needed for a change.
+16. Content parts and tool calls survive the shared message shape.
 
 ## Drift-Critical Fail Conditions (Fail Build If Any True)
 
 - Agent Loop directly calls provider APIs bypassing adapter.
-- Request payload accepts provider/model/base URL/api-key reconfiguration fields.
+- Request payload accepts provider/base URL/api-key reconfiguration fields.
+- The model is bound at startup instead of per call.
 - Raw secret values appear in tracked adapter/runtime/preference config.
 - Unsupported adapter silently falls back.
 - Provider error sanitization fails and unsafe internals leak.

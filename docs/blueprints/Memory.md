@@ -9,7 +9,8 @@ Memory is the owner-controlled durable substrate for system data. It preserves i
 - Persist and retrieve owner data through approved Memory interfaces.
 - Provide core Memory operations (`read`, `write`, `edit`, `delete`, `search`, `list`, `history`).
 - Host conversation and structured/queryable owner data inside the Memory contract.
-- Provide export and history guarantees for owner portability and rollback.
+- Provide export, version history and restore for owner portability and rollback.
+- Report failed or conflicting writes to the caller; never resolve them silently.
 - Enforce path and storage safety boundaries for Memory operations.
 
 ### System Context
@@ -44,7 +45,7 @@ Memory is the owner-controlled durable substrate for system data. It preserves i
 - Memory must not depend outward on Gateway, Agent Loop, or Auth modules.
 - Non-Memory components must not bypass Memory boundaries with direct storage reach-in.
 - Conversation and required structured owner data must not be moved to side stores outside Memory contract.
-- Export and history guarantees are required from day one.
+- Export, version history and restore are required from day one. How history is built is up to the implementation (Git is one option, a database with snapshots is another).
 - Normal inspectable Memory surfaces must exclude secrets where forbidden.
 
 ---
@@ -129,9 +130,15 @@ Memory is the owner-controlled durable substrate for system data. It preserves i
 - Required fields:
   - `path: string`
 - Optional fields:
-  - `commit: string`
+  - `commit: string` (a version identifier; the name comes from the current contract and does not require Git)
 - Output:
   - `{ entries[] }` where each entry includes `commit`, `message`, `timestamp`, `path`, optional `previous_state`
+
+#### Restore
+- Input: a path (or scope) and the earlier state to make current.
+- Output: confirmation of the restore.
+- The restore itself is recorded in history, so it can also be undone.
+- The field names are pending the next contract revision.
 
 #### `memory_export`
 - Required fields:
@@ -170,9 +177,11 @@ Memory is the owner-controlled durable substrate for system data. It preserves i
 
 #### `ConversationMessage`
 - `id: string`
-- `role: system | user | assistant | tool`
-- `content: string`
+- `role: user | assistant | tool`
+- `content`: a list of content parts (text, images, files). The current contract still uses a plain string.
+- Tool calls the assistant made, and the tool results that answered them, are saved as part of the conversation.
 - `timestamp: ISO-8601 string`
+- The bootstrap prompt is Agent Loop configuration, not a stored conversation message.
 
 #### `MemoryError`
 - `code` enum:
@@ -277,13 +286,17 @@ Why invalid:
 - `search`:
   - traverse allowed scope, return line-level matches with safe output treatment.
 - `history`:
-  - query version backend for change records; include prior state where required.
+  - query version backend for change records that show what changed; include prior state where required.
+- restore:
+  - make the requested earlier state current again and record the restore as a new change.
+- concurrent or failed writes:
+  - detect conflicts and report them to the caller; never resolve them silently (for example, no silent last-write-wins) and never corrupt data.
 - `export`:
   - produce owner-data archive path containing required surfaces.
 
 ### 5.3 Conversation Boundary Behavior
 1. Create conversation with initial message and metadata envelope.
-2. Append subsequent messages with stable IDs/timestamps.
+2. Append subsequent messages with stable IDs/timestamps, including tool calls, tool results and every content part.
 3. Maintain list/detail retrieval and canonical envelope contract.
 4. Rebuild/resynchronize listing index if index artifacts become partially invalid.
 
@@ -341,7 +354,8 @@ Why invalid:
 ### Contract Invariants
 - Access occurs through approved Memory boundaries/tools.
 - Conversation data remains inside Memory contract.
-- Export/history guarantees remain available from day one.
+- Export, history and restore remain available from day one.
+- Failed or conflicting writes are reported, never silently resolved.
 - Structured owner data is not hidden outside Memory surface.
 - Secret-bearing fields remain excluded from normal inspectable Memory surfaces.
 
@@ -363,7 +377,7 @@ Why invalid:
 ### Scalability
 - Support growth in owner data volume.
 - Support multiple storage mechanisms behind stable contracts.
-- Support concurrent access without data corruption.
+- Support concurrent access without data corruption; report conflicts to the caller.
 
 ### Reliability and Fault Tolerance
 - Durable writes for owner-critical content.
@@ -410,6 +424,9 @@ Why invalid:
 - `M-02`: access through approved tools/boundaries only.
 - `M-03`: export preserves required owner data surface.
 - `M-04`: history supports change records and prior states.
+- `M-07`: failed or conflicting writes are reported to the caller.
+- `S-06`: the owner can restore an earlier state.
+- `G-09`: conversation history includes tool calls and tool results.
 - `M-05`: conversations and structured owner data remain inside Memory contract.
 - `M-06`: model-facing Memory surface exposes required storage classes through tools.
 - `D-05`: startup fails clearly when version-history readiness cannot be established.
@@ -476,6 +493,9 @@ Why invalid:
 - `MEM-MUST-012`: Secrets MUST NOT be stored in normal inspectable Memory surfaces where forbidden.
 - `MEM-MUST-013`: Owner data MUST remain inspectable without full runtime.
 - `MEM-MUST-014`: Storage backend changes MUST remain behind stable Memory contracts.
+- `MEM-MUST-015`: Memory MUST provide restore: the owner can make an earlier state current again, and the restore is recorded in history.
+- `MEM-MUST-016`: A failed or conflicting write MUST be reported to the caller, never resolved silently, and MUST NOT corrupt data.
+- `MEM-MUST-017`: Stored conversations MUST keep tool calls, tool results and every content part (text, images, files).
 
 ### SHOULD
 - `MEM-SHOULD-001`: Memory SHOULD support resilient index rebuild/recovery for conversation listing artifacts.
@@ -489,7 +509,7 @@ Why invalid:
 ## 14. Acceptance Gates (Pass/Fail)
 
 - `MEM-GATE-01 Contract Gate`: Pass if all defined payload structures validate against `contracts/Memory.schema.json`; fail otherwise.
-- `MEM-GATE-02 Conformance Gate`: Pass if all vectors in `tests/Memory-conformance.md` pass (14 positive + 14 negative); fail on any `MEM-MUST-*` failure.
+- `MEM-GATE-02 Conformance Gate`: Pass if all vectors in `tests/Memory-conformance.md` pass (17 positive + 17 negative); fail on any `MEM-MUST-*` failure.
 - `MEM-GATE-03 Drift Gate`: Pass if all Critical checks in `drift/Memory-drift-guard.md` pass; fail on any Critical check failure.
 - `MEM-GATE-04 Security Gate`: Pass if path sandbox and secret-leakage checks pass; fail on escape/leak detection.
 - `MEM-GATE-05 Conflict Gate`: Pass if no unresolved High-risk conflict remains in Conflict Register.
@@ -512,6 +532,9 @@ Why invalid:
 | MEM-MUST-012 | Human `security-spec.md`; AI matrix `C-03`, `A-04` | `MEM-T012P`, `MEM-T012N` |
 | MEM-MUST-013 | Human `memory-spec.md` inspectability guarantee; AI `memory.md` audit question set | `MEM-T013P`, `MEM-T013N` |
 | MEM-MUST-014 | Human `memory-spec.md` evolution model; AI matrix `M-06` | `MEM-T014P`, `MEM-T014N` |
+| MEM-MUST-015 | Human `memory-spec.md` Version capability and `restore` operation; AI matrix `S-06` | `MEM-T015P`, `MEM-T015N` |
+| MEM-MUST-016 | Human `memory-spec.md` error handling and concurrency; AI matrix `M-07` | `MEM-T016P`, `MEM-T016N` |
+| MEM-MUST-017 | Human `memory-spec.md` export table, `communication-principles.md`; AI matrix `G-09` | `MEM-T017P`, `MEM-T017N` |
 
 ## 16. Residual Risks & Open Decisions
 
@@ -550,10 +573,14 @@ Why invalid:
 ## Self-Validation Report
 
 - Coverage of required sections: 16/16 (100%)
-- Normative requirements count: 19 total (`14 MUST`, `3 SHOULD`, `2 MAY`)
+- Normative requirements count: 22 total (`17 MUST`, `3 SHOULD`, `2 MAY`)
 - Interfaces with schemas: 20 (`memory_read_request`, `memory_read_response`, `memory_write_request`, `memory_write_response`, `memory_edit_request`, `memory_edit_response`, `memory_delete_request`, `memory_delete_response`, `memory_list_request`, `memory_list_response`, `memory_search_request`, `memory_search_response`, `memory_history_request`, `memory_history_response`, `memory_export_response`, `conversation_create_request`, `conversation_append_request`, `conversation_list_response`, `conversation_detail_response`, `memory_error`)
-- Test vectors count: 28 total (`14 positive`, `14 negative`)
+- Test vectors count: 34 total (`17 positive`, `17 negative`)
 - Conflicts detected/resolved: 4/4 resolved
 - Unresolved ambiguity list:
   - `A-01 (Medium)`: canonical minimum breadth of structured/queryable owner-data surface is not fully unified across all source docs.
 - Final readiness rating: Conditionally Ready
+
+## Contract alignment
+
+`contracts/Memory.schema.json` is behind this blueprint in three places: it has no restore operation (MEM-MUST-015), conversation message `content` is still a plain string with no saved tool calls (MEM-MUST-017), and the message role list still includes `system`. Build to the behaviour described here; the field names follow in the next contract revision.

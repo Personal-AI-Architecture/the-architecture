@@ -18,6 +18,8 @@ This file defines language-agnostic pass/fail vectors for the Model API boundary
 - `MAPI-MUST-012`: Local/offline provider endpoint usage remains possible through adapter config.
 - `MAPI-MUST-013`: Model API remains API boundary, not a tool/component collapse.
 - `MAPI-MUST-014`: Tool-call roundtrip continuity preserves stable IDs/names/input shape in generic response.
+- `MAPI-MUST-015`: Each Model API call names the model that came with the request.
+- `MAPI-MUST-016`: Messages use the shared shape: content as parts, tool calls and results as message parts.
 
 ## Test Vectors
 
@@ -29,7 +31,7 @@ This file defines language-agnostic pass/fail vectors for the Model API boundary
 | MAPI-T002N | MAPI-MUST-002 | Negative | Inject provider-specific call into Agent Loop | Conformance/static gate fails | Direct provider call accepted | Core-loop coupling |
 | MAPI-T003P | MAPI-MUST-003 | Positive | Inspect adapter module for provider payload mapping | Provider request/response mapping confined to adapter | Mapping logic found outside adapter | Provider logic leak |
 | MAPI-T003N | MAPI-MUST-003 | Negative | Move provider payload serialization to shared non-adapter module used by core loop | Conformance boundary test fails | Leak accepted | Adapter boundary drift |
-| MAPI-T004P | MAPI-MUST-004 | Positive | Submit valid generic completion request with tools | Adapter returns generic completion response schema | Response deviates from generic shape | Contract drift |
+| MAPI-T004P | MAPI-MUST-004 | Positive | Submit valid generic completion request with tools and the model for this call | Adapter returns generic completion response schema | Response deviates from generic shape | Contract drift |
 | MAPI-T004N | MAPI-MUST-004 | Negative | Adapter returns provider-native raw payload | Conformance schema validation fails | Raw payload accepted | Normalization drift |
 | MAPI-T005P | MAPI-MUST-005 | Positive | Change only preference default model within same provider adapter | Runtime uses new model without code change | Code edits required for same-provider model swap | Swap-path drift |
 | MAPI-T005N | MAPI-MUST-005 | Negative | Same-provider swap requires modifying Agent Loop/Gateway code | Conformance test fails | Code-coupled swap accepted | Model-lock drift |
@@ -37,8 +39,8 @@ This file defines language-agnostic pass/fail vectors for the Model API boundary
 | MAPI-T006N | MAPI-MUST-006 | Negative | Provider change requires core-loop logic rewrite | Conformance test fails | Rewrite requirement accepted | Adapter indirection failure |
 | MAPI-T007P | MAPI-MUST-007 | Positive | Validate config loading layers | Runtime config, adapter config, preferences loaded distinctly | Layers collapsed | Config-layer collapse |
 | MAPI-T007N | MAPI-MUST-007 | Negative | Single loader merges runtime+adapter+preference fields | Conformance check fails | Merged layer accepted | Config taxonomy drift |
-| MAPI-T008P | MAPI-MUST-008 | Positive | Submit generic completion request with messages/tools only | Request accepted and processed | Requires provider/base_url/api keys in request | Hidden reconfig drift |
-| MAPI-T008N | MAPI-MUST-008 | Negative | Inject `provider`, `model`, `base_url`, `api_key` into request payload | Safe reject or schema failure | Request accepted | Request-time reconfiguration |
+| MAPI-T008P | MAPI-MUST-008 | Positive | Submit generic completion request with messages, tools and the model for this call | Request accepted and processed | Requires provider/base_url/api keys in request | Hidden reconfig drift |
+| MAPI-T008N | MAPI-MUST-008 | Negative | Inject `provider`, `base_url`, `api_key` into request payload | Safe reject or schema failure | Request accepted | Request-time reconfiguration |
 | MAPI-T009P | MAPI-MUST-009 | Positive | Validate adapter config | Contains `api_key_env` reference field only | Secret values present | Secret config drift |
 | MAPI-T009N | MAPI-MUST-009 | Negative | Use literal `api_key` in tracked adapter config | Conformance/security test fails | Secret-in-config accepted | Secret leakage |
 | MAPI-T010P | MAPI-MUST-010 | Positive | Simulate provider timeout/invalid response | Safe classified provider error emitted | Raw stack/provider payload leaked | Unsafe error surface |
@@ -51,11 +53,15 @@ This file defines language-agnostic pass/fail vectors for the Model API boundary
 | MAPI-T013N | MAPI-MUST-013 | Negative | Expose Model API as internal tool callable by loop bootstrap | Conformance fails | API/tool conflation accepted | Boundary role drift |
 | MAPI-T014P | MAPI-MUST-014 | Positive | Provider returns tool call(s) with id/name/arguments | Adapter yields generic toolCalls with stable id/name/input | Lost IDs/names or malformed input | Tool-call roundtrip drift |
 | MAPI-T014N | MAPI-MUST-014 | Negative | Adapter drops tool-call IDs or emits unstable names | Conformance test fails | Inconsistent tool-calls accepted | Tool continuity drift |
+| MAPI-T015P | MAPI-MUST-015 | Positive | Send two messages, changing the model preference in between | Second Model API call names the new model; no restart | Same model used until restart | Model-fixed-at-startup drift |
+| MAPI-T015N | MAPI-MUST-015 | Negative | Adapter ignores the per-call model and uses a startup-bound one | Conformance test fails | Startup binding accepted | Model-fixed-at-startup drift |
+| MAPI-T016P | MAPI-MUST-016 | Positive | Send a message with a text part and an image part, then replay a stored turn with a tool call and result | Parts and tool call/result pass through in the shared shape | Content flattened to text or tool calls dropped | Message-shape drift |
+| MAPI-T016N | MAPI-MUST-016 | Negative | Adapter accepts only string content | Conformance test fails | String-only content accepted | Message-shape drift |
 
 ## Coverage Summary
 
-- MUST requirements: 14
-- Positive tests: 14
-- Negative tests: 14
-- Total vectors: 28
-- Critical drift categories covered: adapter bypass, provider logic leakage, contract drift, config-layer collapse, hidden request-time reconfiguration, secret config leakage, unsafe provider errors, misconfiguration masking, cloud-only lock-in, API/tool conflation.
+- MUST requirements: 16
+- Positive tests: 16
+- Negative tests: 16
+- Total vectors: 32
+- Critical drift categories covered: adapter bypass, provider logic leakage, contract drift, config-layer collapse, hidden request-time reconfiguration, secret config leakage, unsafe provider errors, misconfiguration masking, cloud-only lock-in, API/tool conflation, model fixed at startup, message-shape drift.

@@ -26,7 +26,10 @@ This document defines anti-drift controls for the Tools capability boundary.
 - Skipping Auth checks because tool is marked `read_only`.
 - Accepting tool source/definition overrides through request metadata.
 - Registering tools without canonical schema checks.
-- Executing mutating tools before explicit approval decision.
+- Executing a call an approval rule covers before explicit approval decision.
+- Shipping approval on every write as an architecture default.
+- Filtering not-permitted tools out of the model's view so they look missing.
+- Running a tool call without a per-call Auth check.
 - Returning raw exceptions/stack traces in tool failure outputs.
 - Letting components read/write Memory storage directly.
 - Running untrusted tools in-process with unrestricted network/filesystem access.
@@ -49,6 +52,8 @@ This document defines anti-drift controls for the Tools capability boundary.
 | TOLD-CHK-012 | Trust-level isolation policy enforced for untrusted tools | Isolation policy tests | Critical |
 | TOLD-CHK-013 | Tool timeout/unavailability/crash is surfaced explicitly | Failure-injection tests | High |
 | TOLD-CHK-014 | Tool swap remains config/preference-only | Swap regression suite | Critical |
+| TOLD-CHK-015 | Agent Loop asks Auth per call; refusals return "not permitted"; not-permitted tools are marked, not hidden | Refused-call and tool-listing tests | Critical |
+| TOLD-CHK-016 | Owner can use every tool by default; approval rules live only in Auth | Fresh-install tests and static scan of tool definitions/config | Critical |
 
 ## 4. Contract-Break Indicators
 
@@ -66,7 +71,8 @@ This document defines anti-drift controls for the Tools capability boundary.
 - Any Critical check in section 3 fails.
 - Any `TOL-MUST-*` conformance vector fails.
 - Unsafe tool error leakage is detected.
-- Approval bypass is possible for approval-required mutations.
+- Approval bypass is possible where an approval rule applies.
+- A tool call runs without a per-call Auth check.
 - Direct component storage access bypasses tool boundary.
 - Untrusted tool isolation policy requirements are violated.
 - Unresolved High-risk conflict remains in Tools conflict register.
@@ -81,7 +87,10 @@ This document defines anti-drift controls for the Tools capability boundary.
 - [ ] Tool definitions validate against canonical schema.
 - [ ] Startup fails clearly on unsupported/invalid tool sources.
 - [ ] Tool-call and tool-result events preserve stable IDs.
-- [ ] Approval gates block sensitive mutations until decision.
+- [ ] Where approval rules exist, approval gates block covered calls until decision.
+- [ ] Agent Loop asks Auth before each tool call; refusals return "not permitted".
+- [ ] Not-permitted tools are marked, not hidden.
+- [ ] Owner can use every tool by default, with no approval step.
 - [ ] Tool failures are classified and sanitized.
 - [ ] Memory access remains tool-mediated for components.
 - [ ] Trust-level isolation rules are enforced, especially for untrusted tools.

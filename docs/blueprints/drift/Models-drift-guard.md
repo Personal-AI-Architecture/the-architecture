@@ -20,7 +20,9 @@ This document defines anti-drift controls for Models boundary implementations.
 ## 2. Prohibited Implementation Shortcuts
 
 - Hardcoding provider selection in Agent Loop core flow.
-- Accepting `provider_adapter`, `provider`, `base_url`, `api_key`, `api_key_env`, or `model` in request payload contracts.
+- Accepting `provider_adapter`, `provider`, `base_url`, `api_key`, `api_key_env`, or `model` in client request metadata. (The internal request does carry the model, read by the Gateway from preferences.)
+- Binding the model once at startup, so a model change needs a restart.
+- Silently dropping content or substituting a model when the chosen model lacks a capability.
 - Treating primary model invocation as a required tool call.
 - Merging runtime, adapter, and preferences into a mutable request-time config object.
 - Storing raw credentials in tracked config files.
@@ -45,6 +47,8 @@ This document defines anti-drift controls for Models boundary implementations.
 | MODD-CHK-012 | Model errors use safe classified taxonomy | Error mapping tests with fault injection | Critical |
 | MODD-CHK-013 | Gateway does not own model selection responsibility | Gateway boundary ownership tests | Critical |
 | MODD-CHK-014 | External API count remains exactly two | Architecture contract checks | Critical |
+| MODD-CHK-015 | Model travels with each request; no restart for a model change | Change-while-running test | Critical |
+| MODD-CHK-016 | Missing model capabilities are reported, not faked | Capability-gap tests | High |
 
 ## 4. Contract-Break Indicators
 
@@ -67,6 +71,8 @@ This document defines anti-drift controls for Models boundary implementations.
 - Unsupported adapter selection silently falls back.
 - Offline local-model path is not testable or fails by policy.
 - More than two external APIs are exposed.
+- A model change needs a restart.
+- A capability gap is hidden from the owner.
 - Conflict register has unresolved High-risk boundary conflicts.
 
 ## 6. Drift Detection Checklist
@@ -85,3 +91,5 @@ This document defines anti-drift controls for Models boundary implementations.
 - [ ] Local/offline endpoint path is still supported and tested.
 - [ ] Model failure taxonomy remains safe and classified.
 - [ ] External API set is still exactly Gateway API and Model API.
+- [ ] A model change applies to the next message with no restart.
+- [ ] Missing capabilities are reported, not faked.

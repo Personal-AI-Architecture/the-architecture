@@ -27,20 +27,21 @@ Build the architecture-dependent runtime path first, then build product behavior
 ### 3. Startup Readiness
 
 - Ensure deterministic startup order.
-- Ensure export, conversation persistence, auth state, and version-history readiness exist from day one.
+- Ensure export, conversation persistence (including tool calls and tool results), auth state, and version history with restore exist from day one.
 - Ensure localhost-first and offline-capable behavior are real, not planned.
 
 ### 4. Product Runtime Skeleton
 
 - Add product bootstrap and config mapping.
 - Add persistent conversation storage through the approved Memory boundary.
-- Wire Auth on the real path.
-- Enforce tool scope and coded approval.
+- Wire Auth: the Gateway calls it on every request, and the Agent Loop asks it before each tool call.
+- Pass the owner's current model choice with every request.
+- Enforce tool scope, and any approval rules the owner or product sets, in code. The default is that the owner can do everything.
 
 ### 5. Product Interaction Layer
 
 - Build the client on the real Gateway contract.
-- Render approval from contract-visible interaction state.
+- If the product adds approvals, render them from contract-visible interaction state.
 - Add structured logging.
 - Keep the client on the canonical route and stream shapes.
 
@@ -86,7 +87,7 @@ CLI Prototype
 Why this is drift-prone:
 
 - product code normalizes missing boundaries
-- conversations, auth, and approval semantics get trapped in client logic
+- conversations, auth, and (where used) approval semantics get trapped in client logic
 - verification becomes a list of surprises instead of a conformance check
 
 ## Audit Questions

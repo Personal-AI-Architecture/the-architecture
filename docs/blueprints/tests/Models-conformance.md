@@ -16,8 +16,10 @@ This file defines language-agnostic pass/fail vectors for the Models boundary.
 - `MOD-MUST-010`: Unsupported or invalid adapter selection fails clearly without silent fallback.
 - `MOD-MUST-011`: Local/offline model endpoint path remains supported.
 - `MOD-MUST-012`: Model failures use safe classified taxonomy.
-- `MOD-MUST-013`: Gateway does not own model/provider selection as architectural responsibility.
+- `MOD-MUST-013`: Gateway does not own model/provider selection as architectural responsibility; it reads the owner's choice and passes it on.
 - `MOD-MUST-014`: External API set remains exactly Gateway API and Model API.
+- `MOD-MUST-015`: The model travels with each request; a changed preference applies to the next message with no restart.
+- `MOD-MUST-016`: Capabilities the chosen model lacks are reported, not faked.
 
 ## Test Vectors
 
@@ -37,8 +39,8 @@ This file defines language-agnostic pass/fail vectors for the Models boundary.
 | MOD-T006N | MOD-MUST-006 | Negative | Require Agent Loop/Gateway edits for same-provider model swap | Conformance gate fails | Code-coupled swap accepted | Preference bypass |
 | MOD-T007P | MOD-MUST-007 | Positive | Switch provider by updating adapter key + adapter config | Provider path changes without unrelated component edits | Gateway/Auth/Memory changes required | Provider-lock drift |
 | MOD-T007N | MOD-MUST-007 | Negative | Hardcode provider in Agent Loop; swap requires code rewrite | Conformance gate fails | Rewrite accepted | Adapter indirection failure |
-| MOD-T008P | MOD-MUST-008 | Positive | Submit valid generic request payload (`messages`, `tools`, metadata only) | Request accepted | Provider/runtime config required in request | Hidden config channel |
-| MOD-T008N | MOD-MUST-008 | Negative | Inject `provider_adapter`, `provider`, `base_url`, `api_key`, `api_key_env`, `model` in request payload | Safe reject/schema failure | Forbidden fields accepted | Request-time reconfiguration |
+| MOD-T008P | MOD-MUST-008 | Positive | Submit valid client request payload (`messages`, metadata only; the model comes from preferences) | Request accepted | Provider/runtime config required in request | Hidden config channel |
+| MOD-T008N | MOD-MUST-008 | Negative | Inject `provider_adapter`, `provider`, `base_url`, `api_key`, `api_key_env`, `model` in client request metadata | Safe reject/schema failure | Forbidden fields accepted | Request-time reconfiguration |
 | MOD-T009P | MOD-MUST-009 | Positive | Validate adapter config file | Contains secret reference field only (for example `api_key_env`) | Raw secret values found | Secret handling drift |
 | MOD-T009N | MOD-MUST-009 | Negative | Place `api_key` value in tracked adapter config | Conformance/security gate fails | Secret-in-config accepted | Secret leakage |
 | MOD-T010P | MOD-MUST-010 | Positive | Configure unknown adapter in runtime config | Startup fails with explicit unsupported-adapter message | Silent fallback behavior | Failure masking |
@@ -47,15 +49,19 @@ This file defines language-agnostic pass/fail vectors for the Models boundary.
 | MOD-T011N | MOD-MUST-011 | Negative | Enforce cloud-only endpoint assumptions in adapter contract | Conformance gate fails | Cloud-only model path accepted | Deployment lock-in |
 | MOD-T012P | MOD-MUST-012 | Positive | Inject timeout/unavailable/malformed payload failures | Error codes map to allowed taxonomy and safe messages | Raw provider error surfaced | Unsafe error surface |
 | MOD-T012N | MOD-MUST-012 | Negative | Forward raw provider stack/error payload to client | Conformance gate fails | Raw passthrough accepted | Error sanitization drift |
-| MOD-T013P | MOD-MUST-013 | Positive | Inspect Gateway ownership boundaries | Gateway does not choose model/provider as responsibility | Gateway model selection logic present | Ownership bleed |
+| MOD-T013P | MOD-MUST-013 | Positive | Inspect Gateway ownership boundaries | Gateway reads the owner's model choice and passes it on, but does not choose model/provider itself | Gateway model selection logic present | Ownership bleed |
 | MOD-T013N | MOD-MUST-013 | Negative | Add model-selection policy in Gateway route path | Conformance gate fails | Gateway ownership accepted | Gateway-model drift |
 | MOD-T014P | MOD-MUST-014 | Positive | Enumerate external APIs | Exactly two external APIs: Gateway API and Model API | Additional external API introduced | Contract sprawl |
 | MOD-T014N | MOD-MUST-014 | Negative | Add third external API for provider management | Conformance gate fails | Third API accepted | API proliferation |
+| MOD-T015P | MOD-MUST-015 | Positive | While running, change the model preference and send one message | That message is answered by the new model; no restart | Old model used until restart | Model-fixed-at-startup drift |
+| MOD-T015N | MOD-MUST-015 | Negative | Bind the model once in the adapter at startup | Conformance gate fails | Startup-only binding accepted | Model-fixed-at-startup drift |
+| MOD-T016P | MOD-MUST-016 | Positive | Send an image part to a model that cannot read images | Missing capability reported to Agent Loop and owner | Image dropped silently or another model used | Capability faking |
+| MOD-T016N | MOD-MUST-016 | Negative | Adapter strips unsupported parts and continues silently | Conformance gate fails | Silent degradation accepted | Capability faking |
 
 ## Coverage Summary
 
-- MUST requirements: 14
-- Positive tests: 14
-- Negative tests: 14
-- Total vectors: 28
-- Critical drift categories covered: component creep, adapter bypass, API/tool conflation, config-layer collapse, hidden request-time config, secret leakage, adapter fallback masking, offline-path loss, error sanitization drift, ownership bleed, external API proliferation.
+- MUST requirements: 16
+- Positive tests: 16
+- Negative tests: 16
+- Total vectors: 32
+- Critical drift categories covered: component creep, adapter bypass, API/tool conflation, config-layer collapse, hidden request-time config, secret leakage, adapter fallback masking, offline-path loss, error sanitization drift, ownership bleed, external API proliferation, model fixed at startup, capability faking.

@@ -60,6 +60,7 @@ The Model API is the external intelligence boundary through which the Agent Loop
   - normalized completion response (`assistantText`, `toolCalls`, `finishReason`).
 - **External**
   - provider endpoint URLs and auth header conventions.
+  - which capabilities a given model has (images, tool calls, context size); a missing capability is reported, not faked.
   - provider-native payload and response structures.
 
 ### Terminology Clarification
@@ -86,6 +87,7 @@ Defined interfaces:
 - Required fields:
   - `messages: CompletionMessage[]` (min 1)
   - `tools: ModelToolDefinition[]` (can be empty)
+  - the model for this call: the owner's current choice, which came with the Gateway's request (field name pending the next contract revision)
 - Optional fields:
   - `metadata.correlation_id`
 - Forbidden fields:
@@ -94,9 +96,10 @@ Defined interfaces:
   - `base_url`
   - `api_key`
   - `api_key_env`
-  - `model`
 - Behavior:
-  - Accepts only generic interaction payload, never runtime/provider selection data.
+  - Accepts only generic interaction payload plus the model for this call, never provider selection or secrets.
+  - Messages use the same shape as the Gateway API and the Gateway ↔ Agent Loop contract: content is a list of parts (text, images, files), and tool calls and tool results are ordinary parts of messages.
+  - The Agent Loop puts its own bootstrap prompt first; it comes from Agent Loop configuration, not from the Gateway.
 
 ### 4.3 `model_completion_response`
 - Required fields:
@@ -159,7 +162,7 @@ Defined interfaces:
 ```json
 {
   "messages": [
-    { "role": "user", "content": "Summarize this plan." }
+    { "role": "user", "content": [{ "type": "text", "text": "Summarize this plan." }] }
   ],
   "tools": [
     {
@@ -202,16 +205,17 @@ Why invalid:
 1. Load runtime config (includes `provider_adapter`).
 2. Load adapter config for selected adapter (`base_url`, `model`, `api_key_env`).
 3. Ensure Memory and preferences are loaded.
-4. Resolve model binding from adapter config + preferences (`default_model` behavior).
-5. Instantiate adapter implementation.
+4. Instantiate adapter implementation.
+5. The model is not bound here: the Gateway reads the owner's choice on every message, and the Agent Loop names it in each Model API call (adapter `model` is only the fallback default).
 6. Fail clearly if adapter key/config is unsupported or invalid.
 
 ### 5.2 Completion Workflow
-1. Agent Loop builds generic completion request from conversation messages and tool definitions.
+1. Agent Loop builds generic completion request from its bootstrap prompt, conversation messages, tool definitions, and the model that came with this request.
 2. Adapter converts generic request into provider-native payload.
 3. Adapter sends provider request.
 4. Adapter parses provider response.
 5. Adapter normalizes response to generic `assistantText/toolCalls/finishReason`.
+6. If the request needs a capability the model lacks, the adapter reports it rather than dropping content or switching models.
 6. Agent Loop continues loop using normalized output.
 
 ### 5.3 Tool-Call Roundtrip Behavior
@@ -221,7 +225,8 @@ Why invalid:
 
 ### 5.4 Model Swap Behavior
 - Same provider:
-  - update model preference or adapter model binding only.
+  - update the model preference only.
+  - the next message uses the new model, with no restart.
   - no Agent Loop/Gateway/Auth/Memory code rewrite.
 - Different provider:
   - change runtime adapter key + adapter config file.
@@ -397,17 +402,19 @@ Why invalid:
 - `MAPI-MUST-001`: Models MUST remain external intelligence accessed only through the Model API boundary.
 - `MAPI-MUST-002`: Agent Loop MUST interact with models through adapter abstraction only.
 - `MAPI-MUST-003`: Provider-specific payload translation MUST be isolated to adapter implementations.
-- `MAPI-MUST-004`: Internal completion contract MUST remain generic (`messages + tools` in, normalized completion out).
+- `MAPI-MUST-004`: Internal completion contract MUST remain generic (`messages + tools` plus the model for this call in, normalized completion out).
 - `MAPI-MUST-005`: Same-provider model swap MUST require preference/model-binding change only.
 - `MAPI-MUST-006`: Provider swap MUST require adapter/runtime-config change only, not unrelated component rewrites.
 - `MAPI-MUST-007`: Runtime config, adapter config, and preferences MUST remain distinct layers.
-- `MAPI-MUST-008`: Request payloads MUST NOT include hidden provider/runtime reconfiguration fields.
+- `MAPI-MUST-008`: Request payloads MUST NOT include hidden provider/runtime reconfiguration fields or secrets. The model for the call is not reconfiguration; it is the owner's current choice.
 - `MAPI-MUST-009`: Adapter config MUST reference secrets indirectly (`api_key_env` style), not store raw secret values.
 - `MAPI-MUST-010`: Provider failures MUST be surfaced as safe classified errors at consuming boundaries.
 - `MAPI-MUST-011`: Unsupported or misconfigured adapters MUST fail clearly.
 - `MAPI-MUST-012`: Local/offline provider endpoints MUST remain supportable through adapter config.
 - `MAPI-MUST-013`: Model API MUST remain an API boundary and MUST NOT collapse into component/tool ownership.
 - `MAPI-MUST-014`: Tool-call roundtrip continuity MUST preserve stable `id`, `name`, and structured input shape.
+- `MAPI-MUST-015`: Each Model API call MUST name the model that came with the request, so a changed choice applies to the next message with no restart.
+- `MAPI-MUST-016`: Messages MUST use the one shared message shape: content as a list of parts, with tool calls and tool results as ordinary parts of messages.
 
 ### SHOULD
 - `MAPI-SHOULD-001`: Adapter implementations SHOULD remain stateless and deterministic.
@@ -421,7 +428,7 @@ Why invalid:
 ## 14. Acceptance Gates (Pass/Fail)
 
 - `MAPI-GATE-01 Contract Gate`: Pass if all boundary shapes validate against `contracts/Model-API.schema.json`; fail otherwise.
-- `MAPI-GATE-02 Conformance Gate`: Pass if all vectors in `tests/Model-API-conformance.md` pass (14 positive + 14 negative); fail on any `MAPI-MUST-*` failure.
+- `MAPI-GATE-02 Conformance Gate`: Pass if all vectors in `tests/Model-API-conformance.md` pass (16 positive + 16 negative); fail on any `MAPI-MUST-*` failure.
 - `MAPI-GATE-03 Drift Gate`: Pass if all Critical checks in `drift/Model-API-drift-guard.md` pass; fail on any Critical check failure.
 - `MAPI-GATE-04 Swap Gate`: Pass if same-provider model swap and provider swap scenarios remain config-driven; fail if code rewrites are required.
 - `MAPI-GATE-05 Conflict Gate`: Pass if no unresolved High-risk conflict remains in Conflict Register.
@@ -444,6 +451,8 @@ Why invalid:
 | MAPI-MUST-012 | Human `models-spec.md`, `deployment-spec.md`; AI checklist `configuration-review.md` | `MAPI-T012P`, `MAPI-T012N` |
 | MAPI-MUST-013 | Human `foundation-spec.md`, `models-spec.md`; AI matrix `F-02`, `MO-01` | `MAPI-T013P`, `MAPI-T013N` |
 | MAPI-MUST-014 | Human `models-spec.md`, `adapter-spec.md`; AI `models.md` + agent loop/tool contract behavior | `MAPI-T014P`, `MAPI-T014N` |
+| MAPI-MUST-015 | Human `models-spec.md`, decision `D175`; AI matrix `E-05`, `MO-02` | `MAPI-T015P`, `MAPI-T015N` |
+| MAPI-MUST-016 | Human `communication-principles.md`, decisions `D178`, `D179`; AI matrix `GC-07` | `MAPI-T016P`, `MAPI-T016N` |
 
 ## 16. Residual Risks & Open Decisions
 
@@ -467,10 +476,14 @@ Why invalid:
 ## Self-Validation Report
 
 - Coverage of required sections: 16/16 (100%)
-- Normative requirements count: 19 total (`14 MUST`, `3 SHOULD`, `2 MAY`)
+- Normative requirements count: 21 total (`16 MUST`, `3 SHOULD`, `2 MAY`)
 - Interfaces with schemas: 7 (`model_completion_request`, `model_completion_response`, `model_tool_definition`, `model_tool_call`, `adapter_config`, `runtime_model_binding`, `provider_error_surface`)
-- Test vectors count: 28 total (`14 positive`, `14 negative`)
+- Test vectors count: 32 total (`16 positive`, `16 negative`)
 - Conflicts detected/resolved: 4/4 resolved
 - Unresolved ambiguity list:
   - `A-01 (Medium)`: Provider-vs-Model API naming is not fully unified across all source documents.
 - Final readiness rating: Conditionally Ready
+
+## Contract alignment
+
+`contracts/Model-API.schema.json` still lists `model` as a forbidden request field and has string-only message content. This blueprint requires the model on every call (MAPI-MUST-015) and content as a list of parts (MAPI-MUST-016), so the valid example here uses a text part. There is also no way to report a missing model capability. Build to the behaviour described here; the schema follows in the next contract revision.

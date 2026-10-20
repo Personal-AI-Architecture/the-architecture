@@ -11,8 +11,9 @@ This document defines anti-drift controls for Agent Loop implementations.
 - Assistant text dropped when tool calls are present.
 - Recoverable tool failures incorrectly treated as terminal failures.
 - Error taxonomy collapses to a single generic code.
-- Auth context ignored for tool availability.
-- Approval semantics moved out of contract-visible events.
+- Tool calls run without asking Auth first.
+- Model fixed at startup instead of taken from each request.
+- Approval semantics moved out of contract-visible events, or approval imposed when no approval rule exists.
 - Agent Loop starts owning conversation persistence.
 
 ## 2. Prohibited Implementation Shortcuts
@@ -22,13 +23,15 @@ This document defines anti-drift controls for Agent Loop implementations.
 - Skipping `tool-call`/`tool-result` event emission for speed.
 - Converting all errors to one generic code.
 - Using prompt-only approval intent instead of coded controls/events.
+- Relying on the request-level Auth check instead of asking Auth per tool call.
+- Requiring a Gateway-built system message instead of the configured bootstrap prompt.
 - Adding conversation storage reads/writes in Agent Loop runtime paths.
 
 ## 3. Auto-Check Assertions
 
 | Check ID | Assertion | Validation Mechanism | Severity |
 |---|---|---|---|
-| ENGD-CHK-001 | Input contract bounded to `messages + metadata` | Request schema tests against `Engine.schema.json` | Critical |
+| ENGD-CHK-001 | Input contract bounded to `messages` + model + `metadata` | Request schema tests against `Engine.schema.json` (model field pending contract revision) | Critical |
 | ENGD-CHK-002 | `metadata.correlation_id` required | Negative schema/integration tests for missing ID | Critical |
 | ENGD-CHK-003 | Metadata side-channel fields rejected | Negative tests for provider/tool/secret metadata keys | Critical |
 | ENGD-CHK-004 | Loop termination behavior is deterministic | Completion-path and safety-bound tests | Critical |
@@ -38,10 +41,12 @@ This document defines anti-drift controls for Agent Loop implementations.
 | ENGD-CHK-008 | Recoverable failures continue loop | Recoverable tool-failure tests | Critical |
 | ENGD-CHK-009 | Unrecoverable failures emit terminal error | Fault-injection termination tests | Critical |
 | ENGD-CHK-010 | Error taxonomy and sanitization enforced | Error mapping tests for all taxonomy codes | Critical |
-| ENGD-CHK-011 | Auth context filters tool availability | Permission-scoped tool advertisement tests | Critical |
-| ENGD-CHK-012 | Approval interactions remain contract-visible | Approval-required tool path event tests | Critical |
+| ENGD-CHK-011 | Auth asked before each tool call; refusals reported as not permitted | Per-call Auth check tests | Critical |
+| ENGD-CHK-012 | Approval interactions remain contract-visible where approval rules apply, and absent otherwise | Approval-rule and no-rule tool path event tests | Critical |
 | ENGD-CHK-013 | Agent Loop has no conversation persistence ownership | Static + runtime dependency checks | Critical |
 | ENGD-CHK-014 | Provider specifics isolated to adapters | Static architecture boundary checks | Critical |
+| ENGD-CHK-015 | Model taken from each request | Model-change-without-restart test | Critical |
+| ENGD-CHK-016 | Bootstrap prompt from Agent Loop configuration | Request-without-system-message test | High |
 
 ## 4. Contract-Break Indicators
 
@@ -51,7 +56,8 @@ This document defines anti-drift controls for Agent Loop implementations.
 - Tool call/result IDs are inconsistent.
 - Recoverable tool failures terminate stream.
 - `error` events leak raw exception internals.
-- Unauthorized actor receives privileged tools.
+- Unauthorized actor's tool call runs.
+- A model change only takes effect after a restart.
 - Conversation create/list/store behavior appears in Agent Loop module.
 
 ## 5. Fail Build If
@@ -75,7 +81,9 @@ This document defines anti-drift controls for Agent Loop implementations.
 - [ ] Recoverable tool failures continue loop.
 - [ ] Unrecoverable failures emit terminal classified errors.
 - [ ] Error messages are safe and taxonomy-correct.
-- [ ] Auth-scoped tool filtering enforced.
-- [ ] Approval request/result events emitted for approval-required actions.
+- [ ] Auth asked before every tool call; refusals reported as not permitted.
+- [ ] Approval request/result events emitted for actions the owner's rules mark as approval-required, and none otherwise.
+- [ ] Model taken from each request; no restart needed to switch.
+- [ ] Bootstrap prompt comes from Agent Loop configuration.
 - [ ] No conversation persistence responsibilities in Agent Loop.
 - [ ] Provider-specific formatting isolated to adapters.

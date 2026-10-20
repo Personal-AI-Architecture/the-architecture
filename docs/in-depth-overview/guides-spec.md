@@ -101,7 +101,7 @@ Skeleton implementations for each component with the right interfaces but minima
 
 - `engine-stub.ts` — generic agent loop skeleton
 - `gateway-stub.ts` — conversation management + routing skeleton
-- `auth-stub.ts` — middleware skeleton
+- `auth-stub.ts` — Auth contract skeleton (authenticate, authorize, manage), called by the Gateway on every request and by the Agent Loop before each tool call
 - `memory-tools-stub.ts` — memory tool interface skeleton
 
 A developer (or agent) picks up a stub, fills in the implementation, and the system works because the contracts are already wired.
@@ -114,8 +114,8 @@ A runnable test suite that validates *any* implementation against the architectu
 
 | Test ID | Test | Pass Criteria | Validates |
 |---------|------|---------------|-----------|
-| SWAP-1 | Provider swap | Change provider config → next message uses new provider → no code changes | Model API contract, Principle 2 |
-| SWAP-2 | Model swap | Change model config → next message uses new model → no code changes | Model API contract |
+| SWAP-1 | Provider swap | Change provider config → after a restart (allowed for a provider swap), messages use the new provider → no code changes | Model API contract, Principle 2 |
+| SWAP-2 | Model swap | Change the model preference → next message uses new model with no restart → no code changes | Model API contract |
 | SWAP-3 | Tool swap | Add/remove a tool → system functions → no code changes to Agent Loop/Gateway/Auth | D51, Principle 3 |
 
 **Architectural invariant tests:**

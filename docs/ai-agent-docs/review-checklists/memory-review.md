@@ -14,9 +14,11 @@ Use this when reviewing Memory tools, export/history behavior, persistent conver
 - [ ] Structured or queryable owner data is not hidden outside the model-facing Memory surface.
 - [ ] Export exists and covers the required owner data surface.
 - [ ] History returns previous states, not only metadata.
+- [ ] The owner can restore an earlier state, whatever mechanism backs history (Git is one option).
+- [ ] Failed or conflicting writes are reported, never resolved silently.
 - [ ] Version-history readiness is deterministic at startup.
 - [ ] Memory data remains inspectable without the system running.
-- [ ] Secrets are excluded from normal inspectable Memory content.
+- [ ] Secrets are excluded from Memory entirely.
 
 ## Matrix IDs
 
@@ -27,6 +29,8 @@ Use this when reviewing Memory tools, export/history behavior, persistent conver
 - `M-04`
 - `M-05`
 - `M-06`
+- `M-07`
+- `S-06`
 - `D-05`
 - `D-07`
 
@@ -34,8 +38,10 @@ Use this when reviewing Memory tools, export/history behavior, persistent conver
 
 - conversations live in a Gateway-only store
 - export is missing or incomplete
-- history only returns commit metadata
-- git/version guarantees degrade to warnings
+- history only returns change metadata
+- history exists but there is no restore
+- version-history guarantees degrade to warnings
+- concurrent writes resolved by silent last-write-wins
 - database-backed Memory is invisible to the public Memory surface
 
 ## Read Next

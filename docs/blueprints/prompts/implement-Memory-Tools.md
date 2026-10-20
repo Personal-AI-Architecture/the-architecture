@@ -69,9 +69,11 @@ Implement these behaviors:
   - `memory_history`
   - `memory_export`
 - Enforce path confinement to memory root for all path-bearing operations.
-- Block reserved internal roots (at minimum `.git`).
-- Require coded approval for mutating operations.
-- Emit structured audit + version commit records for successful mutations.
+- Block reserved internal roots (for example `.git` when Git backs history).
+- Ask Auth before every memory tool call (the Agent Loop does this); enforce approval in code only where an approval rule in Auth applies. The default policy lets the owner do everything with no approval step.
+- Provide restore: make an earlier state current again and record the restore in history.
+- Report failed or conflicting writes as classified failures; never resolve them silently.
+- Emit structured audit + version history records for successful mutations.
 - Keep read/list/search/history/export read-only by default.
 - Enforce non-empty search query and default conversation exclusion.
 - Apply secret-like token redaction to search match content.
@@ -104,7 +106,8 @@ Use these for MVP consistency:
 
 - Do not remove any canonical memory tool from required surface.
 - Do not allow escaped paths or reserved internals access.
-- Do not execute mutating operations without approval.
+- Do not execute any memory tool call without the per-call Auth check, or without a decision where an approval rule applies.
+- Do not resolve write conflicts silently.
 - Do not bypass audit/version trail on successful mutations.
 - Do not accept empty search queries.
 - Do not leak secret-like tokens unredacted in search output.
@@ -119,8 +122,8 @@ Implement automated tests proving all `MTL-MUST-*` requirements in `Memory-Tools
 1. Canonical surface presence.
 2. Path confinement.
 3. Reserved-path blocking.
-4. Approval gating for mutations.
-5. Mutation audit + version commit.
+4. Per-call Auth check for every memory tool call, and approval only where a rule applies.
+5. Mutation audit + version history entry.
 6. Read-only operation semantics.
 7. Search query validation and default scope.
 8. Search output redaction.
@@ -130,6 +133,8 @@ Implement automated tests proving all `MTL-MUST-*` requirements in `Memory-Tools
 12. Classified/safe failure mapping.
 13. Startup readiness guarantees.
 14. Boundary enforcement against direct storage reach-in.
+15. Restore round trip.
+16. Conflicting-write reporting.
 
 Include positive and negative vectors linked to requirement IDs.
 
@@ -138,7 +143,7 @@ Include positive and negative vectors linked to requirement IDs.
 - Any Critical check in `Memory-Tools-drift-guard.md` fails.
 - Any `MTL-MUST-*` conformance test fails.
 - Path escape or reserved-path access is possible.
-- Mutation approval bypass is possible.
+- A memory tool call can bypass the Auth check or an applicable approval rule.
 - Search redaction fails.
 - Startup readiness degrades required memory guarantees.
 - Direct component storage reach-in bypasses approved boundary.

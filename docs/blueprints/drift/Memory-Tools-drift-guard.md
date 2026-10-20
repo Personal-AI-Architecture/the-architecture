@@ -7,8 +7,11 @@ This document defines anti-drift controls for Memory Tool Surface implementation
 - Missing one or more mandatory memory tools from runtime surface.
 - Path-confinement checks bypassed or inconsistently applied.
 - Reserved internals (`.git` and equivalents) exposed through memory tools.
-- Mutating operations executing without approval.
-- Mutations happening without audit and version commit trail.
+- Mutating operations executing without a per-call Auth check, or without a decision where an approval rule applies.
+- Approval on every write shipped as a built-in default.
+- History present but no restore.
+- Conflicting writes resolved silently.
+- Mutations happening without audit and version history trail.
 - Search behavior drifting to empty-query acceptance.
 - Search output leaking secret-like token patterns.
 - History responses collapsing to metadata-only output.
@@ -22,8 +25,8 @@ This document defines anti-drift controls for Memory Tool Surface implementation
 - Treating memory tools as optional convenience features.
 - Implementing path checks in some operations but not all.
 - Allowing hidden flags to disable reserved-path blocks in request payloads.
-- Replacing coded approval with prompt instruction text.
-- Skipping audit/commit on mutating operations for performance shortcuts.
+- Replacing coded approval rules with prompt instruction text.
+- Skipping audit/version history on mutating operations for performance shortcuts.
 - Removing prior-state support from history output to simplify implementation.
 - Returning raw exceptions directly from runtime/tool layer.
 - Allowing startup to continue when version/history guarantees fail.
@@ -36,8 +39,8 @@ This document defines anti-drift controls for Memory Tool Surface implementation
 | MTLD-CHK-001 | Canonical memory tool surface exists | Tool registration + contract tests | Critical |
 | MTLD-CHK-002 | Path confinement enforced on all path-bearing operations | Escape-path negative tests | Critical |
 | MTLD-CHK-003 | Reserved internals are blocked | Reserved-path negative tests | Critical |
-| MTLD-CHK-004 | Mutations are approval-gated | Approval interaction tests | Critical |
-| MTLD-CHK-005 | Mutations emit structured audit + version commit | Mutation integration tests | Critical |
+| MTLD-CHK-004 | Every call passes the per-call Auth check; approval enforced only where a rule applies | Auth and approval interaction tests | Critical |
+| MTLD-CHK-005 | Mutations emit structured audit + version history entry | Mutation integration tests | Critical |
 | MTLD-CHK-006 | Read-only operations run without approval | Read-only behavior tests | High |
 | MTLD-CHK-007 | Search enforces non-empty query and default conversation exclusion | Search behavior tests | Critical |
 | MTLD-CHK-008 | Search output redacts secret-like token patterns | Sanitization tests | Critical |
@@ -47,14 +50,18 @@ This document defines anti-drift controls for Memory Tool Surface implementation
 | MTLD-CHK-012 | Failure taxonomy remains classified and safe | Error mapping/sanitization tests | Critical |
 | MTLD-CHK-013 | Startup readiness requires memory/history/export guarantees | Startup phase + failure tests | Critical |
 | MTLD-CHK-014 | Components do not bypass memory tool/boundary path | Static + integration boundary tests | Critical |
+| MTLD-CHK-015 | Restore makes an earlier state current and is recorded | Restore round-trip tests | Critical |
+| MTLD-CHK-016 | Failed or conflicting writes are reported | Concurrent-write tests | Critical |
 
 ## 4. Contract-Break Indicators
 
 - `memory_*` tool names missing from available surface.
 - Escaped paths (`../...`) accepted by any memory operation.
 - `.git` entries visible in list/search outputs.
-- `memory_write/edit/delete` execution observed without `approval-request`/decision flow.
-- Mutation succeeds without audit log and version commit evidence.
+- `memory_write/edit/delete` execution observed without an Auth decision, or without `approval-request`/decision flow where an approval rule applies.
+- Mutation succeeds without audit log and version history evidence.
+- No restore path exists.
+- A concurrent write overwrites another with no error.
 - `memory_search` accepts empty query or emits unredacted secret pattern.
 - `memory_history` output contains no prior-state capability.
 - `memory_export` returns empty path or non-owner-scoped destination.
@@ -66,7 +73,7 @@ This document defines anti-drift controls for Memory Tool Surface implementation
 
 - Any Critical check in section 3 fails.
 - Any `MTL-MUST-*` conformance vector fails.
-- Approval bypass exists for mutating operations.
+- Auth-check or approval-rule bypass exists for mutating operations.
 - Path escape or reserved-path access is possible.
 - Secret-like token redaction in search output fails.
 - Export/history day-one readiness requirements are not met.
@@ -78,8 +85,10 @@ This document defines anti-drift controls for Memory Tool Surface implementation
 - [ ] Canonical memory tools are all present.
 - [ ] Every path-bearing operation enforces memory-root confinement.
 - [ ] Reserved internals are inaccessible through memory tools.
-- [ ] Mutating operations are approval-gated.
-- [ ] Mutating operations emit structured audit and version commits.
+- [ ] Every memory tool call passes the per-call Auth check; approval rules, where present, are enforced in code.
+- [ ] Mutating operations emit structured audit and version history entries.
+- [ ] Restore makes an earlier state current.
+- [ ] Failed or conflicting writes are reported, never silently resolved.
 - [ ] Read/list/search/history/export remain read-only no-approval paths.
 - [ ] Search rejects empty query and defaults to conversation exclusion.
 - [ ] Search output applies secret-like token redaction.

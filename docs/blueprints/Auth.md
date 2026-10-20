@@ -3,29 +3,29 @@
 ## 1. Overview
 
 ### Purpose
-Auth is the independent boundary that establishes identity, enforces permissions, and guards protected system interactions.
+Auth is the independent component that establishes identity, decides permissions, and guards protected system interactions. Other components call it through the Auth contract: the Gateway on every request, the Agent Loop before each tool call.
 
 ### High-Level Responsibilities
-- Authenticate protected requests before system interaction proceeds.
+- Authenticate and authorize every request when the Gateway calls it, before anything reaches the Agent Loop or conversation data.
+- Authorize each tool call when the Agent Loop asks, before the tool runs.
 - Build and propagate normalized actor context (identity, actor type, mode, permissions).
-- Authorize actions (tool usage, approval decisions, administrative actions) using policy data.
+- Authorize actions (tool usage, approval decisions where a product adds approvals, administrative actions) using policy data. Default policy: the owner can do everything; every other identity starts with nothing.
 - Maintain product-owned, inspectable, exportable auth state.
 - Emit structured audit records for allow/deny outcomes.
 
 ### System Context
-- Upstream: client requests entering through Gateway.
-- Downstream consumers: Gateway route handling, Agent Loop tool filtering/execution path, approval decision path.
-- Storage relationship: auth state is persisted in product-owned owner data (Memory preferences surface), but Auth does not own Memory internals.
-- Architecture position: cross-cutting boundary independent from Gateway, Agent Loop, and model/provider boundaries.
+- Callers: the Gateway (every request) and the Agent Loop (each tool call), both through the Auth contract. Approval decision paths, where a product adds them, also ask Auth.
+- Storage relationship: Auth keeps its records in its own owner-inspectable, exportable store. It is not configuration and not the preferences surface; permissions live only in Auth.
+- Architecture position: independent component, swappable behind its contract, independent from Gateway, Agent Loop, and model/provider boundaries.
 
 ---
 
 ## 2. Scope Definition
 
 ### What Auth **is**
-- A real, enforceable boundary on protected request paths.
+- A real, enforceable check on every protected request and every tool call.
 - The owner of identity parsing/normalization and authorization decisions.
-- The source of truth for actor permission context used at runtime.
+- The only place permissions (including any approval rules) live.
 - A provider-swappable capability behind a stable contract.
 
 ### What Auth **is not**
@@ -34,9 +34,10 @@ Auth is the independent boundary that establishes identity, enforces permissions
 - Not conversation lifecycle management.
 - Not a model/provider adapter.
 - Not a general-purpose settings or workflow engine.
+- Not middleware owned by the Gateway or the Agent Loop.
 
 ### Boundaries and Constraints
-- Auth must fail closed on invalid or missing credentials/context.
+- Auth must fail closed on invalid or missing credentials/context, and when it can't be reached.
 - Local-owner mode remains a real boundary; it is not a bypass mode.
 - Auth state must be product-owned and exportable in non-secret form.
 - Secrets/credentials must not be written into normal inspectable owner data files.
@@ -55,7 +56,7 @@ Auth is the independent boundary that establishes identity, enforces permissions
 
 ### Internal Concepts
 - **Header/credential parsing**: implementation-specific extraction of identity evidence.
-- **Boundary check**: invariant that protected paths must traverse Auth.
+- **Boundary check**: invariant that every protected request and every tool call is checked with Auth.
 - **Fail-closed path**: deny on parse/validation mismatch or uncertainty.
 
 ### External Concepts
@@ -100,18 +101,19 @@ Auth is the independent boundary that establishes identity, enforces permissions
 
 ### 4.2 Runtime Integration Contracts
 
-#### Gateway pre-handler integration
-- Auth executes before protected route handlers.
+#### Gateway integration (every request)
+- The Gateway calls Auth before protected route handlers run, including list and history reads.
 - On failure:
   - return HTTP 401 (or 403 for denied authority checks) with safe error body.
 - Pre-stream vs mid-stream behavior:
   - Auth failures are pre-stream for request-entry checks.
   - If an auth-related violation occurs during active stream execution, downstream emits classified safe error and terminates.
 
-#### Agent Loop/tool integration
+#### Agent Loop/tool integration (each tool call)
 - Agent Loop consumes already-authenticated context.
-- Tool visibility/execution is filtered by auth permissions.
-- Approval decision submission is additionally gated by approval authority permission.
+- Before each tool call, the Agent Loop asks Auth (`Authorize`). A refused call does not run; the model is told it is not permitted, distinct from "does not exist".
+- Tool definitions shown to the model mark tools Auth does not permit for the actor.
+- Where a product adds approvals, approval decision submission is additionally gated by approval authority permission.
 
 ### 4.3 Abstract Data Structures
 
@@ -124,7 +126,8 @@ Auth is the independent boundary that establishes identity, enforces permissions
   - `approval_authority: boolean`
   - `administration: boolean`
 - Defaults:
-  - deny-by-default (`false`) unless explicitly granted by policy/state.
+  - owner: every permission granted (`true`); the architecture requires no approval step for the owner.
+  - every other identity: deny-by-default (`false`) unless the owner grants it.
 - Forbidden fields:
   - arbitrary hidden grants not represented by explicit contract fields.
 
@@ -217,8 +220,9 @@ Why invalid:
 - includes forbidden secret field (`password_hash`)
 
 ### 4.6 Communication Patterns
-- Request entry: synchronous auth check before protected handler execution.
-- Downstream propagation: context carried with request execution context to Agent Loop/tools.
+- Request entry: the Gateway calls Auth synchronously before protected handler execution.
+- Tool calls: the Agent Loop calls Auth synchronously before each tool call.
+- Downstream propagation: identity carried with request execution context to Agent Loop/tools; it must survive a transport change.
 - Auth tool access: model-driven tool calls with auth-aware execution context.
 
 ---
@@ -227,12 +231,12 @@ Why invalid:
 
 ### 5.1 Startup and Readiness
 1. Ensure product-owned auth-state location exists.
-2. Load existing auth state or create initial owner-mode state.
+2. Load existing auth state or create initial owner-mode state (owner can do everything).
 3. Validate shape and readiness for `auth_export`.
 4. Mark Auth boundary ready for protected request processing.
 
 ### 5.2 Protected Request Flow
-1. Receive protected request from Gateway path.
+1. Gateway calls Auth for the protected request.
 2. Extract and validate auth evidence.
 3. Reconstruct normalized auth context.
 4. Compare/validate against active auth state as required by mode.
@@ -251,14 +255,20 @@ Why invalid:
 
 ### 5.4 Tool and Approval Workflow
 1. Agent Loop/tool layer obtains auth context.
-2. Tool list is filtered to authorized set.
-3. Tool execution path re-checks authorization before execution.
-4. Approval decision path requires `approval_authority=true`.
+2. Tool definitions mark tools Auth does not permit for the actor.
+3. Before each tool call, the Agent Loop asks Auth; a refused call does not run and returns a "not permitted" result.
+4. Where the owner's rules require approval for a call, the approval decision path requires `approval_authority=true`.
 5. Denied authority returns safe forbidden response.
+
+### 5.4a Export and Import
+1. `auth_export` returns identities, policies, configuration and the audit log, without credentials.
+2. On import, policies for unknown identities are kept but dormant; they grant nothing.
+3. A re-created identity gets no access until the owner turns it back on. How the owner does that is the product's choice.
+4. Rules the new system doesn't support are reported to the owner and grant nothing.
 
 ### 5.5 State Management
 - Durable:
-  - auth-state persisted in product-owned owner data path.
+  - auth state persisted in Auth's own owner-inspectable store (not configuration or preferences).
 - Ephemeral:
   - per-request normalized auth context.
 - Export:
@@ -270,30 +280,32 @@ Why invalid:
 - Actor mismatch with active state: deny.
 - Missing approval authority: 403 forbidden.
 - Auth state unreadable/corrupt at startup: fail clearly or deny safely; never silently fall back to insecure defaults.
+- Auth unreachable at request or tool-call time: fail closed.
+- Owner locked out on their own hardware: recovery through filesystem access (command-line reset or editing auth data); other recovery paths are product choices.
 
 ---
 
 ## 6. Dependencies & Interactions
 
 ### Required Dependencies
-- **Gateway boundary**:
-  - invokes Auth pre-handler on protected routes.
+- **Gateway**:
+  - calls Auth on every protected request.
 - **Agent Loop/tool execution path**:
-  - consumes auth context for tool filtering and permission checks.
-- **Memory owner-data path**:
-  - stores product-owned auth-state records.
+  - calls Auth before each tool call.
+- **Auth store**:
+  - holds product-owned auth-state records (owner-inspectable and exportable).
 - **Audit logging subsystem**:
   - records allow/deny events.
 
 ### Interaction Data Flow
 1. Client request enters Gateway.
-2. Gateway invokes Auth boundary.
-3. Auth validates and attaches context or denies.
-4. Agent Loop/tools consume context for downstream authorization.
+2. Gateway calls Auth.
+3. Auth validates; the Gateway attaches the identity or denies.
+4. Agent Loop asks Auth before each tool call.
 5. Auth tools expose actor/permission/export surfaces.
 
 ### Dependency Assumptions
-- Protected route wiring exists and calls Auth consistently.
+- Gateway route wiring and the Agent Loop tool path call Auth consistently.
 - Auth-state storage path is writable/readable at startup.
 - Audit sink is available for structured event capture.
 
@@ -339,7 +351,7 @@ Why invalid:
 ### Security
 - Fail closed by default.
 - No secret leakage in inspectable owner data or exports.
-- Approval authority must be coded enforcement, not prompt intent.
+- Approval rules the owner sets, and approval authority where a product adds approvals, must be coded enforcement, not prompt intent.
 - Structured audit records must capture allow/deny outcomes.
 
 ---
@@ -347,14 +359,14 @@ Why invalid:
 ## 9. Implementation Notes (Language-Agnostic)
 
 ### Suggested Architectural Patterns
-- **Boundary middleware pattern**:
-  - one enforced auth interception point for protected paths.
+- **Single Auth contract, two call points**:
+  - the Gateway calls it on every request; the Agent Loop calls it before each tool call. Neither owns it.
 - **Policy engine abstraction**:
   - centralized authorize decision function.
 - **Contract-first state model**:
   - explicit schemas for auth state/context/export.
-- **Deny-by-default strategy**:
-  - no implicit permissions.
+- **Owner-full, others-deny default**:
+  - the owner can do everything; every other identity has no implicit permissions.
 
 ### Design Considerations
 - Keep auth context immutable once attached to request.
@@ -365,6 +377,8 @@ Why invalid:
 ### Anti-Patterns to Avoid
 - Local-owner no-op auth mode.
 - Permission checks spread ad hoc through business logic.
+- Permissions or approval rules stored in configuration or preferences.
+- Restoring a re-created identity's old access silently after import.
 - Exporting provider-opaque auth records as canonical product state.
 - Coupling Auth to Gateway/Agent Loop internals beyond contract surfaces.
 
@@ -373,13 +387,17 @@ Why invalid:
 ## 10. Validation Against AI Primer (`/docs/ai`)
 
 ### Confirmed Alignments
-- `A-01`: protected requests pass through Auth.
+- `A-01`: the Gateway calls Auth on every request.
+- `A-06`: the Agent Loop asks Auth before each tool call.
+- `A-07`: the owner can do everything by default.
+- `A-08`: re-created identities get no access after import until the owner turns it back on.
+- `C-04`: permissions live only in Auth.
 - `A-02`: authorization ownership remains in Auth boundary.
 - `A-03`: auth state is inspectable/exportable in product-owned form.
 - `A-04`: secrets excluded from normal inspectable owner data.
 - `A-05`: startup guarantees day-one auth state and export capability.
-- `GC-04`: Auth is on Gateway->Agent Loop path.
-- `S-03`: approval enforcement is coded, not prompt-only.
+- `GC-04`: Auth is checked before every handoff and every tool call.
+- `S-03`: approval rules, where set, are enforced in code, not prompt-only.
 
 ### Noted Primer-Implementation Tightening
 - Current runtime is owner-first (`local-owner`) while preserving schema/contract shape for multi-actor expansion.
@@ -390,7 +408,7 @@ Why invalid:
 ## 11. Validation Against Human Documentation (`/the-architecture/docs`)
 
 ### Confirmed Alignments
-- Auth is an independent cross-cutting component (`auth-spec.md`).
+- Auth is an independent component the Gateway calls on every request and the Agent Loop asks before each tool call (`auth-spec.md`).
 - Auth is a memory concern and must remain provider-swappable.
 - Auth boundary is required from day one, including local-owner deployments.
 - Auth exportability and owner inspectability are required.
@@ -424,17 +442,18 @@ Why invalid:
 | AUTH-CF-002 | Human docs describe extensible resource/action policy model; runtime uses fixed permission booleans | Treat boolean permission set as MVP profile of extensible policy contract | Preserves compatibility with current runtime while keeping policy evolution path | Authorization model ossifies and causes future migration pain |
 | AUTH-CF-003 | Human docs enumerate broader auth management operations; MVP primer requires minimal tool set day one | Require minimal tools now; keep broader management operations as planned extensions | Aligns with MVP readiness while retaining architectural direction | Over-scoping MVP or under-delivering required day-one contract |
 | AUTH-CF-004 | Human docs are mechanism-neutral; runtime currently uses explicit auth headers | Preserve neutral contract with header transport as one valid implementation | Maintains portability across runtimes/transports | Auth context portability and interop become implementation-locked |
+| AUTH-CF-005 | Older layers place Auth as middleware between Gateway and Agent Loop, filter tools out of the model's view, and keep auth state on the preferences surface; human `auth-spec.md` has the Gateway and Agent Loop call Auth, marks not-permitted tools, and keeps permissions only in Auth | Follow `auth-spec.md` | One place for every access decision, swappable behind its contract | Tool calls bypass Auth; permissions drift into config |
 
 ## 13. Normative Requirements (MUST/SHOULD/MAY)
 
 ### MUST
 
-- `AUTH-MUST-001`: Every protected request MUST pass through Auth boundary before system interaction.
+- `AUTH-MUST-001`: The Gateway MUST call Auth on every protected request, including list and history reads, before anything reaches the Agent Loop or conversation data.
 - `AUTH-MUST-002`: Auth MUST construct and attach normalized actor context for authenticated requests.
 - `AUTH-MUST-003`: Auth MUST fail closed on missing/malformed/mismatched credentials or context.
 - `AUTH-MUST-004`: Authorization decisions MUST enforce permission denials.
-- `AUTH-MUST-005`: Approval decision operations MUST require `approval_authority`.
-- `AUTH-MUST-006`: Tool availability/execution MUST honor Auth permission filtering.
+- `AUTH-MUST-005`: Where a product adds approvals, approval decision operations MUST require `approval_authority`.
+- `AUTH-MUST-006`: The Agent Loop MUST ask Auth before each tool call; a refused call MUST NOT run and MUST be reported as "not permitted".
 - `AUTH-MUST-007`: Startup MUST create/load product-owned auth state required for runtime and export.
 - `AUTH-MUST-008`: `auth_export` MUST return non-secret product-owned auth state.
 - `AUTH-MUST-009`: `auth_whoami`, `auth_check`, and `auth_export` MUST be available from day one.
@@ -442,6 +461,9 @@ Why invalid:
 - `AUTH-MUST-011`: Auth allow/deny outcomes MUST emit structured audit records.
 - `AUTH-MUST-012`: Local-owner mode MUST remain an enforced Auth boundary.
 - `AUTH-MUST-013`: Auth MUST remain ownership-scoped to identity/access concerns and MUST NOT absorb routing/agent loop responsibilities.
+- `AUTH-MUST-014`: The default policy MUST let the owner do everything with no approval step required by the architecture; every other identity MUST start with no permissions.
+- `AUTH-MUST-015`: Permissions, including approval rules, MUST live only in Auth, not in configuration or preferences.
+- `AUTH-MUST-016`: After import, policies for unknown identities MUST stay dormant, and a re-created identity MUST get no access until the owner turns it back on.
 
 ### SHOULD
 
@@ -457,7 +479,7 @@ Why invalid:
 ## 14. Acceptance Gates (Pass/Fail)
 
 - `AUTH-GATE-01 Contract Gate`: Pass if payloads/context/export shapes validate against `contracts/Auth.schema.json`; fail otherwise.
-- `AUTH-GATE-02 Conformance Gate`: Pass if all vectors in `tests/Auth-conformance.md` pass (13 positive + 13 negative); fail on any `AUTH-MUST-*` failure.
+- `AUTH-GATE-02 Conformance Gate`: Pass if all vectors in `tests/Auth-conformance.md` pass (16 positive + 16 negative); fail on any `AUTH-MUST-*` failure.
 - `AUTH-GATE-03 Drift Gate`: Pass if all Critical checks in `drift/Auth-drift-guard.md` pass; fail on any Critical check failure.
 - `AUTH-GATE-04 Security Gate`: Pass if no auth bypass or secret leakage is detected; fail if either exists.
 - `AUTH-GATE-05 Conflict Gate`: Pass if Conflict Register has no unresolved High-risk items.
@@ -466,12 +488,12 @@ Why invalid:
 
 | Requirement ID | Primary Source(s) | Conformance Test IDs |
 |---|---|---|
-| AUTH-MUST-001 | Human `auth-spec.md`; AI matrix `A-01`, `GC-04` | `AUTH-T001P`, `AUTH-T001N` |
+| AUTH-MUST-001 | Human `auth-spec.md`, `gateway-spec.md`; AI matrix `A-01`, `GC-04` | `AUTH-T001P`, `AUTH-T001N` |
 | AUTH-MUST-002 | AI `auth.md`; Human `auth-spec.md` contract section | `AUTH-T002P`, `AUTH-T002N` |
 | AUTH-MUST-003 | Human `auth-spec.md` failure modes; AI failure pattern `Auth Omitted On The Real Path` | `AUTH-T003P`, `AUTH-T003N` |
 | AUTH-MUST-004 | AI matrix `A-02`; Human `auth-spec.md` permission model | `AUTH-T004P`, `AUTH-T004N` |
 | AUTH-MUST-005 | AI matrix `S-03`; Human `security-spec.md` auth requirements | `AUTH-T005P`, `AUTH-T005N` |
-| AUTH-MUST-006 | AI matrix `T-02`, `A-02`; Human `auth-spec.md` tool access scope | `AUTH-T006P`, `AUTH-T006N` |
+| AUTH-MUST-006 | AI matrix `T-02`, `A-06`; Human `auth-spec.md`, `tools-spec.md` | `AUTH-T006P`, `AUTH-T006N` |
 | AUTH-MUST-007 | AI matrix `A-05`; Human `auth-spec.md` success/security requirements | `AUTH-T007P`, `AUTH-T007N` |
 | AUTH-MUST-008 | AI matrix `A-03`, `A-04`; Human `auth-spec.md` portability rules | `AUTH-T008P`, `AUTH-T008N` |
 | AUTH-MUST-009 | AI `auth.md` required day-one tools; auth checklist | `AUTH-T009P`, `AUTH-T009N` |
@@ -479,6 +501,9 @@ Why invalid:
 | AUTH-MUST-011 | Human `security-spec.md`; AI matrix `S-02` | `AUTH-T011P`, `AUTH-T011N` |
 | AUTH-MUST-012 | AI failure pattern `Auth Omitted On The Real Path`; human local-owner requirement | `AUTH-T012P`, `AUTH-T012N` |
 | AUTH-MUST-013 | Human `foundation-spec.md` responsibility boundaries; AI matrix `A-02` | `AUTH-T013P`, `AUTH-T013N` |
+| AUTH-MUST-014 | Human `auth-spec.md`, `tools-spec.md`; AI matrix `A-07` | `AUTH-T014P`, `AUTH-T014N` |
+| AUTH-MUST-015 | Human `auth-spec.md`, `configuration-spec.md`; AI matrix `C-04` | `AUTH-T015P`, `AUTH-T015N` |
+| AUTH-MUST-016 | Human `auth-spec.md` stale permissions after export/import; AI matrix `A-08` | `AUTH-T016P`, `AUTH-T016N` |
 
 ## 16. Residual Risks & Open Decisions
 
@@ -500,10 +525,19 @@ Why invalid:
 ## Self-Validation Report
 
 - Coverage of required sections: 16/16 (100%)
-- Normative requirements count: 18 total (`13 MUST`, `3 SHOULD`, `2 MAY`)
+- Normative requirements count: 21 total (`16 MUST`, `3 SHOULD`, `2 MAY`)
 - Interfaces with schemas: 11 (`permission_set`, `auth_state`, `auth_context`, `authenticate_request`, `authenticate_response`, `authorize_request`, `authorize_decision`, `auth_whoami_response`, `auth_check_response`, `auth_export_response`, `auth_headers`)
-- Test vectors count: 26 total (`13 positive`, `13 negative`)
-- Conflicts detected/resolved: 4/4 resolved
+- Test vectors count: 32 total (`16 positive`, `16 negative`)
+- Conflicts detected/resolved: 5/5 resolved
 - Unresolved ambiguity list:
   - `A-01 (Medium)`: exact migration timing from owner-first permission booleans to richer resource/action policy model is not yet standardized.
 - Final readiness rating: Conditionally Ready
+
+## Contract Alignment
+
+This blueprint follows `docs/in-depth-overview/auth-spec.md`, which is ahead of the contract files in these places:
+
+- `contracts/Auth.schema.json` and `specs/schemas/policy.json` need the default policy to be "the owner can do everything" (AUTH-MUST-014).
+- `specs/schemas/identity.json` needs a starting status for re-created identities that grants no access until the owner turns it back on (AUTH-MUST-016).
+- `specs/openapi/gateway-engine.yaml` and `gateway-agent-loop-contract` material describe Auth as middleware; there is no "not permitted" tool-result shape or denied-action error code (AUTH-MUST-001, AUTH-MUST-006).
+- `specs/openapi/gateway-api.yaml` describes API keys as full-access only.

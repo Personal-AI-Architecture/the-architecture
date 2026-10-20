@@ -4,19 +4,22 @@ This document defines anti-drift controls for Security cross-cutting implementat
 
 ## 1. Top Drift Patterns
 
-- Secret-bearing values appear in normal Memory content or tracked configuration.
+- Secret-bearing values appear in Memory or in any file git tracks.
 - Raw provider/runtime exception text leaks into client-visible or stream-visible error surfaces.
 - Mid-stream taxonomy collapses to one generic error code.
 - Sensitive actions execute without structured audit records.
-- Approval remains a prompt suggestion instead of coded interception.
-- Approval exists only in local UI flow and not in contract-visible events/routes.
-- Protected paths are reachable without Auth boundary enforcement.
+- An approval rule remains a prompt suggestion instead of coded interception.
+- Approval on every write shipped as an architecture default instead of a product or owner choice.
+- "Environment safety" or product rules override the owner on the owner's own hardware.
+- Untrusted tools run unisolated by default.
+- Where a product adds approvals, they exist only in local UI flow and not in contract-visible events/routes.
+- Protected paths are reachable without the Gateway calling Auth, or tool calls run without the Agent Loop asking Auth.
 - Request payloads become hidden runtime/provider/tool configuration channels.
 - Tool boundaries rely only on Auth policy and lack independent runtime isolation scope.
 - Auth export includes credentials, hashes, or opaque secret blobs.
 - Security controls are deferred as post-MVP hardening.
 - Correlation IDs fail to propagate to tool/audit layers.
-- Memory export/version-history safety net is disabled or warning-only.
+- Memory export, version history or restore safety net is disabled or warning-only.
 - Component or adapter swaps regress previously enforced security behavior.
 
 ## 2. Prohibited Implementation Shortcuts
@@ -24,7 +27,7 @@ This document defines anti-drift controls for Security cross-cutting implementat
 - Persisting `api_key`, `token`, `password`, or equivalent in tracked files.
 - Forwarding `Error.message`, stack traces, filesystem paths, or provider internals in exposed errors.
 - Mapping all mid-stream failures to one catch-all error code.
-- Running mutation tools without approval gate interception where required.
+- Running a tool call an approval rule covers without coded interception.
 - Resolving approvals only in local client logic with no contract event trail.
 - Implementing permissive local mode as auth bypass.
 - Accepting hidden metadata fields that modify runtime/provider/tool settings.
@@ -39,23 +42,28 @@ This document defines anti-drift controls for Security cross-cutting implementat
 | SECD-CHK-002 | Exposed errors are sanitized and safe | Stream/API error payload tests | Critical |
 | SECD-CHK-003 | Mid-stream error codes remain taxonomy-valid | Stream conformance tests (`provider_error`, `tool_error`, `context_overflow`) | Critical |
 | SECD-CHK-004 | Sensitive actions emit structured audit events | Audit sink assertions for auth/tool/approval/memory actions | Critical |
-| SECD-CHK-005 | Approval enforcement is coded interception | Mutation tool execution tests with pending decision state | Critical |
-| SECD-CHK-006 | Approval is contract-visible | Stream + decision-route tests for `approval-request`/`approval-result` | Critical |
-| SECD-CHK-007 | Protected routes fail closed without Auth | Unauthorized request tests | Critical |
+| SECD-CHK-005 | Approval rules, where set, are enforced by coded interception | Tool execution tests with an approval rule and pending decision state | Critical |
+| SECD-CHK-006 | Approval is contract-visible where a product adds approvals | Stream + decision-route tests for `approval-request`/`approval-result` | Critical |
+| SECD-CHK-007 | Gateway calls Auth per request and Agent Loop asks Auth per tool call; both fail closed | Unauthorized request and refused tool-call tests | Critical |
 | SECD-CHK-008 | Request payloads cannot reconfigure runtime/provider/tools | Negative metadata payload tests | Critical |
 | SECD-CHK-009 | Tool boundaries enforce scope independent of Auth-only checks | Runtime boundary and isolation tests | Critical |
 | SECD-CHK-010 | Auth export excludes secret-bearing fields | Export schema + forbidden-field checks | Critical |
 | SECD-CHK-011 | Security controls active at startup readiness | Startup gate tests (auth/audit/safe-errors/approval) | Critical |
 | SECD-CHK-012 | Correlation IDs propagate across boundaries | End-to-end trace tests Gateway->Auth->Agent Loop->tools->audit | High |
-| SECD-CHK-013 | Export/history safety-net guarantees remain active | Memory export/history readiness tests | Critical |
+| SECD-CHK-013 | Export, history and restore safety net remains active | Memory export/history/restore readiness tests | Critical |
 | SECD-CHK-014 | Security properties survive swap scenarios | Adapter/provider/component swap regression suite | High |
+| SECD-CHK-015 | Owner can do everything by default with no approval step | Fresh-install write tests | Critical |
+| SECD-CHK-016 | No rule overrides the owner on the owner's hardware | Merge-order and override tests | Critical |
+| SECD-CHK-017 | Untrusted tools isolated by default | Isolation tests for tools not marked trusted | Critical |
 
 ## 4. Contract-Break Indicators
 
 - Any response contains raw credentials, tokens, stack traces, or internal file paths.
 - Any mid-stream error code is outside approved taxonomy.
-- Approval-required write executes before decision.
+- A call an approval rule covers executes before decision.
 - Approval decision can be made without approval authority.
+- An approval prompt appears for the owner with no approval rule set.
+- A tool call runs without an Auth decision.
 - Unauthorized request reaches Agent Loop execution.
 - Hidden request fields alter adapter/provider/tool/runtime behavior.
 - Tool runtime accesses out-of-scope resources despite auth policy.
@@ -67,7 +75,8 @@ This document defines anti-drift controls for Security cross-cutting implementat
 - Any Critical check in section 3 fails.
 - Any `SEC-MUST-*` conformance vector fails.
 - Secret leakage is detected in inspectable/contract-visible surfaces.
-- Approval enforcement or approval visibility is broken.
+- Approval enforcement or approval visibility is broken where approval rules exist.
+- A rule overrides the owner on the owner's own hardware.
 - Auth bypass exists on any protected path.
 - Mid-stream taxonomy or safe-error requirements are violated.
 - Unresolved High-risk conflict remains in the Security conflict register.
@@ -79,13 +88,16 @@ This document defines anti-drift controls for Security cross-cutting implementat
 - [ ] Pre-stream and mid-stream errors are sanitized and safe.
 - [ ] Mid-stream errors use only approved taxonomy.
 - [ ] Sensitive actions emit structured audit records.
-- [ ] Approval enforcement is coded and active.
-- [ ] Approval interactions are contract-visible.
-- [ ] Protected routes enforce Auth and fail closed.
+- [ ] Approval rules, where set, are enforced in code.
+- [ ] Where a product adds approvals, interactions are contract-visible.
+- [ ] The Gateway calls Auth on every request and the Agent Loop asks Auth before each tool call; both fail closed.
+- [ ] The owner can do everything by default, with no approval step.
+- [ ] No rule overrides the owner on the owner's own hardware.
+- [ ] Untrusted tools run isolated by default.
 - [ ] Request payloads do not reconfigure runtime/provider/tools.
 - [ ] Tool scope/isolation boundaries are independent of Auth-only enforcement.
 - [ ] Auth export excludes credentials/secrets.
 - [ ] Day-one startup enables required security controls.
 - [ ] Correlation-aware traceability is end-to-end.
-- [ ] Export/history safety net remains available.
+- [ ] Export, history and restore safety net remains available.
 - [ ] Security controls survive swap/regression scenarios.

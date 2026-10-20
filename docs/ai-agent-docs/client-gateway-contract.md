@@ -10,8 +10,10 @@ Define the external request, response, conversation, and approval interaction sh
 
 - Client sends HTTP requests to the Gateway API.
 - Gateway owns conversation lifecycle.
-- Gateway normalizes client input into the internal `messages + metadata` handoff.
+- Gateway calls Auth on every request, including conversation list and history reads.
+- Gateway normalizes client input into the internal `messages + model + metadata` handoff, adding the owner's current model choice.
 - Streaming responses use SSE.
+- One message shape across all three contracts: content is a list of parts, and tool calls and tool results are ordinary message parts.
 
 ## Message Request
 
@@ -41,7 +43,8 @@ Define the external request, response, conversation, and approval interaction sh
 - Client request shape stays simple and client-facing.
 - Gateway, not the client, builds the internal `messages` array.
 - Request metadata must not become a hidden configuration channel.
-- Auth must already be on the path for protected requests.
+- The Gateway calls Auth on every request before anything reaches the Agent Loop or conversation data.
+- Message content is a list of parts (text first, room for images and files). A plain string is the shorter form of a single text part.
 
 ## Streaming Response
 
@@ -58,8 +61,8 @@ Define the external request, response, conversation, and approval interaction sh
 - `text-delta`
 - `tool-call`
 - `tool-result`
-- `approval-request`
-- `approval-result`
+- `approval-request` (only in products that add approval prompts)
+- `approval-result` (only in products that add approval prompts)
 - `done`
 - `error`
 
@@ -75,6 +78,8 @@ Define the external request, response, conversation, and approval interaction sh
 ```
 
 ## Approval Events
+
+Approval prompts are a product choice; the architecture default is that the owner can do everything. These events apply only where a product adds approvals, and the approval rules themselves live in Auth.
 
 ### approval-request
 
@@ -105,8 +110,8 @@ Standalone files:
 - `docs/ai-agent-docs/examples/client-message-request.json`
 - `docs/ai-agent-docs/examples/conversation-list-response.json`
 - `docs/ai-agent-docs/examples/conversation-detail-response.json`
-- `docs/ai-agent-docs/examples/approval-request-event.json`
-- `docs/ai-agent-docs/examples/approval-result-event.json`
+- `docs/ai-agent-docs/examples/approval-request-event.json` (product with approvals)
+- `docs/ai-agent-docs/examples/approval-result-event.json` (product with approvals)
 
 ```http
 POST /message
@@ -219,18 +224,22 @@ Why this is drift:
 }
 ```
 
+Conversation history includes the tool calls and tool results inside messages, not only user and assistant text, so a resumed conversation replays faithfully.
+
 ## Required Behaviors
 
 - Gateway exposes a stable client contract distinct from the internal Gateway ↔ Agent Loop contract.
 - Conversation responses use canonical envelopes rather than raw storage shape.
 - Client-facing payloads remain safe and presentation-ready.
-- Approval and completion semantics remain visible in the contract.
+- Conversation history keeps tool calls, tool results and every content part.
+- Completion semantics, and approval semantics where a product adds approvals, remain visible in the contract.
 
 ## Forbidden Behaviors
 
 - Letting the client construct the internal `messages + metadata` contract directly.
 - Returning raw storage records as the external conversation API.
-- Hiding approval flow in terminal-only control logic.
+- Hiding approval flow in terminal-only control logic (where a product adds approvals).
+- Dropping tool calls or tool results from stored history.
 - Using client metadata as runtime/provider configuration.
 
 ## Audit Questions
@@ -238,14 +247,16 @@ Why this is drift:
 - Does the client send the canonical request shape?
 - Does Gateway normalize into the internal contract itself?
 - Are conversation endpoints using canonical envelopes?
-- Are `approval-request`, `approval-result`, `done`, and `error` payloads consistent and safe?
+- Are `done` and `error` payloads (and `approval-request` / `approval-result`, where used) consistent and safe?
+- Does conversation detail return tool calls and tool results?
 - Is `X-Conversation-ID` present once the conversation is resolved?
 
 ## Common Drift Patterns
 
 - Client fabricates the internal request contract.
 - Raw storage shape leaks through conversation endpoints.
-- Approval exists only in local UI flow.
+- Approval exists only in local UI flow (in products that add approvals).
+- Approval treated as an architecture requirement instead of a product choice.
 - `done` payload omits identifiers needed for state reconciliation.
 - Request metadata becomes a side channel for config.
 
@@ -255,3 +266,11 @@ Why this is drift:
 - `docs/in-depth-overview/gateway-agent-loop-contract.md`
 - `docs/in-depth-overview/communication-principles.md`
 - `spec/mvp-build-primer.md`
+
+## Contract Alignment
+
+This primer follows the specs in `docs/in-depth-overview/`, which are ahead of the contract files here:
+
+- `specs/openapi/gateway-api.yaml` says requests are authenticated before they reach the Gateway; the specs have the Gateway call Auth on every request.
+- `specs/openapi/gateway-api.yaml` stores only user and assistant messages, so tool calls and tool results are not yet part of resumable history.
+- `specs/openapi/gateway-api.yaml` and `specs/schemas/message.json` define message content as a string, not a list of parts.

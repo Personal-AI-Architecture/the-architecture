@@ -34,8 +34,10 @@ Provide local, inspectable, portable storage and access primitives without depen
 - Treat conversations and structured/queryable owner data as part of Memory rather than side storage outside the Memory contract.
 - Expose the required Memory surface through tools even when multiple storage mechanisms sit behind it.
 - Preserve owner data across component swaps.
-- Support export in open formats, including the required Memory-owned data surface such as conversations and version history.
-- Keep secrets out of normal Memory content where forbidden.
+- Support export in open formats, including the required Memory-owned data surface such as conversations (with tool calls, tool results and every content part) and version history.
+- Keep version history and restore: record what changed, not only that something changed, and let the owner make an earlier state current again. How it is built is up to the implementation (Git is one option).
+- Report a failed or conflicting write to the caller; never report it as saved and never resolve it silently.
+- Keep secrets out of Memory entirely.
 
 ## Core Operations
 
@@ -46,13 +48,16 @@ Provide local, inspectable, portable storage and access primitives without depen
 - `search`
 - `list`
 - `history`
+- `restore`
+
+Operation names are implementation choices; the capabilities are required.
 
 ## Storage Scope
 
 - Files are part of Memory.
 - Database-backed structured/queryable data is part of Memory.
-- Version history is part of Memory.
-- Storage mechanisms may vary behind tools without changing the Memory contract.
+- Version history is part of Memory and is required.
+- Storage mechanisms (for example files, SQLite, Git) may vary behind tools without changing the Memory contract. None of them is required by name.
 
 ## Forbidden Behaviors
 
@@ -73,7 +78,7 @@ Provide local, inspectable, portable storage and access primitives without depen
 
 - Persistent conversation storage in Memory.
 - Export surface for owner data.
-- Version-history readiness as a real startup guarantee.
+- Version history and restore, ready as a real startup guarantee.
 - Inspectable on-disk owner data without the full system running.
 
 These are MVP requirements, not V1 enhancements.
@@ -90,7 +95,8 @@ These are MVP requirements, not V1 enhancements.
 
 - Incomplete export/import.
 - Database-backed Memory hidden behind non-Memory surfaces.
-- Partial history/version support.
+- Partial history/version support, or history without restore.
+- Silent last-write-wins on concurrent writes.
 - Component-specific bootstrap artifacts making Memory too opinionated.
 - Conversation or structured data living outside the intended Memory contract.
 - Direct filesystem or database access from other components.

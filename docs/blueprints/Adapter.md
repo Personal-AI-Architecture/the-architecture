@@ -480,20 +480,21 @@ Adapters are translation boundaries that keep internal contracts stable while ex
 1. Accept client-facing request shape.
 2. Normalize inbound payload to Gateway-owned internal contract.
 3. Map outbound stream/events and response envelopes back to client-facing shape.
-4. Preserve contract-visible approval semantics and stable identifiers.
+4. Preserve stable identifiers and, where a product adds approvals, contract-visible approval semantics.
 
 ### 5.3 Model-Side Translation Behavior
-1. Accept Agent Loop generic completion request envelope.
-2. Translate to provider-native request payload.
+1. Accept Agent Loop generic completion request envelope, including the model for this call.
+2. Translate to provider-native request payload, naming that model and keeping every content part, tool call and tool result.
+   - If the model lacks a capability the request needs, report it; do not drop content or switch models silently.
 3. Parse provider response.
 4. Normalize response to internal `assistantText/toolCalls/finishReason`.
 5. Map provider failures to safe classified errors.
 
 ### 5.4 Swap Behavior
 - Same provider, different model:
-  - preference update only.
+  - preference update only; the next message uses the new model, with no restart.
 - Different provider:
-  - runtime adapter key and adapter config changes.
+  - runtime adapter key and adapter config changes; a restart is allowed.
 - Different external client standard:
   - gateway adapter translation replacement while preserving Gateway internal contract.
 
@@ -516,7 +517,7 @@ Adapters are translation boundaries that keep internal contracts stable while ex
 ### External Dependencies
 - External client protocol standards.
 - External model provider protocol standards.
-- Secret reference sources (environment variables or equivalent secure source).
+- Secret reference sources outside Memory and outside anything git tracks: environment variables, an untracked config file, or a secret store.
 
 ### Internal Interactions
 - Gateway API contract and Gateway component for client-side translation.

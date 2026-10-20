@@ -18,7 +18,8 @@ Define default network posture, exposure expectations, hardware assumptions, and
 - Component logic.
 - Identity and permission semantics.
 - Product-specific ops tooling.
-- Managed hosting policy details.
+- Hosting policy (outside the architecture).
+- Packaging choice: containers are one supported option, not the default.
 
 ## Required Behaviors
 
@@ -28,6 +29,7 @@ Define default network posture, exposure expectations, hardware assumptions, and
 - The system runs on modern consumer hardware.
 - All components deploy together as a single unit by default.
 - The default network posture is localhost-only.
+- The system runs with no licence activation.
 
 ## Forbidden Behaviors
 
@@ -35,12 +37,14 @@ Define default network posture, exposure expectations, hardware assumptions, and
 - Making remote exposure the hidden default.
 - Making local operation impossible.
 - Treating deployment choices as component-boundary changes.
+- Requiring a container runtime as an architecture rule.
 
 ## Lifecycle Rules
 
 - Deployment changes should not rewrite component ownership.
 - Updates must not risk owner data.
 - The owner must be able to return to a prior working state if an update breaks the system.
+- Owner changes survive updates; where an update conflicts with an owner change, the owner is told.
 
 ## Audit Questions
 

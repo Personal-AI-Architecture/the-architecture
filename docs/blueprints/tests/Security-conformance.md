@@ -4,20 +4,23 @@ This file defines language-agnostic pass/fail vectors for cross-cutting Security
 
 ## Requirement Set (MUST)
 
-- `SEC-MUST-001`: Secrets must not be stored in normal inspectable Memory files or tracked configuration.
+- `SEC-MUST-001`: Secrets must not be stored in Memory or in any file git tracks.
 - `SEC-MUST-002`: Exposed error/event surfaces must use safe sanitized messages.
 - `SEC-MUST-003`: Mid-stream error taxonomy must remain classified (`provider_error`, `tool_error`, `context_overflow`).
 - `SEC-MUST-004`: Sensitive actions must be captured in structured audit logs.
-- `SEC-MUST-005`: Approval enforcement must be coded control, not prompt-only guidance.
-- `SEC-MUST-006`: Approval interaction must remain contract-visible where required.
-- `SEC-MUST-007`: Protected request paths must enforce Auth and fail closed.
+- `SEC-MUST-005`: Where approval rules exist, enforcement must be coded control, not prompt-only guidance.
+- `SEC-MUST-006`: Where a product adds approvals, approval interaction must remain contract-visible.
+- `SEC-MUST-007`: The Gateway calls Auth on every protected request and the Agent Loop asks Auth before each tool call; both fail closed.
 - `SEC-MUST-008`: Request payloads must not become hidden runtime/provider/tool reconfiguration channels.
 - `SEC-MUST-009`: Tool scope/isolation boundaries must enforce limits independent of Auth policy alone.
 - `SEC-MUST-010`: Product-owned auth state export must exclude credentials/secrets.
 - `SEC-MUST-011`: Security controls must be present from day one of MVP operation.
 - `SEC-MUST-012`: Correlation-aware traceability must exist for security-relevant operations.
-- `SEC-MUST-013`: Memory export and version-history safety net guarantees must remain available.
+- `SEC-MUST-013`: Memory export, version history and restore must remain available as the safety net.
 - `SEC-MUST-014`: Security properties must survive component/adapter swaps without boundary erosion.
+- `SEC-MUST-015`: The architecture default lets the owner do everything with no approval step.
+- `SEC-MUST-016`: No product or environment rule overrides the owner on the owner's own hardware.
+- `SEC-MUST-017`: Tools the owner has not said they trust run isolated by default, independent of Auth.
 
 ## Test Vectors
 
@@ -31,12 +34,12 @@ This file defines language-agnostic pass/fail vectors for cross-cutting Security
 | SEC-T003N | SEC-MUST-003 | Negative | Collapse all failures to one generic code | Conformance fails | Collapsed taxonomy accepted | Error collapse drift |
 | SEC-T004P | SEC-MUST-004 | Positive | Execute auth decision + tool read/write + startup phases | Structured audit events emitted | Missing audit entries | Audit coverage drift |
 | SEC-T004N | SEC-MUST-004 | Negative | Disable audit sink for sensitive actions | Conformance fails | Missing audit accepted | Silent action drift |
-| SEC-T005P | SEC-MUST-005 | Positive | Attempt write action requiring approval | Runtime blocks write until coded approval decision | Write executes without approval control | Prompt-only approval drift |
+| SEC-T005P | SEC-MUST-005 | Positive | Set an approval rule in Auth covering a write, then attempt that write | Runtime blocks write until coded approval decision | Write executes without approval control | Prompt-only approval drift |
 | SEC-T005N | SEC-MUST-005 | Negative | Remove approval interception logic, keep prompt text only | Conformance fails | Prompt-only behavior accepted | Enforcement bypass |
-| SEC-T006P | SEC-MUST-006 | Positive | Approval-required interaction through Gateway/Agent Loop contracts | `approval-request` + `approval-result` are contract-visible | Approval hidden in local UI path only | Contract invisibility |
+| SEC-T006P | SEC-MUST-006 | Positive | Where a product adds approvals, approval-required interaction through Gateway/Agent Loop contracts | `approval-request` + `approval-result` are contract-visible | Approval hidden in local UI path only | Contract invisibility |
 | SEC-T006N | SEC-MUST-006 | Negative | Handle approval only inside CLI/local state | Conformance fails | Local-only approval accepted | Approval drift |
-| SEC-T007P | SEC-MUST-007 | Positive | Call protected routes with valid auth context | Requests succeed under valid auth | Valid auth blocked unexpectedly | Auth regression |
-| SEC-T007N | SEC-MUST-007 | Negative | Call protected routes without auth | 401/deny and no downstream execution | Unauthorized access allowed | Auth bypass |
+| SEC-T007P | SEC-MUST-007 | Positive | Call protected routes with valid auth context, then make a permitted tool call | Gateway called Auth for the request; Agent Loop asked Auth before the tool call; both succeed | Valid auth blocked unexpectedly | Auth regression |
+| SEC-T007N | SEC-MUST-007 | Negative | Call protected routes without auth; or make a tool call Auth refuses, or with Auth unavailable | 401/deny and no downstream execution; refused or unchecked tool call does not run | Unauthorized access allowed | Auth bypass |
 | SEC-T008P | SEC-MUST-008 | Positive | Send bounded payload without config leakage | Request accepted | Legitimate request rejected due to false positives | Over-restrictive contract |
 | SEC-T008N | SEC-MUST-008 | Negative | Send provider/model/tool/runtime metadata fields | Safe reject | Reconfiguration accepted | Hidden config channel |
 | SEC-T009P | SEC-MUST-009 | Positive | Evaluate tool execution against configured scope/isolation profile | Out-of-scope access blocked by runtime boundary | Scope bypass possible when auth misconfigured | Boundary independence drift |
@@ -47,15 +50,21 @@ This file defines language-agnostic pass/fail vectors for cross-cutting Security
 | SEC-T011N | SEC-MUST-011 | Negative | Start system with approval/audit/safe-error controls disabled as post-MVP TODOs | Conformance fails | Deferred controls accepted | Hardening deferral drift |
 | SEC-T012P | SEC-MUST-012 | Positive | Trace one request across gateway/auth/agent loop/tool/audit | Correlation IDs present and linked in events/logs | Untraceable sensitive operations | Traceability drift |
 | SEC-T012N | SEC-MUST-012 | Negative | Strip correlation propagation before tool/audit layers | Conformance fails | Correlation loss accepted | Forensics gap drift |
-| SEC-T013P | SEC-MUST-013 | Positive | Exercise memory export/history under normal operation | Export/history available and complete | Export/history unavailable | Recovery-net drift |
-| SEC-T013N | SEC-MUST-013 | Negative | Disable version-history readiness or omit export path | Conformance fails | Missing recovery net accepted | Resilience drift |
+| SEC-T013P | SEC-MUST-013 | Positive | Exercise memory export, history and restore under normal operation | Export, history and restore available and complete | Export, history or restore unavailable | Recovery-net drift |
+| SEC-T013N | SEC-MUST-013 | Negative | Disable version-history readiness, omit restore, or omit export path | Conformance fails | Missing recovery net accepted | Resilience drift |
 | SEC-T014P | SEC-MUST-014 | Positive | Swap provider/adapter/component with contract compatibility | Security requirements remain satisfied after swap | Security control regression after swap | Swap regression drift |
 | SEC-T014N | SEC-MUST-014 | Negative | Swap introduces raw errors, auth bypass, or secret leakage | Conformance fails | Security regression accepted | Boundary erosion |
+| SEC-T015P | SEC-MUST-015 | Positive | Fresh install; owner writes, edits and deletes in Memory | All succeed with no approval step; version history records each change | Approval prompt appears with no rule set | Approval-default drift |
+| SEC-T015N | SEC-MUST-015 | Negative | Ship confirm-every-write as a built-in architecture default | Conformance fails | Built-in approval default accepted | Approval-default drift |
+| SEC-T016P | SEC-MUST-016 | Positive | Owner changes a product security default on their own hardware | Owner's choice takes effect | Product rule blocks the owner | Owner-override drift |
+| SEC-T016N | SEC-MUST-016 | Negative | Add an "environment safety constraint" that overrides the owner locally | Conformance fails | Rule above the owner accepted | Owner-override drift |
+| SEC-T017P | SEC-MUST-017 | Positive | Install a tool the owner has not marked trusted; it tries to read outside its scope | Tool runs isolated; out-of-scope access blocked even with Auth misconfigured | Untrusted tool runs in-process with full access | Isolation-default drift |
+| SEC-T017N | SEC-MUST-017 | Negative | Run untrusted tools in-process by default | Conformance fails | Unisolated default accepted | Isolation-default drift |
 
 ## Coverage Summary
 
-- MUST requirements: 14
-- Positive tests: 14
-- Negative tests: 14
-- Total vectors: 28
-- Critical drift categories covered: secret leakage, unsafe output surfaces, taxonomy collapse, audit gaps, approval bypass, auth bypass, config side-channel, isolation collapse, export leakage, day-one control deferral, traceability gaps, recovery-net erosion, swap-induced security regressions.
+- MUST requirements: 17
+- Positive tests: 17
+- Negative tests: 17
+- Total vectors: 34
+- Critical drift categories covered: secret leakage, unsafe output surfaces, taxonomy collapse, audit gaps, approval bypass, auth bypass, config side-channel, isolation collapse, export leakage, day-one control deferral, traceability gaps, recovery-net erosion, swap-induced security regressions, approval-default drift, rules above the owner, unisolated untrusted tools.

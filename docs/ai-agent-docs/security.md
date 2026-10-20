@@ -25,29 +25,34 @@ Define the non-negotiable security properties that apply across components, espe
 - Tool supply chain.
 - Gateway API abuse.
 - Model provider data flow.
-- Hosting provider access.
 - Model misbehavior.
+
+Hosting provider access is a hosting concern, outside the architecture.
 
 ## Required Behaviors
 
-- Secrets must not leak into forbidden storage locations.
+- Secrets live outside Memory, somewhere git never tracks: environment variables, an untracked config file, or a secret store.
 - Audit records must exist where the architecture requires them.
 - Error and output surfaces must be safe for display or exposure.
 - Trust boundaries must remain explicit rather than accidental.
-- Scope enforcement and approval controls must exist as real mechanisms, not just prompt instructions.
+- The Gateway calls Auth on every request and the Agent Loop asks Auth before each tool call.
+- Scope enforcement, and any approval rules the owner sets, must exist as real mechanisms, not just prompt instructions.
+- The default policy is that the owner can do everything; approval prompts are a product choice. Version history with restore is the safety net that makes this default safe.
+- On the owner's own hardware, the owner has the last word: product defaults, including safety-minded ones, are changeable by the owner.
 
 ## Enforcement Mechanisms
 
-- Auth policy
-- Tool scope and isolation
-- Approval gates
+- Auth policy (per request and per tool call)
+- Tool scope and isolation (untrusted tools isolated by default; the owner decides what they trust)
+- Approval gates (optional; where the owner or product turns them on)
 - Audit logging
 - Content separation
-- Version history as a safety net
+- Version history and restore as the safety net (required)
 
 ## Forbidden Behaviors
 
-- Storing credentials or tokens in normal Memory files where prohibited.
+- Storing credentials or tokens in Memory or any git-tracked file.
+- A product rule that overrides the owner on the owner's own hardware.
 - Returning raw unsafe internal error text through exposed contracts.
 - Omitting required audit capture for critical actions.
 - Relying on accidental safety instead of explicit enforcement.
@@ -62,7 +67,8 @@ Define the non-negotiable security properties that apply across components, espe
 
 - Structured audit logging.
 - Safe client-visible error handling.
-- Coded approval enforcement for sensitive actions.
+- Coded enforcement of any approval rules the owner sets (none are required by default).
+- Version history with restore for Memory.
 - Tool isolation and scope boundaries.
 
 These are MVP requirements, not post-MVP hardening.
@@ -74,6 +80,8 @@ These are MVP requirements, not post-MVP hardening.
 - Are client-visible or internal stream errors normalized and safe?
 - Are trust boundaries explicit in runtime behavior?
 - Does any implementation rely on convention instead of enforced security constraints?
+- Is every tool call checked with Auth before it runs?
+- Can the owner see what changed and restore an earlier state?
 
 ## Common Drift Patterns
 
@@ -81,6 +89,8 @@ These are MVP requirements, not post-MVP hardening.
 - Missing or partial structured audit logging.
 - Raw provider or runtime exception text forwarded through contracts.
 - Security rules documented but not enforced at the component boundary.
+- Confirm-every-write approval treated as an architecture requirement.
+- "Safety constraints" that the owner can't change on their own hardware.
 
 ## Review Links
 

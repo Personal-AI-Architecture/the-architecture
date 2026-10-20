@@ -222,6 +222,8 @@ Models define the external-intelligence boundary of the architecture. The system
   - none
 - Forbidden fields:
   - `request_time_model_override`
+- Notes:
+  - resolution runs on every message, not once at startup: the Gateway reads the owner's current choice and passes it to the Agent Loop with the request.
 - Error shape:
   - pre-stream/startup: `model_policy_error` with `code=invalid_binding_policy`
   - mid-stream: unresolved binding maps to `adapter_misconfigured`
@@ -288,6 +290,7 @@ Models define the external-intelligence boundary of the architecture. The system
 }
 ```
 - Why invalid: allows hidden request-time reconfiguration.
+- Scope: this guard applies to client request metadata. The owner's model choice still reaches the Agent Loop on every request, read by the Gateway from preferences; that is the one per-request value the internal contract carries, not a client override.
 
 ### 4.7 `model_swap_rules`
 - Required fields:
@@ -511,25 +514,29 @@ Models define the external-intelligence boundary of the architecture. The system
 1. Load runtime config and resolve `provider_adapter`.
 2. Load adapter config for selected adapter.
 3. Discover tools and mount Memory surfaces.
-4. Load preferences and resolve active model binding.
+4. Load preferences (the model choice itself is read again on every message).
 5. Instantiate adapter through adapter factory.
 6. Reject unsupported adapter names with explicit startup failure.
 7. Declare ready only after all required phases succeed.
 
 ### 5.2 Model Invocation Behavior
-1. Agent Loop builds generic completion request (`messages`, `tools`, metadata).
+1. Agent Loop builds generic completion request (`messages`, `tools`, metadata), naming the model that came with this request and putting its own bootstrap prompt first.
 2. Request guard enforces forbidden request-field policy.
 3. Adapter translates request to provider-native shape.
 4. Provider response is parsed and normalized.
 5. Normalized result is returned to Agent Loop for loop continuation.
+6. If the request needs something the chosen model cannot do (images, tool calls, context size), that is reported to the Agent Loop and the owner, not faked: no silently dropped image, no pretend tool call, no quiet model substitution.
 
 ### 5.3 Swap Behavior
 - Same-provider model swap:
   - owner preference update changes selected model.
+  - the next message uses the new model, with no restart.
   - no unrelated component code changes are required.
+  - if the chosen model is not available through the loaded adapter, the owner is told rather than silently switched.
 - Provider swap:
   - change `provider_adapter` and adapter config.
   - provide corresponding secret reference if needed.
+  - a restart is allowed.
   - no unrelated component rewrite should be required.
 
 ### 5.4 Error and Recovery Behavior
@@ -548,7 +555,7 @@ Models define the external-intelligence boundary of the architecture. The system
   - adapter/runtime config files in deployment context.
 - Ephemeral state:
   - per-request completion payloads and parsed provider responses.
-  - transient model binding resolution during startup/request handling.
+  - transient model binding resolution per message.
 
 ### 5.6 Edge Cases
 - Preference file missing or default legacy model value present.
@@ -651,7 +658,9 @@ Models define the external-intelligence boundary of the architecture. The system
 
 ### Anti-Patterns to Avoid
 - Hardcoding provider selection in Agent Loop or Gateway code paths.
-- Accepting per-request provider/model/base URL overrides.
+- Accepting provider/model/base URL overrides from client request metadata.
+- Resolving the model once at startup, so a model change needs a restart.
+- Silently dropping content or substituting another model when the chosen model lacks a capability.
 - Merging runtime, adapter, and preference configuration into a single mutable object.
 - Silent fallback to default adapter on unsupported adapter key.
 - Treating primary model invocation as an internal tool.
@@ -665,7 +674,8 @@ Models define the external-intelligence boundary of the architecture. The system
   - models are external boundary; provider details remain in adapters.
   - model and provider swap rules are boundary-defining behavior.
 - `docs/ai-agent-docs/compliance-matrix.md`:
-  - `MO-01`, `MO-02`, `MO-03` captured as MUST-level invariants.
+  - `MO-01`, `MO-02`, `MO-03`, `MO-04` captured as MUST-level invariants.
+  - `E-05` captured: the model travels with each request.
   - `C-01`, `C-02`, `C-03` captured for configuration/secret integrity.
   - `E-03` captured for adapter-isolation ownership.
 - `docs/ai-agent-docs/review-checklists/configuration-review.md`:
@@ -745,13 +755,15 @@ Models define the external-intelligence boundary of the architecture. The system
 - `MOD-MUST-010`: Unsupported or invalid adapter selection MUST fail clearly; silent adapter fallback is forbidden.
 - `MOD-MUST-011`: Local/offline model endpoint path MUST remain a supported deployment option.
 - `MOD-MUST-012`: Model failure outputs MUST use safe classified taxonomy.
-- `MOD-MUST-013`: Gateway MUST NOT own model/provider selection as an architectural responsibility.
+- `MOD-MUST-013`: Gateway MUST NOT own model/provider selection as an architectural responsibility; it reads the owner's current choice and passes it on.
 - `MOD-MUST-014`: The architecture MUST continue to expose only two external APIs: Gateway API and Model API.
+- `MOD-MUST-015`: The model MUST travel with each request, so a changed preference applies to the next message with no restart.
+- `MOD-MUST-016`: Capabilities the chosen model lacks MUST be reported, not faked or silently worked around.
 
 ### SHOULD
 - `MOD-SHOULD-001`: Implementations SHOULD run swap-path CI checks proving no unrelated component edits are needed.
 - `MOD-SHOULD-002`: Adapter contracts SHOULD remain thin and deterministic.
-- `MOD-SHOULD-003`: Model binding resolution behavior SHOULD be explicit and auditable in startup telemetry.
+- `MOD-SHOULD-003`: Model binding resolution behavior SHOULD be explicit and auditable in telemetry for each request.
 
 ### MAY
 - `MOD-MAY-001`: Implementations MAY support multiple adapters in one deployment.
@@ -760,7 +772,7 @@ Models define the external-intelligence boundary of the architecture. The system
 ## 14. Acceptance Gates (Pass/Fail)
 
 - `MOD-GATE-01 Contract Gate`: Pass if all policy interfaces validate against `contracts/Models.schema.json`; fail otherwise.
-- `MOD-GATE-02 Conformance Gate`: Pass if all vectors in `tests/Models-conformance.md` pass (14 positive + 14 negative); fail on any `MOD-MUST-*` failure.
+- `MOD-GATE-02 Conformance Gate`: Pass if all vectors in `tests/Models-conformance.md` pass (16 positive + 16 negative); fail on any `MOD-MUST-*` failure.
 - `MOD-GATE-03 Drift Gate`: Pass if all Critical checks in `drift/Models-drift-guard.md` pass; fail on any Critical check failure.
 - `MOD-GATE-04 Swap Gate`: Pass if same-provider and provider swap tests meet allowed-change-unit constraints.
 - `MOD-GATE-05 Boundary Gate`: Pass if models remain external and no new API/component boundary is introduced.
@@ -783,6 +795,8 @@ Models define the external-intelligence boundary of the architecture. The system
 | MOD-MUST-012 | Human `security-spec.md`, `gateway-agent-loop-contract.md`; AI matrix `S-01`, `GC-05` | `MOD-T012P`, `MOD-T012N` |
 | MOD-MUST-013 | Human `gateway-spec.md`, `configuration-spec.md`; AI matrix `G-02` | `MOD-T013P`, `MOD-T013N` |
 | MOD-MUST-014 | Human `foundation-spec.md`; AI matrix `F-02`, `CU-02` | `MOD-T014P`, `MOD-T014N` |
+| MOD-MUST-015 | Human `models-spec.md`, `configuration-spec.md`, decision `D175`; AI matrix `MO-02`, `E-05` | `MOD-T015P`, `MOD-T015N` |
+| MOD-MUST-016 | Human `models-spec.md` capabilities a model lacks; AI matrix `MO-04` | `MOD-T016P`, `MOD-T016N` |
 
 ## 16. Residual Risks & Open Decisions
 
@@ -833,10 +847,14 @@ Models define the external-intelligence boundary of the architecture. The system
 ## Self-Validation Report
 
 - Coverage of required sections: 16/16 (100%)
-- Normative requirements count: 19 total (`14 MUST`, `3 SHOULD`, `2 MAY`)
+- Normative requirements count: 21 total (`16 MUST`, `3 SHOULD`, `2 MAY`)
 - Interfaces with schemas: 10 (`model_boundary_profile`, `model_access_policy`, `model_configuration_layers`, `model_binding_policy`, `model_request_guard`, `model_swap_rules`, `provider_swap_rules`, `adapter_contract`, `model_failure_taxonomy`, `model_readiness_profile`)
-- Test vectors count: 28 total (`14 positive`, `14 negative`)
+- Test vectors count: 32 total (`16 positive`, `16 negative`)
 - Conflicts detected/resolved: 5/5 resolved
 - Unresolved ambiguity list:
   - `A-01 (Medium)`: standard cross-adapter capability manifest requirements are not yet unified across source docs.
 - Final readiness rating: Conditionally Ready
+
+## Contract alignment
+
+`contracts/Models.schema.json` has no way to report that a model lacks a capability the request needs (MOD-MUST-016), and `model_request_guard` lists `model` as a forbidden request field without separating client metadata from the internal request, which now carries the model on every call (MOD-MUST-015). Build to the behaviour described here; the schema follows in the next contract revision.

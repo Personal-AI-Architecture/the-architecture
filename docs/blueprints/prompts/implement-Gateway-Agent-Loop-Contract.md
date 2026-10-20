@@ -51,24 +51,26 @@ If conflicts appear, do not guess silently. Create `conflict_register.md` and re
 ## Required Contract Capabilities
 
 Implement these behaviors:
-- Keep one bounded internal handoff request shape (`messages + metadata`).
+- Keep one bounded internal handoff request shape (`messages` + model + `metadata`), using the single message shape shared with the Gateway API and Model API (content as a list of parts; tool calls and tool results as message parts).
 - Require `metadata.correlation_id` for every request.
 - Reject request-time provider/tool/runtime configuration leakage.
-- Ensure Auth is on the path before Agent Loop execution.
+- Ensure the Gateway calls Auth on every request before Agent Loop execution, and the Agent Loop asks Auth before each tool call.
 - Emit canonical stream events for in-progress and terminal interaction states.
 - Enforce error taxonomy (`provider_error`, `tool_error`, `context_overflow`).
 - Keep stream error messages safe and sanitized.
 - Preserve tool-call/tool-result ID continuity.
 - Emit completion with stable reconciliation IDs (`conversation_id`, `message_id`).
-- Keep approval semantics contract-visible where required.
+- Where the owner's Auth rules require approval, keep approval semantics contract-visible. The architecture default is no approval step.
 - Preserve Gateway/Agent Loop independent replaceability as long as contract holds.
 
 ## Canonical Contract Rules
 
 ### Request (`POST /engine/chat`)
 - Required:
-  - `messages[]`
+  - `messages[]` (no system message; the bootstrap prompt is Agent Loop configuration)
+  - the model to use (field name pending the next contract revision)
   - `metadata.correlation_id`
+  - a request timestamp (field name pending the next contract revision)
 - Optional:
   - `metadata.conversation_id`
   - `metadata.trigger`
@@ -76,7 +78,6 @@ Implement these behaviors:
 - Forbidden:
   - `provider`
   - `provider_adapter`
-  - `model`
   - `base_url`
   - `api_key` / `api_key_env`
   - per-request `tools` / `tool_sources`
@@ -86,8 +87,8 @@ Implement these behaviors:
   - `text-delta`
   - `tool-call`
   - `tool-result`
-  - `approval-request`
-  - `approval-result`
+  - `approval-request` (where approval rules apply)
+  - `approval-result` (where approval rules apply)
   - `done`
   - `error`
 
@@ -106,14 +107,14 @@ Use these for MVP implementation consistency:
 
 1. Event payload naming in this repo uses `text-delta.delta` and `tool-call.input`.
 2. Completion reconciliation requires `done.conversation_id` and `done.message_id`.
-3. Approval semantics must be represented through contract interaction flow (not CLI-only flow).
-4. If historical docs show narrower core event lists, preserve current contract-visible approval events for matrix alignment.
+3. Where approval rules apply, approval semantics must be represented through contract interaction flow (not CLI-only flow).
+4. If historical docs show narrower core event lists, preserve contract-visible approval events for products that add approvals.
 
 ## Non-Negotiable Constraints
 
 - Do not expose this internal contract as a third external API.
 - Do not allow request payloads to become hidden config channels.
-- Do not bypass Auth on protected Gateway -> Agent Loop paths.
+- Do not bypass the Gateway's Auth call, or the Agent Loop's Auth check before each tool call.
 - Do not emit off-contract event names or malformed event payloads.
 - Do not collapse all mid-stream errors to one code.
 - Do not leak stack traces, filesystem paths, provider internals, or secrets in stream-visible errors.
@@ -122,19 +123,21 @@ Use these for MVP implementation consistency:
 
 Implement automated tests proving:
 
-1. Request shape remains bounded to `messages + metadata`.
+1. Request shape remains bounded to `messages` + model + `metadata`, with no system message.
 2. Missing `metadata.correlation_id` is rejected.
 3. Hidden provider/tool/runtime config fields are rejected.
-4. Auth is required before Agent Loop execution.
+4. The Gateway calls Auth before Agent Loop execution, and every tool call is checked with Auth.
 5. Stream emits canonical event types only.
 6. Error taxonomy is enforced.
 7. Error messages are sanitized.
 8. Pre-stream vs mid-stream error channels are correct.
 9. Tool-call/result ID continuity holds.
 10. `done` includes stable reconciliation IDs.
-11. Approval semantics are contract-visible where required.
+11. Approval semantics are contract-visible where approval rules apply.
 12. Internal contract is not exposed as external API.
 13. Gateway and Agent Loop remain independently swappable with contract compatibility.
+14. Tool calls and tool results travel as message parts and are replayed on resume.
+15. Every request has a timestamp and every error carries the correlation ID.
 
 ## Drift-Critical Fail Conditions (Fail Build If Any True)
 

@@ -38,7 +38,7 @@ State that belongs to the product and the owner, remains inspectable/exportable 
 
 ### startup readiness
 
-The condition where required runtime config, adapter config, tools, Memory, preferences, export surfaces, and startup guarantees are all correctly loaded before the system is considered ready.
+The condition where required runtime config, adapter config, tools, Memory, preferences, export surfaces, and startup guarantees (including version history) are all correctly loaded before the system is considered ready. The model choice is not part of startup readiness: it is read on every message.
 
 ### accepted mvp limit
 

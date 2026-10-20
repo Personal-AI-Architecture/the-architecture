@@ -58,6 +58,9 @@ Implement these behaviors:
 - Provide canonical conversation list/detail envelope shapes.
 - Support export of required owner data surfaces in open formats.
 - Provide history with change records and prior-state retrieval behavior.
+- Provide restore so the owner can make an earlier state current again.
+- Report failed or conflicting writes to the caller; never resolve them silently.
+- Save tool calls, tool results and every content part in conversations.
 - Enforce deterministic startup readiness for version-history guarantees.
 - Keep structured/queryable owner data inside Memory contract surfaces.
 - Keep secret material out of normal inspectable Memory surfaces.
@@ -75,6 +78,8 @@ Implement these behaviors:
 ### Export and history
 - `memory_export` must return archive path and include required owner data surfaces.
 - `memory_history` must expose change records and prior state behavior where applicable.
+- Restore must make an earlier state current and record itself in history. The contract has no restore operation yet; implement the behaviour and report the field names you chose.
+- How history is built is up to you (Git is one option, a database with snapshots is another).
 
 ### Security and portability
 - No direct bypass access from non-Memory components.
@@ -95,7 +100,8 @@ Use these for MVP implementation consistency:
 - Do not add outward dependency from Memory to Gateway, Agent Loop, or Auth.
 - Do not allow direct storage reach-in from non-Memory components.
 - Do not store conversations as ephemeral-only in-process state.
-- Do not omit export/history guarantees.
+- Do not omit export, history or restore.
+- Do not resolve write conflicts silently.
 - Do not allow path escape outside memory root or reserved internals access.
 - Do not write secrets into normal inspectable Memory content.
 - Do not break Memory tool contracts when changing storage backends.
@@ -118,12 +124,16 @@ Implement automated tests that prove:
 12. Secrets are absent from normal inspectable Memory surfaces.
 13. Owner data remains inspectable without full runtime.
 14. Storage backend swaps preserve external Memory contracts.
+15. Restore makes an earlier state current again and is recorded in history.
+16. Concurrent or failed writes are reported and never corrupt data.
+17. Conversations keep tool calls, tool results and every content part.
 
 ## Drift-Critical Fail Conditions (Fail Build If Any True)
 
 - Memory depends outward on Gateway/Agent Loop/Auth.
 - Non-Memory components bypass Memory boundaries for storage access.
-- Export or history guarantees are missing/partial.
+- Export, history or restore guarantees are missing/partial.
+- Conflicting writes are resolved silently.
 - Startup readiness degrades version-history guarantee to warning-only behavior.
 - Path sandbox constraints are bypassable.
 - Secrets appear in inspectable Memory surfaces.

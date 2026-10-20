@@ -9,9 +9,10 @@ Security defines the cross-cutting controls that protect secrets, enforce trust 
 - Define and enforce secret-handling constraints across configuration, auth state, memory, and runtime responses.
 - Require structured audit capture for sensitive operations and policy decisions.
 - Define safe pre-stream and mid-stream error surfaces.
-- Require coded approval enforcement for sensitive actions.
+- Require that any approval rule is enforced in code. The architecture default is that the owner can do everything, with no approval step; approvals are a product or owner choice.
 - Require scope enforcement through independent layers (Auth policy plus tool/runtime boundaries).
-- Preserve owner portability guarantees (export/history) as security controls.
+- Preserve owner portability guarantees (export, version history and restore) as security controls.
+- Keep the owner's last word on the owner's own hardware.
 
 ### System Context
 - Security is not a standalone runtime component.
@@ -39,7 +40,8 @@ Security defines the cross-cutting controls that protect secrets, enforce trust 
 - Controls must be enforced in code and runtime boundaries, not only in prompts or docs.
 - Security controls are day-one requirements for MVP operation.
 - Security controls must survive model, adapter, and component swaps.
-- Secret values are forbidden in normal inspectable owner data paths.
+- Secret values are forbidden in Memory and in anything git tracks; they live in environment variables, an untracked config file, or a secret store.
+- On the owner's own hardware the owner has the last word. Products ship defaults the owner can change; no product or "environment safety" rule overrides the owner locally. Rules the owner can't override belong to hosting, which the architecture doesn't cover.
 
 ---
 
@@ -49,8 +51,8 @@ Security defines the cross-cutting controls that protect secrets, enforce trust 
 - **Security Policy Profile**: canonical set of required security toggles and modes.
 - **Attack Surface**: prompt injection, tool supply chain, gateway abuse, model-provider data flow, hosting access, model misbehavior.
 - **Safe Error Surface**: classified, sanitized failure payloads safe for external/client display.
-- **Approval Control**: coded runtime gate for sensitive mutations.
-- **Tool Isolation Policy**: runtime boundary posture by trust level.
+- **Approval Control**: coded runtime gate for actions an approval rule covers. Approval rules are permissions and live in Auth; the architecture default has none for the owner.
+- **Tool Isolation Policy**: runtime boundary posture by trust level. The owner decides which tools they trust.
 - **Security Violation Record**: structured evidence entry for a control failure.
 
 ### Internal Concepts
@@ -59,12 +61,12 @@ Security defines the cross-cutting controls that protect secrets, enforce trust 
 - **Correlation-aware auditability**: link security-relevant actions/events via request correlation.
 
 ### External Concepts
-- **Protected request path**: request path requiring Auth before Gateway/Agent Loop work.
-- **Contract-visible approval**: approval appears in stream/API contract (`approval-request`, `approval-result`, decision route).
+- **Protected request path**: request path where the Gateway calls Auth before any Agent Loop work; the Agent Loop also asks Auth before each tool call.
+- **Contract-visible approval**: where a product adds approvals, approval appears in stream/API contract (`approval-request`, `approval-result`, decision route).
 - **Product-owned state**: inspectable/exportable owner-controlled data format.
 
 ### Terms
-- **Forbidden storage**: normal inspectable memory/preference/config locations where secrets must not be written.
+- **Forbidden storage**: Memory, preferences, and any file git tracks, where secrets must not be written.
 - **Boundary erosion**: security ownership drifting into ad hoc local logic or disappearing entirely.
 
 ---
@@ -87,7 +89,7 @@ Security defines the cross-cutting controls that protect secrets, enforce trust 
 
 ### 4.2 `security_policy_profile`
 - Required fields:
-  - `approval_mode` enum: `ask_everything | ask_some | ask_nothing`
+  - `approval_mode` enum: `ask_everything | ask_some | ask_nothing` (`ask_nothing` is the architecture default; the value reflects the owner's approval rules held in Auth, not a separate store)
   - `audit_level` enum: `minimal | standard | verbose`
   - `secrets_in_memory_forbidden` const `true`
   - `require_auth_on_protected_routes` const `true`
@@ -104,7 +106,7 @@ Security defines the cross-cutting controls that protect secrets, enforce trust 
 - Valid example:
 ```json
 {
-  "approval_mode": "ask_some",
+  "approval_mode": "ask_nothing",
   "audit_level": "standard",
   "secrets_in_memory_forbidden": true,
   "require_auth_on_protected_routes": true,
@@ -301,7 +303,7 @@ Security defines the cross-cutting controls that protect secrets, enforce trust 
 
 ### 4.9 `secret_reference`
 - Required fields:
-  - `source` enum `env_var | secret_manager`
+  - `source` enum `env_var | secret_manager` (an untracked config file, such as a gitignored `.env`, is also an allowed location; the contract has no value for it yet)
   - `ref` pattern `^[A-Z][A-Z0-9_]*$`
 - Optional fields: none.
 - Defaults: none.
@@ -337,7 +339,8 @@ Security defines the cross-cutting controls that protect secrets, enforce trust 
   - `warning_on_unverified` (default `true`)
   - `resource_limits.cpu_cores`, `resource_limits.memory_mb`, `resource_limits.timeout_ms`
 - Conditional constraint:
-  - if `trust_level=untrusted`, then `isolation_mode` must be `dedicated_container`, `auth_independent_boundary=true`, `warning_on_unverified=true`.
+  - if `trust_level=untrusted`, then by default `isolation_mode` must be `dedicated_container`, `auth_independent_boundary=true`, `warning_on_unverified=true`.
+  - `untrusted` means the owner has not said they trust the tool; the owner decides. Containers are one way to isolate; separate processes or sandboxes are others.
 - Forbidden behavior:
   - auth-only enforcement without runtime isolation boundary.
 - Valid example:
@@ -395,7 +398,7 @@ Security defines the cross-cutting controls that protect secrets, enforce trust 
 ### 4.12 Communication Patterns
 - Sync:
   - pre-stream auth/validation responses (`pre_stream_error_response`).
-  - approval decision API request.
+  - approval decision API request (where a product adds approvals).
 - Async/Evented:
   - stream events (`approval-request`, `approval-result`, `error`).
   - audit event emission to structured sink.
@@ -410,22 +413,23 @@ Security defines the cross-cutting controls that protect secrets, enforce trust 
 1. Load runtime and adapter configuration.
 2. Validate secret references (`api_key_env`-style reference semantics).
 3. Ensure memory layout, version-history readiness, and auth-state availability.
-4. Initialize tool registry and approval store.
+4. Initialize tool registry and, where a product adds approvals, the approval store.
 5. Mark service ready only when required security controls are active.
 
 ### 5.2 Protected Request Entry
 1. Gateway receives request.
-2. Auth middleware validates actor context against product-owned auth state.
-3. On failure: reject pre-stream (`401 unauthorized`) with safe message.
+2. Gateway calls Auth, which validates actor context against product-owned auth state.
+3. On failure: reject pre-stream (`401 unauthorized`) with safe message. Auth fails closed.
 4. On success: attach normalized auth context and continue.
 
 ### 5.3 Mid-Stream Security Behavior
-1. Agent Loop runs model/tool loop under actor permissions.
+1. Agent Loop runs model/tool loop and asks Auth before each tool call; a refused call does not run and returns a "not permitted" result.
 2. Errors are classified to contract taxonomy and sanitized.
 3. Unrecoverable failures emit terminal `error` event and close stream.
 4. Recoverable tool failures remain `tool-result` errors and continue loop.
 
 ### 5.4 Approval Enforcement Flow
+This flow applies only where an approval rule in Auth covers the call. Under the default policy the owner's calls run with no approval step.
 1. Approval-required tool requested.
 2. Agent Loop emits `approval-request` event.
 3. Approval decision endpoint accepts only `{ decision }` with auth/permission check.
@@ -433,8 +437,8 @@ Security defines the cross-cutting controls that protect secrets, enforce trust 
 5. Denied decision returns non-mutating `tool-result` status `denied` and continues safely.
 
 ### 5.5 Tool Boundary Behavior
-- Tool availability filtered by auth permissions.
-- Tool execution re-checks authorization at execution boundary.
+- Agent Loop asks Auth which tools the actor may use and marks the rest as not permitted, so the model can tell "not permitted" from "does not exist".
+- Agent Loop asks Auth before each tool call at the execution boundary.
 - Path and reserved-area sandbox checks enforce filesystem scope for memory tools.
 - Tool errors are normalized to safe codes/messages.
 
@@ -453,7 +457,7 @@ Security defines the cross-cutting controls that protect secrets, enforce trust 
   - memory and version history
   - conversation records
 - Ephemeral state:
-  - pending approvals
+  - pending approvals (where approvals exist)
   - per-request auth context
   - in-loop safety guards (duplicate/mutation guard)
 
@@ -480,17 +484,17 @@ Security defines the cross-cutting controls that protect secrets, enforce trust 
 
 ### Data Flow
 1. Client request enters Gateway.
-2. Auth validates and annotates request context.
-3. Agent Loop executes loop with filtered tool set.
-4. Tool/runtime boundaries enforce scope and approval.
+2. Gateway calls Auth, which validates and annotates request context.
+3. Agent Loop executes loop, asking Auth before each tool call.
+4. Tool/runtime boundaries enforce scope; any approval rule is enforced in code.
 5. Stream events and audit logs provide contract-visible and forensic surfaces.
 6. Memory/export/history remain available as owner safety controls.
 
 ### Dependency Assumptions
-- Auth is always on protected request path.
+- The Gateway calls Auth on every request, and the Agent Loop asks Auth before every tool call.
 - Tool runtime can enforce scope independent of Auth policy alone.
 - Audit sink remains available and structured.
-- Version-history and export guarantees remain enabled from startup.
+- Version history, restore and export remain enabled from startup.
 
 ---
 
@@ -500,12 +504,14 @@ Security defines the cross-cutting controls that protect secrets, enforce trust 
 - Security remains cross-cutting, not a separate component boundary.
 - Security controls are implementation-enforced mechanisms, not prompt-only conventions.
 - Secret values never persist in forbidden inspectable locations.
-- Approval visibility and approval enforcement both remain true simultaneously.
+- Where approvals exist, approval visibility and approval enforcement both remain true simultaneously.
+- The owner can do everything by default; version history and restore are the safety net that makes this safe.
+- No rule overrides the owner on the owner's own hardware.
 - Safe error taxonomy remains stable under provider/tool failures.
 
 ### Constraints That Must Always Hold
 - Protected routes fail closed when auth context is missing/invalid.
-- Approval-required mutations cannot execute without explicit decision.
+- Calls an approval rule covers cannot execute without explicit decision.
 - Security controls are active at MVP day one.
 - Security properties remain after model/provider/component swaps.
 
@@ -535,7 +541,7 @@ Security defines the cross-cutting controls that protect secrets, enforce trust 
 ### Security Considerations
 - Secret material reference-only handling (`source/ref`) in contract surfaces.
 - Safe client-visible error surfaces with no stack traces/credential leakage.
-- Contract-visible approval and authorization boundaries.
+- Contract-visible approval (where approvals exist) and authorization boundaries.
 - Defense-in-depth via auth policy plus runtime/tool isolation controls.
 
 ---
@@ -552,10 +558,12 @@ Security defines the cross-cutting controls that protect secrets, enforce trust 
 - Keep security policy data explicit and schema-validated.
 - Keep correlation ID propagation mandatory through critical actions.
 - Keep approval decision endpoint minimal and strictly shaped.
-- Keep secret references outside inspectable owner data and tracked config files.
+- Keep secret values outside Memory and outside anything git tracks; config holds references only.
 
 ### Anti-Patterns to Avoid
 - Prompt-only approval behavior with no coded gate.
+- Approval on every write shipped as an architecture default.
+- "Environment safety" rules that override the owner on the owner's own hardware.
 - Catch-all error code behavior that collapses taxonomy.
 - Direct storage of secrets in preferences/memory/config tracked files.
 - Security rules spread ad hoc without contract or audit visibility.
@@ -568,9 +576,12 @@ Security defines the cross-cutting controls that protect secrets, enforce trust 
 ### Confirmed Alignments
 - `S-01`: safe exposed error/event surfaces are required.
 - `S-02`: structured audit capture for sensitive actions is required.
-- `S-03`: approval must be coded enforcement, not prompt-only.
+- `S-03`: where approval rules exist, enforcement is coded, not prompt-only.
+- `A-06`, `A-07`: Auth checked before each tool call; the owner can do everything by default.
+- `C-05`: the owner wins; no rule sits above the owner.
+- `S-06`: restore is part of the safety net.
 - `S-04`: tool isolation/scope boundaries remain independent of Auth alone.
-- `S-05`: approval interactions must be contract-visible.
+- `S-05`: where approvals exist, approval interactions must be contract-visible.
 - `A-04`, `C-03`: secrets forbidden in normal inspectable memory/tracked config.
 - `A-05`: product-owned auth state/export readiness from startup.
 - `GC-03`, `GC-05`, `GC-06`: classified stream errors and contract-visible approval path.
@@ -585,10 +596,11 @@ Security defines the cross-cutting controls that protect secrets, enforce trust 
 
 ### Confirmed Alignments
 - Security is explicitly cross-cutting and not a new component (`security-spec.md`).
-- Approval gates are coded controls and not prompt instructions (`security-spec.md`, `tools-spec.md`).
-- Auth is first-line protected-route boundary (`auth-spec.md`, `gateway-agent-loop-contract.md`).
-- Secrets live in configuration references, not memory content (`security-spec.md`, `configuration-spec.md`).
-- Version history and export are part of the security safety net (`security-spec.md`).
+- There is no approval step by default; where the owner's rules require approval, it is a coded control, not a prompt instruction (`security-spec.md`, `tools-spec.md`).
+- The Gateway calls Auth on every request, and the Agent Loop asks Auth before each tool call (`auth-spec.md`, `gateway-agent-loop-contract.md`).
+- Secrets live outside Memory and outside anything git tracks; config holds references only (`security-spec.md`, `configuration-spec.md`).
+- Version history, restore and export are part of the security safety net (`security-spec.md`).
+- The owner has the last word on their own hardware (`configuration-spec.md`, `security-spec.md`).
 
 ### Documented Discrepancies To Reconcile
 1. **Tool trust spectrum implementation depth**
@@ -624,20 +636,23 @@ Security defines the cross-cutting controls that protect secrets, enforce trust 
 
 ### MUST
 
-- `SEC-MUST-001`: Secrets MUST NOT be stored in normal inspectable Memory files or tracked configuration.
+- `SEC-MUST-001`: Secrets MUST NOT be stored in Memory or in any file git tracks; they live in environment variables, an untracked config file, or a secret store.
 - `SEC-MUST-002`: Exposed error/event surfaces MUST use safe sanitized messages.
 - `SEC-MUST-003`: Mid-stream error taxonomy MUST remain classified (`provider_error`, `tool_error`, `context_overflow`).
 - `SEC-MUST-004`: Sensitive actions MUST be captured in structured audit logs.
-- `SEC-MUST-005`: Approval enforcement MUST be coded control, not prompt-only guidance.
-- `SEC-MUST-006`: Approval interaction MUST remain contract-visible where required.
-- `SEC-MUST-007`: Protected request paths MUST enforce Auth and fail closed.
+- `SEC-MUST-005`: Where approval rules exist, enforcement MUST be coded control, not prompt-only guidance.
+- `SEC-MUST-006`: Where a product adds approvals, approval interaction MUST remain contract-visible.
+- `SEC-MUST-007`: The Gateway MUST call Auth on every protected request and the Agent Loop MUST ask Auth before each tool call; both MUST fail closed.
 - `SEC-MUST-008`: Request payloads MUST NOT become hidden runtime/provider/tool reconfiguration channels.
 - `SEC-MUST-009`: Tool scope/isolation boundaries MUST enforce limits independent of Auth policy alone.
 - `SEC-MUST-010`: Product-owned auth-state export MUST exclude credentials/secrets.
 - `SEC-MUST-011`: Security controls MUST be present from day one of MVP operation.
 - `SEC-MUST-012`: Correlation-aware traceability MUST exist for security-relevant operations.
-- `SEC-MUST-013`: Memory export and version-history safety-net guarantees MUST remain available.
+- `SEC-MUST-013`: Memory export, version history and restore MUST remain available as the safety net.
 - `SEC-MUST-014`: Security properties MUST survive component/adapter/provider swaps without boundary erosion.
+- `SEC-MUST-015`: The architecture default MUST let the owner do everything with no approval step; stricter defaults are a product or owner choice held in Auth.
+- `SEC-MUST-016`: No product or environment rule MAY override the owner on the owner's own hardware; rules the owner can't override belong to hosting.
+- `SEC-MUST-017`: Tools the owner has not said they trust MUST run isolated from the owner's data and other tools by default, independent of Auth.
 
 ### SHOULD
 
@@ -648,14 +663,14 @@ Security defines the cross-cutting controls that protect secrets, enforce trust 
 ### MAY
 
 - `SEC-MAY-001`: Implementations MAY introduce additional classified security error codes internally if external contract taxonomy remains stable.
-- `SEC-MAY-002`: Implementations MAY require stronger approval defaults for non-owner actors while preserving contract behavior.
+- `SEC-MAY-002`: Implementations MAY ship stronger approval defaults (for example for non-owner actors) as Auth rules the owner can change.
 
 ## 14. Acceptance Gates (Pass/Fail)
 
 - `SEC-GATE-01 Contract Gate`: Pass if security interfaces validate against `contracts/Security.schema.json`; fail otherwise.
-- `SEC-GATE-02 Conformance Gate`: Pass if all vectors in `tests/Security-conformance.md` pass (14 positive + 14 negative); fail on any `SEC-MUST-*` failure.
+- `SEC-GATE-02 Conformance Gate`: Pass if all vectors in `tests/Security-conformance.md` pass (17 positive + 17 negative); fail on any `SEC-MUST-*` failure.
 - `SEC-GATE-03 Drift Gate`: Pass if all Critical checks in `drift/Security-drift-guard.md` pass; fail on any Critical check failure.
-- `SEC-GATE-04 Boundary Gate`: Pass if auth-on-path, approval visibility, safe error surfaces, and secret restrictions are all enforced in runtime behavior.
+- `SEC-GATE-04 Boundary Gate`: Pass if per-request and per-tool-call Auth checks, approval visibility where approvals exist, safe error surfaces, and secret restrictions are all enforced in runtime behavior.
 - `SEC-GATE-05 Conflict Gate`: Pass if no unresolved High-risk conflict remains in Conflict Register.
 
 ## 15. Traceability Matrix (Requirement -> Source -> Test ID)
@@ -666,16 +681,19 @@ Security defines the cross-cutting controls that protect secrets, enforce trust 
 | SEC-MUST-002 | Human `security-spec.md`, `gateway-agent-loop-contract.md`; AI matrix `S-01`, `GC-03` | `SEC-T002P`, `SEC-T002N` |
 | SEC-MUST-003 | Human `gateway-agent-loop-contract.md`; AI matrix `GC-05` | `SEC-T003P`, `SEC-T003N` |
 | SEC-MUST-004 | Human `security-spec.md`; AI matrix `S-02` | `SEC-T004P`, `SEC-T004N` |
-| SEC-MUST-005 | Human `security-spec.md`, `tools-spec.md`; AI matrix `S-03` | `SEC-T005P`, `SEC-T005N` |
+| SEC-MUST-005 | Human `security-spec.md`, `tools-spec.md`; AI matrix `S-03`, `A-07` | `SEC-T005P`, `SEC-T005N` |
 | SEC-MUST-006 | Human `gateway-agent-loop-contract.md`; AI matrix `S-05`, `GC-06`, `G-08` | `SEC-T006P`, `SEC-T006N` |
-| SEC-MUST-007 | Human `auth-spec.md`, `gateway-agent-loop-contract.md`; AI matrix `A-01`, `GC-04` | `SEC-T007P`, `SEC-T007N` |
+| SEC-MUST-007 | Human `auth-spec.md`, `gateway-agent-loop-contract.md`; AI matrix `A-01`, `A-06`, `GC-04` | `SEC-T007P`, `SEC-T007N` |
 | SEC-MUST-008 | Human `configuration-spec.md`; AI matrix `C-02`, `GC-01` | `SEC-T008P`, `SEC-T008N` |
 | SEC-MUST-009 | Human `security-spec.md`, `tools-spec.md`; AI matrix `S-04`, `T-02`, `T-03` | `SEC-T009P`, `SEC-T009N` |
 | SEC-MUST-010 | Human `auth-spec.md`, `security-spec.md`; AI matrix `A-03`, `A-04` | `SEC-T010P`, `SEC-T010N` |
 | SEC-MUST-011 | Human `security-spec.md`; AI matrix `S-02`, `S-03`, `A-05` | `SEC-T011P`, `SEC-T011N` |
 | SEC-MUST-012 | Human `gateway-agent-loop-contract.md`; AI matrix `GC-01` plus security checklist traceability requirements | `SEC-T012P`, `SEC-T012N` |
-| SEC-MUST-013 | Human `security-spec.md`, `memory-spec.md`; AI matrix `M-03`, `M-04`, `D-05`, `D-07` | `SEC-T013P`, `SEC-T013N` |
+| SEC-MUST-013 | Human `security-spec.md`, `memory-spec.md`; AI matrix `M-03`, `M-04`, `S-06`, `D-05`, `D-07` | `SEC-T013P`, `SEC-T013N` |
 | SEC-MUST-014 | Human `foundation-spec.md`, `security-spec.md`; AI matrix `MO-03`, `CU-02` | `SEC-T014P`, `SEC-T014N` |
+| SEC-MUST-015 | Human `security-spec.md` Approval Gates, `auth-spec.md`, decision `D177`; AI matrix `A-07` | `SEC-T015P`, `SEC-T015N` |
+| SEC-MUST-016 | Human `configuration-spec.md`, `security-spec.md`, decision `D171`; AI matrix `C-05` | `SEC-T016P`, `SEC-T016N` |
+| SEC-MUST-017 | Human `security-spec.md` Tool Isolation, `tools-spec.md`; AI matrix `S-04` | `SEC-T017P`, `SEC-T017N` |
 
 ## 16. Residual Risks & Open Decisions
 
@@ -702,10 +720,14 @@ Security defines the cross-cutting controls that protect secrets, enforce trust 
 ## Self-Validation Report
 
 - Coverage of required sections: 16/16 (100%)
-- Normative requirements count: 19 total (`14 MUST`, `3 SHOULD`, `2 MAY`)
+- Normative requirements count: 22 total (`17 MUST`, `3 SHOULD`, `2 MAY`)
 - Interfaces with schemas: 10 (`security_policy_profile`, `audit_log_event`, `safe_stream_error_event`, `pre_stream_error_response`, `approval_request_event`, `approval_result_event`, `approval_decision_request`, `secret_reference`, `tool_isolation_policy`, `security_violation_record`)
-- Test vectors count: 28 total (`14 positive`, `14 negative`)
+- Test vectors count: 34 total (`17 positive`, `17 negative`)
 - Conflicts detected/resolved: 4/4 resolved
 - Unresolved ambiguity list:
   - `A-01 (Medium)`: content-separation effectiveness measurement is not yet standardized across implementations.
 - Final readiness rating: Conditionally Ready
+
+## Contract alignment
+
+`contracts/Security.schema.json` lags this blueprint in three places: `secret_reference.source` has no value for an untracked config file, `tool_isolation_policy.isolation_mode` names only container modes (separate processes or sandboxes are also allowed), and there is no "not permitted" result shape for a refused tool call. `security_policy_profile.approval_mode` stays, with `ask_nothing` as the architecture default. Build to the behaviour described here; the schema follows in the next contract revision.

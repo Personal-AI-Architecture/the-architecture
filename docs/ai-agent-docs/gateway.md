@@ -4,7 +4,7 @@
 
 ## Purpose
 
-Accept external requests, manage conversation lifecycle, run Auth on the path, and hand bounded interaction requests to the Agent Loop.
+Accept external requests, manage conversation lifecycle, call Auth on every request, and hand bounded interaction requests to the Agent Loop.
 
 ## Owns
 
@@ -15,7 +15,7 @@ Accept external requests, manage conversation lifecycle, run Auth on the path, a
 
 ## Does Not Own
 
-- Model choice as an architectural responsibility.
+- Model choice as an architectural responsibility (the owner chooses; the Gateway only reads the current choice and passes it on).
 - Tool execution.
 - Memory storage internals.
 - Auth policy internals.
@@ -23,29 +23,32 @@ Accept external requests, manage conversation lifecycle, run Auth on the path, a
 
 ## Dependencies
 
-- Auth boundary for request authorization.
+- Auth, called on every request through the Auth contract.
 - Conversation-store access path into Memory.
 - Gateway -> Agent Loop internal contract.
 
 ## Interfaces
 
 - Exposes the Gateway API to clients.
-- Uses the internal `messages + metadata` contract with the Agent Loop.
-- Uses Auth on the request path.
+- Uses the internal `messages + model + metadata` contract with the Agent Loop.
+- Calls Auth on every request, before anything reaches the Agent Loop or conversation data.
 - Uses dedicated conversation access to Memory.
 
 ## Required Behaviors
 
 - Manage conversation load, create, append, and retrieval behavior.
 - Access conversation data through a dedicated conversation-store boundary or tool rather than a private in-process store.
-- Accept client messages plus client metadata.
-- Forward only bounded interaction data to the Agent Loop.
+- Accept client messages plus client metadata. Message content is a list of parts.
+- Save tool calls and tool results as ordinary parts of messages in conversation history, and send them back on resume.
+- Read the owner's current model choice on every message and pass it to the Agent Loop, so a change applies to the next message with no restart.
+- Forward only bounded interaction data to the Agent Loop. The bootstrap prompt is Agent Loop configuration, not something the Gateway adds.
 - Stream or proxy Agent Loop results back to clients.
 - Stay content-agnostic at the architectural level.
 
 ## Forbidden Behaviors
 
-- Choosing or reconfiguring models in the interaction path.
+- Picking a model itself, or routing to models (passing the owner's current choice is required, choosing one is forbidden).
+- Building a system message from configuration.
 - Executing tools itself.
 - Reaching directly into Memory storage internals.
 - Embedding Auth as Gateway-owned logic instead of boundary use.
@@ -60,18 +63,20 @@ Accept external requests, manage conversation lifecycle, run Auth on the path, a
 ## Audit Questions
 
 - Does Gateway still own conversation lifecycle?
-- Is model/provider choice leaking into Gateway?
+- Is the Gateway passing the owner's current model choice, rather than picking one or fixing it at startup?
 - Is Gateway talking to Memory through the right boundary?
-- Is Auth on the real request path?
+- Does the Gateway call Auth on every request, including list and history reads?
+- Are tool calls and tool results saved in conversation history?
 - Does Gateway send only contract-bounded data to Agent Loop?
 
 ## Common Drift Patterns
 
-- Provider/model preference logic living in Gateway.
+- Provider routing or model-selection logic living in Gateway (beyond reading the owner's current choice).
+- Only user and assistant text stored, so tool calls are lost on resume.
 - In-process or private conversation stores bypassing Memory rules.
 - Content interpretation beyond transport normalization.
 - Auth omitted or bypassed in runtime wiring.
-- Approval handled as client-specific behavior instead of contract interaction.
+- Approval, where a product adds it, handled as client-specific behavior instead of contract interaction.
 
 ## Review Links
 

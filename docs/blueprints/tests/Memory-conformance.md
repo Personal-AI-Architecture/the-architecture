@@ -18,6 +18,9 @@ This file defines language-agnostic pass/fail vectors for Memory component confo
 - `MEM-MUST-012`: Secrets are excluded from normal inspectable Memory surfaces where forbidden.
 - `MEM-MUST-013`: Owner data remains inspectable without full system runtime.
 - `MEM-MUST-014`: Storage backend changes remain behind stable Memory tool contract.
+- `MEM-MUST-015`: Restore makes an earlier state current again and is recorded in history.
+- `MEM-MUST-016`: Failed or conflicting writes are reported to the caller, never silently resolved, and never corrupt data.
+- `MEM-MUST-017`: Stored conversations keep tool calls, tool results and every content part.
 
 ## Test Vectors
 
@@ -51,11 +54,17 @@ This file defines language-agnostic pass/fail vectors for Memory component confo
 | MEM-T013N | MEM-MUST-013 | Negative | Require proprietary runtime-only format to inspect content | Conformance test fails | Opaque storage accepted | Ownership erosion |
 | MEM-T014P | MEM-MUST-014 | Positive | Swap storage backend implementation behind Memory interfaces | Existing Memory tool/boundary contracts still pass | Consumer contracts break on backend swap | Backend lock-in drift |
 | MEM-T014N | MEM-MUST-014 | Negative | Backend swap requires API changes in Gateway/Agent Loop | Conformance gate fails | Breaking change accepted | Contract instability |
+| MEM-T015P | MEM-MUST-015 | Positive | Write a file twice, then restore the first version | First version is current again; history shows the restore as a new change | Earlier state cannot be made current | Restore missing |
+| MEM-T015N | MEM-MUST-015 | Negative | Implementation offers history but no restore | Conformance test fails | History-only implementation accepted | Read-only history drift |
+| MEM-T016P | MEM-MUST-016 | Positive | Two writers change the same file at the same time | One write succeeds; the other gets a classified conflict error; no data is corrupted | Conflict hidden or data corrupted | Silent conflict resolution |
+| MEM-T016N | MEM-MUST-016 | Negative | Implementation applies last-write-wins with no error | Conformance test fails | Silent overwrite accepted | Silent conflict resolution |
+| MEM-T017P | MEM-MUST-017 | Positive | Save a conversation turn with a tool call, its result, and an image part, then fetch detail | Tool call, tool result and every content part come back | Any of them missing | Lossy conversation history |
+| MEM-T017N | MEM-MUST-017 | Negative | Store only the final assistant text | Conformance test fails | Text-only history accepted | Lossy conversation history |
 
 ## Coverage Summary
 
-- MUST requirements: 14
-- Positive tests: 14
-- Negative tests: 14
-- Total vectors: 28
-- Critical drift categories covered: outward dependencies, direct storage reach-in, surface incompleteness, path escape, non-durable writes, conversation side-store, partial export, metadata-only history, startup readiness degradation, hidden structured data, secret leakage, inspectability loss, backend lock-in.
+- MUST requirements: 17
+- Positive tests: 17
+- Negative tests: 17
+- Total vectors: 34
+- Critical drift categories covered: outward dependencies, direct storage reach-in, surface incompleteness, path escape, non-durable writes, conversation side-store, partial export, metadata-only history, startup readiness degradation, hidden structured data, secret leakage, inspectability loss, backend lock-in, missing restore, silent conflict resolution, lossy conversation history.

@@ -16,10 +16,10 @@
     (external)                     (component)   (component)                       (external)
                                                       │
                         ─── Auth ───                  └──→ Tools (verbs)  ──→  External Memory (nouns)
-                        (cross-cutting                     ├── MCP servers      ├── Salesforce data
-                         component,                        ├── CLI tools        ├── Weather services
-                         applies to all                    └── Native functions └── The internet
-                         requests)
+                        (separate component:               ├── MCP servers      ├── Salesforce data
+                         Gateway calls it on               ├── CLI tools        ├── Weather services
+                         every request; Agent              └── Native functions └── The internet
+                         Loop before each tool call)
 ```
 
 ### Components (4)
@@ -28,8 +28,8 @@
 |-----------|-------------|
 | **Your Memory** | Persist, retrieve, search, version data. The platform -- zero outward dependencies. Accessed through tools. |
 | **Agent Loop** | Generic agent loop: message -> model -> tool calls -> stream response -> repeat. No product-specific logic. |
-| **Auth** | Cross-cutting identity and access control. Independent of Gateway. Middleware on every request path. |
-| **Gateway** | Manage conversations and route to Agent Loop. Content-agnostic, interface-agnostic. |
+| **Auth** | Identity and access control. The Gateway calls it on every request; the Agent Loop asks it before each tool call. Permissions live only in Auth. Independently swappable. |
+| **Gateway** | Manage conversations (including tool calls and results) and route to Agent Loop with the owner's current model choice. Content-agnostic, interface-agnostic. |
 
 ### APIs (2)
 
@@ -48,7 +48,8 @@
 
 ## Key Contracts
 
-- **Gateway <-> Agent Loop:** `POST /engine/chat` with messages array -> SSE stream. See `specs/openapi/gateway-engine.yaml`.
+- **Gateway <-> Agent Loop:** `POST /engine/chat` with messages array + model + metadata -> SSE stream. See `specs/openapi/gateway-engine.yaml`.
+- **One message shape** across all three contracts: content is a list of parts, and tool calls and tool results are ordinary message parts saved in conversation history.
 - **Gateway API:** See `specs/openapi/gateway-api.yaml`.
 - **Model API:** See `specs/openapi/model-api.yaml`.
 - **Shared types:** See `specs/schemas/`.
@@ -64,7 +65,7 @@ Before merging any non-trivial change, verify:
 5. **No secrets in Memory or tracked config files** -- secrets live outside Your Memory and are never tracked by git (environment variables, an untracked config file, or a secret store)
 6. **Agent Loop has zero product-specific logic** -- product behavior emerges from what's in Memory
 7. **Gateway doesn't interpret content** -- it passes through, it doesn't understand
-8. **Auth is independent of Gateway** -- swapping either doesn't affect the other
+8. **Auth is independent of Gateway** -- the Gateway calls Auth through its contract; swapping either doesn't require changing the other
 
 Full gate: `docs/in-depth-overview/lockin-gate.md` (PR checks). Full audit: `docs/in-depth-overview/lockin-audit.md` (milestone/release).
 
@@ -72,7 +73,8 @@ Full gate: `docs/in-depth-overview/lockin-gate.md` (PR checks). Full audit: `doc
 
 Runtime config is 4 fields: `memory_root`, `provider_adapter`, `auth_mode`, `tool_sources`.
 
-Preferences (model choice, tool policies) live in Your Memory.
+Preferences (such as model choice and the always-send tool set) live in Your Memory. The Gateway reads the model choice on every message, so a change applies to the next message with no restart.
+Permissions live only in Auth, not in configuration or preferences. The default policy is that the owner can do everything.
 Tool definitions are self-describing (from tools themselves).
 Secrets live outside Your Memory and are never tracked by git: environment variables, an untracked config file, or a secret store.
 

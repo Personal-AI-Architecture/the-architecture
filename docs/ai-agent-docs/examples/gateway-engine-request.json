@@ -1,10 +1,6 @@
 {
   "messages": [
     {
-      "role": "system",
-      "content": "You are BrainDrive."
-    },
-    {
       "role": "user",
       "content": "Write a project spec."
     }

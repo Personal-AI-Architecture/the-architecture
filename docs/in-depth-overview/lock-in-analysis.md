@@ -271,7 +271,7 @@ The probability of needing to replace MCP is near zero. MCP is the default but n
 
 | Dimension | Risk Level | Detail |
 |-----------|-----------|--------|
-| **Architecture position** | None | Auth is a cross-cutting layer (D60), independent of the Agent Loop and Gateway. No other component knows about callers. |
+| **Architecture position** | None | Auth is a cross-cutting layer (D60), independent of the Agent Loop and Gateway. The Gateway calls it on every request and the Agent Loop asks it before each tool call, both only through the Auth contract. Permissions live only in Auth. |
 | **Auth contract** | None | Three operations: Authenticate, Authorize, Manage. Implementation-agnostic — any technology satisfying the contract is valid. |
 | **Standards** | None | OAuth 2.1, OpenID Connect, standard token formats. Not proprietary auth protocols. |
 | **Data format** | None | Product-owned, not provider-specific. Enables migration between auth providers without losing identities. |
@@ -285,7 +285,7 @@ The probability of needing to replace MCP is near zero. MCP is the default but n
 
 - **Switching auth provider:** Change only the auth component — no other component is affected. Days, not weeks.
 - **Switching identity provider (password → OAuth → SSO):** Each is additive, not exclusive.
-- **Exporting auth state to a new deployment:** Policies import cleanly. References to unknown identities are preserved but inactive.
+- **Exporting auth state to a new deployment:** Policies import cleanly. References to unknown identities are preserved but dormant, and a re-created identity gets no access until the owner turns it back on.
 
 #### Verdict
 
@@ -301,13 +301,13 @@ The probability of needing to replace MCP is near zero. MCP is the default but n
 
 ### 7. Security (Foundation Mechanisms)
 
-**Spec claim:** "Security controls must not create lock-in" (D29). The Foundation provides mechanisms — scope enforcement, audit logging, content separation, tool isolation, approval gates, version history. Implementations provide sensible defaults.
+**Spec claim:** "Security controls must not create lock-in" (D29). The Foundation provides mechanisms — scope enforcement, audit logging, content separation, tool isolation, optional approval gates, version history with restore. Implementations provide sensible defaults, which the owner can change.
 
 #### Lock-In Assessment
 
 | Dimension | Risk Level | Detail |
 |-----------|-----------|--------|
-| **Tool isolation** | None | OCI standard containers — Docker, Podman, containerd. No proprietary sandboxing. |
+| **Tool isolation** | None | Implementation choice: OCI standard containers (Docker, Podman, containerd), separate processes or sandboxes. No proprietary sandboxing. |
 | **Encryption** | None | No mandatory app-level encryption in the architecture. OS encryption for local deployment. Export always works regardless of security level. |
 | **Audit logging** | None | Logging levels control detail, not whether events are logged. Schema exists from the start. |
 | **Scope enforcement** | None | Scope = available tools + Auth permissions (D55). No proprietary scope enforcer. |
@@ -315,17 +315,17 @@ The probability of needing to replace MCP is near zero. MCP is the default but n
 
 **Memory export always works** — the owner can always get their data out regardless of system state, security level, or deployment mode. This is a non-negotiable invariant.
 
-**No deployment choice creates permanent lock-in.** Security enforcement mechanisms work at every capability phase without changing. Local deployment and managed hosting use the same mechanisms with different defaults (D128).
+**No deployment choice creates permanent lock-in.** Security enforcement mechanisms work at every capability phase without changing. Hosting is outside the architecture (D148, D171).
 
 #### Exit Cost
 
-- **Switching deployment modes (local ↔ managed):** Same code, different configuration (D23). No security-related migration.
-- **Changing tool isolation approach:** Standard container formats. Any OCI-compatible runtime works.
+- **Moving between deployments:** Same code, different configuration. No security-related migration.
+- **Changing tool isolation approach:** Standard formats and mechanisms. Any OCI-compatible runtime works if containers are used.
 - **Removing all security beyond auth:** The system still works. Security is additive, not load-bearing.
 
 #### Verdict
 
-**Zero lock-in.** Open standards throughout. Standard containers for isolation, open formats for export, no proprietary security mechanisms. The Foundation provides mechanisms — not opinions about how to use them.
+**Zero lock-in.** Open standards throughout. Standard mechanisms for isolation, open formats for export, no proprietary security mechanisms. The Foundation provides mechanisms — not opinions about how to use them.
 
 #### Discipline Required
 
@@ -391,17 +391,17 @@ The probability of needing to replace MCP is near zero. MCP is the default but n
 | Dimension | Assessment |
 |-----------|-----------|
 | **Lock-in** | Zero. Each link independently swappable. Model API adapter translates between the Agent Loop's internal interface and whichever provider format is current — this is the most frequently swapped adapter (D139). |
-| **Concrete swap costs** | Same provider, different model: change one preference in Your Memory — zero code changes. Different provider: change `provider_adapter` in runtime config (1 field) + provide new adapter config file (1 file) + update env variable if needed — still zero code changes. |
+| **Concrete swap costs** | Same provider, different model: change one preference in Your Memory — the next message uses it, no restart, zero code changes. Different provider: change `provider_adapter` in runtime config (1 field) + provide new adapter config file (1 file) + update the secret reference if needed — still zero code changes. |
 | **Discipline** | Have a config-level fallback to at least one alternate provider. Test it before production. |
 
 ### Gateway ↔ Agent Loop Internal Contract (D137)
 
 | Dimension | Assessment |
 |-----------|-----------|
-| **Lock-in** | Zero. Plain HTTP API contract — one endpoint, SSE streaming, auth on path. Not a third API — two components in the same deployment don't need the ceremony of an external API. |
+| **Lock-in** | Zero. Plain HTTP API contract — one endpoint, SSE streaming, an Auth check before every request. Not a third API — two components in the same deployment don't need the ceremony of an external API. |
 | **Standards** | HTTP, Server-Sent Events, industry-standard `role` + `content` message format (D16). |
 | **Success criteria** | Swapping the Agent Loop does not require Gateway changes. Swapping the Gateway does not require Agent Loop changes. Contract works as both HTTP endpoint and direct function call without shape changes. |
-| **Discipline** | Keep the contract explicit and versioned. Auth middleware sits between them independently — authenticates without either component knowing how. |
+| **Discipline** | Keep the contract explicit and versioned. The Gateway calls Auth on every request and the Agent Loop asks Auth before each tool call, through the Auth contract — neither knows how Auth decides. |
 
 ### Contract Swappability (D139)
 
@@ -419,7 +419,7 @@ Configuration is a cross-cutting concern with its own spec (D143). The architect
 
 | Category | Where It Lives | What It Contains | Portable? |
 |----------|---------------|-----------------|-----------|
-| **Preferences** | Your Memory | Personal choices — model, tools, behavior | Yes — travels with you |
+| **Preferences** | Your Memory | Personal choices — model, always-send tools, behavior (not permissions, which live only in Auth) | Yes — travels with you |
 | **Runtime config** | Environment | Deployment details — 4 fields only (D144) | No — describes this machine |
 | **Tool definitions** | With the tools | Self-describing (D146) — config points to sources | Yes — tools carry their own identity |
 
@@ -434,11 +434,11 @@ Configuration is a cross-cutting concern with its own spec (D143). The architect
 
 This is the most concrete enforcement mechanism in the architecture. Every other claim in this document can be validated by this test.
 
-**Precedence chain:** Environment safety > Owner preferences > Product defaults > Foundation defaults. Higher levels override lower levels, but cannot remove Foundation guarantees.
+**Precedence chain:** Owner > Product defaults > Foundation defaults. Higher levels override lower levels, but cannot remove Foundation guarantees. On the owner's own hardware there is no layer above the owner (D171); rules the owner can't override belong to hosting, which the architecture doesn't cover.
 
 ### Deployment (D148, Five Guarantees)
 
-The architecture defines local deployment only (D148). Managed hosting is an implementation concern — same code, stricter configuration via D23.
+The architecture defines local deployment only (D148). Hosting is outside the architecture (D171).
 
 **Five deployment guarantees:**
 
@@ -446,21 +446,21 @@ The architecture defines local deployment only (D148). Managed hosting is an imp
 2. **Functions fully offline.** No internet required for core functionality (model access is the obvious exception).
 3. **Data stays local by default.** No silent outbound traffic. Localhost-only network default.
 4. **Runs on modern consumer hardware.** No specialized infrastructure required.
-5. **Single deployable unit by default.** One package, one start command.
+5. **Single deployable unit by default.** One package, one start command. Packaging (containers, native installers, plain programs) is an implementation choice (D173).
 
 **Memory inspectable without the system running.** Text editor, file browser, database viewer — Your Memory is readable without booting the system. This is a portability guarantee that no proprietary system matches.
 
-**Managed hosting is an implementation concern:** Same code with stricter configuration. No deployment choice creates permanent lock-in. The local path always exists.
+**Hosting is an implementation concern.** No deployment choice creates permanent lock-in. The local path always exists.
 
 #### Verdict
 
 **Zero lock-in.** The local path always exists. Managed hosting is a convenience layer, not a dependency.
 
-### Customization (D153, D155)
+### Customization
 
-Implementations depend on the Architecture via npm package (D155) — clean semver separation, not a fork. Foundation updates flow automatically without merge conflicts.
+Implementations start from the published contracts and, optionally, an architecture template — not from a package (AC-17.5 in the [PAA spec](../spec/personal-ai-architecture-spec.md)). The contracts and conformance tests, not shared code, are what keep products compatible with the architecture.
 
-**Foundation ships runnable code with sensible defaults, all overridable (D153).** It's a working runtime, not just specs. Two boot modes: standalone (Foundation runs alone) and as-a-dependency (an Implementation imports and customizes).
+**The architecture ships sensible defaults, all overridable.** Owner changes survive product updates: where an update conflicts with an owner change, the owner is told instead of having it overwritten silently.
 
 **Four customization mechanisms only:**
 
@@ -468,14 +468,14 @@ Implementations depend on the Architecture via npm package (D155) — clean semv
 |-----------|-------------------|---------|
 | **Your Memory content** | Behavior, personality, knowledge | System prompt, skills, AGENT.md |
 | **Tools** | Capabilities | Add MCP servers, CLI tools |
-| **Configuration** | Environment and preferences | Model selection, provider, tool availability |
+| **Configuration** | Environment and preferences | Model selection, provider, tool sources |
 | **Client** | Interface | Web app, mobile app, CLI, Discord bot |
 
 **Invariant: No code modification for Implementation/Personalization.** All customization is runtime, not framework. Removing all implementation customization leaves a working Architecture. Implementation and Personalization use identical mechanisms — no technical difference between builder customization and owner personalization.
 
 #### Verdict
 
-**Zero lock-in.** Products can take Foundation updates without merge conflicts. The four-mechanism constraint prevents the customization surface from growing into a coupling surface.
+**Zero lock-in.** Products build on stable contracts rather than forked code. The four-mechanism constraint prevents the customization surface from growing into a coupling surface.
 
 ---
 

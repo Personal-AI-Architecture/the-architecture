@@ -15,10 +15,31 @@ Make common architecture failures easier to recognize quickly during implementat
 
 ## Pattern: Auth Omitted On The Real Path
 
-- Symptom: requests work with no auth middleware, no identity headers, or a “local mode” that bypasses the boundary.
-- Likely cause: implementer treated permissive policy as equivalent to no Auth component.
+- Symptom: requests work with no Auth call from the Gateway, no identity attached, or a “local mode” that bypasses the boundary; or tool calls run with no Auth check before them.
+- Likely cause: implementer treated permissive policy (the owner can do everything) as equivalent to no Auth component, or treated the request-level check as covering tool calls.
 - Read next: `docs/ai-agent-docs/auth.md`, `docs/ai-agent-docs/gateway-agent-loop-contract.md`
-- Matrix IDs: `A-01`, `A-02`, `A-05`, `GC-04`
+- Matrix IDs: `A-01`, `A-02`, `A-05`, `A-06`, `GC-04`
+
+## Pattern: Permissions In Configuration
+
+- Symptom: allow/deny lists, tool permissions or approval modes sit in runtime config, adapter config or preferences.
+- Likely cause: permissions were treated as settings rather than as Auth's data.
+- Read next: `docs/ai-agent-docs/configuration.md`, `docs/ai-agent-docs/auth.md`
+- Matrix IDs: `C-04`, `A-02`
+
+## Pattern: Model Fixed At Startup
+
+- Symptom: changing the model preference has no effect until the system restarts.
+- Likely cause: the model was loaded into Agent Loop or adapter configuration at boot instead of being read by the Gateway on every message and passed with the request.
+- Read next: `docs/ai-agent-docs/models.md`, `docs/ai-agent-docs/gateway.md`, `docs/ai-agent-docs/gateway-agent-loop-contract.md`
+- Matrix IDs: `E-05`, `MO-02`, `GC-01`
+
+## Pattern: Tool Calls Missing From History
+
+- Symptom: a resumed conversation has only user and assistant text; the tool calls and results the model saw are gone.
+- Likely cause: the conversation store saved text only, or each contract used its own message shape.
+- Read next: `docs/ai-agent-docs/gateway.md`, `docs/ai-agent-docs/gateway-agent-loop-contract.md`
+- Matrix IDs: `G-09`, `GC-07`
 
 ## Pattern: Config Layer Collapse
 
@@ -27,19 +48,26 @@ Make common architecture failures easier to recognize quickly during implementat
 - Read next: `docs/ai-agent-docs/configuration.md`, `docs/ai-agent-docs/build-sequence.md`
 - Matrix IDs: `C-01`, `C-02`, `C-03`, `D-06`
 
+## Pattern: Approval As An Architecture Default
+
+- Symptom: every write asks the owner to confirm, and the owner can't turn it off, because the implementation treats approval as an architecture rule.
+- Likely cause: approval prompts were read as required; the architecture default is that the owner can do everything, with version history and restore as the safety net.
+- Read next: `docs/ai-agent-docs/auth.md`, `docs/ai-agent-docs/tools.md`, `docs/ai-agent-docs/security.md`
+- Matrix IDs: `A-07`, `S-03`, `S-06`, `C-05`
+
 ## Pattern: Approval Trapped In The Client
 
-- Symptom: approval works only through local readline/UI branches and does not appear in the contract.
+- Symptom: in a product that adds approvals, approval works only through local readline/UI branches and does not appear in the contract.
 - Likely cause: approval was treated as UX behavior instead of contract-visible interaction plus coded enforcement.
 - Read next: `docs/ai-agent-docs/client-gateway-contract.md`, `docs/ai-agent-docs/gateway-agent-loop-contract.md`, `docs/ai-agent-docs/security.md`
 - Matrix IDs: `S-03`, `S-05`, `GC-06`
 
 ## Pattern: Version History Is Best-Effort
 
-- Symptom: git or version initialization fails with warnings and the system continues.
-- Likely cause: version guarantees were treated as operational niceties instead of Memory and startup-readiness requirements.
+- Symptom: version history initialization fails with warnings and the system continues, or history exists but there is no way to restore an earlier state.
+- Likely cause: version guarantees were treated as operational niceties or as optional, instead of Memory and startup-readiness requirements.
 - Read next: `docs/ai-agent-docs/memory.md`, `docs/ai-agent-docs/build-sequence.md`
-- Matrix IDs: `M-04`, `D-05`
+- Matrix IDs: `M-04`, `D-05`, `S-06`
 
 ## Pattern: Export Surface Missing Or Partial
 

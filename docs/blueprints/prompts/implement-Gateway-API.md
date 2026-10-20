@@ -57,12 +57,12 @@ Implement these endpoints:
 - `POST /message`
 - `GET /conversations`
 - `GET /conversations/:id`
-- `POST /approvals/:request_id`
+- `POST /approvals/:request_id` (only if the product adds approval prompts)
 
 ## Canonical Gateway API Contract Rules
 
 ### `POST /message`
-- Request body: `{ content, metadata? }`
+- Request body: `{ content, metadata? }`, where `content` is a list of content parts (a string is the shorthand for one text part)
 - Reject any attempt to submit internal handoff fields directly (`messages`, provider config, tool config, runtime config-like fields).
 - Response:
   - `text/event-stream`
@@ -73,8 +73,8 @@ Implement these endpoints:
   - `text-delta`
   - `tool-call`
   - `tool-result`
-  - `approval-request`
-  - `approval-result`
+  - `approval-request` (where approval rules apply)
+  - `approval-result` (where approval rules apply)
   - `done`
   - `error`
 - `done` must include `conversation_id` and `message_id`.
@@ -90,9 +90,9 @@ Implement these endpoints:
 ### `GET /conversations/:id`
 - Response envelope must be canonical:
   - `id`, `title`, `created_at`, `updated_at`
-  - `messages[]` (id, role, content, timestamp)
+  - `messages[]` (id, role, content parts, timestamp), including tool calls and tool results
 
-### `POST /approvals/:request_id`
+### `POST /approvals/:request_id` (products that add approvals)
 - Request body: `{ decision }`
 - Response body: `{ request_id, decision }`
 - Must be auth-protected.
@@ -104,7 +104,7 @@ Use these for MVP implementation consistency:
 1. External event payload naming:
    - `text-delta` uses `delta`
    - `tool-call` uses `input`
-2. Approval interaction remains contract-visible in stream and decision route.
+2. Where approval rules apply, approval interaction remains contract-visible in stream and decision route. The architecture default is no approval step.
 3. Completion reconciliation favors client-facing IDs in `done`.
 4. No provider/tool runtime config fields are accepted in client request metadata.
 
@@ -113,7 +113,7 @@ Use these for MVP implementation consistency:
 - Do not treat Gateway API as a separate component with new ownership.
 - Do not expose internal Gateway ↔ Agent Loop request format to clients.
 - Do not create undocumented helper routes/payloads for approvals.
-- Do not bypass Auth on protected routes.
+- Do not bypass Auth on protected routes: the Gateway calls Auth on every request, including list and history reads.
 - Do not leak raw storage records to client responses.
 - Do not leak raw stack traces, file paths, credentials, or provider internals in client-visible errors/events.
 
@@ -121,7 +121,7 @@ Use these for MVP implementation consistency:
 
 Implement automated contract tests that prove:
 
-1. Auth is required on protected routes.
+1. Every protected-route request is checked with Auth, including list and history reads.
 2. `POST /message` accepts canonical request shape and rejects internal-shape drift.
 3. `POST /message` returns SSE with `X-Conversation-ID`.
 4. Stream emits canonical event types.
@@ -131,6 +131,7 @@ Implement automated contract tests that prove:
 8. Unknown conversation ID returns safe 404.
 9. Approval decision route enforces canonical request/response shape.
 10. Unknown approval request ID returns safe 404.
+11. Conversation detail includes tool calls and tool results.
 11. Unsafe internal error text is never exposed in client-visible surfaces.
 12. Metadata side-channel attempts for provider/tool config are rejected.
 
@@ -138,7 +139,8 @@ Implement automated contract tests that prove:
 
 - Client can submit internal Agent Loop contract directly.
 - Conversation endpoints leak raw storage/database shape.
-- Approval semantics exist only in UI flow, not contract-visible API behavior.
+- Approval semantics (where the product adds them) exist only in UI flow, not contract-visible API behavior.
+- Conversation detail drops tool calls or tool results.
 - Event names/payloads drift from canonical contract.
 - `done` omits stable reconciliation identifiers.
 - Protected routes are reachable without Auth.
