@@ -59,7 +59,7 @@ See [engine-spec.md](./engine-spec.md).
 
 With intelligence and hands, Your Memory becomes endlessly extensible through tools: read a file, call an API, search a library, control a browser.
 
-New capabilities don't require adding code to a platform. They only need a hand to hold them. Add a tool, and the system can do something new. The architecture doesn't change.
+New capabilities do not require adding code to a software platform. In fact, they require no software platform at all. They simply require a hand to hold them. Add a tool, and the system can do something new. The architecture doesn't change.
 
 This works because everything the system handles is one of two things. If it's data, it's memory. If it's not data, it's a tool. Even the system's own components reach Your Memory only through tools, so storage can evolve without anything else changing.
 
