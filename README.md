@@ -2,7 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-**Own your AI.** An open blueprint for building personal AI systems. Keep your memory, swap everything else.
+**Own your AI.** An open blueprint for building personal AI systems you own. Keep your memory, swap everything else.
 
 <p align="center">
   <img src="docs/assets/readme-hero.svg" alt="Your Memory (conversations, preferences, skills, documents and more, in files you own) stays under your control, while models, interfaces and tools can be swapped freely." width="680">
