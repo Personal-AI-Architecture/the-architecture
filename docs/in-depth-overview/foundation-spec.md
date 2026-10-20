@@ -21,19 +21,15 @@ We should own those systems, so we can always ensure they are working with our b
 
 ### 1. Make Your Memory the platform
 
-Your Memory is what makes a personal AI system personal.
+Your Memory is more than your conversation history. It's also your files, preferences, skills, and connections to tools and agents. In other words, Your Memory is what makes a personal AI system personal.
 
-It's more than your conversation history. It's also your files, preferences, skills, and connections to tools and agents.
+So if you want to own your AI system, you must own Your Memory. That means Your Memory is never locked into a company or a technology choice. You should be able to use Your Memory in any AI system, change between them, and take Your Memory with you when you do.
 
-In traditional software, Your Memory cannot be separated from the code that powers it.
-
-With AI, this is no longer the case. We can now separate Your Memory from the intelligence and tools that power it.
+In traditional software, Your Memory cannot be separated from the code that powers it. With AI, this is no longer the case. We can now separate Your Memory from the intelligence and tools that power it.
 
 We can get rid of the Big Tech platforms, and make Your Memory the platform instead.
 
 Once Your Memory is the platform, you can own it. All other components of your AI system can plug into it, and become swappable components. Your Memory persists when everything else is swapped, upgraded, or removed, and stays readable with standard tools (a text editor, a file browser, a database viewer) even when the system isn't running.
-
-This is also what compounds. Every conversation, decision and plan makes Your Memory richer, so every new model has more to work with.
 
 See [memory-spec.md](./memory-spec.md) and [memory-as-platform.md](./memory-as-platform.md).
 
