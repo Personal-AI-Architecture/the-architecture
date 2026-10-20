@@ -5,7 +5,7 @@
 <g fill="none" stroke="#94A3B8" stroke-width="1.5" stroke-dasharray="5 4"><rect x="670" y="50" width="170" height="80" rx="8"/><rect x="320" y="210" width="200" height="70" rx="8"/></g>
 <g fill="#FFFFFF" text-anchor="middle">
 <text x="420" y="87" font-weight="700" font-size="17">Agent Loop</text><text x="420" y="110" font-size="12" fill="#94A3B8">the hands</text>
-<text x="755" y="87" font-weight="600" font-size="15">AI model</text><text x="755" y="110" font-size="12" fill="#94A3B8">the brain</text>
+<text x="755" y="87" font-weight="600" font-size="15">AI model</text><text x="755" y="110" font-size="12" fill="#94A3B8">the intelligence</text>
 <text x="420" y="242" font-weight="600" font-size="15">Tools</text><text x="420" y="263" font-size="12" fill="#94A3B8">Your Memory, APIs, browsers…</text>
 </g>
 <g stroke="#94A3B8" stroke-width="1.5" fill="none">
