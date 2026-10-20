@@ -5,6 +5,8 @@ hide_table_of_contents: true
 
 # Gateway Spec: Conversations and Routing
 
+**Serves stories:** US-6, US-7, US-10 in the [PAA spec](../spec/personal-ai-architecture-spec.md).
+
 Every AI system has a way for users to interact — ChatGPT has its web app, Copilot integrates into your editor, agent frameworks expose REST APIs. So what's different here?
 
 In those systems, the interaction point **is** the application. The app manages conversations, the app defines how you interact, and if you want a different interface, you either start over or lose your history.

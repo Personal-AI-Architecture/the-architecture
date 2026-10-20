@@ -5,6 +5,8 @@ hide_table_of_contents: true
 
 # Customization: How Implementations Build on the Architecture
 
+**Serves stories:** US-11, US-17 in the [PAA spec](../spec/personal-ai-architecture-spec.md).
+
 Every AI system has an extension model — plugins, hooks, middleware, SDKs, custom code. So what's different here?
 
 Here, customization is primarily **content, not changes to the architecture.** An implementation combines Your Memory content, tools, configuration, and a client while keeping the four architecture components generic. The behavior of the system emerges from what is in Your Memory and which tools are available, rather than from product-specific logic in the Agent Loop, Gateway, or Auth.

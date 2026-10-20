@@ -5,6 +5,8 @@ hide_table_of_contents: true
 
 # Auth Spec: Identity, Access, and Permissions
 
+**Serves stories:** US-3, US-7, US-10 in the [PAA spec](../spec/personal-ai-architecture-spec.md).
+
 Every AI system has some form of access control. ChatGPT has user accounts and sessions, Copilot inherits your organization's credentials, and agent frameworks usually leave auth to the developer. In those systems, auth is a **feature of the application**: a login screen, a session cookie, maybe an API key.
 
 Here, auth is a **component** of the architecture. A personal AI system that stores your memory, manages your tools and acts on your behalf needs access control as an architectural boundary, not a login screen. Auth decides who and what may act on the owner's system: who can reach it, what they can read and change in Your Memory, which tools they can use, and what they can do outside the system. That covers humans, AI agents, services and, later, other systems.

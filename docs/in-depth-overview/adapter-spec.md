@@ -5,6 +5,8 @@ hide_table_of_contents: true
 
 # Adapter Spec: Making Contracts Swappable
 
+**Serves stories:** US-5, US-7 in the [PAA spec](../spec/personal-ai-architecture-spec.md).
+
 You own the internal interface your system speaks. That's what adapters are about.
 
 Every AI system depends on external standards — OpenAI format, Anthropic format, provider-specific APIs, streaming conventions. You don't control those standards. They change when someone else decides they change. Without a boundary between you and them, your entire system is coupled to decisions you didn't make.

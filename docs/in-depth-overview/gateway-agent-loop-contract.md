@@ -5,6 +5,8 @@ hide_table_of_contents: true
 
 # Gateway ↔ Agent Loop API Contract
 
+**Serves stories:** US-5, US-6, US-7 in the [PAA spec](../spec/personal-ai-architecture-spec.md).
+
 ## How we define this contract
 
 Every system with more than one component has to answer a basic question: how do they talk to each other? In this architecture, the two external boundaries — the Gateway API (how clients connect) and the Model API (how the Agent Loop connects to models) — were defined from the start. But there was one internal handoff left undefined: how does the Gateway pass a request to the Agent Loop, and how does the Agent Loop send results back?

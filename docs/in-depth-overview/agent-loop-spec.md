@@ -5,6 +5,8 @@ hide_table_of_contents: true
 
 # Agent Loop Spec
 
+**Serves stories:** US-5, US-7, US-8 in the [PAA spec](../spec/personal-ai-architecture-spec.md).
+
 Every AI system has an agent loop — ChatGPT runs a loop that calls tools and streams responses, Copilot runs a loop that reads code and suggests completions, every agent framework implements the same message → model → tool → response cycle. So what's different here?
 
 Nothing. That's the point. **The Agent Loop is intentionally generic — a commodity component with no product-specific logic.** Its job is to connect a model to tools and stream results back. Think of it as a hand. A hand can grip any tool — hammer, pen, scalpel, phone. It doesn't need to be rebuilt for each one. It doesn't know what it's holding or why. The brain decides what to pick up and what to do with it. The hand executes.

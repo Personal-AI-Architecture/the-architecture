@@ -5,6 +5,8 @@ hide_table_of_contents: true
 
 # Tools: Capabilities in the Environment
 
+**Serves stories:** US-8, US-10, US-17 in the [PAA spec](../spec/personal-ai-architecture-spec.md).
+
 The system reduces to two things: memory and tools.
 
 Memory is the nouns: data, wherever it lives. Tools are the verbs: read, write, search, query, send, execute. A tool's definition, code and instructions are data, but the act of running it is not. The operation has no persistent state. It acts on memory and returns.

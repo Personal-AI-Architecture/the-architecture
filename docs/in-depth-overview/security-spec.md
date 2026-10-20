@@ -5,6 +5,8 @@ hide_table_of_contents: true
 
 # Security Spec: Threats, Data Protection, and Enforcement
 
+**Serves stories:** US-2, US-8, US-9, US-10 in the [PAA spec](../spec/personal-ai-architecture-spec.md).
+
 Every AI system has security concerns — data protection, access control, threat mitigation, audit trails. So what's different here?
 
 Here, security is **a cross-cutting property of the whole system, not a bolt-on layer.** There is no security component. Security is enforced by existing components through configuration and contracts — Auth provides scope enforcement, tools provide container isolation, the Agent Loop enforces timeouts, Your Memory provides version history. The Foundation provides the *mechanisms*; implementations provide the *defaults*.

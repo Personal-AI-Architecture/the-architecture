@@ -5,6 +5,8 @@ hide_table_of_contents: true
 
 # Configuration: The Thin Bootstrap
 
+**Serves stories:** US-5, US-10, US-11 in the [PAA spec](../spec/personal-ai-architecture-spec.md).
+
 Every system has configuration — Docker Compose files, .env files, settings.json, config.yaml. Every AI system has settings for which model to use, what tools are available, how to connect to services. So what's different here?
 
 In most systems, configuration is a grab bag. User preferences, server addresses, API keys, feature flags, tool definitions, behavioral settings — all dumped into the same place. Move to a new environment and half of it breaks. Change a provider and you're editing files across the system. Configuration becomes a quiet source of lock-in that nobody notices until they try to leave.
