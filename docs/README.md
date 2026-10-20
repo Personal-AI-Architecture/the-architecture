@@ -109,6 +109,7 @@ How to verify an implementation meets the architecture.
 
 | Document | What it's for |
 |----------|--------------|
+| [PAA Product Spec](spec/personal-ai-architecture-spec.md) | User stories and acceptance criteria: what every implementation must deliver |
 | [Foundation Verification](in-depth-overview/foundation-verification.md) | Implementation-agnostic checklist — does it meet the claims? |
 | [Zero Lock-In Checklist](in-depth-overview/zero-lockin-checklist.md) | Three levels of enforcement: PR gate, milestone audit, verification |
 | [Lock-In Gate](in-depth-overview/lockin-gate.md) | Mandatory PR checklist — run before every merge |
