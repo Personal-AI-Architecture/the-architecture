@@ -31,4 +31,4 @@ Tests are currently defined as specifications (pass criteria, setup, verificatio
 
 - `../implementers-reference.md` — what each component must do
 - `../../../specs/openapi/` and `../../../specs/schemas/` — canonical schemas that payloads must validate against
-- `../../foundation-spec.md` — architectural principles these tests enforce
+- `../foundation-spec.md` — architectural principles these tests enforce

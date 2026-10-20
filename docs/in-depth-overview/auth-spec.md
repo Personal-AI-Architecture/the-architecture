@@ -13,9 +13,9 @@ Why a separate component? Because if auth lived in the Model, you couldn't swap 
 
 Auth is a **cross-cutting layer** — it touches every other component, it's security-critical from day one, and bad auth decisions are expensive to reverse. Auth is independent of the Gateway — both can be swapped without affecting the other. Auth is a **memory concern** — it controls who can read, write, and act on the owner's memory. Not a hosting concern, not an infrastructure concern.
 
-This is a **requirements and design spec**, not a technology choice document. The auth contract defined here is implementation-agnostic — any technology that satisfies the contract is valid. Technology recommendations are in `research/auth-research.md`.
+This is a **requirements and design spec**, not a technology choice document. The auth contract defined here is implementation-agnostic — any technology that satisfies the contract is valid.
 
-This is an **Architecture spec** — it defines what the auth system does at the generic, unopinionated level. Product-specific auth choices (technology stack, managed hosting policies, MFA requirements, product evolution timeline) are implementation concerns documented in `research/auth-research.md` §Product Auth Design.
+This is an **Architecture spec** — it defines what the auth system does at the generic, unopinionated level. Product-specific auth choices (technology stack, managed hosting policies, MFA requirements, product evolution timeline) are implementation concerns (not published in this repository).
 
 **Related documents:** [foundation-spec.md](./foundation-spec.md) (architecture overview, links to all component specs)
 
@@ -404,20 +404,6 @@ Per-component requirements from [security-spec.md](./security-spec.md). Security
 ## Related Documents
 
 [foundation-spec.md](./foundation-spec.md) (architecture overview, links to all component specs)
-
----
-
-## Changelog
-
-| Date | Change | Source |
-|------|--------|--------|
-| 2026-03-01 | Codex cross-reference audit fix: Added Level 1 implementation note to Actors section — build schema/headers for all actor types, only owner flow needs to work at runtime. Closes ambiguity between schema-readiness and runtime scope. | Codex audit (Dave W + Claude) |
-| 2026-03-01 | "No users, only owners" language pass: user → owner | Ownership model alignment (Dave W + Claude) |
-| 2026-03-01 | Rewritten as Level 1 foundation spec. All BrainDrive-specific content (managed hosting, product evolution timeline, technology-specific OQs, payment lapse flows, BrainDrive-the-company actor, product decisions required) moved to `research/auth-research.md` §Product Auth Design. Structure aligned with engine-spec and memory-spec: opener compares to industry then states architectural principle, guiding principles derived from architecture not product philosophy, generic actor taxonomy, evolution as capability phases not product versions. 9 OQs reduced to 2 (Level 1 only). | Foundation alignment (Dave W + Claude) |
-| 2026-02-27 | Reframed opener as "How we define auth". Merged sections. Added Level 1 note. | Spec reorder + trim (Dave W + Claude) |
-| 2026-02-27 | Added Security Requirements section — cross-referenced from security-spec.md per T-219 | T-219 (Dave W + Claude) |
-| 2026-02-23 | Initial auth spec created from interview | Auth interview session (Dave W + Claude) |
-| 2026-02-23 | Terminology update — Harness→Engine, component count corrected, aligned with D39-D65 | Reconciliation pass |
 
 ---
 

@@ -102,9 +102,9 @@ The primary model can't be a tool — it *is* the intelligence making tool decis
 | # | Decision | Rationale |
 |---|----------|-----------|
 | D44 | Your Memory + Model = the brain — neither is complete alone | Your Memory is the persistent half (stored patterns, knowledge, skills). The model is the intelligence half. The brain reconstitutes every time — the model arrives fresh and reads Your Memory to become capable. |
-| D63 | Models are not a component — they are external intelligence accessed through the Provider API | Every model-related concern maps to existing components or configuration: provider routing (Engine implementation), API keys (configuration/Auth), model selection (configuration), fallback (Engine), context window awareness (Engine/Provider API). There is no gap. The system calls a model. It doesn't contain one. |
-| D64 | The system has four components, two connectors, and three external dependencies | The six component interviews resolved the architecture. Four components (Your Memory, Engine, Auth, Gateway), two connectors (Gateway API, Provider API), three external dependencies (Clients, Models, Tools). What started as six components and three connectors simplified as each interview revealed concerns mapping to existing components. |
-| D108 | Provider API must remain a connector, not a tool | Intelligence is a requirement — the model decides which tools to use, so "call the model" can't itself be a tool (circular dependency). Sub-agents are the exception: the primary model can delegate to a secondary model as a tool. |
+| D63 | Models are not a component — they are external intelligence accessed through the Model API | Every model-related concern maps to existing components or configuration: provider routing (Agent Loop implementation), API keys (configuration/Auth), model selection (configuration), fallback (Agent Loop), context window awareness (Agent Loop/Model API). There is no gap. The system calls a model. It doesn't contain one. |
+| D64 | The system has four components, two APIs, and three external dependencies | The six component interviews resolved the architecture. Four components (Your Memory, Agent Loop, Auth, Gateway), two APIs (Gateway API, Model API), three external dependencies (Clients, Models, Tools). What started as six components and three APIs simplified as each interview revealed concerns mapping to existing components. |
+| D108 | Model API must remain an API, not a tool | Intelligence is a requirement — the model decides which tools to use, so "call the model" can't itself be a tool (circular dependency). Sub-agents are the exception: the primary model can delegate to a secondary model as a tool. |
 | D135 | Memory/tool binary — if it's data, it's memory; if it's not data, it's a tool | Models conceptually decompose (weights = memory, inference = tool) but are elevated to an external dependency because swappable intelligence needs a clean boundary, and storage is not computation. |
 
 ---
@@ -122,21 +122,6 @@ None. Models is the thinnest spec because models are the most external thing in 
 - [ ] The system works with any model that accepts prompts and returns completions — cloud, local, future
 - [ ] The Model API absorbs model evolution — new capabilities, new providers, new paradigms are configuration changes
 - [ ] Local models (Ollama) and cloud models (OpenRouter) are interchangeable from the Agent Loop's perspective
-
----
-
-## Changelog
-
-| Date | Change | Source |
-|------|--------|--------|
-| 2026-03-01 | Conciseness pass: 193→147 lines (~24%). Removed "Brain Reconstitutes" section (absorbed by intro). Collapsed Provider API subsections to two paragraphs. Not-a-Component table 8→4 rows. "Swappable intelligence" collapsed to coupling argument. "Connector Not Tool" leads with circular dependency. Source provenance removed. | Dave W + Claude |
-| 2026-03-01 | Intro reshaped: biological vs digital brain argument integrated into "How we define models." Split brain analogy paragraph, added digital brain separation insight (biological brain fuses memory+intelligence, digital brain separates them via Provider API). Same length, stronger argument chain. | Dave W + Claude |
-| 2026-03-01 | Reordered: Provider API definition moved before "Why" sections. "Why the Provider API Is a Connector, Not a Tool" promoted to standalone section. Reader now understands what the Provider API is before reading why it needs to exist. | Dave W + Claude |
-| 2026-03-01 | Added "Why Models Don't Dissolve Into Memory + Tools" — binary decomposition (weights = memory, inference = tool), swappable intelligence boundary, storage vs computation, ownership case, Auth as sibling exception. D135 added to Decisions Made. Completeness doc added to Related Documents. | Dave W + Claude |
-| 2026-02-27 | Reordered sections (why → what → how → reference). Merged "What This Document Is", "What Is a Model?", and "Models Are External" into single "How we define models" opener. Collapsed related docs table to single line. Removed "Impact on the Architecture" section (redundant with foundation-spec.md). Removed "Level 1/2/3 Distinction" section (Level 1 note in opener). | Spec reorder + trim (Dave W + Claude) |
-| 2026-02-23 | Initial Models spec created from interview — established that Models is external intelligence, not a component. Final architecture resolved: 4 components, 2 connectors, 3 external dependencies. | Models interview session (Dave W + Claude) |
-| 2026-02-25 | Added "Why the Provider API is a connector, not a tool" — circular dependency argument, model-calls-model exception. | Foundation architecture deep dive (Dave W + Dave J) |
-| 2026-02-26 | Rewrote Provider API section — lead with brain analogy (intelligence is a requirement, swappable is the difference), sub-agents as when intelligence becomes a tool, circular dependency as technical confirmation. | Dave W reframing session |
 
 ---
 

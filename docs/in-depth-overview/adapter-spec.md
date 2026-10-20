@@ -180,15 +180,4 @@ This also aligns with existing practice. Existing AI SDKs already work this way 
 
 ---
 
-## Changelog
-
-| Date | Change | Reason | Source | Decision |
-|------|--------|--------|--------|----------|
-| 2026-03-01 | Cross-doc consistency: genericized Vercel AI SDK reference in Architectural Impact — replaced with "Existing AI SDKs" (Level 1 spec, no product-specific SDK recommendations). | Cross-doc review (Dave W + Claude) | — |
-| 2026-03-01 | Added "How Model Configuration Works in Practice" section | Practical walkthrough of model/provider config and swaps — what to set, what changes for each swap type. Cross-references added to foundation-spec, models-spec, configuration-spec, implementers-reference. | Dave W + Claude | — |
-| 2026-02-27 | Opener reframe + trim | Consistency with other specs: "How we define adapters" opener, collapsed related docs, added Level 1 note | Reorder + trim pass (Dave W + Claude) | — |
-| 2026-02-27 | Initial spec created | Architecture discussion | Dave W + Claude | D139 |
-
----
-
 *You own the internal interface. You control what changes and when. You ride the best available standards without coupling to them. Adapters are how the architecture delivers on that promise — simple to own, simple to control, simple to change.*

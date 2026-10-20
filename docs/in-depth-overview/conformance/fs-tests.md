@@ -1,6 +1,6 @@
 # Foundation User Story Tests
 
-> Validates the end-to-end promises of the architecture (FS-1 through FS-8 from [foundation-spec.md](../../foundation-spec.md)).
+> Validates the end-to-end promises of the architecture (FS-1 through FS-8 from [foundation-spec.md](../foundation-spec.md)).
 > Some tests overlap with SWAP/ARCH/DEPLOY tests — noted with `=` references.
 
 ---
@@ -43,7 +43,7 @@
 
 ## FS-2: Add Capability Without Violating the Architecture
 
-**Validates:** Principle 3 (interfaces over implementations), Principle 1 (Memory has zero outward dependencies), D64
+**Validates:** Principle 2 (Keep Everything Else Swappable), Principle 1 (Memory has zero outward dependencies), D64
 
 **Setup:**
 1. System running with base configuration

@@ -125,13 +125,13 @@ See [configuration-spec.md](./configuration-spec.md) for the full boot sequence 
 
 | # | Decision | Rationale |
 |---|----------|-----------|
-| D39 | The Engine is a generic agent loop with no product-specific logic | Composability. A generic engine can pick up any tool the ecosystem produces. A domain-specific engine can only pick up domain-shaped things. Lock-in comes from tying what you do to how the engine works. |
-| D40 | Prompt assembly and skill execution live in Your Memory, not the Engine | The model reads skills and context through tools. Product behavior emerges from what's in the files, not from custom engine code. Same principle as D39 — don't tie intelligence to the loop. |
-| D41 | The "harness" concept is replaced by Engine + the other components working together | The harness was an abstraction for something that's actually just Your Memory + Engine + Tools + Models. The agent isn't a component — it's what emerges when you connect the pieces. |
+| D39 | The Agent Loop is a generic agent loop with no product-specific logic | Composability. A generic engine can pick up any tool the ecosystem produces. A domain-specific engine can only pick up domain-shaped things. Lock-in comes from tying what you do to how the engine works. |
+| D40 | Prompt assembly and skill execution live in Your Memory, not the Agent Loop | The model reads skills and context through tools. Product behavior emerges from what's in the files, not from custom engine code. Same principle as D39 — don't tie intelligence to the loop. |
+| D41 | The "harness" concept is replaced by Agent Loop + the other components working together | The harness was an abstraction for something that's actually just Your Memory + Agent Loop + Tools + Models. The agent isn't a component — it's what emerges when you connect the pieces. |
 | D42 | Engine renamed from "Harness" — "Engine" reflects that it's a commodity component | Every engine does the same thing. What makes the car different is everything around it. The Engine is the boring, interchangeable part. |
-| D50 | Bootstrap prompt is Engine configuration — minimal seed that lets the model self-bootstrap from Your Memory | One line: "Read the entry point in the current folder." Everything else the model discovers from Your Memory by following that instruction. |
-| D108 | Provider API must remain a connector, not a tool | The model decides what tools to call — you can't use a tool to call the thing that decides which tools to use. Circular dependency. The Provider API is structurally different from tools. |
-| D137 | Gateway ↔ Engine is a plain HTTP API contract | POST /engine/chat with messages array + metadata. Engine returns SSE stream. Auth middleware on path. See [gateway-engine-contract.md](./gateway-engine-contract.md). |
+| D50 | Bootstrap prompt is Agent Loop configuration — minimal seed that lets the model self-bootstrap from Your Memory | One line: "Read the entry point in the current folder." Everything else the model discovers from Your Memory by following that instruction. |
+| D108 | Model API must remain an API, not a tool | The model decides what tools to call — you can't use a tool to call the thing that decides which tools to use. Circular dependency. The Model API is structurally different from tools. |
+| D137 | Gateway ↔ Agent Loop is a plain HTTP API contract | POST /engine/chat with messages array + metadata. Agent Loop returns SSE stream. Auth middleware on path. See [gateway-engine-contract.md](./gateway-engine-contract.md). |
 
 ---
 
@@ -161,22 +161,6 @@ Per-component requirements from [security-spec.md](./security-spec.md). Security
 - [ ] Tool call results must be passed to the model without modification — the Agent Loop must not inject, filter, or alter tool results
 - [ ] The Agent Loop must report tool execution failures to the model, not silently retry or recover
 - [ ] The Agent Loop must enforce configured timeouts on tool calls — a slow or hung tool cannot block the loop indefinitely
-
----
-
-## Changelog
-
-| Date | Change | Source |
-|------|--------|--------|
-| 2026-03-01 | "No users, only owners" language pass: user → owner | Ownership model alignment (Dave W + Claude) |
-| 2026-03-01 | Codex cross-reference audit fix: Boot-time configuration table cited D137 (Gateway↔Engine contract) for tool/provider config — corrected to D143 (configuration spec). | Codex audit (Dave W + Claude) |
-| 2026-03-01 | Removed V1 Implementation section (Level 2 product detail — Vercel AI SDK, MCP SDK, build estimates, VoltAgent fallback). "Background gardener" → "Background task" in concurrency table. Added concurrency row for multiple simultaneous conversations (same owner, separate requests, Engine stateless between loops). | L1 cleanup (Dave W + Claude) |
-| 2026-02-27 | Reordered sections (why → what → how → reference). Merged "What the Engine Is", "How the Engine Fits", and "Why the Engine Is Thin" into single "How we define the Engine" opener. Collapsed related docs table to single line. Moved "Does NOT Do" up as key conceptual boundary. | Spec reorder + trim (Dave W + Claude) |
-| 2026-02-27 | Added Security Requirements section — cross-referenced from security-spec.md per T-219 | T-219 (Dave W + Claude) |
-| 2026-02-23 | Initial Engine spec created from interview | Engine interview session (Dave W + Claude) |
-| 2026-02-23 | Consistency pass — added V1 Implementation section (Build Our Own with Vercel AI SDK + MCP TypeScript SDK), aligned selection criteria with foundation-spec.md (added Must-Have Architecture #8/#11, Nice-to-Have #12/#13, Does NOT Need #6), updated stale D30 reference to D39-D42, replaced stale "updates deferred" note with reconciliation confirmation | Cross-doc consistency audit (Dave W + Claude) |
-| 2026-02-25 | Restructured section order — what it is → how it fits → what it does → why it's thin. Removed Selection Criteria (decision made — Build Our Own, documented in V1 Implementation). Removed Harness rename history (rename complete, all docs updated). | Spec cleanup (Dave W + Claude) |
-| 2026-03-17 | Guarantees updated: Agent Loop MUST NOT impose default iteration cap (implementations MAY configure a safety bound). Text preservation on tool continuation added as guarantee. | Drift remediation — MVP Build Review (Dave W + Dave J + Claude) |
 
 ---
 

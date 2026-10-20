@@ -111,7 +111,7 @@ Can one component add new fields to its messages without breaking any other comp
 | Semantic routing / task dispatch | The model decides (P4) | [engine-spec.md](./engine-spec.md) |
 | Specific error codes | Interface-specific | Each contract (e.g., [gateway-engine-contract.md](./gateway-engine-contract.md)) |
 | Authentication mechanism | Auth's responsibility | [auth-spec.md](./auth-spec.md) |
-| The Gateway-Engine contract details | Already defined | [gateway-engine-contract.md](./gateway-engine-contract.md) |
+| The Gateway ↔ Agent Loop contract details | Already defined | [gateway-engine-contract.md](./gateway-engine-contract.md) |
 
 ---
 
@@ -142,21 +142,11 @@ Can one component add new fields to its messages without breaking any other comp
 
 ---
 
-## Changelog
-
-| Date | Change | Source |
-|------|--------|--------|
-| 2026-03-05 | Voice alignment: rewrote to match finalized spec style — "How we define" opener, conversational tone, analogies woven through, scope folded into opener, Decisions Made restored, test language woven into prose instead of bold-formatted subsections. | Style alignment (Dave W + Claude) |
-| 2026-03-05 | Complete rewrite: reframed from "debate position" to "properties for lock-in-free communication." 8 principles reduced to 6, each derived from "what makes communication swappable." Old P1 (Standards First) removed — covered by Foundation Principle 4. Old P5 (Structured Errors) folded into P2 (Consistency). Old P7 (Memory Stays Central) reframed as P3 (No State) + P1 (Not Embedded). Old P8 (Transport Independence) removed — scope statement, not principle. | Architecture review (Dave W + Claude) |
-| 2026-03-05 | Initial draft — 8 principles, success criteria, open questions | Architecture review of BDP (Dave W + Claude) |
-
----
-
 ## Summary
 
 The architecture requires a separation of responsibilities because swappability depends on it. Communication is the connective tissue between components — that makes it the most likely place for responsibilities to bleed across boundaries, because every component touches it. If the communication layer starts holding state, it's doing Memory's job. If it starts making semantic decisions, it's doing the model's job. If it starts enforcing access control, it's doing Auth's job. Each leak makes swapping harder.
 
-The six principles are Principle #6 (Responsibilities Stay Where They Belong) applied to the communication layer: keep it thin, keep it dumb, keep it stateless — because those jobs already have owners. A communication layer that carries signals without interpreting them is one you can swap without consequences. A communication layer that's accumulated other components' responsibilities is one you're stuck with.
+The six principles are Principle 3 (Keep Responsibilities Where They Belong) applied to the communication layer: keep it thin, keep it dumb, keep it stateless — because those jobs already have owners. A communication layer that carries signals without interpreting them is one you can swap without consequences. A communication layer that's accumulated other components' responsibilities is one you're stuck with.
 
 The communication layer's job is to communicate. The architecture works because nothing else is doing that job, and communication isn't doing anything else.
 

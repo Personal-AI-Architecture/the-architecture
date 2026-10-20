@@ -144,20 +144,20 @@ Clients are not components of the system. They connect through the Gateway (D57)
 
 | # | Decision | Rationale |
 |---|----------|-----------|
-| D57 | The client is not a component — it's any external client that connects through the Gateway | The system is Your Memory + Engine + Auth + Gateway. Web apps, CLIs, mobile apps, bots, voice assistants — these are all external clients. None are part of the system. Same pattern as Claude: the web app is not Claude. It connects to Claude. Clients connect to the system through the Gateway. |
-| D58 | The Gateway is a new component — manages conversations and routes interactions to the Engine | Without the Gateway, the Engine would need to manage conversations (violates D39 — Engine is generic) or Memory would need conversation awareness (violates D43 — Memory is unopinionated) or every client would independently manage conversations (duplicated, inconsistent). The Gateway fills this gap. |
-| D59 | The Gateway is generic, content-agnostic, and interface-agnostic at Level 1 | Same principle as Engine (generic loop) and Your Memory (unopinionated substrate). The Gateway passes any content type through without interpretation. It serves any client identically. It doesn't inject context, filter content, or have product-specific logic. |
-| D60 | Auth is a cross-cutting concern — independent of the Gateway | Auth and the Gateway don't know about each other. Requests must be authenticated before interacting with the system, but how (middleware, proxy, sidecar) is a Level 2 decision. Both can be swapped independently. |
+| D57 | The client is not a component — it's any external client that connects through the Gateway | The system is Your Memory + Agent Loop + Auth + Gateway. Web apps, CLIs, mobile apps, bots, voice assistants — these are all external clients. None are part of the system. Same pattern as Claude: the web app is not Claude. It connects to Claude. Clients connect to the system through the Gateway. |
+| D58 | The Gateway is a new component — manages conversations and routes interactions to the Agent Loop | Without the Gateway, the Agent Loop would need to manage conversations (violates D39 — Agent Loop is generic) or Memory would need conversation awareness (violates D43 — Memory is unopinionated) or every client would independently manage conversations (duplicated, inconsistent). The Gateway fills this gap. |
+| D59 | The Gateway is generic, content-agnostic, and interface-agnostic in the architecture | Same principle as Agent Loop (generic loop) and Your Memory (unopinionated substrate). The Gateway passes any content type through without interpretation. It serves any client identically. It doesn't inject context, filter content, or have product-specific logic. |
+| D60 | Auth is a cross-cutting concern — independent of the Gateway | Auth and the Gateway don't know about each other. Requests must be authenticated before interacting with the system, but how (middleware, proxy, sidecar) is an implementation decision. Both can be swapped independently. |
 | D61 | Conversations live in the system, not in any client — enabling seamless client switching | Conversations are data in Your Memory, managed by the Gateway. Start on web, continue on mobile, pick up on CLI. The conversation persists regardless of which client connects. This is what makes clients truly external and interchangeable. |
-| D62 | Models are external intelligence, not a system component — addressed in Models interview | The interview raised the question of whether Models is a component. Models are called through the Provider API but aren't part of the system the way Your Memory, Engine, Auth, and Gateway are. Full treatment deferred to the Models interview. |
-| D137 | Gateway ↔ Engine is a plain HTTP API contract | POST /engine/chat with messages array + metadata. Engine returns SSE stream. Auth middleware on path. Tool definitions and provider config are boot-time, not per-request. See [gateway-engine-contract.md](./gateway-engine-contract.md). |
-| D152 | Gateway accesses Your Memory through a dedicated conversation store tool, not directly | Purpose-built internal tool for conversation management (store, load, list, create). Same tool interface as memory tools, called directly by Gateway — not through Engine's tool loop (circular dependency). One key to the mailbox, not a copy of every key. |
+| D62 | Models are external intelligence, not a system component — addressed in Models interview | The interview raised the question of whether Models is a component. Models are called through the Model API but aren't part of the system the way Your Memory, Agent Loop, Auth, and Gateway are. Full treatment deferred to the Models interview. |
+| D137 | Gateway ↔ Agent Loop is a plain HTTP API contract | POST /engine/chat with messages array + metadata. Agent Loop returns SSE stream. Auth middleware on path. Tool definitions and provider config are boot-time, not per-request. See [gateway-engine-contract.md](./gateway-engine-contract.md). |
+| D152 | Gateway accesses Your Memory through a dedicated conversation store tool, not directly | Purpose-built internal tool for conversation management (store, load, list, create). Same tool interface as memory tools, called directly by Gateway — not through Agent Loop's tool loop (circular dependency). One key to the mailbox, not a copy of every key. |
 
 ---
 
 ## Open Questions
 
-- [x] **OQ-1: Is Models a system component or external intelligence?** **Resolved.** D63 established that Models are external intelligence, not a component. The system calls a model through the Provider API — it doesn't contain one. Final architecture (D64): 4 components, 2 APIs, 3 external dependencies.
+- [x] **OQ-1: Is Models a system component or external intelligence?** **Resolved.** D63 established that Models are external intelligence, not a component. The system calls a model through the Model API — it doesn't contain one. Final architecture (D64): 4 components, 2 APIs, 3 external dependencies.
 
 ---
 
@@ -183,20 +183,6 @@ Per-component requirements from [security-spec.md](./security-spec.md). Security
 - [ ] The Gateway must not interpret, filter, or modify message content — content-agnostic (D59)
 - [ ] The Gateway must provide extension points for rate limiting and abuse detection — implementations configure policies
 - [ ] The Gateway must support TLS for all external-facing connections
-
----
-
-## Changelog
-
-| Date | Change | Source |
-|------|--------|--------|
-| 2026-03-01 | "No users, only owners" language pass: user → owner | Ownership model alignment (Dave W + Claude) |
-| 2026-03-01 | D152: Gateway uses conversation store tool, not direct storage access. "Direct access" language replaced. "Does NOT Do" row clarified (model-driven tools vs operational tool). Dependency direction paragraph retained. | Architecture review (Dave W + Claude) |
-| 2026-02-27 | Reordered sections (why → what → how → reference). Merged "What the Gateway Is", "Gateway and Auth", "Gateway and Memory", and "Level 1/2/3 Distinction" into single "How we define the Gateway" opener. Collapsed related docs table to single line. Moved "Does NOT Do" up as key conceptual boundary. Folded "Switching clients" into opener. | Spec reorder + trim (Dave W + Claude) |
-| 2026-02-27 | Added Security Requirements section — cross-referenced from security-spec.md per T-219 | T-219 (Dave W + Claude) |
-| 2026-02-23 | Initial Interface & Gateway spec created from interview — Interface is not a component, Gateway is a new component | Interface interview session (Dave W + Claude) |
-| 2026-02-23 | Consistency pass — added V1 Implementation section (Build Our Own with Hono + SQLite), marked OQ-1 resolved (D63: Models are external intelligence) | Cross-doc consistency audit (Dave W + Claude) |
-| 2026-02-25 | Trimmed intro — removed Interface justification, Gateway rationale, and architecture impact sections (all settled). Renamed to Gateway spec. | Spec refinement (Dave W + Claude) |
 
 ---
 

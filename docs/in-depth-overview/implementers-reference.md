@@ -309,7 +309,7 @@ One HTTP endpoint. Not a third API.
 | ARCH-2 | Agent Loop swap | Replace Agent Loop -> Gateway/Memory/Auth/tools unaffected |
 | ARCH-3 | Client swap | New client speaks Gateway API -> system serves identically |
 | ARCH-4 | Schema conformance | All API payloads validate against canonical schemas |
-| ARCH-5 | Error taxonomy compliance | Engine emits correct error codes per failure type -> no catch-all code |
+| ARCH-5 | Error taxonomy compliance | Agent Loop emits correct error codes per failure type -> no catch-all code |
 | ARCH-6 | Error message sanitization | No SSE error event contains paths, stack traces, or credentials |
 | ARCH-7 | Memory export | `memory_export` produces complete archive in open formats -> readable without system |
 | ARCH-8 | Auth tool surface | `auth_whoami`, `auth_check`, `auth_export` exist and return correct results |
@@ -349,7 +349,7 @@ One HTTP endpoint. Not a third API.
 | Contracts | Swappable via adapters |
 | Auth | Swappable via cross-cutting independence |
 
-**Adapters** are thin, stateless translation layers. Each describable in one sentence. See [adapter-spec.md](../adapter-spec.md) §How Model Configuration Works in Practice for the concrete model/provider swap walkthrough.
+**Adapters** are thin, stateless translation layers. Each describable in one sentence. See [adapter-spec.md](./adapter-spec.md) §How Model Configuration Works in Practice for the concrete model/provider swap walkthrough.
 
 **Tools** are data in the environment, not a component. Definitions self-describe, execution is the Agent Loop's job, permissions are Auth's job.
 
