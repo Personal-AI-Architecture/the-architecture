@@ -35,6 +35,10 @@ markers while adapter configuration changes remain outside tool definitions.
 
 A restart is allowed here: the provider adapter is startup configuration. Changing only the model never needs a restart (see SWAP-2).
 
+Provider failure is reported by the Agent Loop as a provider error. This test
+does not require or permit a silent fallback to another provider; an explicit
+retry or provider change is a separate owner/product action.
+
 **Pass criteria:**
 - [ ] Test conversation completes successfully with Provider B
 - [ ] Zero code changes were required between steps 1 and 6

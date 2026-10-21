@@ -43,6 +43,7 @@ Authenticate requests, carry actor identity, and enforce permissions without col
 - Exist as a real architectural boundary.
 - Authenticate before protected interaction proceeds.
 - Carry or reconstruct actor context consistently; the identity survives a transport change or a replacement of the Gateway or the Agent Loop.
+- Preserve the authenticated actor when the AI acts for the owner; owner authority is expressed through policy and must not silently replace the actor in context or audit records.
 - Be the only place permissions live. Configuration and preferences hold none.
 - Default policy: the owner can do everything, with no approval prompt required by the architecture. Every other identity starts with nothing until the owner grants it.
 - Evaluate portable policy rules with exact/whole-wildcard/trailing-path-prefix matching, all-condition evaluation, deny-over-allow precedence, and fail-closed handling for unknown references or unsupported conditions.

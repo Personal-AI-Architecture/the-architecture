@@ -197,7 +197,7 @@ This is the same test that dissolved three proposed components during the archit
 
 - **Interface/Client (D57-D58):** Clients are external. Managing conversations is the Gateway's job (new component created to fill an actual gap). The "Interface" didn't have a distinct job — it was an external connecting to the system. Dissolved into Gateway + external clients.
 
-- **Models (D62-D63):** Provider routing is the Agent Loop's implementation. API keys are configuration. Model selection is configuration. Fallback is the Agent Loop's concern. No distinct job. Not a component — an external dependency with its own API.
+- **Models (D62-D63):** Provider routing is the Agent Loop's implementation. API keys are configuration. Model selection is configuration. Provider failures are reported by the Agent Loop; PAA does not require automatic fallback. No distinct job. Not a component — an external dependency with its own API.
 
 Each time, the question was the same: is there a gap? Each time, the answer was no — existing components already covered every concern.
 

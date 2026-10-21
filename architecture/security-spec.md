@@ -357,7 +357,7 @@ These requirements apply to each component. Cross-referenced into component spec
 
 | Scenario | Expected Behavior |
 |----------|-------------------|
-| Auth provider crashes | System fails closed — unauthenticated requests denied. Active sessions with valid tokens may continue. |
+| Auth provider crashes | System fails closed — requests and tool calls whose Auth checks cannot complete are denied, including requests from sessions that previously had valid tokens. No new work continues without a successful current Auth check. |
 | Containerized tool becomes unresponsive | Agent Loop detects timeout, reports to model. Model informs owner. Tool can be restarted independently. |
 | In-process tool crashes | Agent Loop may crash. This is why only trusted, code-reviewed tools run in-process. Agent Loop restarts clean. |
 | Disk full on write | Tool reports failure to Agent Loop, Agent Loop reports to model. Model informs owner. No partial writes. |

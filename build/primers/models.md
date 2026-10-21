@@ -57,6 +57,7 @@ Define how the system talks to external models without turning models or provide
 - Model held as boot-time Agent Loop configuration instead of arriving with each request.
 - Missing adapter-config layer.
 - Provider defaults or fallback behavior hidden in the wrong layer.
+- Context limits unavailable to the Agent Loop, or silent provider fallback after failure.
 - Internal contract carrying too much implementation-specific state.
 
 ## Source Docs

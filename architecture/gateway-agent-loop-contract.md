@@ -168,6 +168,14 @@ The stream started, then something failed.
 
 The Agent Loop must classify errors correctly — no catch-all error code. Recoverable tool failures (a tool returns an error result) go back to the model as `tool-result` events for the model to decide what to do. Only unrecoverable tool infrastructure failures emit `tool_error` and close the stream.
 
+**Conversation ordering and persistence:** The Gateway permits only one active Agent
+Loop turn for a conversation. Later messages queue in arrival order; different
+conversations may run concurrently. The Gateway persists the incoming message
+before dispatch when possible. If the stream later fails, it retains all observed
+assistant text, tool calls, tool results, and the terminal error as an incomplete
+turn. It does not report a successful completion. If initial persistence fails,
+the Gateway does not dispatch the turn.
+
 **Error message safety:** The `message` field in error events must be safe for client display. Never forward raw `Error.message`, stack traces, or file paths. Map each error code to a fixed safe message. Log raw diagnostic detail to structured stdout only. See Security Requirements below.
 
 Every error, whether an HTTP response or an SSE error event, carries the request's correlation ID, so a failure can be traced to the request that caused it ([communication-principles.md](./communication-principles.md) P2, P5).
