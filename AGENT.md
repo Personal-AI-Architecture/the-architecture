@@ -48,11 +48,11 @@
 
 ## Key Contracts
 
-- **Gateway <-> Agent Loop:** `POST /engine/chat` with messages array + model + metadata -> SSE stream. See `specs/openapi/gateway-engine.yaml`.
+- **Gateway <-> Agent Loop:** `POST /engine/chat` with messages array + model + metadata -> SSE stream. See `contracts/openapi/gateway-engine.yaml`.
 - **One message shape** across all three contracts: content is a list of parts, and tool calls and tool results are ordinary message parts saved in conversation history.
-- **Gateway API:** See `specs/openapi/gateway-api.yaml`.
-- **Model API:** See `specs/openapi/model-api.yaml`.
-- **Shared types:** See `specs/schemas/`.
+- **Gateway API:** See `contracts/openapi/gateway-api.yaml`.
+- **Model API:** See `contracts/openapi/model-api.yaml`.
+- **Shared types:** See `contracts/schemas/`.
 
 ## What NOT to Do (Lock-in Checks)
 
@@ -67,7 +67,7 @@ Before merging any non-trivial change, verify:
 7. **Gateway doesn't interpret content** -- it passes through, it doesn't understand
 8. **Auth is independent of Gateway** -- the Gateway calls Auth through its contract; swapping either doesn't require changing the other
 
-Full gate: `docs/in-depth-overview/lockin-gate.md` (PR checks). Full audit: `docs/in-depth-overview/lockin-audit.md` (milestone/release).
+Full gate: `conformance/lockin-gate.md` (PR checks). Full audit: `conformance/lockin-audit.md` (milestone/release).
 
 ## Configuration
 
@@ -86,23 +86,23 @@ An implementation is valid if it passes these tests:
 - **ARCH-1:** Memory readable with standard tools when all components are stopped
 - **ARCH-2:** Agent Loop replacement doesn't affect other components
 - **ARCH-3:** New client connects through Gateway API identically
-- **ARCH-4:** All payloads validate against canonical schemas in `specs/`
+- **ARCH-4:** All payloads validate against canonical schemas in `contracts/`
 
-See `docs/in-depth-overview/conformance/` for full test suite. See `docs/in-depth-overview/implementers-reference.md` for the complete implementation contract.
+See `conformance/` for the full test suite. See `build/implementers-reference.md` for the complete implementation contract.
 
 ## File Map
 
 ```
 ├── AGENT.md                              <- you are here
-├── docs/
-│   ├── README.md                         <- docs landing page
-│   ├── doc-registry.json                 <- doc-maintenance tooling state
-│   ├── in-depth-overview/                <- full human-readable specs, principles, lockin, conformance
-│   ├── ai-agent-docs/                    <- condensed primers for AI agents
-│   └── blueprints/                       <- per-component blueprints + contracts + tests + prompts
-├── specs/
+├── spec/                                 <- what every PAA system must promise
+├── architecture/                         <- how it works; binding human-readable architecture
+├── contracts/                            <- exact OpenAPI, JSON Schema, and canonical examples
 │   ├── schemas/                          <- JSON Schema shared types
 │   └── openapi/                          <- canonical OpenAPI specs
+├── conformance/                          <- language-neutral proof and review checks
+├── build/                                <- derived primers, blueprints, prompts, and build help
+├── maintainers/                          <- repository health, registries, and maintenance guidance
+├── assets/                               <- README and documentation images
 └── README.md                             <- repository orientation and implementation-template route
 ```
 

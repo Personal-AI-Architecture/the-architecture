@@ -1,0 +1,251 @@
+{
+  "docs": [
+    {
+      "path": "architecture/overview.md",
+      "covers": [],
+      "tier": 1,
+      "update_trigger": "manual",
+      "depends_on": []
+    },
+    {
+      "path": "spec/personal-ai-architecture-spec.md",
+      "covers": [],
+      "tier": 1,
+      "update_trigger": "manual",
+      "depends_on": []
+    },
+    {
+      "path": "spec/personal-ai-architecture-gaps.md",
+      "covers": [],
+      "tier": 1,
+      "update_trigger": "manual",
+      "depends_on": ["spec/personal-ai-architecture-spec.md"]
+    },
+    {
+      "path": "architecture/gateway-agent-loop-contract.md",
+      "covers": ["src/gateway/", "src/engine/"],
+      "tier": 1,
+      "update_trigger": "code",
+      "depends_on": ["architecture/overview.md", "architecture/gateway-spec.md", "architecture/agent-loop-spec.md"]
+    },
+
+    {
+      "path": "architecture/agent-loop-spec.md",
+      "covers": ["src/engine/"],
+      "tier": 2,
+      "update_trigger": "code",
+      "depends_on": ["architecture/overview.md"]
+    },
+    {
+      "path": "architecture/memory-spec.md",
+      "covers": ["src/memory/"],
+      "tier": 2,
+      "update_trigger": "code",
+      "depends_on": ["architecture/overview.md"]
+    },
+    {
+      "path": "architecture/gateway-spec.md",
+      "covers": ["src/gateway/"],
+      "tier": 2,
+      "update_trigger": "code",
+      "depends_on": ["architecture/overview.md"]
+    },
+    {
+      "path": "architecture/auth-spec.md",
+      "covers": ["src/auth/"],
+      "tier": 2,
+      "update_trigger": "code",
+      "depends_on": ["architecture/overview.md", "architecture/security-spec.md"]
+    },
+    {
+      "path": "architecture/tools-spec.md",
+      "covers": ["src/engine/tool-executor.ts", "src/memory/tools.ts"],
+      "tier": 2,
+      "update_trigger": "code",
+      "depends_on": ["architecture/overview.md"]
+    },
+    {
+      "path": "architecture/models-spec.md",
+      "covers": ["src/adapters/"],
+      "tier": 2,
+      "update_trigger": "code",
+      "depends_on": ["architecture/overview.md"]
+    },
+    {
+      "path": "architecture/security-spec.md",
+      "covers": ["src/auth/", "src/engine/tool-executor.ts"],
+      "tier": 2,
+      "update_trigger": "code",
+      "depends_on": ["architecture/overview.md"]
+    },
+    {
+      "path": "architecture/adapter-spec.md",
+      "covers": ["src/adapters/", "adapters/"],
+      "tier": 2,
+      "update_trigger": "code",
+      "depends_on": ["architecture/overview.md", "architecture/models-spec.md"]
+    },
+    {
+      "path": "architecture/configuration-spec.md",
+      "covers": ["src/config/", "contracts/schemas/configuration.json"],
+      "tier": 2,
+      "update_trigger": "code",
+      "depends_on": ["architecture/overview.md"]
+    },
+    {
+      "path": "architecture/communication-principles.md",
+      "covers": [],
+      "tier": 2,
+      "update_trigger": "spec",
+      "depends_on": ["architecture/overview.md"]
+    },
+    {
+      "path": "architecture/deployment-spec.md",
+      "covers": [],
+      "tier": 2,
+      "update_trigger": "spec",
+      "depends_on": ["architecture/overview.md"]
+    },
+    {
+      "path": "architecture/customization-spec.md",
+      "covers": [],
+      "tier": 2,
+      "update_trigger": "spec",
+      "depends_on": ["architecture/overview.md"]
+    },
+
+    {
+      "path": "conformance/foundation-verification.md",
+      "covers": [],
+      "tier": 3,
+      "update_trigger": "spec",
+      "depends_on": ["architecture/overview.md"]
+    },
+    {
+      "path": "conformance/lockin-gate.md",
+      "covers": [],
+      "tier": 3,
+      "update_trigger": "spec",
+      "depends_on": ["architecture/overview.md", "conformance/foundation-verification.md"]
+    },
+    {
+      "path": "conformance/lockin-audit.md",
+      "covers": [],
+      "tier": 3,
+      "update_trigger": "spec",
+      "depends_on": ["architecture/overview.md", "conformance/foundation-verification.md", "conformance/lockin-gate.md"]
+    },
+    {
+      "path": "conformance/zero-lockin-checklist.md",
+      "covers": [],
+      "tier": 3,
+      "update_trigger": "spec",
+      "depends_on": ["conformance/lockin-gate.md", "conformance/lockin-audit.md", "conformance/foundation-verification.md"]
+    },
+    {
+      "path": "architecture/background/memory-as-platform.md",
+      "covers": [],
+      "tier": 3,
+      "update_trigger": "manual",
+      "depends_on": ["architecture/overview.md", "architecture/memory-spec.md"]
+    },
+    {
+      "path": "maintainers/doc-maintenance-spec.md",
+      "covers": [],
+      "tier": 3,
+      "update_trigger": "manual",
+      "depends_on": ["architecture/overview.md"]
+    },
+    {
+      "path": "build/implementers-reference.md",
+      "covers": [],
+      "tier": 3,
+      "update_trigger": "spec",
+      "depends_on": ["architecture/overview.md"]
+    },
+    {
+      "path": "maintainers/guides-spec.md",
+      "covers": [],
+      "tier": 3,
+      "update_trigger": "manual",
+      "depends_on": ["architecture/overview.md"]
+    },
+    {
+      "path": "conformance/README.md",
+      "covers": [],
+      "tier": 3,
+      "update_trigger": "spec",
+      "depends_on": ["architecture/overview.md"]
+    },
+    {
+      "path": "conformance/swap-tests.md",
+      "covers": [],
+      "tier": 3,
+      "update_trigger": "spec",
+      "depends_on": ["architecture/adapter-spec.md", "architecture/models-spec.md", "architecture/tools-spec.md"]
+    },
+    {
+      "path": "conformance/deploy-tests.md",
+      "covers": [],
+      "tier": 3,
+      "update_trigger": "spec",
+      "depends_on": ["architecture/deployment-spec.md"]
+    },
+    {
+      "path": "conformance/fs-tests.md",
+      "covers": [],
+      "tier": 3,
+      "update_trigger": "spec",
+      "depends_on": ["architecture/overview.md"]
+    },
+    {
+      "path": "conformance/arch-tests.md",
+      "covers": [],
+      "tier": 3,
+      "update_trigger": "spec",
+      "depends_on": ["architecture/overview.md"]
+    },
+    {
+      "path": "architecture/principles.md",
+      "covers": [],
+      "tier": 2,
+      "update_trigger": "spec",
+      "depends_on": ["architecture/overview.md"]
+    },
+    {
+      "path": "CONTRIBUTING.md",
+      "covers": [],
+      "tier": 3,
+      "update_trigger": "manual",
+      "depends_on": []
+    },
+    {
+      "path": "architecture/background/memory-tool-completeness.md",
+      "covers": [],
+      "tier": 3,
+      "update_trigger": "manual",
+      "depends_on": ["architecture/memory-spec.md", "architecture/tools-spec.md"]
+    },
+    {
+      "path": "architecture/background/lock-in-analysis.md",
+      "covers": [],
+      "tier": 3,
+      "update_trigger": "manual",
+      "depends_on": ["architecture/overview.md", "architecture/adapter-spec.md"]
+    },
+    {
+      "path": "README.md",
+      "covers": [],
+      "tier": 3,
+      "update_trigger": "spec",
+      "depends_on": ["architecture/overview.md"]
+    },
+    {
+      "path": "AGENT.md",
+      "covers": [],
+      "tier": 3,
+      "update_trigger": "spec",
+      "depends_on": ["architecture/overview.md"]
+    }
+  ]
+}
