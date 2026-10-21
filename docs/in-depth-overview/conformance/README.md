@@ -10,7 +10,7 @@ Each test has an ID, description, pass/fail criteria, and maps to a specific arc
 
 ## How to Use
 
-1. Implement the architecture (or start from the [TypeScript template](https://github.com/Personal-AI-Architecture/ts-architecture-template))
+1. Implement the architecture (or start from the [TypeScript](https://github.com/Personal-AI-Architecture/ts-architecture-template), [Python](https://github.com/Personal-AI-Architecture/python-architecture-template), [Go](https://github.com/Personal-AI-Architecture/go-architecture-template), [Rust](https://github.com/Personal-AI-Architecture/rust-architecture-template) or [Java](https://github.com/Personal-AI-Architecture/java-architecture-template) template)
 2. Run each test category below against your implementation
 3. All tests must pass for conformance — partial conformance is not conformance
 
@@ -25,7 +25,7 @@ Each test has an ID, description, pass/fail criteria, and maps to a specific arc
 
 ## Test Status
 
-Tests are currently defined as specifications (pass criteria, setup, verification steps). There are no executable test scripts yet. Run the suite by hand until the language-neutral conformance kit (US-16) is published.
+Tests are currently defined as specifications (pass criteria, setup, verification steps). The language-neutral [PAA conformance validator](https://github.com/Personal-AI-Architecture/paa-conformance-validator) (US-16) runs them against a built system.
 
 ## Related Documents
 

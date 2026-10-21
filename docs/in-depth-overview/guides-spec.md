@@ -97,7 +97,7 @@ For AI agents specifically, a working reference is the single best piece of cont
 
 ### 5. Template and Conformance Kit
 
-Runnable starting code lives in the separate [TypeScript template](https://github.com/Personal-AI-Architecture/ts-architecture-template), which has the right interfaces and minimal logic for each component. Builders using another language start from the contracts and the stories, and check their work with the language-neutral conformance kit (US-16) once it is published.
+Runnable starting code lives in the separate [TypeScript](https://github.com/Personal-AI-Architecture/ts-architecture-template), [Python](https://github.com/Personal-AI-Architecture/python-architecture-template), [Go](https://github.com/Personal-AI-Architecture/go-architecture-template), [Rust](https://github.com/Personal-AI-Architecture/rust-architecture-template) or [Java](https://github.com/Personal-AI-Architecture/java-architecture-template) templates, which have the right interfaces and minimal logic for each component. Builders using another language start from the contracts and the stories, and check their work with the language-neutral [PAA conformance validator](https://github.com/Personal-AI-Architecture/paa-conformance-validator) (US-16).
 
 ### 6. Conformance Suite (`conformance/`)
 
