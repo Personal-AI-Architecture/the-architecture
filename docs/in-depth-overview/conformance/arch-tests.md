@@ -185,7 +185,7 @@
 
 ## ARCH-7: Memory Export
 
-**Validates:** memory-spec.md §Export is non-negotiable, security-spec.md §Owner Data Rights
+**Validates:** memory-spec.md §Export is non-negotiable, security-spec.md §Export Security
 
 **Setup:**
 1. System running with data in Your Memory (files, conversations, preferences, version history)
