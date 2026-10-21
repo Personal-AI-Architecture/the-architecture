@@ -7,7 +7,7 @@ hide_table_of_contents: true
 
 > **Purpose:** Product contract for the Personal AI Architecture: what a developer can do with it, and what every system built on it promises the person who owns that system. This is for product owners, builders, QA and maintainers. It is not an owner-facing document.
 >
-> **Status:** Proposed for acceptance in this repository. On acceptance it is tagged. Tag: pending. No stories are Open. Where the published material does not yet deliver a story, the gap is listed in [personal-ai-architecture-gaps.md](./personal-ai-architecture-gaps.md).
+> **Status:** Accepted in this repository by Dave J and Dave W ([PR #7](https://github.com/Personal-AI-Architecture/the-architecture/pull/7)). Tag: [`paa-spec/2026-10-20`](https://github.com/Personal-AI-Architecture/the-architecture/tree/paa-spec/2026-10-20). No stories are Open. Where the published material does not yet deliver a story, the gap is listed in [personal-ai-architecture-gaps.md](./personal-ai-architecture-gaps.md).
 
 Evidence links point into this repository. Paths outside `docs/` (such as `specs/`, `AGENT.md`, `README.md` and `CONTRIBUTING.md`) are relative to the repository root. Paths that start with `template:` mean [Personal-AI-Architecture/ts-architecture-template](https://github.com/Personal-AI-Architecture/ts-architecture-template), read at `7fe3824`.
 
@@ -383,7 +383,7 @@ As a contributor, I want a clear way to change the architecture, so that the spe
 
 ## Approval
 
-Accepted by pull request in this repository, then tagged. Tag: pending.
+Accepted by pull request in this repository, then tagged. Tag: `paa-spec/2026-10-20`.
 
 ## Contract alignment
 
