@@ -151,12 +151,10 @@ Auth is the independent component that establishes identity, decides permissions
   - `mode: enum`
   - `permissions: PermissionSet`
 
-#### `AuthHeaders` (implementation example, not mandatory mechanism)
-- Required keys:
-  - `x-actor-id`
-  - `x-actor-type`
-  - `x-auth-mode`
-  - `x-actor-permissions`
+#### `AuthIdentityTransport` (implementation example, not mandatory mechanism)
+- The authenticated identity must survive a transport swap without caller-controlled
+  permission data. The current internal contract uses `X-Actor-ID`; permissions remain
+  in Auth. Transport-neutral propagation remains open under S5.
 
 ### 4.4 Required Tool Contracts
 
@@ -535,9 +533,8 @@ Why invalid:
 
 ## Contract Alignment
 
-This blueprint follows `architecture/auth-spec.md`, which is ahead of the contract files in these places:
-
-- The canonical policy contract now records the owner allow-all default and no-access default for other identities (AUTH-MUST-014).
-- `contracts/schemas/identity.json` needs a starting status for re-created identities that grants no access until the owner turns it back on (AUTH-MUST-016).
-- `contracts/openapi/gateway-engine.yaml` and `gateway-agent-loop-contract` material describe Auth as middleware; there is no "not permitted" tool-result shape or denied-action error code (AUTH-MUST-001, AUTH-MUST-006).
-- `contracts/openapi/gateway-api.yaml` describes API keys as full-access only.
+The canonical contract tree under `contracts/` is authoritative for identity, policy,
+request, and error shapes. Identity status and extensible actor types are published;
+re-created identities remain inactive until the owner reactivates them. Auth remains
+the sole owner of permissions, and transport-neutral identity propagation (S5) and
+tool-definition semantics (S8) remain open follow-up questions.

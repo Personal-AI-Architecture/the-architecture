@@ -330,15 +330,13 @@ Per-component requirements from [security-spec.md](./security-spec.md). Security
 
 ## Contract alignment
 
-This spec is ahead of the contract files in these places:
-
-- **Where Auth sits.** `contracts/openapi/gateway-api.yaml` says requests are authenticated before reaching the Gateway, and `gateway-agent-loop-contract.md` and `contracts/openapi/gateway-engine.yaml` describe Auth as middleware between the Gateway and the Agent Loop. Both need to say the Gateway calls Auth on every request and the Agent Loop calls Auth before each tool call.
-- **Identity status.** `contracts/schemas/identity.json` needs a starting status for re-created identities that grants no access until the owner turns it back on. Its status list today is active, suspended and revoked.
-- **Identity types.** `contracts/schemas/identity.json` has a fixed list of types; this spec requires new types to be addable as data.
-- **Identity transport (open).** Identity currently travels in `X-Actor-ID` and `X-Actor-Permissions` headers (`contracts/openapi/gateway-engine.yaml`). This spec requires only that the authenticated identity survives a transport swap or a replacement of the Gateway or Agent Loop. The `X-Actor-Permissions` example format also doesn't match `contracts/schemas/policy.json`.
-- **Policy rules.** `contracts/schemas/policy.json` adds wildcards, deny-wins precedence and conditions that this spec doesn't describe yet, and needs its default (if it has one) to be "the owner can do everything".
-- **Denied and revoked errors.** Neither `gateway-api.yaml` nor `gateway-engine.yaml` has an error code for a denied action, a "not permitted" tool result, or a revocation mid-operation.
-- **API keys.** `gateway-api.yaml` describes API keys as full-access (owner-level) only.
+The canonical contract tree under `contracts/` is authoritative for transport and
+payload shapes. Identity records now have an explicit `status` and extensible actor
+`type`; re-created identities remain inactive until the owner reactivates them.
+The Gateway carries the authenticated identity through the transport-neutral Auth
+boundary, currently represented by `X-Actor-ID` on the internal handoff. Permissions
+remain owned by Auth and are not caller-controlled header data. The remaining open
+transport question is tracked outside this spec as S5.
 
 ---
 

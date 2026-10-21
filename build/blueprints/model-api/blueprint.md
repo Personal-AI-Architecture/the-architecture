@@ -87,7 +87,7 @@ Defined interfaces:
 - Required fields:
   - `messages: CompletionMessage[]` (min 1)
   - `tools: ModelToolDefinition[]` (can be empty)
-  - the model for this call: the owner's current choice, which came with the Gateway's request (field name pending the next contract revision)
+  - `model`: the owner's current choice, which came with the Gateway's request
 - Optional fields:
   - `metadata.correlation_id`
 - Forbidden fields:

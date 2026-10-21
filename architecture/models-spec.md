@@ -138,10 +138,10 @@ None. Models is the thinnest spec because models are the most external thing in 
 
 ## Contract alignment
 
-The text above is ahead of the contracts in these places, pending the next contract revision:
-
-- `contracts/openapi/model-api.yaml` has no way to report that a model lacks a capability the request needs (no capability field or capability error).
-- `contracts/openapi/gateway-engine.yaml` has no request field for the model, so the Agent Loop cannot yet receive the owner's current choice per request.
+The canonical contract tree under `contracts/` is authoritative for the model-facing
+payloads and the internal request handoff. The Agent Loop receives the selected model
+through `AgentLoopRequest.model`; capability reporting remains an implementation and
+future contract-extension concern.
 
 ---
 

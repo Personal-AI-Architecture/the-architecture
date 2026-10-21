@@ -103,6 +103,26 @@
       },
       "source": "cli:git",
       "category": "always-send"
+    },
+    {
+      "name": "memory_restore",
+      "description": "Make an earlier version of owner memory current again.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Path or scope whose earlier version should become current"
+          },
+          "version": {
+            "type": "string",
+            "description": "Opaque version identifier returned by the memory history operation"
+          }
+        },
+        "required": ["path", "version"]
+      },
+      "source": "memory",
+      "category": "discoverable"
     }
   ]
 }

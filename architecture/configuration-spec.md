@@ -269,13 +269,11 @@ Per-component requirements from [security-spec.md](./security-spec.md). Security
 
 ## Contract alignment
 
-The text above is ahead of these contract files:
-
-- `contracts/openapi/gateway-engine.yaml` (and [gateway-agent-loop-contract.md](../architecture/gateway-agent-loop-contract.md) "Provider configuration"): the Gateway–Agent Loop request needs to carry the owner's current model choice on every request, instead of the model being fixed at startup.
-- `contracts/schemas/configuration.json`: examples use product-specific paths; they should use neutral paths like the ones above.
-- `contracts/schemas/tool-definition.json`: the always-send `category` is declared by the tool, while this spec makes the always-send set an owner preference.
-- `contracts/schemas/`: there is no adapter config schema yet.
-- `contracts/openapi/gateway-api.yaml`, `gateway-engine.yaml`, `contracts/schemas/message.json`: describe the system message as coming "from configuration"; the bootstrap prompt belongs to the Agent Loop's configuration, not runtime config.
+The canonical contract tree under `contracts/` is authoritative for exact runtime,
+adapter, message, and internal-handoff shapes. The model choice is carried by the
+internal request, while the bootstrap prompt, provider adapter, and tool definitions
+remain startup configuration. Adapter configuration remains intentionally
+implementation-specific until a dedicated schema is agreed.
 
 ---
 

@@ -32,7 +32,7 @@ This file defines language-agnostic pass/fail vectors for Auth component conform
 | AUTH-T001P | AUTH-MUST-001 | Positive | Call protected route (including a history read) with valid credentials | Gateway calls Auth; request proceeds | 401 on valid auth, or no Auth call | Boundary path regression |
 | AUTH-T001N | AUTH-MUST-001 | Negative | Call protected route without valid credentials | 401 unauthorized | Route executes without an Auth check | Auth omitted on real path |
 | AUTH-T002P | AUTH-MUST-002 | Positive | Submit request with valid actor headers/credentials | Normalized auth context attached to request | Missing auth context downstream | Identity propagation drift |
-| AUTH-T002N | AUTH-MUST-002 | Negative | Supply malformed `x-actor-permissions` or invalid actor type | Safe reject and no context attachment | Request continues with malformed context | Context validation drift |
+| AUTH-T002N | AUTH-MUST-002 | Negative | Supply malformed authenticated identity context or an invalid actor type | Safe reject and no context attachment | Request continues with malformed context | Context validation drift |
 | AUTH-T003P | AUTH-MUST-003 | Positive | Provide mismatched actor identity vs persisted auth state | Denied (fail closed) | Request allowed despite mismatch | Fail-open auth drift |
 | AUTH-T003N | AUTH-MUST-003 | Negative | Remove required auth headers | Denied with safe unauthorized response | Default/anonymous context granted | Missing-credential bypass |
 | AUTH-T004P | AUTH-MUST-004 | Positive | Actor lacks `administration`, call admin-gated operation | Operation denied | Admin operation allowed | Permission enforcement drift |

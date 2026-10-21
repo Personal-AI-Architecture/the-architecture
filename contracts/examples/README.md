@@ -24,6 +24,7 @@ Provide copyable valid and invalid example files so implementers, reviewers, and
 - `invalid-runtime-config.json` - drift example with collapsed config, embedded secret values, a model fixed in runtime config, and an approval rule in config instead of Auth
 - `adapter-config.json` - canonical adapter config
 - `invalid-adapter-config.json` - drift example with product/runtime concerns (and an approval rule) mixed into adapter config
+- `memory-restore-tool.json` - canonical memory restore tool definition
 
 ## Authority Mapping
 
@@ -32,6 +33,7 @@ Provide copyable valid and invalid example files so implementers, reviewers, and
 - Startup/runtime config -> `build/primers/configuration.md`
 - Pass/fail enforcement -> `build/compliance-matrix.md`
 - Cross-reference map -> `maintainers/traceability-map.md`
+- Memory restore tool -> `architecture/memory-spec.md`
 
 ## Usage Rules
 
@@ -50,7 +52,8 @@ Provide copyable valid and invalid example files so implementers, reviewers, and
 
 ## Contract Alignment
 
-The examples follow the current contract files, which are behind the specs in `architecture/` in these places:
+The examples follow the current canonical contract files:
 
 - `gateway-engine-request.json` includes the per-request model. Correlation and conversation metadata remain in the request metadata object.
 - Message content is a list of parts. Tool calls and tool results use the same message-part shape and remain in conversation history.
+- `memory-restore-tool.json` defines the canonical restore operation inputs: a path or scope and an opaque version identifier.

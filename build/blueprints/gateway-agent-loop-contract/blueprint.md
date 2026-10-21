@@ -6,7 +6,7 @@
 The Gateway ↔ Agent Loop Contract defines the bounded internal handoff between Gateway and Agent Loop so both components can evolve independently while preserving behavior, safety, and auditability.
 
 ### High-Level Responsibilities
-- Define one internal request contract (`messages` + model + `metadata`) for `POST /engine/chat` (the path keeps the component's older name until the next contract revision).
+- Define one internal request contract (`messages` + model + `metadata`) for `POST /agent-loop/chat`.
 - Define one internal streaming event contract for interaction output.
 - Define pre-stream vs mid-stream failure behavior.
 - Require that the Gateway calls Auth on every request before the handoff, and that the Agent Loop asks Auth before each tool call.
@@ -63,7 +63,7 @@ The Gateway ↔ Agent Loop Contract defines the bounded internal handoff between
 
 ### Internal vs External Concepts
 - **Internal**
-  - `POST /engine/chat` payload and SSE event semantics.
+  - `POST /agent-loop/chat` payload and SSE event semantics.
   - identity attached by the Gateway after its Auth call.
 - **External**
   - client request/response contract (`/message`, `/conversations`, and `/approvals` where used).
@@ -79,9 +79,8 @@ Canonical schema pack: `build/blueprints/gateway-agent-loop-contract/contract-pa
 
 Required:
 - `messages: GatewayMessage[]`
-- the model to use (the owner's current choice; field name pending the next contract revision)
+  - `model` (the owner's current choice)
 - `metadata.correlation_id: string`
-- a request timestamp, ISO 8601 (field name pending the next contract revision)
 
 Optional metadata:
 - `conversation_id: string`
@@ -168,7 +167,7 @@ Allowed `code` values:
 
 ### 4.7 Communication Pattern
 
-- Request/response handoff begins with `POST /engine/chat`.
+- Request/response handoff begins with `POST /agent-loop/chat`.
 - Response is SSE stream, not batched polling.
 - Pre-stream failures are returned as HTTP error responses.
 - Mid-stream failures are emitted as SSE `error` events, then stream closes.
@@ -178,8 +177,12 @@ Allowed `code` values:
 ```json
 {
   "messages": [
-    { "role": "user", "content": "Draft a project plan." }
+    {
+      "role": "user",
+      "content": [{ "type": "text", "text": "Draft a project plan." }]
+    }
   ],
+  "model": "local/llama-3.1-8b",
   "metadata": {
     "correlation_id": "req_123",
     "conversation_id": "conv_123",
@@ -206,7 +209,8 @@ Allowed `code` values:
 Why invalid:
 - request includes forbidden runtime/provider configuration fields.
 
-The valid example omits the model and timestamp because their field names are pending the next contract revision.
+The valid example includes the canonical `model` field. The internal contract does not
+require a separate request timestamp.
 
 ---
 
@@ -492,7 +496,7 @@ The valid example omits the model and timestamp because their field names are pe
 - Test vectors count: 32 total (`16 positive`, `16 negative`)
 - Conflicts detected/resolved: 3/3 resolved
 - Unresolved ambiguity list:
-  - `A-01 (Medium)`: some human examples still use legacy event payload field names.
+  - `A-01 (Medium)`: transport-neutral identity propagation (S5), tool-definition semantics (S8), and approval lifecycle remain open outside this bounded contract.
 - Final readiness rating: Conditionally Ready
 
 ## Contract Alignment

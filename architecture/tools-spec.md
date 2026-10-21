@@ -319,16 +319,14 @@ Per-component requirements from [security-spec.md](./security-spec.md). The secu
 
 ## Contract alignment
 
-The text above is ahead of the published contracts in these places:
-
-- **Who chooses visibility.** `contracts/schemas/tool-definition.json` has a `category` field (always-send or discoverable) on the tool's own self-description, so the tool can choose its visibility. This spec makes it the owner's choice, stored as a preference.
-- **Tool identity.** In `contracts/schemas/tool-definition.json`, `source` is optional, and the tool definition in `contracts/openapi/model-api.yaml` has no source at all. Two tools with the same name from different sources can collide.
-- **"Exists but not permitted".** Neither `tool-definition.json` nor `model-api.yaml` has a way to tell the model that a tool exists but isn't permitted for the current actor.
-- **Parallel calls.** The contracts don't say that several tool calls in one turn may run at the same time, or that the text alongside them is kept.
-- **Tool calls and results in messages.** `contracts/schemas/message.json`, `contracts/openapi/model-api.yaml` and `contracts/openapi/gateway-engine.yaml` still use different shapes for tool calls and tool results, and the Gateway–Agent Loop contract paths still say "engine".
-- **Adapter config.** There is no schema for adapter config files in `contracts/schemas/`.
-- **Approval step.** No contract defines an approval step for products that add one.
-- **Wording.** `tool-definition.json` examples still say "user's library", and its `source` description uses an approval-gate tool as an example.
+The canonical contract tree under `contracts/` is authoritative for tool-definition
+and message shapes. The generic tool-definition contract now includes a canonical
+`memory_restore` example with an opaque `version` identifier. S8 remains open for
+the owner-controlled visibility/source semantics and adapter configuration details;
+approval lifecycle remains open for products that add approval prompts. Parallel
+execution and “exists but not permitted” behavior remain architectural requirements
+that implementations must enforce even where the generic tool schema is intentionally
+extensible.
 
 ---
 

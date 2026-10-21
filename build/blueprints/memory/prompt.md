@@ -78,7 +78,7 @@ Implement these behaviors:
 ### Export and history
 - `memory_export` must return archive path and include required owner data surfaces.
 - `memory_history` must expose change records and prior state behavior where applicable.
-- Restore must make an earlier state current and record itself in history. The contract has no restore operation yet; implement the behaviour and report the field names you chose.
+- Restore must make an earlier state current and record itself in history. Use the canonical `memory_restore` tool definition with `path` and opaque `version` fields.
 - How history is built is up to you (Git is one option, a database with snapshots is another).
 
 ### Security and portability

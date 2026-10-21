@@ -429,7 +429,7 @@ Memory Tools define the always-present operational surface used to read, write, 
 - Output: confirmation of the restore.
 - Behaviour: the earlier state becomes current, and the restore is recorded in history as a new change.
 - Auth check: the same per-call check as any mutating operation.
-- Field names are pending the next contract revision.
+- Canonical tool-definition example: `contracts/examples/memory-restore-tool.json`.
 
 ### 4.12 `memory_export_input` and `memory_export_output`
 - Input required fields: none.

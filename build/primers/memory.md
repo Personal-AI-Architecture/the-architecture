@@ -91,6 +91,10 @@ These are MVP requirements, not V1 enhancements.
 - Does export include everything the architecture says it must?
 - Are secrets excluded from normal Memory storage?
 
+## Canonical Example
+
+- `contracts/examples/memory-restore-tool.json`
+
 ## Common Drift Patterns
 
 - Incomplete export/import.

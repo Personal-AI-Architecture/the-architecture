@@ -130,7 +130,7 @@ Memory is the owner-controlled durable substrate for system data. It preserves i
 - Required fields:
   - `path: string`
 - Optional fields:
-  - `commit: string` (a version identifier; the name comes from the current contract and does not require Git)
+  - `version: string` (an opaque version identifier; it does not require Git)
 - Output:
   - `{ entries[] }` where each entry includes `commit`, `message`, `timestamp`, `path`, optional `previous_state`
 
@@ -138,7 +138,7 @@ Memory is the owner-controlled durable substrate for system data. It preserves i
 - Input: a path (or scope) and the earlier state to make current.
 - Output: confirmation of the restore.
 - The restore itself is recorded in history, so it can also be undone.
-- The field names are pending the next contract revision.
+- Canonical tool-definition example: `contracts/examples/memory-restore-tool.json`.
 
 #### `memory_export`
 - Required fields:

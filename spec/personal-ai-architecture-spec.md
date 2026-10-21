@@ -387,7 +387,10 @@ Accepted by pull request in this repository, then tagged. Tag: `paa-spec/2026-10
 
 ## Contract alignment
 
-The text above is ahead of the contracts in these places:
-
-- `contracts/schemas/identity.json`: needs a starting state for identities re-created by an import that gives them no access until the owner turns it back on (AC-3.5, AC-10.3).
-- `contracts/openapi/gateway-engine.yaml`: needs the owner's current model choice to travel with each request so the next message uses it (AC-5.1).
+The canonical contract tree under `contracts/` is authoritative for exact payloads,
+routes, shared message parts, and stream events. Identity status and extensible actor
+types, the per-request model, and structured message content are now represented in
+the published contracts. Remaining open contract questions are tracked in the gaps
+file, including approval lifecycle, transport-neutral identity propagation (S5),
+tool-definition semantics (S8), and the still-to-be-finalized correlation/streaming
+details.

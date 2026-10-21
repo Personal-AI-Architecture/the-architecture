@@ -323,6 +323,25 @@
         "product-owned state",
         "drift"
       ]
+    },
+    {
+      "file": "contracts/examples/memory-restore-tool.json",
+      "kind": "valid",
+      "owning_docs": [
+        "build/primers/memory.md"
+      ],
+      "matrix_ids": [
+        "M-04",
+        "D-07"
+      ],
+      "related_checklists": [
+        "conformance/review-checklists/memory-review.md",
+        "conformance/review-checklists/security-review.md"
+      ],
+      "glossary_terms": [
+        "version history",
+        "restore"
+      ]
     }
   ]
 }

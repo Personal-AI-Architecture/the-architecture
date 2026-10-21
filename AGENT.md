@@ -48,7 +48,7 @@
 
 ## Key Contracts
 
-- **Gateway <-> Agent Loop:** `POST /engine/chat` with messages array + model + metadata -> SSE stream. See `contracts/openapi/gateway-engine.yaml`.
+- **Gateway <-> Agent Loop:** `POST /agent-loop/chat` with messages array + model + metadata -> SSE stream. See `contracts/openapi/gateway-engine.yaml`.
 - **One message shape** across all three contracts: content is a list of parts, and tool calls and tool results are ordinary message parts saved in conversation history.
 - **Gateway API:** See `contracts/openapi/gateway-api.yaml`.
 - **Model API:** See `contracts/openapi/model-api.yaml`.
@@ -112,7 +112,7 @@ Use these terms consistently. The "Don't Use" column lists old terms that should
 
 | Use | Don't Use | Notes |
 |-----|-----------|-------|
-| **Agent Loop** | Engine | Describes what it does: send to model, get tool calls, execute, loop. Engine is the former name; it is still used in contract paths (`/engine/chat`, `gateway-engine.yaml`) until the next contract revision |
+| **Agent Loop** | Engine | Describes what it does: send to model, get tool calls, execute, loop. `gateway-engine.yaml` remains the canonical filename for compatibility; route and schema names use Agent Loop terminology. |
 | **APIs** | Connectors | Gateway API, Model API — just call them what they are |
 | **Model API** | Provider API | "Model API" is immediately clear |
 | **Clients** | External clients | Interfaces that communicate with a system through the Gateway API |

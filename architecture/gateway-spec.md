@@ -152,7 +152,7 @@ Clients are not components of the system. They connect through the Gateway (D57)
 | D60 | Auth is independent of the Gateway | Neither depends on how the other is built, and both can be swapped independently. The Gateway calls Auth on every request before anything reaches the Agent Loop (D176). |
 | D61 | Conversations live in the system, not in any client — enabling seamless client switching | Conversations are data in Your Memory, managed by the Gateway. Start on web, continue on mobile, pick up on CLI. The conversation persists regardless of which client connects. This is what makes clients truly external and interchangeable. |
 | D62 | Models are external intelligence, not a system component — addressed in Models interview | The interview raised the question of whether Models is a component. Models are called through the Model API but aren't part of the system the way Your Memory, Agent Loop, Auth, and Gateway are. Full treatment deferred to the Models interview. |
-| D137 | Gateway ↔ Agent Loop is a plain HTTP API contract | `POST /engine/chat` with messages array, model and metadata. Agent Loop returns SSE stream. Tool definitions are boot-time; the model travels with each request. See [gateway-agent-loop-contract.md](../architecture/gateway-agent-loop-contract.md). |
+| D137 | Gateway ↔ Agent Loop is a plain HTTP API contract | `POST /agent-loop/chat` with messages array, model and metadata. Agent Loop returns SSE stream. Tool definitions are boot-time; the model travels with each request. See [gateway-agent-loop-contract.md](../architecture/gateway-agent-loop-contract.md). |
 | D152 | Gateway accesses Your Memory through a dedicated conversation store tool, not directly | Purpose-built internal tool for conversation management (store, load, list, create). Same tool interface as memory tools, called directly by Gateway — not through Agent Loop's tool loop (circular dependency). One key to the mailbox, not a copy of every key. |
 
 ---
@@ -193,12 +193,11 @@ Per-component requirements from [security-spec.md](./security-spec.md). Security
 
 ## Contract alignment
 
-The text above is ahead of the contracts in these places, pending the next contract revision:
-
-- `contracts/openapi/gateway-api.yaml` says requests are authenticated before they reach the Gateway. This spec has the Gateway call Auth on every request.
-- `contracts/openapi/gateway-api.yaml` stores only user and assistant messages, so tool calls and tool results are not part of resumable history. This spec requires them in history, using the single message shape in `contracts/schemas/message.json`.
-- `contracts/openapi/gateway-api.yaml` and `contracts/schemas/message.json` define message content as a string. This spec requires a list of content parts.
-- `contracts/openapi/gateway-engine.yaml` has no request field for the model. This spec has the Gateway pass the owner's current model choice on every request.
+The canonical contract tree under `contracts/` is authoritative for the Gateway API,
+the internal `/agent-loop/chat` handoff, and the shared structured message shape.
+This spec defines the Gateway responsibilities those contracts expose: Auth before
+protected work, conversation persistence through Memory, model propagation, and
+lossless tool-call/tool-result history.
 
 ---
 

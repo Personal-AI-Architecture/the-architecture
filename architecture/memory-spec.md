@@ -302,11 +302,12 @@ Per-component requirements from [security-spec.md](./security-spec.md). Security
 
 ## Contract alignment
 
-The text above is ahead of the contracts in these places, pending the next contract revision:
-
-- The memory tool contract has no restore operation. This spec requires one.
-- `contracts/schemas/message.json` defines message content as a string. This spec stores conversations with every content part (text, images, files), and with tool calls and tool results.
-- `contracts/openapi/model-api.yaml` has no embeddings route. Semantic search is therefore optional, and how text becomes vectors is left to the implementation.
+The canonical message schema under `contracts/` defines structured content parts and
+preserves tool calls and tool results in conversation history. The generic
+tool-definition contract now includes the canonical `memory_restore` operation shape
+(`path` plus an opaque `version` identifier); concrete history storage and result
+transport remain implementation-defined. Semantic search remains optional because
+the Model API does not define an embeddings route.
 
 ---
 

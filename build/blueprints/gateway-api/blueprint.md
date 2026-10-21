@@ -416,8 +416,7 @@ The Gateway API is the external contract through which clients interact with the
 
 ## Contract Alignment
 
-This blueprint follows the human specs, which are ahead of the contract files in these places:
-
-- The canonical Gateway API and shared message contracts define content as a list of parts (GW-MUST-016).
-- `contracts/openapi/gateway-api.yaml` stores only user and assistant messages, so tool calls and tool results are not part of conversation detail (GAPI-MUST-014).
-- `contracts/openapi/gateway-api.yaml` says requests are authenticated before they reach the Gateway; the specs have the Gateway call Auth on every request (GAPI-MUST-012).
+The canonical Gateway API and shared message contracts under `contracts/` are
+authoritative for routes, envelopes, structured content parts, and event shapes. This
+blueprint defines the Gateway ownership and behavior around those contracts; its
+adjacent `contract-pack.json` is only a derived source manifest.

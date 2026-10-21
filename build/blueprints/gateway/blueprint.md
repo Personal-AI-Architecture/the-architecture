@@ -16,7 +16,7 @@ The Gateway is the system's external interaction boundary. It accepts client req
 ### System Context
 - Upstream: external clients (CLI, web, mobile, bots, future clients).
 - Lateral dependencies: Auth boundary, Memory conversation-store boundary.
-- Downstream: Agent Loop through internal `POST /engine/chat` contract.
+- Downstream: Agent Loop through internal `POST /agent-loop/chat` contract.
 - Position in architecture: front door component, content-agnostic transport and lifecycle manager.
 
 ### Companion Artifact
@@ -111,12 +111,11 @@ The Gateway is the system's external interaction boundary. It accepts client req
 
 ### 4.2 Internal Gateway ↔ Agent Loop Interface (Conceptual)
 
-#### Request: `POST /engine/chat`
+#### Request: `POST /agent-loop/chat`
 - Required:
   - `messages[]`
   - the model to use (the owner's current choice, read on every message)
   - `metadata.correlation_id`
-  - a request timestamp
 - Optional:
   - `metadata.conversation_id`
   - `metadata.trigger`
@@ -491,7 +490,7 @@ Applies only where the owner's Auth rules require approval for a tool call. The 
 
 ## 16. Residual Risks & Open Decisions
 
-- `GW-RISK-001 (Medium)`: Human and primer documents still differ on some event payload field names; canonical schema publication is still needed to remove ambiguity.
+- `GW-RISK-001 (Medium)`: Products that add approvals still need an explicit lifecycle decision; the canonical base stream remains the published event set under `contracts/`.
 - `GW-RISK-002 (Medium)`: Approval visibility requirements (for products that add approvals) are aligned, but final cross-doc wording should be unified to avoid future regression.
 - `GW-RISK-003 (Low)`: Resume identifier transport is conceptually defined but not fully standardized across all client SDKs.
 - `GW-DECISION-OPEN-001`: Publish a single canonical event payload glossary for `Gateway API` and internal stream examples.

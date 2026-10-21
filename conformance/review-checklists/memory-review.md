@@ -44,6 +44,10 @@ Use this when reviewing Memory tools, export/history behavior, persistent conver
 - concurrent writes resolved by silent last-write-wins
 - database-backed Memory is invisible to the public Memory surface
 
+## Example Files
+
+- `contracts/examples/memory-restore-tool.json`
+
 ## Read Next
 
 - `build/primers/memory.md`

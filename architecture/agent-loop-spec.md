@@ -17,7 +17,7 @@ Why this matters: a generic agent loop can pick up any tool the ecosystem produc
 
 AI tool use collapsed the engineering cost of capabilities from "build across four layers" to "add a tool." The model is now good enough at deciding which tools to use and how to compose them without being told. This means the agent loop itself doesn't need to be smart — it just needs to reliably connect a model to tools and get out of the way.
 
-The Agent Loop sits in the middle of the foundation's flow: clients connect through the Gateway, the Gateway routes to the Agent Loop, the Agent Loop calls models through the Model API and executes tools from the environment. Your Memory is the platform — the Agent Loop reads and writes to it through tools. The Gateway ↔ Agent Loop interface is defined in [gateway-agent-loop-contract.md](../architecture/gateway-agent-loop-contract.md) (D137). The Agent Loop receives a messages array (conversation history + current message), the model to use for this request, and metadata via `POST /engine/chat` (the path keeps its older name until the next contract revision), then returns an SSE stream of events (text-delta, tool-call, tool-result, done, error). The Agent Loop adds its own bootstrap prompt from its configuration. Messages use one shape across all three contracts: tool calls and tool results are ordinary parts of messages, so they travel in conversation history like everything else. The Gateway calls Auth on every request before anything reaches the Agent Loop, and the Agent Loop asks Auth before each tool call.
+The Agent Loop sits in the middle of the foundation's flow: clients connect through the Gateway, the Gateway routes to the Agent Loop, the Agent Loop calls models through the Model API and executes tools from the environment. Your Memory is the platform — the Agent Loop reads and writes to it through tools. The Gateway ↔ Agent Loop interface is defined in [gateway-agent-loop-contract.md](../architecture/gateway-agent-loop-contract.md) (D137). The Agent Loop receives a messages array (conversation history + current message), the model to use for this request, and metadata via `POST /agent-loop/chat`, then returns an SSE stream of events (text-delta, tool-call, tool-result, done, error). The Agent Loop adds its own bootstrap prompt from its configuration. Messages use one shape across all three contracts: tool calls and tool results are ordinary parts of messages, so they travel in conversation history like everything else. The Gateway calls Auth on every request before anything reaches the Agent Loop, and the Agent Loop asks Auth before each tool call.
 
 **Related documents:** [overview.md](../architecture/overview.md) (architecture overview, links to all component specs)
 
@@ -135,7 +135,7 @@ See [configuration-spec.md](./configuration-spec.md) for the full boot sequence 
 | D42 | Engine renamed from "Harness" — "Engine" reflects that it's a commodity component | Every engine does the same thing. What makes the car different is everything around it. The Engine is the boring, interchangeable part. |
 | D50 | Bootstrap prompt is Agent Loop configuration — minimal seed that lets the model self-bootstrap from Your Memory | One line: "Read the entry point in the current folder." Everything else the model discovers from Your Memory by following that instruction. |
 | D108 | Model API must remain an API, not a tool | The model decides what tools to call — you can't use a tool to call the thing that decides which tools to use. Circular dependency. The Model API is structurally different from tools. |
-| D137 | Gateway ↔ Agent Loop is a plain HTTP API contract | `POST /engine/chat` with messages array + metadata. Agent Loop returns SSE stream. See [gateway-agent-loop-contract.md](../architecture/gateway-agent-loop-contract.md). |
+| D137 | Gateway ↔ Agent Loop is a plain HTTP API contract | `POST /agent-loop/chat` with messages array, model and metadata. Agent Loop returns SSE stream. See [gateway-agent-loop-contract.md](../architecture/gateway-agent-loop-contract.md). |
 
 ---
 
@@ -170,12 +170,10 @@ Per-component requirements from [security-spec.md](./security-spec.md). Security
 
 ## Contract alignment
 
-The text above is ahead of `contracts/openapi/gateway-engine.yaml` in these places, pending the next contract revision:
-
-- The request has no field for the model to use. This spec requires one on every request.
-- The request's message shape has no tool calls or tool-call references, although it allows a `tool` role. This spec requires the single shared message shape in `contracts/schemas/message.json`, with tool calls and tool results as message parts.
-- The yaml describes the system message as assembled by the Gateway from configuration. This spec makes the bootstrap prompt Agent Loop configuration, so the request carries no system message.
-- The `/engine/chat` path and the `engine` schema names still carry the component's old name.
+The canonical `contracts/openapi/gateway-engine.yaml` and shared message schema are
+authoritative for the internal route, request fields, structured message parts, and
+stream event shapes. This spec describes the ownership and behavioral requirements
+behind those canonical definitions.
 
 ---
 
