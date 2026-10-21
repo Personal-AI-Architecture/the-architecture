@@ -9,7 +9,7 @@ hide_table_of_contents: true
 >
 > Each gap is something the spec expects that the published architecture does not deliver today. Classification is a suggestion for triage: **Defect** (published material is broken or contradicts itself), **Decision needed** (the maintainers must choose), **Technical** (contract and technical work), **Spec-only** (wording fix in the architecture docs). A gap marked **Decided, spec update in progress** has a settled answer that is still being written into the specs and contracts.
 
-**Scoreboard:** The contract-source alignment batch, example-shape validation, documentation freshness tooling, configuration alignment, required parallel tool execution, portable policy semantics, approval lifecycle contracts, transport-neutral identity propagation, tool-definition visibility/source semantics, local-address decision, first executable language-neutral conformance baseline, and template-link cleanup are complete. All gaps tracked before 2026-10-21 are resolved. The 2026-10-21 visitor-1 read-through of the four component specs found nine new gaps, listed under "Open gaps from the component read-through": 4 Technical, 4 Decision needed, 1 Spec-only.
+**Scoreboard:** The contract-source alignment batch, example-shape validation, documentation freshness tooling, configuration alignment, required parallel tool execution, portable policy semantics, approval lifecycle contracts, transport-neutral identity propagation, tool-definition visibility/source semantics, local-address decision, first executable language-neutral conformance baseline, and template-link cleanup are complete. All gaps tracked before 2026-10-21 are resolved. The 2026-10-21 visitor-1 read-through of the four component specs found nine new gaps, listed under "Open gaps from the component read-through": 5 Decision needed, 2 Technical, 1 Defect, 1 Spec-only.
 
 ## Routes a developer follows
 
@@ -127,7 +127,7 @@ hide_table_of_contents: true
 - **Published:** The Agent Loop spec's "Concurrency" section says multi-actor concurrency is not an Agent Loop concern, because a collaborator or external agent always brings their own system and agent loop. The overview and the Auth spec say other people and AI agents can act through the owner's own system with the permissions the owner grants, so they get loops in this Agent Loop. The identity rules already cover this (identity travels with each request and is checked on every tool call); the Concurrency prose and its scenario table need rewording to match.
 - **Evidence:** [agent-loop-spec.md](../architecture/agent-loop-spec.md) "Concurrency"; [overview.md](../architecture/overview.md) "The parts" (Auth); [auth-spec.md](../architecture/auth-spec.md).
 
-### GAP-PAA-18: Two messages to the same conversation at once are not defined — Technical
+### GAP-PAA-18: Two messages to the same conversation at once are not defined — Decision needed
 
 - **Expected:** US-2 AC-2.4. Simultaneous changes do not corrupt data, and conflicts are reported. US-6 AC-6.1: any client can resume a conversation.
 - **Published:** The Gateway handles multiple clients connecting at the same time, but no spec says what happens when a second message arrives for a conversation while a loop for that conversation is still running (queue it, reject it, or run both). Two loops could append to one conversation in an unpredictable order.
@@ -143,7 +143,7 @@ hide_table_of_contents: true
 
 - **Expected:** One owner for keeping a request inside the model's context window. (US-5 says models differ; no user story promises long conversations work with every model.)
 - **Published:** When a request is too large, a `context_overflow` error is reported. Who prevents it is unsettled: the Agent Loop spec says the Agent Loop does not decide what to cut, leaving it to the model, the provider or instructions; the Models spec says the Agent Loop knows the limits of what it is calling; and tool results must reach the model unmodified.
-- **Evidence:** [agent-loop-spec.md](../architecture/agent-loop-spec.md) "What the Agent Loop does not do" (Context window management), "Error output" and "Checking an implementation"; [models-spec.md](../architecture/models-spec.md) (concerns table: "Context window awareness"); [build/blueprints/agent-loop](../build/blueprints/) (`context_overflow`).
+- **Evidence:** [agent-loop-spec.md](../architecture/agent-loop-spec.md) "What the Agent Loop does not do" (Context window management), "Error output" and "Checking an implementation"; [models-spec.md](../architecture/models-spec.md) (concerns table: "Context window awareness"); [build/blueprints/agent-loop](../build/blueprints/agent-loop/) (`context_overflow`).
 
 ### GAP-PAA-21: Revoking access cannot stop a running loop — Technical
 
@@ -151,13 +151,13 @@ hide_table_of_contents: true
 - **Published:** The Agent Loop checks Auth before each tool call, but no spec or contract defines stopping a loop that is already running: there is no cancel signal between the Gateway and the Agent Loop. With no default iteration cap, a loop for a revoked actor keeps calling the model until its next tool check.
 - **Evidence:** [auth-spec.md](../architecture/auth-spec.md) "Access revoked during an operation"; [agent-loop-spec.md](../architecture/agent-loop-spec.md) "What the Agent Loop guarantees"; [gateway-agent-loop-contract.md](../architecture/gateway-agent-loop-contract.md); `contracts/openapi/gateway-engine.yaml`.
 
-### GAP-PAA-22: The Auth and security specs disagree on what happens when Auth is down — Decision needed
+### GAP-PAA-22: The security spec contradicts the decided fail-closed rule when Auth is down — Defect
 
 - **Expected:** US-10 AC-10.1. One rule for requests and tool calls when Auth cannot be reached.
-- **Published:** The Auth spec says the system fails closed: requests that can't be checked are refused and tool calls that can't be checked don't run. The security spec says active sessions with valid tokens may continue. Since every tool call is checked with Auth, an active session cannot do any tool work either way.
-- **Evidence:** [auth-spec.md](../architecture/auth-spec.md) "Auth unavailable"; [security-spec.md](../architecture/security-spec.md) (failure table: "Auth provider crashes"); [agent-loop-spec.md](../architecture/agent-loop-spec.md) "Error output".
+- **Published:** Fail closed is decided: the Auth spec and the Gateway ↔ Agent Loop contract say requests and tool calls that can't be checked are refused, and `authorization-result.json` requires callers to treat an unavailable check as denied. The security spec's failure table still says active sessions with valid tokens may continue. It should be corrected to match.
+- **Evidence:** [auth-spec.md](../architecture/auth-spec.md) "Auth unavailable"; [security-spec.md](../architecture/security-spec.md) (failure table: "Auth provider crashes"); [agent-loop-spec.md](../architecture/agent-loop-spec.md) "Error output"; [authorization-result.json](../contracts/schemas/authorization-result.json).
 
-### GAP-PAA-23: What the Gateway saves when a reply fails partway is not defined — Technical
+### GAP-PAA-23: What the Gateway saves when a reply fails partway is not defined — Decision needed
 
 - **Expected:** US-6 AC-6.3. The system never reports a message as saved when it was not.
 - **Published:** No spec or contract says when the Gateway saves the incoming message relative to routing it, or what it keeps when the Agent Loop stream fails partway: the message, a partial reply and its tool events, or nothing. The internal stream's `done` arrives before the Gateway stores anything, while the client-facing `done` means storage has completed.

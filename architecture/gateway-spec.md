@@ -128,8 +128,8 @@ Where a product enables approvals, the Gateway forwards the canonical `approval-
 
 Before it POSTs to the Agent Loop, the Gateway:
 
-- Attaches the canonical `auth_context` for the actor Auth identified: the actor, an authentication ID, timestamps and the correlation ID, never credentials or permissions
-- Generates the correlation ID that traces the request end to end
+- Generates the correlation ID that traces the request end to end, before it calls Auth
+- Attaches the canonical `auth_context` for the actor Auth identified: the actor, an authentication ID, timestamps and the same correlation ID, never credentials or permissions
 
 These must survive a replacement of either the Gateway or the Agent Loop (AC-7.2). The full field list is in [gateway-agent-loop-contract.md](./gateway-agent-loop-contract.md).
 
