@@ -304,7 +304,7 @@ As a product builder, I want to make my own product (its methods, personality, t
 - **AC-17.2** — Given two products with different content on the same architecture, then each behaves according to its own content with no custom infrastructure code. _(evidence: [customization-spec.md](../in-depth-overview/customization-spec.md))_
 - **AC-17.3** — Given a builder's custom tools, then they are discovered and usable with the Agent Loop unchanged. _(evidence: [customization-spec.md](../in-depth-overview/customization-spec.md); [tools-spec.md](../in-depth-overview/tools-spec.md))_
 - **AC-17.4** — Given a branded client, then it connects through the Gateway API like any other client and can continue the same conversations; branding stays in the client. _(evidence: [customization-spec.md](../in-depth-overview/customization-spec.md))_
-- **AC-17.5** — Given a builder starts a product, then they start from the published contracts and the TypeScript template, or from the stories and specs alone in any language; the architecture is not installed as a package. _(evidence: `CONTRIBUTING.md` "Scope"; `README.md` "What this is")_ The Customization spec still promises a package: GAP-PAA-13.
+- **AC-17.5** — Given a builder starts a product, then they start from the published contracts and the TypeScript template, or from the stories and specs alone in any language; the architecture is not installed as a package. _(evidence: `CONTRIBUTING.md` "Scope"; `README.md` "What this is")_
 
 </details>
 
