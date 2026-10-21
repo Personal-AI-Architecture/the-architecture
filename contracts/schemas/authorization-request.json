@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "authorization-request.json",
+  "title": "Authorization Request",
+  "description": "A transport-neutral request to Auth. The Gateway uses it for incoming requests and the Agent Loop uses it before every tool call. Permissions are evaluated by Auth only (D176).",
+  "type": "object",
+  "required": ["actor_id", "resource", "action", "correlation_id"],
+  "properties": {
+    "actor_id": {
+      "type": "string",
+      "description": "Stable identity ID returned by authentication."
+    },
+    "resource": {
+      "type": "string",
+      "description": "Resource being accessed. Open-ended names include tool:read_file, memory:/life/finances/*, and system:change_settings."
+    },
+    "action": {
+      "type": "string",
+      "description": "Requested action. Open-ended names include read, write, delete, execute, delegate, approve, and configure."
+    },
+    "context": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Request-specific facts Auth may use for scoped policies, limits, approvals, or audit detail."
+    },
+    "correlation_id": {
+      "type": "string",
+      "description": "End-to-end request correlation ID. Auth includes it in the audit record."
+    }
+  },
+  "examples": [
+    {
+      "actor_id": "agent_system_001",
+      "resource": "tool:read_file",
+      "action": "execute",
+      "context": { "path": "/finances/AGENT.md" },
+      "correlation_id": "req_xyz789"
+    }
+  ]
+}

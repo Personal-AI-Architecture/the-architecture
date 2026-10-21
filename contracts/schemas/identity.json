@@ -12,17 +12,7 @@
     },
     "type": {
       "type": "string",
-      "enum": [
-        "owner",
-        "collaborator",
-        "system_agent",
-        "background_agent",
-        "external_agent",
-        "service",
-        "economic",
-        "federated"
-      ],
-      "description": "The type of actor. This enum is extensible — new actor types are new values, not schema changes. V1 implements only 'owner' and 'system_agent'. The identity schema supports all types from day one so that adding new actor types is a data change, not a schema change. Types: owner (the person whose system this is, exactly one per instance), collaborator (human invited by owner with scoped access, V2), system_agent (interactive AI agent acting on owner's behalf, V1), background_agent (scheduled tasks like digest and gardener, V1.1), external_agent (another AI connecting from outside, V3), service (integration like calendar sync or webhook, V3), economic (can spend money, V3), federated (another system instance, V4)."
+      "description": "The type of actor. This is an open string: adding an actor type is a data change, not a schema change. Known types include owner, collaborator, system_agent, background_agent, external_agent, service, economic, and federated."
     },
     "display_name": {
       "type": "string",

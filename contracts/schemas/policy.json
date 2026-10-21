@@ -49,7 +49,7 @@
     "effect": {
       "type": "string",
       "enum": ["allow", "deny"],
-      "description": "Whether this policy allows or denies the action. Deny takes precedence over allow when both match (fail-closed). The system starts maximally constrained — the owner loosens it as they gain confidence."
+      "description": "Whether this policy allows or denies the action. Deny takes precedence over allow when both match (fail-closed). The owner has the default allow-all policy on their own system; other identities start with no access until granted."
     },
     "conditions": {
       "type": "object",

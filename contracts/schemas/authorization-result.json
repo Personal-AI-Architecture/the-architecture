@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "authorization-result.json",
+  "title": "Authorization Result",
+  "description": "The result of an Auth authorization check. Every decision is auditable, and callers must treat an unavailable check as denied (fail closed).",
+  "type": "object",
+  "required": ["allowed", "reason", "audit_id", "correlation_id"],
+  "properties": {
+    "allowed": {
+      "type": "boolean",
+      "description": "Whether the actor may perform the requested action."
+    },
+    "reason": {
+      "type": "string",
+      "description": "Machine-readable decision reason. Implementations may add reasons; not_permitted, requires_approval, identity_inactive, and auth_unavailable are standard reasons."
+    },
+    "requires_approval": {
+      "type": "boolean",
+      "default": false,
+      "description": "True when policy permits the operation only after an approval flow. The architecture does not require approval by default."
+    },
+    "actor": {
+      "$ref": "identity.json",
+      "description": "The identity evaluated by Auth, when available."
+    },
+    "policy_ids": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Policy records that contributed to the decision, when the provider can expose them."
+    },
+    "audit_id": {
+      "type": "string",
+      "description": "Stable identifier for the audit record of this decision."
+    },
+    "correlation_id": {
+      "type": "string",
+      "description": "The correlation ID copied from the authorization request."
+    }
+  },
+  "examples": [
+    {
+      "allowed": true,
+      "reason": "policy_allow",
+      "requires_approval": false,
+      "actor": {
+        "id": "owner_abc123",
+        "type": "owner",
+        "display_name": "Owner",
+        "status": "active",
+        "created": "2026-01-15T10:30:00Z"
+      },
+      "policy_ids": ["owner_default"],
+      "audit_id": "audit_123",
+      "correlation_id": "req_xyz789"
+    },
+    {
+      "allowed": false,
+      "reason": "not_permitted",
+      "requires_approval": false,
+      "policy_ids": [],
+      "audit_id": "audit_124",
+      "correlation_id": "req_xyz789"
+    }
+  ]
+}

@@ -470,6 +470,13 @@ components:
         id:
           type: string
           description: Matches the corresponding tool-call id
+        error_code:
+          type: string
+          enum:
+            - not_permitted
+            - tool_error
+            - auth_unavailable
+          description: Machine-readable failure reason when the tool did not run
         output:
           type: string
           description: Successful tool output

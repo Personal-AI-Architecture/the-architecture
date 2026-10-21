@@ -43,16 +43,6 @@ paths:
             type: string
             examples:
               - 'owner_abc123'
-        - name: X-Actor-Permissions
-          in: header
-          required: true
-          description: |
-            Authorization context for the authenticated actor. The Agent Loop must not
-            treat this header as a permission cache; it asks Auth before each tool call.
-          schema:
-            type: string
-            examples:
-              - 'memory:*,tools:*'
       requestBody:
         required: true
         content:
@@ -286,6 +276,13 @@ components:
         id:
           type: string
           description: Matches the id from the corresponding tool-call event
+        error_code:
+          type: string
+          enum:
+            - not_permitted
+            - tool_error
+            - auth_unavailable
+          description: Machine-readable failure reason when the tool did not run
         output:
           type: string
           description: Successful tool output
@@ -340,11 +337,13 @@ components:
           enum:
             - provider_error
             - tool_error
+            - auth_error
             - context_overflow
           description: |
             Error category:
             - provider_error: Model unreachable or timeout
             - tool_error: Tool failed and model cannot recover
+            - auth_error: Auth denied the request or could not check it
             - context_overflow: Messages exceed model context window
         message:
           type: string
