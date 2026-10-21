@@ -723,7 +723,7 @@ Tools define the callable capability surface of the system: operations executed 
 | TOL-CF-002 | Human docs: model must tell "does not exist" from "not permitted"; MVP evidence filters tool list by permission before model call | Make it MUST-level (TOL-MUST-015); treat current filtering as a gap | Follows the current tools and Auth specs | Model reports permitted-but-refused tools as missing, misleading the owner |
 | TOL-CF-003 | Human docs define always-send/discoverable + discovery meta-tool; MVP evidence sends configured tools directly | Treat split as SHOULD-level readiness pattern and MUST-level when tool count/scale requires | Maintains MVP simplicity while preventing scale-time drift | Context bloat and degraded tool selection at higher tool counts |
 | TOL-CF-004 | Security/tools docs require mandatory isolation for untrusted tools; MVP evidence uses curated in-process tools and no full trust policy surface | Keep mandatory untrusted isolation as MUST policy in contract; document current gap as implementation backlog | Ensures future marketplace/third-party integration stays safe | Untrusted tool compromise could breach host/data boundaries |
-| TOL-CF-005 | Agent Loop spec guarantees concurrent execution for parallel tool calls; current loop evidence processes calls sequentially | Keep concurrent capability as SHOULD for MVP and MUST for scale/performance profiles | Avoids contradicting current implementation while preserving spec intent | Latency and throughput degradation for multi-tool turns |
+| TOL-CF-005 | Agent Loop spec requires concurrent execution for independent parallel tool calls; older implementation evidence is sequential | Make independent-call concurrency a MUST and preserve dependency ordering | Aligns tool execution with US-8 AC-8.4 and avoids unnecessary latency | Serial execution of independent work violates the architecture |
 
 ## 13. Normative Requirements (MUST/SHOULD/MAY)
 
@@ -745,12 +745,12 @@ Tools define the callable capability surface of the system: operations executed 
 - `TOL-MUST-014`: Tool add/remove swap paths MUST remain configuration/preference driven without architecture rewrites.
 - `TOL-MUST-015`: The Agent Loop MUST ask Auth before each tool call; a refused call MUST NOT run and MUST return "not permitted", and tools the actor may not use MUST be marked not permitted rather than hidden.
 - `TOL-MUST-016`: The default policy MUST let the owner use every tool with no approval step; any approval rule MUST live in Auth, not in tool definitions or configuration.
+- `TOL-MUST-017`: Independent tool calls in one Agent Loop turn MUST execute concurrently; dependent calls MUST remain ordered.
 
 ### SHOULD
 
 - `TOL-SHOULD-001`: Systems SHOULD implement explicit always-send/discoverable split with discovery query path.
 - `TOL-SHOULD-002`: A "not permitted" result SHOULD carry a short safe reason so the model can explain it to the owner.
-- `TOL-SHOULD-003`: Systems SHOULD support concurrent execution for independent tool calls in a single loop turn.
 
 ### MAY
 
@@ -785,6 +785,7 @@ Tools define the callable capability surface of the system: operations executed 
 | TOL-MUST-014 | Human `configuration-spec.md` (D147), `tools-spec.md`; AI matrix `T-03`, `MO-03` | `TOL-T014P`, `TOL-T014N` |
 | TOL-MUST-015 | Human `tools-spec.md`, `auth-spec.md`, decision `D176`; AI matrix `A-06`, `T-02` | `TOL-T015P`, `TOL-T015N` |
 | TOL-MUST-016 | Human `tools-spec.md` (no approval step by default), decision `D177`; AI matrix `A-07`, `C-04` | `TOL-T016P`, `TOL-T016N` |
+| TOL-MUST-017 | Human `agent-loop-spec.md`; AI `agent-loop.md` | `TOL-T017P`, `TOL-T017N` |
 
 ## 16. Residual Risks & Open Decisions
 

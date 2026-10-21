@@ -272,7 +272,7 @@ The Agent Loop is the generic execution loop that processes one interaction requ
 
 ### Scalability
 - Must support independent concurrent interactions (separate loop instances per request).
-- Should support multiple tool calls per interaction turn.
+- Must execute independent multiple tool calls in the same interaction turn concurrently; dependent calls remain ordered.
 - Must remain swappable as a component behind fixed internal contract.
 
 ### Reliability and Fault Tolerance
@@ -337,7 +337,7 @@ The Agent Loop is the generic execution loop that processes one interaction requ
 - `MO-01/MO-02/MO-03`: Model boundary stays external and swappable through adapters/config.
 
 ### Noted Primer/Implementation Tensions
-- Primer states support for concurrent tool execution where allowed; current loop processes tool calls sequentially within a turn.
+- Concurrent execution is now a mandatory implementation target for independent tool calls; sequential execution is permitted only where call dependencies require ordering.
 - Primer warns against approval ownership drift; current implementation includes in-loop pending approval state (bounded and contract-visible, but should remain carefully constrained to avoid policy ownership creep).
 
 ---
@@ -352,16 +352,13 @@ The Agent Loop is the generic execution loop that processes one interaction requ
 - Provider interactions remain adapter-mediated (`models-spec.md`, `adapter-spec.md`).
 
 ### Documented Discrepancies To Reconcile
-1. **Parallel tool execution expectation**
-   - Human Agent Loop spec states tool calls in a turn should be executable concurrently.
-   - Current implementation executes tool calls sequentially per turn.
-2. **Approval state ownership strictness**
+1. **Approval state ownership strictness**
    - Human Agent Loop spec says Agent Loop does not manage approval state, and that approval prompts are a product choice (default: none).
    - Current implementation maintains pending approval map inside Agent Loop runtime to support coded enforcement flow.
-3. **Event payload naming conventions**
+2. **Event payload naming conventions**
    - Human Gateway ↔ Agent Loop examples show `text-delta.content` and `tool-call.arguments`.
    - Current implementation/primer contract use `text-delta.delta` and `tool-call.input`.
-4. **Internal event set scope**
+3. **Internal event set scope**
    - Human internal contract table lists core events (`text-delta`, `tool-call`, `tool-result`, `done`, `error`).
    - Current runtime emits approval events in-stream as contract-visible extension.
 
@@ -376,7 +373,7 @@ The Agent Loop is the generic execution loop that processes one interaction requ
 
 | Conflict ID | Conflicting Statements | Chosen Resolution | Rationale | Risk if Unresolved |
 |---|---|---|---|---|
-| ENG-CF-001 | Human Agent Loop spec expects concurrent tool execution in a turn; current implementation executes sequentially | Preserve correctness-first behavior as conformant baseline; mark concurrency as SHOULD-level enhancement | Maintains deterministic behavior while enabling phased concurrency support | Inconsistent performance/latency expectations across implementations |
+| ENG-CF-001 | Human Agent Loop spec requires concurrent independent tool execution; older implementation evidence is sequential | Make concurrency a MUST for independent calls and require dependency-aware ordering | Preserves the agreed user-visible latency and composition behavior without racing dependent calls | Implementations may serialize independent work and violate US-8 AC-8.4 |
 | ENG-CF-002 | Human spec says loop should not manage approval state; runtime implementation maintains pending approval map | Allow bounded in-loop approval wait state only for coded enforcement and event visibility; keep policy ownership in Auth/tools | Satisfies contract-visible approval semantics without transferring policy ownership | Approval ownership can creep into Agent Loop policy logic |
 | ENG-CF-003 | Human examples use `text-delta.content` / `tool-call.arguments`; primer/runtime use `text-delta.delta` / `tool-call.input` | Use primer/runtime naming for MVP compatibility | Aligns with active contract and blueprints schemas | Event payload mismatch between Gateway and Agent Loop implementations |
 | ENG-CF-004 | Human internal contract table lists core events only; primer/runtime include approval events | Treat approval events as a contract extension, required only in products that add approval prompts | Matches compliance matrix and client contract requirements; approval is a product choice | Approval control path becomes non-portable and non-auditable |
@@ -402,10 +399,9 @@ The Agent Loop is the generic execution loop that processes one interaction requ
 - `ENG-MUST-014`: Agent Loop core loop MUST NOT contain provider-specific wire formatting logic (adapter boundary ownership).
 - `ENG-MUST-015`: Agent Loop MUST use the model named in each request, so a changed model choice applies to the next request with no restart.
 - `ENG-MUST-016`: Agent Loop MUST take the bootstrap prompt from its own configuration and put it first when calling the model; it MUST NOT depend on a Gateway-supplied system message.
+- `ENG-MUST-017`: Agent Loop MUST execute independent tool calls from one loop turn concurrently, preserve stable call/result association, and keep dependent calls ordered.
 
 ### SHOULD
-
-- `ENG-SHOULD-001`: Agent Loop SHOULD support concurrent tool execution when safe and deterministic for the implementation.
 - `ENG-SHOULD-002`: Agent Loop SHOULD expose deterministic guard behavior for duplicate or conflicting tool-call patterns.
 - `ENG-SHOULD-003`: Agent Loop SHOULD emit structured correlation-aware audit logs for loop transitions and failures.
 
@@ -442,13 +438,13 @@ The Agent Loop is the generic execution loop that processes one interaction requ
 | ENG-MUST-014 | Human `models-spec.md`, `adapter-spec.md`; AI matrix `E-03` | `ENG-T014P`, `ENG-T014N` |
 | ENG-MUST-015 | Human `agent-loop-spec.md`, `models-spec.md`; AI matrix `E-05`, `MO-02` | `ENG-T015P`, `ENG-T015N` |
 | ENG-MUST-016 | Human `agent-loop-spec.md`, `configuration-spec.md`; AI matrix `E-06` | `ENG-T016P`, `ENG-T016N` |
+| ENG-MUST-017 | Human `agent-loop-spec.md`; AI matrix `E-07` | `ENG-T017P`, `ENG-T017N` |
 
 ## 16. Residual Risks & Open Decisions
 
-- `ENG-RISK-001 (Medium)`: Concurrency expectation differs between source layers; implementations may vary unless a single canonical concurrency target is published.
+- `ENG-RISK-001 (Low)`: Implementations must preserve dependency ordering while running independent calls concurrently.
 - `ENG-RISK-002 (Medium)`: Approval state handling remains sensitive where a product adds approvals; bounded wait-state is allowed, but policy creep risk must be actively tested.
 - `ENG-RISK-003 (Low)`: Event field naming examples are mixed in legacy docs; schema pack is authoritative but docs should converge.
-- `ENG-DECISION-OPEN-001`: Publish canonical stance on required vs optional parallel tool execution for MVP conformance profiles.
 
 ## Source Basis
 
@@ -463,12 +459,12 @@ The Agent Loop is the generic execution loop that processes one interaction requ
 ## Self-Validation Report
 
 - Coverage of required sections: 16/16 (100%)
-- Normative requirements count: 21 total (`16 MUST`, `3 SHOULD`, `2 MAY`)
+- Normative requirements count: 21 total (`17 MUST`, `2 SHOULD`, `2 MAY`)
 - Interfaces with schemas: 4 (`gateway_engine_request`, `stream_event`, `model_completion_response`, `tool_execution_result`)
 - Test vectors count: 32 total (`16 positive`, `16 negative`)
 - Conflicts detected/resolved: 5/5 resolved
 - Unresolved ambiguity list:
-  - `A-01 (Medium)`: concurrency requirement strictness is not fully unified across source docs.
+  - Dependency detection and scheduling strategy remain implementation-defined.
 - Final readiness rating: Conditionally Ready
 
 ## Contract Alignment

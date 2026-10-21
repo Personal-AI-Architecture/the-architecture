@@ -9,7 +9,7 @@ hide_table_of_contents: true
 >
 > Each gap is something the spec expects that the published architecture does not deliver today. Classification is a suggestion for triage: **Defect** (published material is broken or contradicts itself), **Decision needed** (the maintainers must choose), **Technical** (contract and technical work), **Spec-only** (wording fix in the architecture docs). A gap marked **Decided, spec update in progress** has a settled answer that is still being written into the specs and contracts.
 
-**Scoreboard:** The contract-source alignment batch, example-shape validation, documentation freshness tooling, and configuration alignment are complete. Remaining work is concentrated in the approval lifecycle, policy portability, transport-neutral identity (S5), tool-definition semantics (S8), the local-address decision, and the first executable language-neutral conformance implementation.
+**Scoreboard:** The contract-source alignment batch, example-shape validation, documentation freshness tooling, configuration alignment, and required parallel tool execution are complete. Remaining work is concentrated in the approval lifecycle, policy portability, transport-neutral identity (S5), tool-definition semantics (S8), the local-address decision, and the first executable language-neutral conformance implementation.
 
 ## Routes a developer follows
 
@@ -66,11 +66,11 @@ hide_table_of_contents: true
 - **Evidence:** [swap-tests.md](../conformance/swap-tests.md) SWAP-1, SWAP-2; [arch-tests.md](../conformance/arch-tests.md) DEPLOY-5; [deploy-tests.md](../conformance/deploy-tests.md) DEPLOY-3.
 - **Decided:** the model travels with each request; the Gateway reads the owner's current model choice on every message, so a model switch needs no restart. The model-switch portion is resolved; the local-address mismatch remains open.
 
-### GAP-PAA-11: Running tool calls at the same time is required, but some blueprints make it optional — Technical
+### GAP-PAA-11: Running tool calls at the same time is required, but some blueprints make it optional — Resolved
 
 - **Expected:** US-8 AC-8.4.
-- **Published:** The Agent Loop spec guarantees independent tool calls run together; the Agent Loop and Tools blueprints treat it as optional or as a later scale feature.
-- **Evidence:** [agent-loop-spec.md](../architecture/agent-loop-spec.md) "What the Agent Loop Guarantees"; [build/blueprints/agent-loop/blueprint.md](../build/blueprints/agent-loop/blueprint.md) ENG-CF-001, ENG-SHOULD-001; [build/blueprints/tools/blueprint.md](../build/blueprints/tools/blueprint.md).
+- **Published:** The Agent Loop and Tools builder materials now make concurrent execution of independent tool calls a MUST, require stable result association, and preserve ordering for dependent calls. Conformance vectors cover both overlap and ordering failures.
+- **Evidence:** [agent-loop-spec.md](../architecture/agent-loop-spec.md) "What the Agent Loop Guarantees"; [build/blueprints/agent-loop/blueprint.md](../build/blueprints/agent-loop/blueprint.md) ENG-MUST-017; [build/blueprints/agent-loop/tests.md](../build/blueprints/agent-loop/tests.md); [build/blueprints/tools/blueprint.md](../build/blueprints/tools/blueprint.md).
 
 ### GAP-PAA-12: Permission rules have no shared definition for moving between systems — Technical
 

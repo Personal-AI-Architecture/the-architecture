@@ -24,6 +24,7 @@ This file defines language-agnostic pass/fail vectors for the Agent Loop compone
 - `ENG-MUST-014`: Provider-specific wire formatting remains in adapters, not in core loop logic.
 - `ENG-MUST-015`: Agent Loop uses the model named in each request; a changed choice applies to the next request with no restart.
 - `ENG-MUST-016`: Agent Loop takes the bootstrap prompt from its own configuration; it does not depend on a Gateway-supplied system message.
+- `ENG-MUST-017`: Independent tool calls in one loop turn execute concurrently; dependent calls remain ordered and every result retains its call ID.
 
 ## Test Vectors
 
@@ -61,11 +62,13 @@ This file defines language-agnostic pass/fail vectors for the Agent Loop compone
 | ENG-T015N | ENG-MUST-015 | Negative | Implementation reads the model from startup configuration and ignores the request | Conformance test fails | Startup-fixed model accepted | Model-fixed-at-startup drift |
 | ENG-T016P | ENG-MUST-016 | Positive | Request carries no system message | Model call starts with the configured bootstrap prompt | No bootstrap prompt sent | Bootstrap ownership drift |
 | ENG-T016N | ENG-MUST-016 | Negative | Implementation only works when the Gateway supplies a system message | Conformance test fails | Gateway-built system message required | Bootstrap ownership drift |
+| ENG-T017P | ENG-MUST-017 | Positive | Model emits two independent tool calls in one turn | Both calls overlap in execution, results preserve their IDs, and the loop continues after both complete | Calls run one after another or results are mismatched | Parallel-execution drift |
+| ENG-T017N | ENG-MUST-017 | Negative | Model emits independent calls but implementation serializes them, or starts a dependent call before its prerequisite result | Conformance test fails | Independent work serialized or dependency order violated | Concurrency/order drift |
 
 ## Coverage Summary
 
-- MUST requirements: 16
-- Positive tests: 16
-- Negative tests: 16
-- Total vectors: 32
+- MUST requirements: 17
+- Positive tests: 17
+- Negative tests: 17
+- Total vectors: 34
 - Critical drift categories covered: hidden reconfiguration channels, premature loop termination, event taxonomy drift, assistant-text loss, correlation mismatch, taxonomy collapse, permission bypass, approval invisibility, approval imposed by default, ownership drift, provider lock-in, model fixed at startup, bootstrap ownership.

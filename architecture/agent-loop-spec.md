@@ -63,7 +63,7 @@ That's the complete behavior. Five steps.
 - Responses stream back to the caller
 - The loop continues until the model signals completion. The Agent Loop MUST NOT impose a default iteration cap. Implementations MAY configure a safety bound as a deployment choice, but the Agent Loop itself never terminates the loop before the model signals done.
 - When the model emits text and tool calls in the same turn, the Agent Loop preserves the text in the assistant message for the next loop iteration. Streamed text is never silently discarded on tool continuation.
-- The model can dispatch multiple tool calls in parallel within a single loop — the Agent Loop executes them concurrently and returns all results
+- The model can dispatch multiple tool calls in parallel within a single loop — the Agent Loop executes independent calls concurrently, preserves stable call/result association, and keeps dependent calls ordered before returning all results
 
 ---
 
@@ -71,7 +71,7 @@ That's the complete behavior. Five steps.
 
 The Agent Loop is one brain with two hands — one model that can dispatch multiple tool executions in parallel. The model coordinates because it initiated all of them. It knows the left hand is reorganizing the filing cabinet, so it tells the right hand to wait before pulling from the same drawer.
 
-This is the only concurrency the Agent Loop needs to handle: **parallel tool execution within a single loop.** The model calls several tools at once (read a file while a background task runs), the Agent Loop executes them concurrently, results come back, the model decides what's next.
+This is the only concurrency the Agent Loop needs to handle: **parallel tool execution within a single loop.** The model calls several tools at once (read a file while a background task runs), the Agent Loop executes independent calls concurrently, keeps dependent calls ordered, results come back, and the model decides what's next.
 
 **Multi-actor concurrency is not an Agent Loop concern.** When a collaborator or external agent accesses the same Memory, they bring their own system — their own agent loop, their own model calls. Two people don't share a brain. They each have their own brain and access the same filing cabinet through Auth. Memory is inert — it doesn't care who's reading it. Auth gates every request. Tools handle write conflicts. No shared agent loop state needed.
 

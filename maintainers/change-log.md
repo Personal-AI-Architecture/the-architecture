@@ -23,6 +23,11 @@ Track how the primer layer evolves so examples, matrix rows, glossary terms, lim
 - Made Model API streaming explicit and added discriminated event shapes.
 - Enforced role-appropriate message parts and aligned builder materials on `parameters` for tool definitions.
 
+### Parallel Tool Execution Alignment
+
+- Promoted independent-call concurrency from an optional blueprint enhancement to a mandatory Agent Loop and Tools requirement.
+- Added conformance vectors for overlap, stable result IDs, and dependent-call ordering.
+
 ### Canonical Contract Alignment
 
 - Replaced duplicated blueprint contract packs with derived source manifests.

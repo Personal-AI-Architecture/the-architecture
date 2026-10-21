@@ -113,7 +113,7 @@ Use these for MVP implementation consistency:
 3. Loop completion:
    - Agent Loop must continue until model completion signal unless an explicit configured safety bound triggers classified termination.
 4. Parallelism:
-   - If parallel tool execution is not implemented initially, preserve deterministic sequential correctness and document deviation in `conflict_register.md` with a planned compatibility path.
+   - Independent tool calls in the same loop turn MUST execute concurrently. Preserve deterministic result association and keep dependent calls ordered.
 
 ## Non-Negotiable Constraints
 

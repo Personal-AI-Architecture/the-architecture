@@ -47,7 +47,7 @@ Run the model-tool loop for an interaction without owning product behavior, conv
 - Put its configured bootstrap prompt first when it calls the model.
 - Ask Auth before each tool call; do not run a call Auth refuses, and tell the model it was not permitted.
 - Execute permitted model-requested tools.
-- Support concurrent tool execution where allowed.
+- Execute independent tool calls in the same loop turn concurrently; keep dependent calls ordered.
 - Pass tool results back into model context.
 - Emit tool calls and tool results in the shared message shape so the Gateway can save them in history.
 - Stay separate from conversation ownership.
