@@ -181,7 +181,7 @@ After an `error` event, the stream closes. The Gateway decides how to communicat
 Auth is a separate component, not part of the Gateway or the Agent Loop (D60). Permissions live only in Auth. It is called at two points:
 
 1. **Every request.** The Gateway calls Auth before it POSTs to the Agent Loop. Auth validates the request (token, session, API key) and identifies the actor. The Gateway attaches the canonical transport-neutral `auth_context` returned by Auth or rejects the request with HTTP 401. Permissions remain in Auth and are not carried in the context.
-2. **Each tool call.** Before running a tool call, the Agent Loop asks Auth whether this actor may make it. A refused call is not run; the model is told it was not permitted.
+2. **Each tool call.** Before running a tool call, the Agent Loop asks Auth whether this actor may make it. A refused call is not run; the model is told it was not permitted. If Auth can't be reached, the call is not run either: the system fails closed (see [auth-spec.md](./auth-spec.md) "Auth unavailable").
 
 The Agent Loop receives a pre-authenticated `auth_context` through the internal transport adapter. The adapter verifies the Gateway-to-Agent-Loop boundary and rejects a missing, malformed, expired, or caller-supplied context. The Agent Loop never authenticates credentials itself and never decides permissions: it asks Auth and honours the answer.
 

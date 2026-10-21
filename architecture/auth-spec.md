@@ -3,21 +3,42 @@ sidebar_label: Auth
 hide_table_of_contents: true
 ---
 
-# Auth Spec: Identity, Access, and Permissions
+# Auth
+
+## What Auth is
+
+Auth decides who and what can act on your AI system, and what each of them is allowed to do. That covers you, the people you invite, the AI agents working for you, and the services that act on your system.
+
+In most AI products, access control is part of the app: a login screen and whatever rules the app decides to enforce. Some go further and leave it to the model, with instructions in the prompt about what it shouldn't do.
+
+We think both are the wrong place for it. Rules that live in an app are lost when you leave the app. Rules that live in the model change whenever you change models, and a model can be talked out of them. Your security has to hold no matter which model, app or agent loop you're using.
+
+So in PAA, Auth is its own component. You can do everything on your own system; everyone and everything else starts with no access until you grant it. Your rules belong to you and stay the same when you swap any other part of your system.
+
+That means you can invite a collaborator, or let an AI agent act on your behalf, with exactly the access you choose, and change models or apps without losing your rules.
+
+<p align="center">
+  <img src="../assets/readme-how-it-works.svg" alt="Interfaces connect through the Gateway API to the Gateway, which hands off to the Agent Loop. The Agent Loop calls models through the Model API and reaches Your Memory and other tools through tools. Auth checks every request." width="900" />
+</p>
+
+## How it works
+
+Because models can be swapped and can be tricked, Auth sits outside the model and is checked at two points:
+
+1. **Every request.** When anything arrives at the Gateway, including just reading a conversation, the Gateway asks Auth who sent it and whether they may. If Auth says no, the request goes no further.
+2. **Every tool call.** Before the Agent Loop runs a tool, it asks Auth whether this actor may use this tool here. If Auth says no, the tool doesn't run, and the model is told it isn't permitted.
+
+The rules themselves are simple data: who, on what, doing what, allowed or denied. If no rule allows something, it's denied. You manage the rules the same way you manage everything else, by asking ("give my business partner read access to my finances"), and you can inspect and export all of them, along with a log of every action.
+
+Just as important is what Auth doesn't do. It doesn't hold Your Memory or your conversations, route requests, run tools or decide what the AI should do. It answers one question, "who is acting, and may they?", and everything else asks it.
+
+---
+
+The rest of this doc is the specification: what any implementation of Auth must do.
 
 **Serves stories:** US-3, US-7, US-10 in the [PAA spec](../spec/personal-ai-architecture-spec.md).
 
-Every AI system has some form of access control. ChatGPT has user accounts and sessions, Copilot inherits your organization's credentials, and agent frameworks usually leave auth to the developer. In those systems, auth is a **feature of the application**: a login screen, a session cookie, maybe an API key.
-
-Here, auth is a **component** of the architecture. A personal AI system that stores your memory, manages your tools and acts on your behalf needs access control as an architectural boundary, not a login screen. Auth decides who and what may act on the owner's system: who can reach it, what they can read and change in Your Memory, which tools they can use, and what they can do outside the system. That covers humans, AI agents, services and, later, other systems.
-
-Auth is separate so the other components stay swappable. If auth lived in the Model, swapping models would mean losing your security settings. Switch models, and your collaborators' access shouldn't disappear, your rules shouldn't reset and your audit trail shouldn't break. This is the same argument that keeps the Model outside Your Memory: Memory is inert so it stays portable; Auth is independent so the Model, the Agent Loop and the Gateway stay swappable.
-
 This is a **requirements and design spec**, not a technology choice. Any technology that meets the Auth contract is valid. Product choices such as the auth technology, MFA, login screens and how approvals look are implementation concerns (not published in this repository).
-
-**Related documents:** [overview.md](../architecture/overview.md) (architecture overview, links to all component specs)
-
----
 
 ## Where Auth sits
 
@@ -278,7 +299,7 @@ A conforming system needs at least `auth_whoami`, `auth_check` and `auth_export`
 
 | Data | Included | Format |
 |---|---|---|
-| Memory (files, content) | Yes | As-is, open formats |
+| Memory (files, content) | Exported by Your Memory, not Auth (see [memory-spec.md](./memory-spec.md) "Export") | As-is, open formats |
 | Permission policies | Yes | The architecture's open format (JSON or YAML) |
 | Identity records | Yes, details only | Names, types, creation dates, links to policies |
 | Audit log | Yes | Queryable records of who did what |
@@ -310,18 +331,11 @@ The pattern: **add identity types and rules, don't change the contract.**
 
 ---
 
-## Decisions made
+## Checking an implementation
 
-| # | Decision | Rationale |
-|---|---|---|
-| D22 | Auth on both local and managed hosting | Local deployment still needs authentication. Filesystem access is not the same as authenticated access to the system, and a local system may be reachable over a network. Auth is a memory concern: who can act on the owner's system, not where it runs. |
-| D60 | Auth is a cross-cutting layer, independent of the Gateway | Auth and the Gateway can each be swapped without changing the other. The Gateway calls Auth only through the Auth contract. |
+Items marked *(security)* are the per-component requirements from [security-spec.md](./security-spec.md), which owns the "why".
 
----
-
-## Success criteria
-
-- [ ] Every Gateway request is authenticated and authorized by Auth before it reaches the Agent Loop; requests without a valid identity are refused
+- [ ] Every Gateway request is authenticated and authorized by Auth before it reaches the Agent Loop; requests without a valid identity are refused (D22) *(security)*
 - [ ] Every tool call is authorized by Auth before it runs
 - [ ] A denied tool call is reported as "not permitted", distinguishable from "does not exist"
 - [ ] The owner can set up credentials on a new system
@@ -330,30 +344,24 @@ The pattern: **add identity types and rules, don't change the contract.**
 - [ ] Approval rules the owner sets are enforced
 - [ ] A new identity, of any type, has no permissions until the owner grants them
 - [ ] Every action is recorded in the audit log; if the log can't be written, work continues and the owner is alerted
-- [ ] Auth state is exportable: identities, policies, configuration and audit log
+- [ ] Auth state is exportable: identities, policies, configuration and audit log; it belongs to the owner *(security)*
 - [ ] After import, re-created identities have no access until the owner turns it back on; unsupported rules are reported and grant nothing
 - [ ] Swapping the auth provider changes only the Auth component
 - [ ] Adding a new identity type is a data change, not a code change
+- [ ] Requests and tool calls that can't be checked must be refused: fail closed *(security)*
+- [ ] Permissions live only in Auth *(security)*
+- [ ] Credentials stay outside Your Memory and are never tracked by git *(security)*
+- [ ] Auth and the Gateway must be independently swappable (D60) *(security)*
+- [ ] The auth data format belongs to the architecture, not the provider, so the owner can move between providers *(security)*
 
 ---
 
-## Security requirements
+## Decisions
 
-Per-component requirements from [security-spec.md](./security-spec.md). Security-spec owns the "why"; this section owns the "what" for Auth.
-
-- [ ] Every request must be authenticated before it reaches the Agent Loop (D22)
-- [ ] Requests and tool calls that can't be checked must be refused: fail closed
-- [ ] Permissions live only in Auth
-- [ ] Credentials stay outside Your Memory and are never tracked by git
-- [ ] Auth state must be exportable; it belongs to the owner
-- [ ] Auth and the Gateway must be independently swappable (D60)
-- [ ] The auth data format belongs to the architecture, not the provider, so the owner can move between providers
-
----
-
-## Related documents
-
-[overview.md](../architecture/overview.md) (architecture overview, links to all component specs) · [security-spec.md](./security-spec.md) · [gateway-agent-loop-contract.md](../architecture/gateway-agent-loop-contract.md)
+| # | Decision | Rationale |
+|---|---|---|
+| D22 | Auth on both local and managed hosting | Local deployment still needs authentication. Filesystem access is not the same as authenticated access to the system, and a local system may be reachable over a network. Auth is a memory concern: who can act on the owner's system, not where it runs. |
+| D60 | Auth is a cross-cutting layer, independent of the Gateway | Auth and the Gateway can each be swapped without changing the other. The Gateway calls Auth only through the Auth contract. |
 
 ---
 
@@ -371,7 +379,3 @@ Auth and are never caller-controlled transport data.
 Tool definitions use the same boundary discipline: source provenance and visibility
 metadata are canonical, while adapter endpoints and credentials remain outside the
 definition contract.
-
----
-
-*Auth is the gatekeeper that makes the other components safely swappable. A personal AI system needs access control that persists whatever intelligence is plugged in.*

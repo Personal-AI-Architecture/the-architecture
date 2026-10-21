@@ -65,7 +65,7 @@ A failed or conflicting write is reported to the caller, never reported as saved
 | Files | Markdown, plain text |
 | Version history | Git, or a database with snapshots |
 
-Implementations choose their storage mechanisms and can add more as needed (a database such as SQLite for structured queries, vector indexes for semantic search, etc.). Adding a mechanism means adding tool implementations — it doesn't change the contract. See `memory-spec.md` §Evolution.
+Implementations choose their storage mechanisms and can add more as needed (a database such as SQLite for structured queries, vector indexes for semantic search, etc.). Adding a mechanism means adding tool implementations — it doesn't change the contract. See `memory-spec.md` §How Your Memory grows.
 
 **Substrate test:** If it stores/retrieves/searches/versions data, it belongs to Your Memory. If it interprets or produces content, it belongs to the model.
 

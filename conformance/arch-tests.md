@@ -187,7 +187,7 @@
 
 ## ARCH-7: Memory Export
 
-**Validates:** memory-spec.md §Export is non-negotiable, security-spec.md §Export Security
+**Validates:** memory-spec.md §Export, security-spec.md §Export Security
 
 **Setup:**
 1. System running with data in Your Memory (files, conversations, preferences, version history)
@@ -215,7 +215,7 @@
 
 ## ARCH-8: Auth Tool Surface
 
-**Validates:** auth-spec.md §Minimal Tool Surface
+**Validates:** auth-spec.md §Auth tools
 
 **Setup:**
 1. System running with Auth configured (any mode, including local owner)
@@ -240,7 +240,7 @@
 
 ## ARCH-9: Version History Reliability
 
-**Validates:** memory-spec.md §What Memory Guarantees, security-spec.md §6. Version History as Security Net
+**Validates:** memory-spec.md §What Your Memory guarantees, security-spec.md §6. Version History as Security Net
 
 **Setup:**
 1. Fresh system install (no prior data)
