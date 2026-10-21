@@ -21,6 +21,7 @@ Use this when reviewing runtime auth wiring, identity propagation, permission en
 - [ ] `auth_whoami`, `auth_check`, and `auth_export` exist in the runtime.
 - [ ] Secrets are not written into Memory or any git-tracked file.
 - [ ] Approval rules the owner sets are enforced through code, not only policy prose or prompt text; none are required by default.
+- [ ] Where approvals are enabled, requests are pending before execution, only approval-authorized identities decide, terminal decisions include cancellation/expiry, and replay is idempotent by request ID.
 
 ## Matrix IDs
 
@@ -33,6 +34,7 @@ Use this when reviewing runtime auth wiring, identity propagation, permission en
 - `A-07`
 - `A-08`
 - `A-09`
+- `A-10`
 - `C-04`
 - `GC-04`
 - `S-03`

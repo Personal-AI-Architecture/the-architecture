@@ -123,6 +123,8 @@ An owner or a product may want approval before some actions, such as writing fil
 
 An approval rule can't be enforced by a prompt alone. A system prompt that says "always ask before writing" is a suggestion the model might ignore. A check in software before the call runs is a guarantee.
 
+When enabled, the check emits the canonical pending `approval-request` with a stable request ID and expiry. An approval-authorized identity resolves it with one terminal `approved`, `denied`, `cancelled`, or `expired` decision. Replaying a decision is idempotent and cannot execute the tool twice; conflicting decisions are rejected. The exact payloads are defined in `contracts/schemas/approval-request.json` and `contracts/schemas/approval-decision.json`.
+
 ---
 
 ## Tools and skills

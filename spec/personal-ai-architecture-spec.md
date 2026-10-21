@@ -200,7 +200,7 @@ As a developer, I want every request and every AI action checked against the own
 <summary>Acceptance criteria</summary>
 
 - **AC-10.1** — Given a request with no valid identity, then it is refused. Given an identity, then it can act only within the permissions it was given. _(evidence: [auth-spec.md "Permissions"](../architecture/auth-spec.md#permissions))_
-- **AC-10.2** — Given the owner's permission and approval rules, then the system enforces them. How strict the defaults are and how approvals look are the product's choice. _(evidence: [auth-spec.md](../architecture/auth-spec.md); [security-spec.md](../architecture/security-spec.md))_ The contracts do not yet define an approval step: GAP-PAA-16.
+- **AC-10.2** — Given the owner's permission and approval rules, then the system enforces them. How strict the defaults are and how approvals look are the product's choice. Where a product enables approvals, the canonical request/decision lifecycle is pending → approved, denied, cancelled, or expired; decisions require Auth authority and are replay-safe by request ID. _(evidence: [auth-spec.md](../architecture/auth-spec.md); [security-spec.md](../architecture/security-spec.md); `contracts/schemas/approval-request.json`; `contracts/schemas/approval-decision.json`)_
 - **AC-10.3** — Given a new kind of actor (another person, an AI agent acting for the owner), then it can be added, and it gets no permissions until the owner grants them. The same holds for an identity re-created by an import: it has no access until the owner turns it back on (AC-3.5). _(evidence: [auth-spec.md](../architecture/auth-spec.md))_ The published identity definition only allows a fixed list: GAP-PAA-6.
 - **AC-10.4** — Given an action, then it is recorded in an audit log; if the log cannot be written, work continues and the owner is alerted. _(evidence: [auth-spec.md "Failure modes"](../architecture/auth-spec.md#failure-modes); [security-spec.md](../architecture/security-spec.md))_
 - **AC-10.5** — Given secrets (API keys, passwords), then they live outside Your Memory, somewhere git never tracks: environment variables, an untracked configuration file or a secret store. They are never in memory or tracked configuration files. _(evidence: [configuration-spec.md "Secrets"](../architecture/configuration-spec.md#secrets); [security-spec.md "Secrets Management"](../architecture/security-spec.md#secrets-management); `AGENT.md` lock-in check 5)_
@@ -391,6 +391,6 @@ The canonical contract tree under `contracts/` is authoritative for exact payloa
 routes, shared message parts, and stream events. Identity status and extensible actor
 types, the per-request model, and structured message content are now represented in
 the published contracts. Remaining open contract questions are tracked in the gaps
-file, including approval lifecycle, transport-neutral identity propagation (S5),
+file, including transport-neutral identity propagation (S5),
 tool-definition semantics (S8), and the still-to-be-finalized correlation/streaming
 details.

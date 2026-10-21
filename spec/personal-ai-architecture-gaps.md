@@ -9,7 +9,7 @@ hide_table_of_contents: true
 >
 > Each gap is something the spec expects that the published architecture does not deliver today. Classification is a suggestion for triage: **Defect** (published material is broken or contradicts itself), **Decision needed** (the maintainers must choose), **Technical** (contract and technical work), **Spec-only** (wording fix in the architecture docs). A gap marked **Decided, spec update in progress** has a settled answer that is still being written into the specs and contracts.
 
-**Scoreboard:** The contract-source alignment batch, example-shape validation, documentation freshness tooling, configuration alignment, required parallel tool execution, and portable policy semantics are complete. Remaining work is concentrated in the approval lifecycle, transport-neutral identity (S5), tool-definition semantics (S8), the local-address decision, and the first executable language-neutral conformance implementation.
+**Scoreboard:** The contract-source alignment batch, example-shape validation, documentation freshness tooling, configuration alignment, required parallel tool execution, portable policy semantics, and approval lifecycle contracts are complete. Remaining work is concentrated in transport-neutral identity (S5), tool-definition semantics (S8), the local-address decision, and the first executable language-neutral conformance implementation.
 
 ## Routes a developer follows
 
@@ -92,9 +92,9 @@ hide_table_of_contents: true
 - **Evidence:** [memory-spec.md](../architecture/memory-spec.md); [configuration-spec.md](../architecture/configuration-spec.md) "How the System Boots".
 - **Decided:** tools load before Your Memory is used, and preferences (including the model choice, read on every message) are read through the Memory tools. The configuration and Memory guidance now reflects that order.
 
-### GAP-PAA-16: Approval steps have no defined lifecycle in the contracts — Technical — Partly decided, spec update in progress
+### GAP-PAA-16: Approval steps have no defined lifecycle in the contracts — Resolved
 
 - **Expected:** US-10 AC-10.2 (configured approval rules are enforced; products own defaults and how approvals look).
-- **Published:** The security and Auth specs describe approval authority, and some primers show approval events, but the internal contract defines no approval request, answer, cancel or replay. Some wording also reads as a universal "confirm before every write" default.
-- **Evidence:** [security-spec.md](../architecture/security-spec.md) "Approval Gates"; [auth-spec.md](../architecture/auth-spec.md); [gateway-agent-loop-contract.md](../architecture/gateway-agent-loop-contract.md).
-- **Decided:** the architecture's default is that the owner can do everything; approval prompts are a product choice, so there is no universal confirm-before-write default. Whether the contracts define an approval lifecycle is still open.
+- **Published:** Optional approval interactions now have canonical request and decision schemas, Gateway/Agent Loop stream events, and explicit pending-to-terminal lifecycle semantics. Requests include a stable ID and expiry; decisions are `approved`, `denied`, `cancelled`, or `expired`, require Auth approval authority, and are idempotent on replay without re-executing the tool.
+- **Evidence:** [approval-request.json](../contracts/schemas/approval-request.json); [approval-decision.json](../contracts/schemas/approval-decision.json); [gateway-engine.yaml](../contracts/openapi/gateway-engine.yaml); [security-spec.md](../architecture/security-spec.md); [auth tests](../build/blueprints/auth/tests.md).
+- **Decided:** the architecture's default remains that the owner can do everything; approval prompts are a product choice, but products that enable them must use this lifecycle and cannot treat presentation as enforcement.

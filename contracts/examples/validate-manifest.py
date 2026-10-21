@@ -118,8 +118,9 @@ def validate_contract_example(file_path: str, payload: object, kind: str) -> Non
         return
 
     if name in {"approval-request-event.json", "approval-result-event.json", "invalid-approval-request-event.json", "invalid-approval-result-event.json"}:
-        required = {"request_id", "tool_name", "summary"} if "request" in name else {"request_id", "decision"}
-        valid = isinstance(payload, dict) and required <= payload.keys()
+        schema_name = "approval-request.json" if "request" in name else "approval-decision.json"
+        errors = list(Draft202012Validator(schema(schema_name), format_checker=None).iter_errors(payload))
+        valid = not errors
         if (kind == "valid") != valid:
             fail(f"{file_path} has kind={kind} but its approval shape is {'valid' if valid else 'invalid'}")
         return

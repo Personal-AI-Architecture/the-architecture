@@ -78,6 +78,8 @@ The Gateway knows about conversations. The Agent Loop doesn't. The Agent Loop kn
 
 The Gateway ↔ Agent Loop interface is defined in [gateway-agent-loop-contract.md](../architecture/gateway-agent-loop-contract.md) (D137). The Gateway calls Auth, then packages the messages array (conversation history + current message), the model choice it has just read, and metadata, and POSTs to the Agent Loop. The bootstrap prompt is not part of the request: it is the Agent Loop's own configuration. The Agent Loop returns an SSE stream. All three contracts use one message shape, with tool calls and tool results as ordinary parts of messages, so what the Agent Loop streams back can be stored and replayed as history without conversion.
 
+Where a product enables approvals, the Gateway forwards the canonical `approval-request` and `approval-result` events and accepts decisions through the product's Gateway route. It does not approve locally: Auth verifies authority, and `request_id` makes terminal decisions replay-safe.
+
 ---
 
 ## Clients

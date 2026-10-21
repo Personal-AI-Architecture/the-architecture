@@ -228,9 +228,9 @@ Most AI SDKs produce streaming events that map directly to this contract's SSE e
 
 ---
 
-## Open Questions
+## Approval interaction
 
-- **OQ-1: Approval gates and mid-stream interaction.** Approval prompts are a product choice; the architecture default is that the owner can do everything. For a product that adds them: when the model calls the approval tool and needs owner confirmation, the stream must pause or complete. Simplest approach: the stream completes with the approval request in the response, the client sends a new message with the decision through the normal Gateway API, and the Agent Loop continues in a new stream. This handles approval at the conversation level, not the stream level. It has not yet been validated against an implementation.
+Approval prompts remain a product choice; the architecture default is that the owner can do everything. When a product enables an approval rule, the Agent Loop emits the canonical `approval-request` event and does not execute the covered call while it is pending. The client submits the canonical decision through the normal Gateway API; the Agent Loop may continue in a new stream. `approved`, `denied`, `cancelled`, and `expired` are terminal outcomes keyed by `request_id`; duplicate decisions are idempotent and cannot replay execution. Auth must authorize the decision maker.
 
 ---
 

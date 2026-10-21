@@ -25,6 +25,7 @@ This file defines language-agnostic pass/fail vectors for Auth component conform
 - `AUTH-MUST-015`: Permissions, including approval rules, live only in Auth.
 - `AUTH-MUST-016`: After import, a re-created identity has no access until the owner turns it back on.
 - `AUTH-MUST-017`: Policy matching, conditions, precedence, and unsupported-reference handling follow the portable policy contract.
+- `AUTH-MUST-018`: Where approvals are enabled, only an approval-authorized identity can resolve a pending request; terminal decisions are idempotent by `request_id` and replay never executes the tool again.
 
 ## Test Vectors
 
@@ -64,11 +65,13 @@ This file defines language-agnostic pass/fail vectors for Auth component conform
 | AUTH-T016N | AUTH-MUST-016 | Negative | Implementation re-activates imported policies when an identity with the same name appears | Conformance fails | Silent re-grant accepted | Silent re-grant drift |
 | AUTH-T017P | AUTH-MUST-017 | Positive | Evaluate exact, wildcard, path-prefix, conditional allow, and deny-over-allow rules | All implementations return the same allow/deny result and approval metadata | Provider-specific match or precedence result | Policy portability drift |
 | AUTH-T017N | AUTH-MUST-017 | Negative | Supply an unknown condition, unsupported reference, arbitrary mid-string wildcard, or missing condition context | Rule is reported unsupported or denied; it never grants access | Unsupported policy grants access or provider guesses semantics | Fail-open policy drift |
+| AUTH-T018P | AUTH-MUST-018 | Positive | Create a pending approval, submit an authorized `approved` decision, then replay the same decision | One terminal result and one tool execution; replay returns the same result | Duplicate execution or changed outcome | Approval replay drift |
+| AUTH-T018N | AUTH-MUST-018 | Negative | Submit a decision without approval authority, or resolve an already-terminal request with a conflicting decision | Decision denied/rejected; covered tool never runs | Unauthorized or conflicting decision accepted | Approval lifecycle bypass |
 
 ## Coverage Summary
 
-- MUST requirements: 17
-- Positive tests: 17
-- Negative tests: 17
-- Total vectors: 34
+- MUST requirements: 18
+- Positive tests: 18
+- Negative tests: 18
+- Total vectors: 36
 - Critical drift categories covered: auth bypass, fail-open authorization, approval bypass, tool permission bypass, startup readiness drift, secret leakage, audit omission, local-mode boundary disappearance, ownership creep, approval imposed by default, permissions in config, silent re-grant after import.

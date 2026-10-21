@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "approval-decision.json",
+  "title": "Approval Decision",
+  "description": "The terminal decision for an approval request. Decisions are idempotent by request_id and never re-execute a tool on replay.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["request_id", "decision", "decided_at"],
+  "properties": {
+    "request_id": { "type": "string", "minLength": 1 },
+    "actor_id": { "type": "string", "minLength": 1, "description": "Actor whose request is being resolved." },
+    "decided_by": { "type": "string", "minLength": 1, "description": "Identity that supplied the decision; Auth must verify approval authority." },
+    "decision": { "type": "string", "enum": ["approved", "denied", "cancelled", "expired"] },
+    "reason": { "type": "string" },
+    "decided_at": { "type": "string", "format": "date-time" },
+    "correlation_id": { "type": "string", "minLength": 1 }
+  }
+}

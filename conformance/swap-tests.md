@@ -5,6 +5,10 @@
 The Model API contract remains streaming-only (`stream: true`) with discriminated
 completion events; adapter transport details may vary behind that boundary.
 
+Approval-enabled implementations must retain the canonical pending/terminal approval
+lifecycle and replay semantics while components are swapped; the architecture default
+still requires no approval prompt.
+
 ---
 
 ## SWAP-1: Provider Swap

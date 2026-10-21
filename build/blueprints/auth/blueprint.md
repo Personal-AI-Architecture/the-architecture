@@ -471,6 +471,7 @@ Why invalid:
 - `AUTH-MUST-015`: Permissions, including approval rules, MUST live only in Auth, not in configuration or preferences.
 - `AUTH-MUST-016`: After import, policies for unknown identities MUST stay dormant, and a re-created identity MUST get no access until the owner turns it back on.
 - `AUTH-MUST-017`: Auth MUST evaluate portable policy rules with the canonical matching, condition, precedence, and fail-closed reference semantics.
+- `AUTH-MUST-018`: Where approvals are enabled, Auth MUST authorize terminal approval decisions, enforce the pending-to-terminal lifecycle, and make decisions idempotent by `request_id`; replay MUST NOT execute a tool again.
 
 ### SHOULD
 
@@ -512,6 +513,7 @@ Why invalid:
 | AUTH-MUST-015 | Human `auth-spec.md`, `configuration-spec.md`; AI matrix `C-04` | `AUTH-T015P`, `AUTH-T015N` |
 | AUTH-MUST-016 | Human `auth-spec.md` stale permissions after export/import; AI matrix `A-08` | `AUTH-T016P`, `AUTH-T016N` |
 | AUTH-MUST-017 | Human `auth-spec.md` portable policy evaluation; canonical `policy.json` | `AUTH-T017P`, `AUTH-T017N` |
+| AUTH-MUST-018 | Human `security-spec.md` approval lifecycle; canonical approval schemas | `AUTH-T018P`, `AUTH-T018N` |
 
 ## 16. Residual Risks & Open Decisions
 
@@ -533,7 +535,7 @@ Why invalid:
 ## Self-Validation Report
 
 - Coverage of required sections: 16/16 (100%)
-- Normative requirements count: 22 total (`17 MUST`, `3 SHOULD`, `2 MAY`)
+- Normative requirements count: 23 total (`18 MUST`, `3 SHOULD`, `2 MAY`)
 - Interfaces with schemas: 11 (`permission_set`, `auth_state`, `auth_context`, `authenticate_request`, `authenticate_response`, `authorize_request`, `authorize_decision`, `auth_whoami_response`, `auth_check_response`, `auth_export_response`, `auth_headers`)
 - Test vectors count: 32 total (`16 positive`, `16 negative`)
 - Conflicts detected/resolved: 5/5 resolved

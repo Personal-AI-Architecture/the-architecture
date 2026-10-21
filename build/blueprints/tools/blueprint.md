@@ -348,7 +348,10 @@ Tools define the callable capability surface of the system: operations executed 
   - `request_id` (identifier)
   - `tool_name` (string)
   - `summary` (string)
-- Optional fields: none.
+  - `status` const `pending`
+  - `created_at` (date-time)
+  - `expires_at` (date-time)
+- Optional fields: `tool_call_id`, `actor_id`, `correlation_id`.
 - Defaults: none.
 - Forbidden behavior:
   - executing a call an approval rule covers before approval-request emission
@@ -376,8 +379,9 @@ Tools define the callable capability surface of the system: operations executed 
 - Required fields:
   - `type` const `approval-result`
   - `request_id` (identifier)
-  - `decision` enum: `approved | denied`
-- Optional fields: none.
+  - `decision` enum: `approved | denied | cancelled | expired`
+  - `decided_at` (date-time)
+- Optional fields: `actor_id`, `decided_by`, `reason`, `correlation_id`.
 - Defaults: none.
 - Forbidden behavior:
   - omitted result after approval request
@@ -535,7 +539,7 @@ Tools define the callable capability surface of the system: operations executed 
 1. Model emits `tool-call` with stable call ID.
 2. Agent Loop verifies tool exists.
 3. Agent Loop asks Auth whether the current actor may make this call. If not, the call does not run and the model gets a "not permitted" result.
-4. If an approval rule in Auth covers the call, Agent Loop emits `approval-request` and waits for `approved|denied`. Under the default policy the owner's calls need no approval.
+4. If an approval rule in Auth covers the call, Agent Loop emits the canonical `approval-request` with a pending request ID and expiry, and waits for one terminal `approved|denied|cancelled|expired` decision. Under the default policy the owner's calls need no approval.
 5. Agent Loop executes tool and emits `tool-result`.
 6. Agent Loop re-injects tool result into model context and continues loop.
 
@@ -548,7 +552,8 @@ Tools define the callable capability surface of the system: operations executed 
 ### 5.6 State Management
 - Tools are operation-scoped and stateless by default.
 - Persistent state belongs to Memory or external systems, never to tool definitions.
-- Where approvals exist, approval pending state is explicit and externally resolvable by request ID.
+- Where approvals exist, approval pending state is explicit and externally resolvable by request ID; only an approval-authorized identity may decide.
+- Decisions are terminal and idempotent by request ID. Replays return the existing outcome and never execute a tool twice; conflicting decisions are rejected.
 
 ### 5.7 Lifecycle and Health
 - Tool startup: in-process at runtime boot or by environment-managed startup.

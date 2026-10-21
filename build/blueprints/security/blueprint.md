@@ -227,7 +227,10 @@ Security defines the cross-cutting controls that protect secrets, enforce trust 
   - `request_id` (identifier)
   - `tool_name` (string)
   - `summary` (string)
-- Optional fields: none.
+  - `status` const `pending`
+  - `created_at` (date-time)
+  - `expires_at` (date-time)
+- Optional fields: `tool_call_id`, `actor_id`, `correlation_id`.
 - Defaults: none.
 - Forbidden behavior:
   - approval interactions existing only in local UI flow with no contract event.
@@ -255,8 +258,9 @@ Security defines the cross-cutting controls that protect secrets, enforce trust 
 - Required fields:
   - `type` const `approval-result`
   - `request_id` (identifier)
-  - `decision` enum `approved | denied`
-- Optional fields: none.
+  - `decision` enum `approved | denied | cancelled | expired`
+  - `decided_at` (date-time)
+- Optional fields: `actor_id`, `decided_by`, `reason`, `correlation_id`.
 - Defaults: none.
 - Forbidden behavior:
   - execution of approved/denied path without emitting result event.
@@ -282,7 +286,8 @@ Security defines the cross-cutting controls that protect secrets, enforce trust 
 
 ### 4.8 `approval_decision_request`
 - Required fields:
-  - `decision` enum `approved | denied`
+  - `decision` enum `approved | denied | cancelled | expired`
+- `request_id` is the idempotency key; terminal decisions are replay-safe and cannot execute the covered tool twice.
 - Optional fields: none.
 - Defaults: none.
 - Forbidden fields:

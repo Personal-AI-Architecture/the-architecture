@@ -135,10 +135,10 @@ The Gateway API is the external contract through which clients interact with the
 
 #### Approval decision request/response
 - Request:
-  - `decision: approved | denied`
+  - `decision: approved | denied | cancelled | expired`
 - Response:
   - `request_id: string`
-  - `decision: approved | denied`
+  - `decision: approved | denied | cancelled | expired`
 
 ### 4.3 Streaming Event Contract
 
@@ -152,8 +152,8 @@ The Gateway API is the external contract through which clients interact with the
 - `error`
 
 #### Minimum event payload expectations
-- `approval-request`: `request_id`, `tool_name`, `summary`
-- `approval-result`: `request_id`, `decision`
+- `approval-request`: `request_id`, `tool_name`, `summary`, `status=pending`, `created_at`, `expires_at`
+- `approval-result`: `request_id`, `decision` (`approved|denied|cancelled|expired`), `decided_at`
 - `done`: `conversation_id`, `message_id` (may also include completion metadata)
 - `error`: `code`, `message`
 
@@ -193,10 +193,10 @@ The Gateway API is the external contract through which clients interact with the
 - Unknown IDs return safe not-found response.
 
 ### 5.3 Approval Flow (products that add approvals)
-1. Stream emits `approval-request`.
-2. Stream emits `approval-result` when decision is applied.
-3. Client submits explicit decision using `POST /approvals/:request_id`.
-4. API returns explicit decision confirmation payload.
+1. Stream emits `approval-request` before the covered call runs.
+2. Client submits an explicit decision using `POST /approvals/:request_id`; Auth verifies approval authority.
+3. Stream emits `approval-result` when the terminal decision is applied.
+4. Replaying the same decision returns the same result and never executes the tool again; conflicting decisions are rejected.
 
 ### 5.4 State Reconciliation Behavior
 - Clients use `X-Conversation-ID` and `done` event identifiers to reconcile UI/client state.

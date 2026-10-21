@@ -1,4 +1,8 @@
 {
   "request_id": "apr_1",
-  "decision": "approved"
+  "actor_id": "owner",
+  "decided_by": "owner",
+  "decision": "approved",
+  "decided_at": "2026-10-21T14:01:00Z",
+  "correlation_id": "corr_1"
 }

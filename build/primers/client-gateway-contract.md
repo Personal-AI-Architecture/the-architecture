@@ -90,20 +90,26 @@ Must include enough information for safe user presentation and decision capture.
 Minimum fields:
 
 - `request_id`
+- `status=pending`
 - `tool_name`
 - `summary`
+- `created_at`
+- `expires_at`
 
 ### approval-result
 
 Must include:
 
 - `request_id`
-- `decision`
+- `decision`: `approved`, `denied`, `cancelled`, or `expired`
+- `decided_at`
 
 Rules:
 
 - Approval must be contract-visible, not hidden in local client control flow.
 - Client rendering is presentation only; Gateway and runtime behavior must treat approval as real interaction state.
+- The request ID is the idempotency key: repeated terminal decisions return the existing outcome and never execute a tool twice; conflicting decisions are rejected.
+- Only an identity authorized by Auth may submit a decision. Cancellation and expiry are terminal non-execution outcomes.
 
 ## Valid Example
 

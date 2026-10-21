@@ -110,8 +110,8 @@ The Agent Loop is the generic execution loop that processes one interaction requ
 - `text-delta`: incremental assistant text fragment.
 - `tool-call`: tool invocation intent (`id`, `name`, input payload).
 - `tool-result`: execution outcome (`status`, output payload), including "not permitted" when Auth refuses the call.
-- `approval-request`: pending sensitive action decision (`request_id`, `tool_name`, summary).
-- `approval-result`: decision outcome (`request_id`, `decision`).
+- `approval-request`: pending sensitive action decision (`request_id`, `tool_name`, summary, expiry).
+- `approval-result`: terminal outcome (`request_id`, `decision`, `decided_at`); replay by request ID is idempotent.
 - `done`: terminal completion metadata, including stable identifiers where required by caller contract.
 - `error`: classified failure code + safe display message + the request's correlation ID.
 
@@ -150,7 +150,7 @@ The Agent Loop is the generic execution loop that processes one interaction requ
   - run guards (duplicate-call guard, mutation-scope guard as implemented)
   - if the owner's Auth rules require approval for this call:
     - emit `approval-request`
-    - await decision
+    - await an Auth-authorized `approved|denied|cancelled|expired` decision
     - emit `approval-result`
     - on deny, emit `tool-result` with denied status and continue
   - execute tool

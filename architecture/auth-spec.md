@@ -52,6 +52,8 @@ Everyone and everything else starts with nothing. A new identity has no permissi
 
 Whether to ask the owner before some actions (approval prompts), and which actions, is a product choice. Version history and restore in Your Memory are the safety net whatever the product chooses.
 
+When a product enables approvals, Auth also owns the decision authority and lifecycle enforcement described in [security-spec.md](./security-spec.md#approval-lifecycle-when-a-product-enables-approvals): only an approval-authorized identity may resolve a pending request, and replaying a terminal decision is idempotent.
+
 ### Auth through conversation
 
 The owner manages auth the same way they manage everything else: by asking. "Give my business partner read access to finances" should just work. Settings screens can exist as well. This means Auth is reachable through tools, so the agent can read and change permissions when the owner asks.

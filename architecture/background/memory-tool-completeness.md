@@ -4,6 +4,10 @@ hide_table_of_contents: true
 
 # Memory/Tool Completeness: Why the Architecture Needs No New Components
 
+Where a product adds approval rules to memory writes, the tool boundary uses the
+canonical approval request/decision lifecycle; the owner-default path remains
+approval-free.
+
 ## 1. The Binary
 
 The system reduces to two things: **memory and tools** (D135).

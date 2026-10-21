@@ -143,8 +143,8 @@ Allowed event types:
 - `text-delta`: `{ type, delta }`
 - `tool-call`: `{ type, id, name, input }`
 - `tool-result`: `{ type, id, status, output }`, with a "not permitted" error status when Auth refuses the call
-- `approval-request`: `{ type, request_id, tool_name, summary }`
-- `approval-result`: `{ type, request_id, decision }`
+- `approval-request`: `{ type, request_id, tool_name, summary, status=pending, created_at, expires_at }`
+- `approval-result`: `{ type, request_id, decision, decided_at }`, where decision is `approved | denied | cancelled | expired`; replay is idempotent by request ID
 - `done`: `{ type, conversation_id, message_id, finish_reason }`
 - `error`: `{ type, code, message }` plus the request's correlation ID
 

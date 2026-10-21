@@ -210,6 +210,8 @@ components:
         - $ref: '#/components/schemas/TextDeltaEvent'
         - $ref: '#/components/schemas/ToolCallEvent'
         - $ref: '#/components/schemas/ToolResultEvent'
+        - $ref: '#/components/schemas/ApprovalRequestEvent'
+        - $ref: '#/components/schemas/ApprovalResultEvent'
         - $ref: '#/components/schemas/DoneEvent'
         - $ref: '#/components/schemas/ErrorEvent'
       discriminator:
@@ -218,6 +220,8 @@ components:
           text-delta: '#/components/schemas/TextDeltaEvent'
           tool-call: '#/components/schemas/ToolCallEvent'
           tool-result: '#/components/schemas/ToolResultEvent'
+          approval-request: '#/components/schemas/ApprovalRequestEvent'
+          approval-result: '#/components/schemas/ApprovalResultEvent'
           done: '#/components/schemas/DoneEvent'
           error: '#/components/schemas/ErrorEvent'
 
@@ -289,6 +293,36 @@ components:
         error:
           type: string
           description: Tool execution error message
+
+    ApprovalRequestEvent:
+      type: object
+      description: Optional product approval request emitted before a covered tool executes. Raw arguments and secrets are not included.
+      required: [_event_type, request_id, tool_name, summary, status, created_at, expires_at]
+      properties:
+        _event_type: { type: string, const: approval-request }
+        request_id: { type: string }
+        tool_call_id: { type: string }
+        actor_id: { type: string }
+        tool_name: { type: string }
+        summary: { type: string }
+        status: { type: string, const: pending }
+        created_at: { type: string, format: date-time }
+        expires_at: { type: string, format: date-time }
+        correlation_id: { type: string }
+
+    ApprovalResultEvent:
+      type: object
+      description: Optional product approval outcome. The decision is terminal and idempotent by request_id; replay never executes the tool again.
+      required: [_event_type, request_id, decision, decided_at]
+      properties:
+        _event_type: { type: string, const: approval-result }
+        request_id: { type: string }
+        actor_id: { type: string }
+        decided_by: { type: string }
+        decision: { type: string, enum: [approved, denied, cancelled, expired] }
+        reason: { type: string }
+        decided_at: { type: string, format: date-time }
+        correlation_id: { type: string }
 
     DoneEvent:
       type: object

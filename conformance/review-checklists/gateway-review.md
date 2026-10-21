@@ -19,6 +19,7 @@ Use this when reviewing Gateway code paths, routes, conversation handling, or cl
 - [ ] `X-Conversation-ID` is returned when the conversation is resolved.
 - [ ] Client-facing `done` includes `conversation_id` and `message_id`.
 - [ ] Where a product adds approvals, approval appears in the contract rather than only in client-local control flow.
+- [ ] Approval requests expose a stable request ID and expiry; decisions are terminal and replay-safe.
 
 ## Matrix IDs
 
