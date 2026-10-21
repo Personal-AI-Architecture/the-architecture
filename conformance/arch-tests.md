@@ -280,7 +280,7 @@
 2. Check the listening address of the Gateway HTTP server
 
 **Pass criteria:**
-- [ ] Gateway binds to `127.0.0.1` only by default
+- [ ] Gateway binds only to the loopback interface by default: `127.0.0.1` and/or `::1` are valid; wildcard/network addresses are not
 - [ ] Gateway does NOT bind to `0.0.0.0` unless explicitly configured
 - [ ] Changing bind address to `0.0.0.0` requires an explicit configuration change (not just removing a restriction)
 

@@ -86,7 +86,7 @@
 5. Scan for any ports exposed to the network
 
 **Pass criteria:**
-- [ ] Gateway API is accessible on `localhost` (127.0.0.1 or ::1)
+- [ ] Gateway API is accessible on the loopback interface (`127.0.0.1` and/or `::1`); either address family is valid
 - [ ] Gateway API is NOT accessible from other machines on the network
 - [ ] No ports are exposed to the network by default
 - [ ] No UPnP, mDNS, or discovery broadcasts are sent

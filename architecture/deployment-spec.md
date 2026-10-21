@@ -127,7 +127,9 @@ These are explicitly out of scope for the Architecture. Implementations address 
 
 ## Network Posture
 
-The system listens on **localhost only** by default. No port is exposed to the network unless the owner explicitly configures it.
+The system listens on **the loopback interface only** by default: `127.0.0.1` and/or
+`::1` are valid localhost bindings. No wildcard or network address is exposed unless
+the owner explicitly configures it. No particular IP address family is required.
 
 This means:
 

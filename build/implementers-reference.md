@@ -291,7 +291,7 @@ One HTTP endpoint. Not a third API.
 | Secrets | Outside Your Memory, never in a git-tracked file: environment variables, an untracked config file, or a secret store |
 | Skills | Prompts in Your Memory |
 | Bootstrap prompt | One line in Agent Loop config: "Read AGENT.md for your instructions" |
-| Bind address | Default `127.0.0.1` (localhost only). Network binding (`0.0.0.0`) requires explicit configuration. See DEPLOY-3, DEPLOY-5. |
+| Bind address | Default loopback only (`127.0.0.1` and/or `::1`). Network binding (`0.0.0.0`, `::`, or a LAN address) requires explicit configuration. See DEPLOY-3, DEPLOY-5. |
 
 ### Boot Sequence
 
@@ -339,7 +339,7 @@ On every message, the Gateway reads the owner's current model choice and passes 
 | DEPLOY-2 | Local data storage | All owner data on owner-controlled storage -> no silent external writes |
 | DEPLOY-3 | Default localhost | Fresh install binds to localhost only |
 | DEPLOY-4 | No silent outbound | No network calls except explicit provider/tool requests |
-| DEPLOY-5 | Default bind address | Gateway binds to `127.0.0.1` only -> network binding requires explicit config change |
+| DEPLOY-5 | Default bind address | Gateway binds only to loopback (`127.0.0.1` and/or `::1`) -> network binding requires explicit config change |
 
 ### Foundation User Story Tests
 

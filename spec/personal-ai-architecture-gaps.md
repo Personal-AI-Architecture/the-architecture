@@ -9,7 +9,7 @@ hide_table_of_contents: true
 >
 > Each gap is something the spec expects that the published architecture does not deliver today. Classification is a suggestion for triage: **Defect** (published material is broken or contradicts itself), **Decision needed** (the maintainers must choose), **Technical** (contract and technical work), **Spec-only** (wording fix in the architecture docs). A gap marked **Decided, spec update in progress** has a settled answer that is still being written into the specs and contracts.
 
-**Scoreboard:** The contract-source alignment batch, example-shape validation, documentation freshness tooling, configuration alignment, required parallel tool execution, portable policy semantics, approval lifecycle contracts, transport-neutral identity propagation, and tool-definition visibility/source semantics are complete. Remaining work is concentrated in the local-address decision and the first executable language-neutral conformance implementation.
+**Scoreboard:** The contract-source alignment batch, example-shape validation, documentation freshness tooling, configuration alignment, required parallel tool execution, portable policy semantics, approval lifecycle contracts, transport-neutral identity propagation, tool-definition visibility/source semantics, local-address decision, and first executable language-neutral conformance baseline are complete. The remaining tracked issue is GAP-PAA-8, the external template's stale Foundation-spec/plan links.
 
 ## Routes a developer follows
 
@@ -59,12 +59,18 @@ hide_table_of_contents: true
 - **Published:** `identity.json` now uses an open string for actor types, while Auth promises new actor types without a schema change.
 - **Evidence:** `contracts/schemas/identity.json`; [auth-spec.md](../architecture/auth-spec.md) "Identity types".
 
-### GAP-PAA-7: Two conformance tests contradict agreed promises — Technical — Partly decided, spec update in progress
+### GAP-PAA-7: Two conformance tests contradict agreed promises — Resolved
 
 - **Expected:** US-5 AC-5.1 (next message, no restart) and US-9 AC-9.3 (local-only by default).
 - **Published:** SWAP-1 restarts the system to swap provider, which is fine for providers, but it is often read as the model-switch rule; the model rule (no restart) needs to stay separate. DEPLOY-5 accepts only the IPv4 local address, while DEPLOY-3 also accepts the IPv6 one.
 - **Evidence:** [swap-tests.md](../conformance/swap-tests.md) SWAP-1, SWAP-2; [arch-tests.md](../conformance/arch-tests.md) DEPLOY-5; [deploy-tests.md](../conformance/deploy-tests.md) DEPLOY-3.
-- **Decided:** the model travels with each request; the Gateway reads the owner's current model choice on every message, so a model switch needs no restart. The model-switch portion is resolved; the local-address mismatch remains open.
+- **Decided:** the model travels with each request; the Gateway reads the owner's current model choice on every message, so a model switch needs no restart. The default local address is the loopback interface: `127.0.0.1` and/or `::1` are valid; wildcard/network addresses require explicit configuration. The model-switch and local-address portions are resolved.
+
+### GAP-PAA-LOCAL-CONFORMANCE: The local address and executable conformance baseline were not settled — Resolved
+
+- **Published:** DEPLOY-3 and DEPLOY-5 now use one loopback rule, accepting IPv4 and IPv6 loopback while rejecting wildcard/network exposure by default. The repository now includes an executable language-neutral conformance runner that validates the canonical examples and core contract invariants.
+- **Evidence:** [arch-tests.md](../conformance/arch-tests.md) DEPLOY-5; [deploy-tests.md](../conformance/deploy-tests.md) DEPLOY-3; [runner.py](../conformance/runner.py); [README.md](../conformance/README.md).
+- **Decided:** `localhost` means loopback (`127.0.0.1` and/or `::1`), not a specific address family. The first executable kit is contract-first and implementation-neutral; target-specific runtime tests remain additive.
 
 ### GAP-PAA-11: Running tool calls at the same time is required, but some blueprints make it optional — Resolved
 
