@@ -233,7 +233,7 @@ As a developer, I want to understand what the architecture is and why it exists 
 - **AC-12.1** — Given the repository README, when a developer reads it, then they find what the architecture is, its licence (MIT), and links to the Architecture overview, the contracts, the blueprints, the AI primers, the conformance tests and the TypeScript template. _(evidence: `README.md`)_
 - **AC-12.2** — Given the docs guide, then it offers a short "just browsing" route (README, principles, about) and a "ready to build" route (Architecture overview, implementer's reference, internal contract). _(evidence: [docs/README.md](../README.md))_
 - **AC-12.3** — Given the Architecture overview, then it names the four components, the two APIs and the three outside parties, says that Your Memory depends on nothing, and gives a responsibility table saying who does what and who does not. _(evidence: [foundation-spec.md](../in-depth-overview/foundation-spec.md), including "Responsibility Matrix")_
-- **AC-12.4** — Every link on these routes opens the document it names. Broken links are gaps (GAP-PAA-1, GAP-PAA-9).
+- **AC-12.4** — Every link on these routes opens the document it names. Broken links are gaps.
 
 </details>
 
@@ -285,7 +285,7 @@ As a developer, I want published pass/fail tests, so that I can show my implemen
 <summary>Acceptance criteria</summary>
 
 - **AC-16.1** — Given the conformance suite, then every test has an ID, set-up steps and pass/fail criteria, grouped as swap tests (SWAP-1 to SWAP-3), architecture tests (ARCH-1 to ARCH-9), deployment tests (DEPLOY-1 to DEPLOY-5) and Foundation story tests (FS-1 to FS-8). _(evidence: [conformance/](../in-depth-overview/conformance/README.md))_
-- **AC-16.2** — Given the suite index, then it lists every test that exists and links only to things that exist. _(evidence: [conformance/README.md](../in-depth-overview/conformance/README.md))_ Today it misses ARCH-5 to ARCH-9 and DEPLOY-5 and points to a `stubs` folder that does not exist: GAP-PAA-1.
+- **AC-16.2** — Given the suite index, then it lists every test that exists and links only to things that exist. _(evidence: [conformance/README.md](../in-depth-overview/conformance/README.md))_
 - **AC-16.3** — Given the lock-in gate and lock-in audit, then a developer can work through each check for a pull request or a release. _(evidence: [lockin-gate.md](../in-depth-overview/lockin-gate.md), [lockin-audit.md](../in-depth-overview/lockin-audit.md))_ The gate's `check:docs` command has no published tool: GAP-PAA-10.
 - **AC-16.4** — An implementation that passes every test is conformant; passing some is not conformance. _(evidence: [conformance/README.md "How to Use"](../in-depth-overview/conformance/README.md#how-to-use))_
 
