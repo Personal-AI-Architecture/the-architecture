@@ -65,7 +65,9 @@ paths:
               newConversation:
                 summary: Start a new conversation
                 value:
-                  content: 'Help me plan my finances'
+                  content:
+                    - type: text
+                      text: 'Help me plan my finances'
                   metadata:
                     path: '/finances'
       responses:
@@ -218,7 +220,9 @@ paths:
               resumeConversation:
                 summary: Continue a budgeting conversation
                 value:
-                  content: 'Focus on budgeting'
+                  content:
+                    - type: text
+                      text: 'Focus on budgeting'
                   metadata:
                     path: '/finances'
       responses:
@@ -283,10 +287,13 @@ components:
         - content
       properties:
         content:
-          type: string
+          type: array
+          minItems: 1
+          items:
+            $ref: '../schemas/message.json#/$defs/ContentPart'
           description: |
-            The message content. The Gateway is content-agnostic — text, images,
-            audio, video, files are all just data passed through without interpretation.
+            Ordered message content parts. The Gateway is content-agnostic and passes
+            them through without interpretation.
         metadata:
           type: object
           additionalProperties: true
@@ -375,36 +382,24 @@ components:
           description: When the last message was added
 
     ConversationMessage:
-      type: object
-      required:
-        - id
-        - role
-        - content
-        - created_at
-      properties:
-        id:
-          type: string
-          description: Unique message identifier within the conversation
-        role:
-          type: string
-          enum:
-            - user
-            - assistant
-          description: |
-            Who sent this message:
-            - user: The human or client
-            - assistant: The AI model's response
-        content:
-          type: string
-          description: The message content
-        created_at:
-          type: string
-          format: date-time
-          description: When this message was created
-        metadata:
-          type: object
-          additionalProperties: true
-          description: Client-provided metadata that was sent with this message
+      allOf:
+        - $ref: '../schemas/message.json'
+        - type: object
+          required:
+            - id
+            - created_at
+          properties:
+            id:
+              type: string
+              description: Unique message identifier within the conversation
+            created_at:
+              type: string
+              format: date-time
+              description: When this message was created
+            metadata:
+              type: object
+              additionalProperties: true
+              description: Client-provided metadata that was sent with this message
 
     # --- Client SSE Stream ---
 
@@ -421,13 +416,19 @@ components:
         - $ref: '#/components/schemas/ToolResultEvent'
         - $ref: '#/components/schemas/DoneEvent'
         - $ref: '#/components/schemas/ErrorEvent'
+      discriminator:
+        propertyName: _event_type
 
     TextDeltaEvent:
       type: object
       description: Model generates text — streamed incrementally
       required:
+        - _event_type
         - content
       properties:
+        _event_type:
+          type: string
+          const: text-delta
         content:
           type: string
           description: A chunk of generated text
@@ -438,9 +439,13 @@ components:
         Model initiates a tool call. Clients use these for status display
         ("Reading file...", "Searching library...") and approval gates.
       required:
+        - _event_type
         - id
         - name
       properties:
+        _event_type:
+          type: string
+          const: tool-call
         id:
           type: string
           description: Tool call identifier
@@ -456,8 +461,12 @@ components:
       type: object
       description: Tool execution completes
       required:
+        - _event_type
         - id
       properties:
+        _event_type:
+          type: string
+          const: tool-result
         id:
           type: string
           description: Matches the corresponding tool-call id
@@ -474,8 +483,12 @@ components:
         Response complete. The Gateway has stored the message and response in the
         conversation. The message_id confirms the stored record.
       required:
+        - _event_type
         - finish_reason
       properties:
+        _event_type:
+          type: string
+          const: done
         finish_reason:
           type: string
           description: Why the response ended
@@ -496,9 +509,13 @@ components:
         Failure during processing. The Gateway translates Agent Loop errors into
         client-appropriate messages.
       required:
+        - _event_type
         - code
         - message
       properties:
+        _event_type:
+          type: string
+          const: error
         code:
           type: string
           description: Error category

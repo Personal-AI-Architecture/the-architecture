@@ -18,7 +18,7 @@ Provide copyable valid and invalid example files so implementers, reviewers, and
 - `invalid-approval-request-event.json` - drift example missing required approval context
 - `approval-result-event.json` - client-facing approval result event payload, for products that add approval prompts
 - `invalid-approval-result-event.json` - drift example missing required decision linkage
-- `gateway-engine-request.json` - canonical internal Gateway -> Agent Loop request (no system message: the bootstrap prompt is Agent Loop configuration)
+- `gateway-engine-request.json` - canonical internal Gateway -> Agent Loop request with the per-request model and structured message parts
 - `invalid-gateway-engine-request.json` - drift example that leaks config and secrets into metadata
 - `runtime-config.json` - canonical startup-ready runtime config
 - `invalid-runtime-config.json` - drift example with collapsed config, embedded secret values, a model fixed in runtime config, and an approval rule in config instead of Auth
@@ -52,5 +52,5 @@ Provide copyable valid and invalid example files so implementers, reviewers, and
 
 The examples follow the current contract files, which are behind the specs in `architecture/` in these places:
 
-- `gateway-engine-request.json` does not show the model or the request timestamp; their field names are pending the next revision of `contracts/openapi/gateway-engine.yaml`.
-- Message content is shown as a plain string and conversation detail shows only user and assistant text. The specs require content as a list of parts and tool calls and tool results in history; `contracts/schemas/message.json` and `contracts/openapi/gateway-api.yaml` have not caught up.
+- `gateway-engine-request.json` includes the per-request model. Correlation and conversation metadata remain in the request metadata object.
+- Message content is a list of parts. Tool calls and tool results use the same message-part shape and remain in conversation history.

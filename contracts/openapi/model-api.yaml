@@ -51,11 +51,16 @@ paths:
               withTools:
                 summary: Prompt with tool definitions
                 value:
+                  model: 'local/llama-3.1-8b'
                   messages:
                     - role: system
-                      content: 'You are a helpful personal AI assistant. Read /AGENT.md for instructions.'
+                      content:
+                        - type: text
+                          text: 'You are a helpful personal AI assistant. Read /AGENT.md for instructions.'
                     - role: user
-                      content: 'Help me plan my finances'
+                      content:
+                        - type: text
+                          text: 'Help me plan my finances'
                   tools:
                     - name: read_file
                       description: Read a file from the user's library
@@ -123,6 +128,7 @@ components:
       type: object
       required:
         - messages
+        - model
       properties:
         messages:
           type: array
@@ -155,8 +161,8 @@ components:
         model:
           type: string
           description: |
-            Model identifier. The adapter resolves this to the provider's native
-            model ID. If omitted, the adapter uses its configured default.
+            Model identifier. The Gateway/Agent Loop supplies the owner's current
+            choice for every request; the adapter resolves it to the provider's native ID.
         max_tokens:
           type: integer
           description: Maximum number of tokens in the completion
@@ -167,65 +173,10 @@ components:
           description: Sampling temperature for the model
 
     Message:
-      type: object
-      required:
-        - role
-        - content
-      properties:
-        role:
-          type: string
-          enum:
-            - system
-            - user
-            - assistant
-            - tool
-          description: |
-            The role of the message sender:
-            - system: System instructions (bootstrap prompt, context)
-            - user: Human message from the conversation
-            - assistant: Previous model response (may include tool_calls)
-            - tool: Result of a tool execution, returned to the model
-        content:
-          type: string
-          description: The textual content of the message
-        tool_calls:
-          type: array
-          items:
-            $ref: '#/components/schemas/ToolCall'
-          description: |
-            Tool calls made by the assistant in a previous turn. Present only when
-            role is "assistant" and the model decided to call tools. Included so the
-            model has context for the tool results that follow.
-        tool_call_id:
-          type: string
-          description: |
-            When role is "tool", this identifies which tool call this result
-            corresponds to. Matches the id from a previous assistant tool_calls entry.
+      $ref: '../schemas/message.json'
 
     ToolDefinition:
-      type: object
-      required:
-        - name
-        - description
-        - parameters
-      properties:
-        name:
-          type: string
-          description: |
-            The tool's name. Tools identify themselves — MCP servers expose a
-            namespace, CLI tools have command names, native functions have function
-            names. Source provenance is preserved (D146).
-        description:
-          type: string
-          description: |
-            Human-readable description of what the tool does. Provided by the tool
-            itself (self-describing, D146) — nobody writes definitions manually.
-        parameters:
-          type: object
-          description: |
-            JSON Schema describing the tool's parameters. The model uses this to
-            construct valid tool call arguments.
-          additionalProperties: true
+      $ref: '../schemas/tool-definition.json'
 
     ToolCall:
       type: object
