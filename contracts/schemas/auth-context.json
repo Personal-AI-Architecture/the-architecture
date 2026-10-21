@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "auth-context.json",
+  "title": "Authenticated Actor Context",
+  "description": "Transport-neutral identity context produced by Auth and carried from Gateway to Agent Loop. It contains no credentials or permissions. The receiving boundary must verify the caller before trusting it; headers, body fields, direct-call arguments, and other transports are adapters for this shape.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["actor", "authentication_id", "authenticated_at", "correlation_id"],
+  "properties": {
+    "actor": { "$ref": "identity.json", "description": "The authenticated actor. Auth remains authoritative for current status and permissions." },
+    "authentication_id": { "type": "string", "minLength": 1, "description": "Stable identifier for this authenticated request/session, not a secret credential." },
+    "authenticated_at": { "type": "string", "format": "date-time" },
+    "expires_at": { "type": "string", "format": "date-time", "description": "Optional expiry for the authentication context. The receiving boundary rejects an expired context." },
+    "correlation_id": { "type": "string", "minLength": 1, "description": "End-to-end request correlation ID shared with Gateway, Agent Loop, Auth, tools, and audit records." }
+  },
+  "examples": [{
+    "actor": { "id": "owner_abc123", "type": "owner", "display_name": "Owner", "status": "active", "created": "2026-01-15T10:30:00Z" },
+    "authentication_id": "authn_123",
+    "authenticated_at": "2026-10-21T15:00:00Z",
+    "expires_at": "2026-10-21T15:30:00Z",
+    "correlation_id": "req_xyz789"
+  }]
+}

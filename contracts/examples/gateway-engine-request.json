@@ -1,0 +1,30 @@
+{
+  "messages": [
+    {
+      "role": "user",
+      "content": [
+        { "type": "text", "text": "Write a project spec." }
+      ]
+    }
+  ],
+  "model": "local/llama-3.1-8b",
+  "auth_context": {
+    "actor": {
+      "id": "owner_abc123",
+      "type": "owner",
+      "display_name": "Owner",
+      "status": "active",
+      "created": "2026-01-15T10:30:00Z"
+    },
+    "authentication_id": "authn_123",
+    "authenticated_at": "2026-10-21T15:00:00Z",
+    "correlation_id": "req_xyz789"
+  },
+  "metadata": {
+    "correlation_id": "req_123",
+    "conversation_id": "conv_123",
+    "client_context": {
+      "client": "braindrive-cli"
+    }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "contract-pack://paa/tools",
+  "title": "Tools Capability Boundary Contract Pack (derived)",
+  "description": "Derived source manifest. Tool definitions, messages, and authorization decisions are authoritative only in contracts/.",
+  "x-canonical_sources": ["contracts/schemas/tool-definition.json", "contracts/schemas/message.json", "contracts/schemas/authorization-request.json", "contracts/schemas/authorization-result.json"],
+  "x-status": "derived"
+}

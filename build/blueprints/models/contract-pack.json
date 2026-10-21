@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "contract-pack://paa/models",
+  "title": "Models Boundary Contract Pack (derived)",
+  "description": "Derived source manifest. Model-provider boundary shapes are authoritative only in contracts/.",
+  "x-canonical_sources": ["contracts/openapi/model-api.yaml", "contracts/examples/adapter-config.json"],
+  "x-status": "derived"
+}

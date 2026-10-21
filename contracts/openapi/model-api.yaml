@@ -1,0 +1,346 @@
+openapi: '3.1.0'
+info:
+  title: Model API — Agent Loop ↔ Models
+  version: '1.0.0'
+  description: |
+    The Model API is how the Agent Loop calls models. It is one of the system's two
+    APIs — the contract that absorbs the fastest-moving part of AI.
+
+    This is an internal interface (what the Agent Loop speaks), not a specific provider's
+    API. An adapter translates between this generic internal interface and
+    provider-specific formats (OpenRouter, Anthropic, Ollama, etc.). Swapping a
+    provider means swapping an adapter — no Agent Loop changes.
+
+    Direction:
+    - Agent Loop → Model: Prompt (system instructions + conversation + tool definitions + context)
+    - Model → Agent Loop: Streamed completion (text + tool calls)
+
+    The Model API handles:
+    - Sending prompts to the model
+    - Receiving streamed completions
+    - Passing tool definitions (so the model knows what tools are available)
+    - Receiving tool calls (the model's decisions about which tools to use)
+    - Handling provider-specific API formats (abstracted behind the adapter)
+
+    Source: models-spec.md (D63, D108), adapter-spec.md (D139)
+
+paths:
+  /completions:
+    post:
+      operationId: createCompletion
+      summary: Send a prompt, receive a streamed completion
+      description: |
+        The Agent Loop sends a prompt containing system instructions, conversation history,
+        tool definitions, and context. The model returns a streamed completion with
+        text and/or tool calls.
+
+        This is the contract the Agent Loop speaks. The adapter translates this into
+        whatever the actual provider expects (OpenAI format, Anthropic format, Ollama
+        format, etc.) and translates the response back.
+
+        The Agent Loop may call this multiple times within a single user interaction:
+        send prompt → model returns tool calls → Agent Loop executes tools → send
+        results back to model → model continues.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompletionRequest'
+            examples:
+              withTools:
+                summary: Prompt with tool definitions
+                value:
+                  model: 'local/llama-3.1-8b'
+                  messages:
+                    - role: system
+                      content:
+                        - type: text
+                          text: 'You are a helpful personal AI assistant. Read /AGENT.md for instructions.'
+                    - role: user
+                      content:
+                        - type: text
+                          text: 'Help me plan my finances'
+                  tools:
+                    - name: read_file
+                      description: Read a file from the user's library
+                      source:
+                        id: 'mcp:filesystem'
+                        kind: 'mcp'
+                      visibility:
+                        mode: 'always_send'
+                        authorization: 'permitted'
+                      read_only: true
+                      parameters:
+                        type: object
+                        properties:
+                          path:
+                            type: string
+                            description: Path to the file to read
+                        required:
+                          - path
+                    - name: write_file
+                      description: Write content to a file in the user's library
+                      source:
+                        id: 'mcp:filesystem'
+                        kind: 'mcp'
+                      visibility:
+                        mode: 'always_send'
+                        authorization: 'permitted'
+                      read_only: false
+                      parameters:
+                        type: object
+                        properties:
+                          path:
+                            type: string
+                            description: Path to the file to write
+                          content:
+                            type: string
+                            description: Content to write
+                        required:
+                          - path
+                          - content
+                  stream: true
+      responses:
+        '200':
+          description: |
+            Streamed completion from the model. Events arrive as SSE. The completion
+            may contain text, tool calls, or both. The adapter translates from the
+            provider's native streaming format into this standard format.
+          content:
+            text/event-stream:
+              schema:
+                $ref: '#/components/schemas/CompletionStream'
+        '400':
+          description: Invalid request — malformed prompt, invalid tool definitions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Authentication failed — invalid API key or credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Rate limited by the provider
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '502':
+          description: Provider unreachable or returned an invalid response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    CompletionRequest:
+      type: object
+      required:
+        - messages
+        - model
+        - stream
+      properties:
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/Message'
+          description: |
+            The full prompt: system instructions + conversation history + tool results.
+            Uses the industry-standard role + content format. The adapter translates
+            to the provider's expected format.
+          minItems: 1
+        tools:
+          type: array
+          items:
+            $ref: '#/components/schemas/ToolDefinition'
+          description: |
+            Tool definitions available for this completion. The model uses these to
+            decide which tools to call. Includes both the always-send set and any
+            dynamically loaded tools (D109).
+
+            Tool definitions are sent alongside prompts through the Model API —
+            this is how the model knows what tools are available. The model decides
+            which tools to use — that decision is intelligence (D108).
+        stream:
+          type: boolean
+          const: true
+          description: |
+            Must be true. The Model API is streaming-only; callers collect the
+            stream when they need a complete response.
+        model:
+          type: string
+          description: |
+            Model identifier. The Gateway/Agent Loop supplies the owner's current
+            choice for every request; the adapter resolves it to the provider's native ID.
+        max_tokens:
+          type: integer
+          description: Maximum number of tokens in the completion
+        temperature:
+          type: number
+          minimum: 0
+          maximum: 2
+          description: Sampling temperature for the model
+
+    Message:
+      $ref: '../schemas/message.json'
+
+    ToolDefinition:
+      $ref: '../schemas/tool-definition.json'
+
+    ToolCall:
+      type: object
+      required:
+        - id
+        - source_id
+        - name
+        - arguments
+      properties:
+        id:
+          type: string
+          description: Unique identifier for this tool call
+        source_id:
+          type: string
+          description: Stable source identity from the tool definition; source_id plus name identifies the tool
+        name:
+          type: string
+          description: Name of the tool to call
+        arguments:
+          type: object
+          additionalProperties: true
+          description: Arguments for the tool call, matching the tool's parameter schema
+
+    # --- Completion Stream Events ---
+
+    CompletionStream:
+      description: |
+        Streamed completion from the model via the adapter. Events may contain
+        text deltas, tool calls, or completion signals.
+
+        The adapter translates from the provider's native streaming format into
+        these standard event types.
+      oneOf:
+        - $ref: '#/components/schemas/TextDelta'
+        - $ref: '#/components/schemas/ToolCallDelta'
+        - $ref: '#/components/schemas/CompletionDone'
+        - $ref: '#/components/schemas/CompletionError'
+      discriminator:
+        propertyName: _event_type
+        mapping:
+          text-delta: '#/components/schemas/TextDelta'
+          tool-call: '#/components/schemas/ToolCallDelta'
+          done: '#/components/schemas/CompletionDone'
+          error: '#/components/schemas/CompletionError'
+
+    TextDelta:
+      type: object
+      description: A chunk of generated text from the model
+      required:
+        - _event_type
+        - content
+      properties:
+        _event_type:
+          type: string
+          const: text-delta
+        content:
+          type: string
+          description: Text chunk
+
+    ToolCallDelta:
+      type: object
+      description: |
+        The model requests a tool call. The Agent Loop will execute the tool and
+        send the result back to the model in the next completion request.
+      required:
+        - _event_type
+        - id
+        - source_id
+        - name
+        - arguments
+      properties:
+        _event_type:
+          type: string
+          const: tool-call
+        id:
+          type: string
+          description: Tool call identifier — used to match results
+        source_id:
+          type: string
+          description: Stable source identity from the tool definition
+        name:
+          type: string
+          description: Name of the tool to call
+        arguments:
+          type: object
+          additionalProperties: true
+          description: Arguments for the tool
+
+    CompletionDone:
+      type: object
+      description: |
+        Model finished generating. Does not necessarily mean the agent loop is
+        complete — if the completion contains tool calls, the Agent Loop will execute
+        them and make another completion request.
+      required:
+        - _event_type
+        - finish_reason
+      properties:
+        _event_type:
+          type: string
+          const: done
+        finish_reason:
+          type: string
+          enum:
+            - stop
+            - tool_calls
+            - max_tokens
+          description: |
+            Why the model stopped:
+            - stop: Natural completion
+            - tool_calls: Model wants to use tools (Agent Loop should execute and continue)
+            - max_tokens: Hit the token limit
+        usage:
+          type: object
+          properties:
+            prompt_tokens:
+              type: integer
+              description: Tokens in the prompt
+            completion_tokens:
+              type: integer
+              description: Tokens generated
+
+    CompletionError:
+      type: object
+      description: Error from the model or adapter
+      required:
+        - _event_type
+        - code
+        - message
+      properties:
+        _event_type:
+          type: string
+          const: error
+        code:
+          type: string
+          description: Error category
+        message:
+          type: string
+          description: Human-readable error description
+
+    Error:
+      type: object
+      description: Non-streaming error response
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          description: Machine-readable error code
+        message:
+          type: string
+          description: Human-readable error description

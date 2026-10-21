@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "contract-pack://paa/security",
+  "title": "Security Cross-Cutting Contract Pack (derived)",
+  "description": "Derived source manifest. Auth, message, API, and stream error shapes are authoritative only in contracts/.",
+  "x-canonical_sources": ["contracts/openapi/gateway-api.yaml", "contracts/openapi/gateway-engine.yaml", "contracts/openapi/model-api.yaml", "contracts/schemas/identity.json", "contracts/schemas/policy.json", "contracts/schemas/authorization-result.json"],
+  "x-status": "derived"
+}

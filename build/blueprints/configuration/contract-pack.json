@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "contract-pack://paa/configuration",
+  "title": "Configuration Boundary Contract Pack (derived)",
+  "description": "Derived source manifest. Runtime configuration is authoritative only in contracts/.",
+  "x-canonical_sources": ["contracts/schemas/configuration.json", "contracts/examples/runtime-config.json", "contracts/examples/invalid-runtime-config.json", "contracts/examples/adapter-config.json"],
+  "x-status": "derived"
+}

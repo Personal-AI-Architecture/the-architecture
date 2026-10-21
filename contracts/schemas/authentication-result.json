@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "authentication-result.json",
+  "title": "Authentication Result",
+  "description": "The transport-neutral result of authenticating a Gateway request. Credential formats remain provider-specific; the identity and downstream auth-context formats belong to PAA.",
+  "type": "object",
+  "required": ["authenticated", "reason", "correlation_id"],
+  "properties": {
+    "authenticated": {
+      "type": "boolean"
+    },
+    "actor": {
+      "$ref": "identity.json"
+    },
+    "reason": {
+      "type": "string",
+      "description": "Machine-readable authentication result reason."
+    },
+    "audit_id": {
+      "type": "string",
+      "description": "Audit record for the authentication attempt, when one was written."
+    },
+    "correlation_id": {
+      "type": "string"
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "authenticated": { "const": true } } },
+      "then": { "required": ["actor"] }
+    }
+  ],
+  "examples": [
+    {
+      "authenticated": true,
+      "actor": {
+        "id": "owner_abc123",
+        "type": "owner",
+        "display_name": "Owner",
+        "status": "active",
+        "created": "2026-01-15T10:30:00Z"
+      },
+      "reason": "authenticated",
+      "audit_id": "audit_122",
+      "correlation_id": "req_xyz789"
+    },
+    {
+      "authenticated": false,
+      "reason": "invalid_credential",
+      "correlation_id": "req_xyz789"
+    }
+  ]
+}

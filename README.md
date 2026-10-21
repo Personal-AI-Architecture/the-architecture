@@ -5,7 +5,7 @@
 **Own your AI.** An open blueprint for building personal AI systems you own. Keep your memory, swap everything else.
 
 <p align="center">
-  <img src="docs/assets/readme-hero.svg" alt="Your Memory (conversations, preferences, skills, documents and more, in files you own) stays under your control, while models, interfaces and tools can be swapped freely." width="680">
+  <img src="assets/readme-hero.svg" alt="Your Memory (conversations, preferences, skills, documents and more, in files you own) stays under your control, while models, interfaces and tools can be swapped freely." width="680">
 </p>
 
 <p align="center">
@@ -16,38 +16,41 @@
 
 Not an app, and not a framework you install. A blueprint, plus a starter kit to build from.
 
-- **The specs** (this repo, [`docs/`](docs/)): the principles, component specs and rules that keep every part swappable.
-- **Contracts and tests** (this repo, [`specs/`](specs/)): OpenAPI and JSON Schema contracts for every boundary, plus conformance guidance to check your system really can swap its parts.
+- **The specification** ([`spec/`](spec/)): what every PAA system must promise, including product stories and known gaps.
+- **The architecture** ([`architecture/`](architecture/)): how the system works, its principles, decisions, component specifications, and explanatory background.
+- **Contracts** ([`contracts/`](contracts/)): the exact OpenAPI and JSON Schema shapes code must match, plus canonical examples.
+- **Conformance** ([`conformance/`](conformance/)): language-neutral checks and review guidance that prove a system conforms.
+- **Build guidance** ([`build/`](build/)): primers, blueprints, implementation prompts, and derived implementation references.
 - **The starter kit** ([ts-architecture-template](https://github.com/Personal-AI-Architecture/ts-architecture-template)): a working TypeScript starting point with all four components built in.
 
 ## How it works
 
 <p align="center">
-  <img src="docs/assets/readme-how-it-works.svg" alt="Interfaces connect through the Gateway API to the Gateway, which hands off to the Agent Loop. The Agent Loop calls models through the Model API and reaches Your Memory and other tools through tools. Auth checks every request." width="900">
+  <img src="assets/readme-how-it-works.svg" alt="Interfaces connect through the Gateway API to the Gateway, which hands off to the Agent Loop. The Agent Loop calls models through the Model API and reaches Your Memory and other tools through tools. Auth checks every request." width="900">
 </p>
 
 Four components and two APIs:
 
 | Part | What it does |
 |------|--------------|
-| [Your Memory](docs/in-depth-overview/memory-spec.md) | All your data, in files you own. Everything else depends on it; it depends on nothing. |
-| [Agent Loop](docs/in-depth-overview/agent-loop-spec.md) | Calls the model, runs the tools it asks for, and repeats until the job is done. |
-| [Gateway](docs/in-depth-overview/gateway-spec.md) | One front door for every interface. Start on the web, pick up on your phone. |
-| [Auth](docs/in-depth-overview/auth-spec.md) | Controls who and what gets in. Swapping other parts never changes it. |
-| [Gateway API](specs/openapi/gateway-api.yaml) | How interfaces connect. Anything that speaks it plugs in. |
-| [Model API](specs/openapi/model-api.yaml) | How models connect. Switch providers with a config change. |
+| [Your Memory](architecture/memory-spec.md) | All your data, in files you own. Everything else depends on it; it depends on nothing. |
+| [Agent Loop](architecture/agent-loop-spec.md) | Calls the model, runs the tools it asks for, and repeats until the job is done. |
+| [Gateway](architecture/gateway-spec.md) | One front door for every interface. Start on the web, pick up on your phone. |
+| [Auth](architecture/auth-spec.md) | Controls who and what gets in. Swapping other parts never changes it. |
+| [Gateway API](contracts/openapi/gateway-api.yaml) | How interfaces connect. Anything that speaks it plugs in. |
+| [Model API](contracts/openapi/model-api.yaml) | How models connect. Switch providers with a config change. |
 
 ## Start here
 
 | I want to... | Start here |
 |--------------|------------|
-| Understand the architecture | [Architecture overview](docs/in-depth-overview/foundation-spec.md) |
+| Understand the architecture | [Architecture overview](architecture/overview.md) |
 | Build a system | [TypeScript template](https://github.com/Personal-AI-Architecture/ts-architecture-template) |
-| Build with an AI coding agent | [AGENT.md](AGENT.md) and the [architecture primer](docs/ai-agent-docs/) |
-| Build one component | [Blueprints](docs/blueprints/) |
-| See what every system must promise | [Product spec](docs/spec/personal-ai-architecture-spec.md) |
-| Check my system conforms | [Conformance guide](docs/in-depth-overview/conformance/) |
-| Check for lock-in | [Lock-in gate](docs/in-depth-overview/lockin-gate.md) |
+| Build with an AI coding agent | [AGENT.md](AGENT.md) and the [architecture primers](build/primers/) |
+| Build one component | [Blueprints](build/blueprints/) |
+| See what every system must promise | [Product spec](spec/personal-ai-architecture-spec.md) |
+| Check my system conforms | [Conformance guide](conformance/) |
+| Check for lock-in | [Lock-in gate](conformance/lockin-gate.md) |
 
 ## Built on PAA
 

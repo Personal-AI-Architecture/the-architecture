@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "approval-request.json",
+  "title": "Approval Request",
+  "description": "A pending approval interaction for a tool call. Approval is optional by product and policy; when present, the request is emitted before the covered tool executes.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["request_id", "tool_name", "summary", "status", "created_at", "expires_at"],
+  "properties": {
+    "request_id": { "type": "string", "minLength": 1, "description": "Stable identifier for this approval interaction." },
+    "tool_call_id": { "type": "string", "minLength": 1, "description": "Identifier of the blocked tool call, when one exists." },
+    "actor_id": { "type": "string", "minLength": 1, "description": "Actor whose attempted action needs approval." },
+    "tool_name": { "type": "string", "minLength": 1 },
+    "summary": { "type": "string", "minLength": 1, "description": "Safe human-readable summary; raw arguments and secrets do not belong here." },
+    "status": { "type": "string", "const": "pending" },
+    "created_at": { "type": "string", "format": "date-time" },
+    "expires_at": { "type": "string", "format": "date-time", "description": "Deadline after which the request is no longer actionable." },
+    "correlation_id": { "type": "string", "minLength": 1 }
+  }
+}

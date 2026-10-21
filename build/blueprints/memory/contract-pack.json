@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "contract-pack://paa/memory",
+  "title": "Memory Component Contract Pack (derived)",
+  "description": "Derived source manifest. Conversation message shapes are authoritative only in contracts/; the storage implementation remains implementation-defined.",
+  "x-canonical_sources": ["contracts/schemas/message.json", "contracts/examples/conversation-list-response.json", "contracts/examples/conversation-detail-response.json"],
+  "x-status": "derived"
+}

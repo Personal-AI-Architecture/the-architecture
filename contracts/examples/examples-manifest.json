@@ -1,0 +1,347 @@
+{
+  "version": "1.0",
+  "traceability_source": "maintainers/traceability-map.md",
+  "examples": [
+    {
+      "file": "contracts/examples/client-message-request.json",
+      "kind": "valid",
+      "owning_docs": [
+        "build/primers/client-gateway-contract.md"
+      ],
+      "matrix_ids": [
+        "G-05"
+      ],
+      "related_checklists": [
+        "conformance/review-checklists/gateway-review.md"
+      ],
+      "glossary_terms": [
+        "client contract",
+        "internal contract"
+      ]
+    },
+    {
+      "file": "contracts/examples/invalid-client-message-request.json",
+      "kind": "invalid",
+      "owning_docs": [
+        "build/primers/client-gateway-contract.md"
+      ],
+      "matrix_ids": [
+        "G-05"
+      ],
+      "related_checklists": [
+        "conformance/review-checklists/gateway-review.md"
+      ],
+      "glossary_terms": [
+        "client contract",
+        "internal contract",
+        "drift"
+      ]
+    },
+    {
+      "file": "contracts/examples/conversation-list-response.json",
+      "kind": "valid",
+      "owning_docs": [
+        "build/primers/client-gateway-contract.md"
+      ],
+      "matrix_ids": [
+        "G-06",
+        "G-07"
+      ],
+      "related_checklists": [
+        "conformance/review-checklists/gateway-review.md"
+      ],
+      "glossary_terms": [
+        "client contract",
+        "contract-visible"
+      ]
+    },
+    {
+      "file": "contracts/examples/invalid-conversation-list-response.json",
+      "kind": "invalid",
+      "owning_docs": [
+        "build/primers/client-gateway-contract.md"
+      ],
+      "matrix_ids": [
+        "G-06"
+      ],
+      "related_checklists": [
+        "conformance/review-checklists/gateway-review.md"
+      ],
+      "glossary_terms": [
+        "client contract",
+        "drift"
+      ]
+    },
+    {
+      "file": "contracts/examples/conversation-detail-response.json",
+      "kind": "valid",
+      "owning_docs": [
+        "build/primers/client-gateway-contract.md"
+      ],
+      "matrix_ids": [
+        "G-06",
+        "G-07"
+      ],
+      "related_checklists": [
+        "conformance/review-checklists/gateway-review.md"
+      ],
+      "glossary_terms": [
+        "client contract",
+        "contract-visible"
+      ]
+    },
+    {
+      "file": "contracts/examples/invalid-conversation-detail-response.json",
+      "kind": "invalid",
+      "owning_docs": [
+        "build/primers/client-gateway-contract.md"
+      ],
+      "matrix_ids": [
+        "G-06"
+      ],
+      "related_checklists": [
+        "conformance/review-checklists/gateway-review.md"
+      ],
+      "glossary_terms": [
+        "client contract",
+        "drift"
+      ]
+    },
+    {
+      "file": "contracts/examples/approval-request-event.json",
+      "kind": "valid",
+      "owning_docs": [
+        "build/primers/client-gateway-contract.md",
+        "build/primers/gateway-agent-loop-contract.md"
+      ],
+      "matrix_ids": [
+        "S-05",
+        "GC-06"
+      ],
+      "related_checklists": [
+        "conformance/review-checklists/gateway-review.md",
+        "conformance/review-checklists/security-review.md",
+        "conformance/review-checklists/agent-loop-review.md"
+      ],
+      "glossary_terms": [
+        "contract-visible",
+        "client contract"
+      ]
+    },
+    {
+      "file": "contracts/examples/invalid-approval-request-event.json",
+      "kind": "invalid",
+      "owning_docs": [
+        "build/primers/client-gateway-contract.md",
+        "build/primers/gateway-agent-loop-contract.md"
+      ],
+      "matrix_ids": [
+        "S-05",
+        "GC-06"
+      ],
+      "related_checklists": [
+        "conformance/review-checklists/gateway-review.md",
+        "conformance/review-checklists/security-review.md",
+        "conformance/review-checklists/agent-loop-review.md"
+      ],
+      "glossary_terms": [
+        "contract-visible",
+        "client contract",
+        "drift"
+      ]
+    },
+    {
+      "file": "contracts/examples/approval-result-event.json",
+      "kind": "valid",
+      "owning_docs": [
+        "build/primers/client-gateway-contract.md",
+        "build/primers/gateway-agent-loop-contract.md"
+      ],
+      "matrix_ids": [
+        "S-05",
+        "GC-06"
+      ],
+      "related_checklists": [
+        "conformance/review-checklists/gateway-review.md",
+        "conformance/review-checklists/security-review.md",
+        "conformance/review-checklists/agent-loop-review.md"
+      ],
+      "glossary_terms": [
+        "contract-visible",
+        "client contract"
+      ]
+    },
+    {
+      "file": "contracts/examples/invalid-approval-result-event.json",
+      "kind": "invalid",
+      "owning_docs": [
+        "build/primers/client-gateway-contract.md",
+        "build/primers/gateway-agent-loop-contract.md"
+      ],
+      "matrix_ids": [
+        "S-05",
+        "GC-06"
+      ],
+      "related_checklists": [
+        "conformance/review-checklists/gateway-review.md",
+        "conformance/review-checklists/security-review.md",
+        "conformance/review-checklists/agent-loop-review.md"
+      ],
+      "glossary_terms": [
+        "contract-visible",
+        "client contract",
+        "drift"
+      ]
+    },
+    {
+      "file": "contracts/examples/gateway-engine-request.json",
+      "kind": "valid",
+      "owning_docs": [
+        "build/primers/gateway-agent-loop-contract.md",
+        "build/primers/configuration.md"
+      ],
+      "matrix_ids": [
+        "GC-01",
+        "GC-02",
+        "C-02"
+      ],
+      "related_checklists": [
+        "conformance/review-checklists/agent-loop-review.md",
+        "conformance/review-checklists/configuration-review.md"
+      ],
+      "glossary_terms": [
+        "internal contract",
+        "contract-visible"
+      ]
+    },
+    {
+      "file": "contracts/examples/invalid-gateway-engine-request.json",
+      "kind": "invalid",
+      "owning_docs": [
+        "build/primers/gateway-agent-loop-contract.md",
+        "build/primers/configuration.md",
+        "build/primers/security.md"
+      ],
+      "matrix_ids": [
+        "GC-01",
+        "GC-03",
+        "GC-05",
+        "C-02",
+        "S-01"
+      ],
+      "related_checklists": [
+        "conformance/review-checklists/agent-loop-review.md",
+        "conformance/review-checklists/configuration-review.md",
+        "conformance/review-checklists/security-review.md"
+      ],
+      "glossary_terms": [
+        "internal contract",
+        "contract-visible",
+        "drift"
+      ]
+    },
+    {
+      "file": "contracts/examples/runtime-config.json",
+      "kind": "valid",
+      "owning_docs": [
+        "build/primers/configuration.md",
+        "build/primers/models.md"
+      ],
+      "matrix_ids": [
+        "C-01",
+        "C-02",
+        "C-03",
+        "MO-02"
+      ],
+      "related_checklists": [
+        "conformance/review-checklists/configuration-review.md"
+      ],
+      "glossary_terms": [
+        "startup readiness",
+        "product-owned state"
+      ]
+    },
+    {
+      "file": "contracts/examples/invalid-runtime-config.json",
+      "kind": "invalid",
+      "owning_docs": [
+        "build/primers/configuration.md",
+        "build/primers/security.md"
+      ],
+      "matrix_ids": [
+        "C-01",
+        "C-02",
+        "C-03"
+      ],
+      "related_checklists": [
+        "conformance/review-checklists/configuration-review.md",
+        "conformance/review-checklists/security-review.md"
+      ],
+      "glossary_terms": [
+        "startup readiness",
+        "product-owned state",
+        "drift"
+      ]
+    },
+    {
+      "file": "contracts/examples/adapter-config.json",
+      "kind": "valid",
+      "owning_docs": [
+        "build/primers/configuration.md",
+        "build/primers/models.md"
+      ],
+      "matrix_ids": [
+        "C-01",
+        "C-03",
+        "MO-02"
+      ],
+      "related_checklists": [
+        "conformance/review-checklists/configuration-review.md"
+      ],
+      "glossary_terms": [
+        "startup readiness",
+        "product-owned state"
+      ]
+    },
+    {
+      "file": "contracts/examples/invalid-adapter-config.json",
+      "kind": "invalid",
+      "owning_docs": [
+        "build/primers/configuration.md",
+        "build/primers/security.md"
+      ],
+      "matrix_ids": [
+        "C-01",
+        "C-03"
+      ],
+      "related_checklists": [
+        "conformance/review-checklists/configuration-review.md",
+        "conformance/review-checklists/security-review.md"
+      ],
+      "glossary_terms": [
+        "startup readiness",
+        "product-owned state",
+        "drift"
+      ]
+    },
+    {
+      "file": "contracts/examples/memory-restore-tool.json",
+      "kind": "valid",
+      "owning_docs": [
+        "build/primers/memory.md"
+      ],
+      "matrix_ids": [
+        "M-04",
+        "D-07"
+      ],
+      "related_checklists": [
+        "conformance/review-checklists/memory-review.md",
+        "conformance/review-checklists/security-review.md"
+      ],
+      "glossary_terms": [
+        "version history",
+        "restore"
+      ]
+    }
+  ]
+}

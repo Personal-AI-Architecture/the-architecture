@@ -1,0 +1,411 @@
+openapi: '3.1.0'
+info:
+  title: Gateway ↔ Agent Loop Internal Contract
+  version: '1.0.0'
+  description: |
+    Internal contract between Gateway and Agent Loop. Not a third connector — an internal
+    interface between two components in the same deployment. POST /agent-loop/chat, SSE stream
+    response, and a transport-neutral Auth context on the internal path.
+
+    This contract fills the one gap identified by the protocol evaluation (D136). The
+    Gateway API and Model API are the swappability boundaries — external things plug
+    into them. This is an internal contract between two components we control, inside the
+    same deployment.
+
+    Source: gateway-engine-contract.md (D137)
+paths:
+  /agent-loop/chat:
+    post:
+      operationId: agentLoopChat
+      summary: Send messages to the Agent Loop for processing
+      description: |
+        Gateway POSTs a request containing the current model, messages array (system prompt +
+        conversation history + current message), and metadata. Agent Loop returns an SSE stream.
+
+        The Gateway assembles the messages array from three sources:
+        1. System message — the Agent Loop's configured bootstrap prompt
+        2. Conversation history — from the Gateway's conversation store
+        3. Current message — from the client request
+
+        The Gateway checks Auth before routing. The Agent Loop also checks Auth before every
+        tool call; permissions live only in Auth.
+
+        The Agent Loop is pre-configured with tool definitions and provider configuration at
+        startup. These are not per-request data.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgentLoopRequest'
+            examples:
+              budgetConversation:
+                summary: A budgeting conversation with history
+                value:
+                  model: 'local/llama-3.1-8b'
+                  auth_context:
+                    actor:
+                      id: 'owner_abc123'
+                      type: 'owner'
+                      display_name: 'Owner'
+                      status: 'active'
+                      created: '2026-01-15T10:30:00Z'
+                    authentication_id: 'authn_123'
+                    authenticated_at: '2026-10-21T15:00:00Z'
+                    correlation_id: 'req_xyz789'
+                  messages:
+                    - role: system
+                      content:
+                        - type: text
+                          text: 'Read /AGENT.md for your instructions.'
+                    - role: user
+                      content:
+                        - type: text
+                          text: 'Help me plan my finances'
+                    - role: assistant
+                      content:
+                        - type: text
+                          text: "I'll read your finance page..."
+                    - role: user
+                      content:
+                        - type: text
+                          text: 'Focus on budgeting'
+                  metadata:
+                    conversation_id: 'conv_abc123'
+                    correlation_id: 'req_xyz789'
+                    trigger: message
+                    client_context:
+                      path: '/finances'
+      responses:
+        '200':
+          description: |
+            SSE stream of agent loop events. Always streaming — no non-streaming mode.
+            Callers who want the complete response collect the stream.
+
+            The Agent Loop may call the model multiple times in one stream (model calls tools,
+            Agent Loop executes them, sends results back to model, model continues). This
+            multi-turn loop is internal to the Agent Loop — the stream captures everything.
+          content:
+            text/event-stream:
+              schema:
+                $ref: '#/components/schemas/SSEStream'
+        '400':
+          description: |
+            Invalid request — missing messages, bad format. Pre-stream error: the request
+            never started processing. No SSE stream opened.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                missingMessages:
+                  summary: Missing required messages array
+                  value:
+                    code: 'invalid_request'
+                    message: 'Request body must include a messages array'
+        '401':
+          description: |
+            Auth middleware rejected the request. Pre-stream error: no SSE stream opened.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                unauthorized:
+                  summary: Invalid or missing authentication
+                  value:
+                    code: 'unauthorized'
+                    message: 'Auth middleware rejected the request — invalid token'
+        '503':
+          description: |
+            Agent Loop unavailable. Pre-stream error: no SSE stream opened.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                unavailable:
+                  summary: Agent Loop is not ready
+                  value:
+                    code: 'agent_loop_unavailable'
+                    message: 'Agent Loop is not accepting requests'
+
+components:
+  schemas:
+    AgentLoopRequest:
+      type: object
+      required:
+        - messages
+        - model
+        - auth_context
+      properties:
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/Message'
+          description: |
+            System prompt + conversation history + current message. Follows the
+            industry-standard role + content format (D16: use the prevailing standard,
+            not a custom protocol).
+          minItems: 1
+        model:
+          type: string
+          description: |
+            The owner's current model choice. The Gateway reads this for every
+            request and passes it through; the Agent Loop must not pin it at startup.
+        auth_context:
+          $ref: '../schemas/auth-context.json'
+          description: |
+            Transport-neutral authenticated actor context produced by Auth. The Gateway
+            adds it after authentication; clients must not supply or override it. The
+            transport adapter must preserve and integrity-protect this context when the
+            internal handoff is HTTP, a message bus, or a direct function call.
+        metadata:
+          $ref: '#/components/schemas/RequestMetadata'
+
+    Message:
+      $ref: '../schemas/message.json'
+
+    RequestMetadata:
+      type: object
+      required:
+        - correlation_id
+      properties:
+        conversation_id:
+          type: string
+          description: |
+            Which conversation this belongs to. The Agent Loop does not need this — the
+            Gateway tracks conversations. Included as pass-through context.
+        correlation_id:
+          type: string
+          description: |
+            Request trace ID, generated by Gateway. Flows through Agent Loop, tool calls,
+            and logs. Enables end-to-end tracing.
+        trigger:
+          type: string
+          enum:
+            - message
+            - webhook
+            - schedule
+          default: message
+          description: |
+            How this request was triggered. The Agent Loop gets the same messages array
+            regardless of trigger source — it genuinely does not know the difference.
+            - message: Client sent a message through the Gateway API
+            - webhook: External service triggered via Gateway API
+            - schedule: Cron tool triggered via Gateway
+        client_context:
+          type: object
+          additionalProperties: true
+          description: |
+            Client-provided context (path, folder, etc.). The Gateway passes this
+            through — it does not add or interpret it. The Agent Loop can use it or ignore it.
+
+    # --- SSE Event Types ---
+
+    SSEStream:
+      description: |
+        Server-Sent Events stream. The response is always streaming — no non-streaming mode.
+
+        Events appear in the stream as SSE with `event:` and `data:` fields:
+          event: text-delta
+          data: {"content":"Hello"}
+
+        Tool calls are visible in the stream for status display, approval gates,
+        and observability.
+      oneOf:
+        - $ref: '#/components/schemas/TextDeltaEvent'
+        - $ref: '#/components/schemas/ToolCallEvent'
+        - $ref: '#/components/schemas/ToolResultEvent'
+        - $ref: '#/components/schemas/ApprovalRequestEvent'
+        - $ref: '#/components/schemas/ApprovalResultEvent'
+        - $ref: '#/components/schemas/DoneEvent'
+        - $ref: '#/components/schemas/ErrorEvent'
+      discriminator:
+        propertyName: _event_type
+        mapping:
+          text-delta: '#/components/schemas/TextDeltaEvent'
+          tool-call: '#/components/schemas/ToolCallEvent'
+          tool-result: '#/components/schemas/ToolResultEvent'
+          approval-request: '#/components/schemas/ApprovalRequestEvent'
+          approval-result: '#/components/schemas/ApprovalResultEvent'
+          done: '#/components/schemas/DoneEvent'
+          error: '#/components/schemas/ErrorEvent'
+
+    TextDeltaEvent:
+      type: object
+      description: Model generates text — streamed incrementally as it is produced
+      required:
+        - _event_type
+        - content
+      properties:
+        _event_type:
+          type: string
+          const: text-delta
+        content:
+          type: string
+          description: A chunk of generated text
+
+    ToolCallEvent:
+      type: object
+      description: |
+        Model initiates a tool call. Visible in the stream so clients can display
+        status ("Reading file...", "Searching library...") and approval gates can
+        intercept write operations.
+      required:
+        - _event_type
+        - id
+        - source_id
+        - name
+        - arguments
+      properties:
+        _event_type:
+          type: string
+          const: tool-call
+        id:
+          type: string
+          description: Unique identifier for this tool call within the stream
+        source_id:
+          type: string
+          description: Stable source identity; source_id plus name identifies the tool
+        name:
+          type: string
+          description: Name of the tool being called
+        arguments:
+          type: object
+          additionalProperties: true
+          description: Arguments passed to the tool
+
+    ToolResultEvent:
+      type: object
+      description: |
+        Tool execution completes. Contains either output (success) or error (failure).
+        The Agent Loop passes results back to the model for the next iteration.
+      required:
+        - _event_type
+        - id
+      properties:
+        _event_type:
+          type: string
+          const: tool-result
+        id:
+          type: string
+          description: Matches the id from the corresponding tool-call event
+        error_code:
+          type: string
+          enum:
+            - not_permitted
+            - tool_error
+            - auth_unavailable
+          description: Machine-readable failure reason when the tool did not run
+        output:
+          type: string
+          description: Successful tool output
+        error:
+          type: string
+          description: Tool execution error message
+
+    ApprovalRequestEvent:
+      type: object
+      description: Optional product approval request emitted before a covered tool executes. Raw arguments and secrets are not included.
+      required: [_event_type, request_id, tool_name, summary, status, created_at, expires_at]
+      properties:
+        _event_type: { type: string, const: approval-request }
+        request_id: { type: string }
+        tool_call_id: { type: string }
+        actor_id: { type: string }
+        tool_name: { type: string }
+        summary: { type: string }
+        status: { type: string, const: pending }
+        created_at: { type: string, format: date-time }
+        expires_at: { type: string, format: date-time }
+        correlation_id: { type: string }
+
+    ApprovalResultEvent:
+      type: object
+      description: Optional product approval outcome. The decision is terminal and idempotent by request_id; replay never executes the tool again.
+      required: [_event_type, request_id, decision, decided_at]
+      properties:
+        _event_type: { type: string, const: approval-result }
+        request_id: { type: string }
+        actor_id: { type: string }
+        decided_by: { type: string }
+        decision: { type: string, enum: [approved, denied, cancelled, expired] }
+        reason: { type: string }
+        decided_at: { type: string, format: date-time }
+        correlation_id: { type: string }
+
+    DoneEvent:
+      type: object
+      description: |
+        Agent loop complete. After this event, the stream closes. The Gateway stores
+        the response in the conversation and returns it to the client.
+      required:
+        - _event_type
+        - finish_reason
+      properties:
+        _event_type:
+          type: string
+          const: done
+        finish_reason:
+          type: string
+          description: Why the agent loop ended (e.g., "stop", "max_tokens")
+        usage:
+          $ref: '#/components/schemas/Usage'
+
+    Usage:
+      type: object
+      description: Token usage for this interaction
+      properties:
+        prompt_tokens:
+          type: integer
+          description: Number of tokens in the prompt sent to the model
+        completion_tokens:
+          type: integer
+          description: Number of tokens in the model's completion
+
+    ErrorEvent:
+      type: object
+      description: |
+        Unrecoverable failure mid-stream. After an error event, the stream closes.
+        The Gateway decides how to communicate the failure to the client.
+      required:
+        - _event_type
+        - code
+        - message
+      properties:
+        _event_type:
+          type: string
+          const: error
+        code:
+          type: string
+          enum:
+            - provider_error
+            - tool_error
+            - auth_error
+            - context_overflow
+          description: |
+            Error category:
+            - provider_error: Model unreachable or timeout
+            - tool_error: Tool failed and model cannot recover
+            - auth_error: Auth denied the request or could not check it
+            - context_overflow: Messages exceed model context window
+        message:
+          type: string
+          description: Human-readable error description
+
+    Error:
+      type: object
+      description: |
+        Pre-stream error response. Consistent format across HTTP errors and SSE
+        error events (convention, not protocol).
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: string
+          description: Machine-readable error code
+        message:
+          type: string
+          description: Human-readable error description

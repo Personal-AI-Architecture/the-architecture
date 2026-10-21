@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "contract-pack://paa/auth",
+  "title": "Auth Component Contract Pack (derived)",
+  "description": "Derived source manifest. Identity, policy, authentication, and authorization shapes are authoritative only in contracts/.",
+  "x-canonical_sources": ["contracts/schemas/identity.json", "contracts/schemas/auth-context.json", "contracts/schemas/policy.json", "contracts/schemas/authentication-result.json", "contracts/schemas/authorization-request.json", "contracts/schemas/authorization-result.json"],
+  "x-status": "derived"
+}
