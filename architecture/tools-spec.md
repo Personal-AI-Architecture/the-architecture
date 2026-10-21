@@ -125,6 +125,8 @@ An approval rule can't be enforced by a prompt alone. A system prompt that says 
 
 When enabled, the check emits the canonical pending `approval-request` with a stable request ID and expiry. An approval-authorized identity resolves it with one terminal `approved`, `denied`, `cancelled`, or `expired` decision. Replaying a decision is idempotent and cannot execute the tool twice; conflicting decisions are rejected. The exact payloads are defined in `contracts/schemas/approval-request.json` and `contracts/schemas/approval-decision.json`.
 
+The actor used for that check arrives in the canonical transport-neutral `auth_context`; tool execution must not depend on a particular header, message bus, or direct-call transport.
+
 ---
 
 ## Tools and skills

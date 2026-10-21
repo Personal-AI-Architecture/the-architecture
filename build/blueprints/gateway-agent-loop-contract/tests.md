@@ -8,7 +8,7 @@ This file defines language-agnostic pass/fail vectors for the internal Gateway â
 
 ## Requirement Set (MUST)
 
-- `GEC-MUST-001`: Gateway sends only bounded internal request shape (`messages` + model + `metadata`) to Agent Loop.
+- `GEC-MUST-001`: Gateway sends only bounded internal request shape (`messages` + model + `auth_context` + `metadata`) to Agent Loop.
 - `GEC-MUST-002`: `metadata.correlation_id` is required for every handoff.
 - `GEC-MUST-003`: Metadata keys are limited to contract-approved fields (`conversation_id`, `trigger`, `client_context`).
 - `GEC-MUST-004`: Request payload rejects hidden provider/tool/runtime reconfiguration fields and carries no system message.
@@ -24,6 +24,7 @@ This file defines language-agnostic pass/fail vectors for the internal Gateway â
 - `GEC-MUST-014`: Gateway and Agent Loop remain independently swappable as long as contract is preserved.
 - `GEC-MUST-015`: Messages use the single shared shape; content is a list of parts, and tool calls and tool results are message parts saved in history.
 - `GEC-MUST-016`: Every request carries a timestamp, and every error carries the correlation ID.
+- `GEC-MUST-017`: The canonical `auth_context` survives HTTP, message-bus, and direct-call adapters without credentials or permissions; malformed, expired, or caller-supplied context is rejected.
 
 ## Test Vectors
 
@@ -61,11 +62,13 @@ This file defines language-agnostic pass/fail vectors for the internal Gateway â
 | GEC-T015N | GEC-MUST-015 | Negative | Implementation flattens content to text or drops tool parts from history | Conformance fails | Lossy shape accepted | Message-shape drift |
 | GEC-T016P | GEC-MUST-016 | Positive | Send a request, then force a pre-stream and a mid-stream error | Request has a timestamp; both errors carry the correlation ID | Missing timestamp or correlation ID | Traceability drift |
 | GEC-T016N | GEC-MUST-016 | Negative | Error body or event carries only `code` and `message` | Conformance fails | Untraceable error accepted | Traceability drift |
+| GEC-T017P | GEC-MUST-017 | Positive | Carry one Auth-produced context through HTTP, message-bus, and direct-call adapters | Same actor, authentication ID, timestamps, and correlation ID arrive; tool authorization uses that actor | Context changes or disappears | Transport identity drift |
+| GEC-T017N | GEC-MUST-017 | Negative | Omit, alter, expire, or add permissions/credentials to context at receiving boundary | Request fails closed before Agent Loop/tool execution | Forged, stale, or permission-bearing context accepted | Identity propagation bypass |
 
 ## Coverage Summary
 
-- MUST requirements: 16
-- Positive tests: 16
-- Negative tests: 16
-- Total vectors: 32
+- MUST requirements: 17
+- Positive tests: 17
+- Negative tests: 17
+- Total vectors: 34
 - Critical drift categories covered: bounded payload erosion, metadata/config side-channel, auth bypass, event taxonomy drift, error taxonomy collapse, unsafe error leakage, pre/mid-stream channel confusion, tool-call identity drift, completion reconciliation drift, boundary role drift, approval invisibility, swapability regression, message-shape drift, untraceable errors.

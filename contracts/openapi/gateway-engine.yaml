@@ -5,7 +5,7 @@ info:
   description: |
     Internal contract between Gateway and Agent Loop. Not a third connector — an internal
     interface between two components in the same deployment. POST /agent-loop/chat, SSE stream
-    response, auth middleware on path.
+    response, and a transport-neutral Auth context on the internal path.
 
     This contract fills the one gap identified by the protocol evaluation (D136). The
     Gateway API and Model API are the swappability boundaries — external things plug
@@ -32,17 +32,6 @@ paths:
 
         The Agent Loop is pre-configured with tool definitions and provider configuration at
         startup. These are not per-request data.
-      parameters:
-        - name: X-Actor-ID
-          in: header
-          required: true
-          description: |
-            Identity of the authenticated actor, set after the Gateway's Auth check. The
-            Agent Loop carries this identity into its per-tool Auth checks.
-          schema:
-            type: string
-            examples:
-              - 'owner_abc123'
       requestBody:
         required: true
         content:
@@ -54,6 +43,16 @@ paths:
                 summary: A budgeting conversation with history
                 value:
                   model: 'local/llama-3.1-8b'
+                  auth_context:
+                    actor:
+                      id: 'owner_abc123'
+                      type: 'owner'
+                      display_name: 'Owner'
+                      status: 'active'
+                      created: '2026-01-15T10:30:00Z'
+                    authentication_id: 'authn_123'
+                    authenticated_at: '2026-10-21T15:00:00Z'
+                    correlation_id: 'req_xyz789'
                   messages:
                     - role: system
                       content:
@@ -138,6 +137,7 @@ components:
       required:
         - messages
         - model
+        - auth_context
       properties:
         messages:
           type: array
@@ -153,6 +153,13 @@ components:
           description: |
             The owner's current model choice. The Gateway reads this for every
             request and passes it through; the Agent Loop must not pin it at startup.
+        auth_context:
+          $ref: '../schemas/auth-context.json'
+          description: |
+            Transport-neutral authenticated actor context produced by Auth. The Gateway
+            adds it after authentication; clients must not supply or override it. The
+            transport adapter must preserve and integrity-protect this context when the
+            internal handoff is HTTP, a message bus, or a direct function call.
         metadata:
           $ref: '#/components/schemas/RequestMetadata'
 

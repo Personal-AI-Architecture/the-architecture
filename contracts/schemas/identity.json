@@ -8,7 +8,7 @@
   "properties": {
     "id": {
       "type": "string",
-      "description": "Unique identifier for this actor. Stable across sessions and exports. Used in X-Actor-ID headers, audit logs, and policy subjects."
+      "description": "Unique identifier for this actor. Stable across sessions and exports. Used in auth_context, audit logs, and policy subjects."
     },
     "type": {
       "type": "string",

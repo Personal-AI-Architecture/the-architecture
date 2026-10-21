@@ -20,6 +20,7 @@ Use this when reviewing Gateway code paths, routes, conversation handling, or cl
 - [ ] Client-facing `done` includes `conversation_id` and `message_id`.
 - [ ] Where a product adds approvals, approval appears in the contract rather than only in client-local control flow.
 - [ ] Approval requests expose a stable request ID and expiry; decisions are terminal and replay-safe.
+- [ ] The internal handoff carries canonical `auth_context`; identity does not depend on `X-Actor-ID` or another single transport.
 
 ## Matrix IDs
 

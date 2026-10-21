@@ -154,15 +154,17 @@ Auth is the independent component that establishes identity, decides permissions
 
 #### `AuthContext`
 - Required fields:
-  - `actorId: string`
-  - `actorType: enum`
-  - `mode: enum`
-  - `permissions: PermissionSet`
+  - `actor: identity.json`
+  - `authentication_id: string`
+  - `authenticated_at: timestamp`
+  - `correlation_id: string`
+- Optional field: `expires_at: timestamp`
+- Forbidden: credentials, permission sets, or provider-specific opaque fields.
 
 #### `AuthIdentityTransport` (implementation example, not mandatory mechanism)
 - The authenticated identity must survive a transport swap without caller-controlled
-  permission data. The current internal contract uses `X-Actor-ID`; permissions remain
-  in Auth. Transport-neutral propagation remains open under S5.
+  permission data. The canonical transport shape is `contracts/schemas/auth-context.json`;
+  HTTP headers, message metadata, and direct-call arguments are adapters only.
 
 ### 4.4 Required Tool Contracts
 
@@ -472,6 +474,7 @@ Why invalid:
 - `AUTH-MUST-016`: After import, policies for unknown identities MUST stay dormant, and a re-created identity MUST get no access until the owner turns it back on.
 - `AUTH-MUST-017`: Auth MUST evaluate portable policy rules with the canonical matching, condition, precedence, and fail-closed reference semantics.
 - `AUTH-MUST-018`: Where approvals are enabled, Auth MUST authorize terminal approval decisions, enforce the pending-to-terminal lifecycle, and make decisions idempotent by `request_id`; replay MUST NOT execute a tool again.
+- `AUTH-MUST-019`: Auth and the internal transport adapter MUST propagate the canonical `auth_context` without credentials or permissions; missing, malformed, expired, or caller-supplied context MUST fail closed across transport implementations.
 
 ### SHOULD
 
@@ -514,6 +517,7 @@ Why invalid:
 | AUTH-MUST-016 | Human `auth-spec.md` stale permissions after export/import; AI matrix `A-08` | `AUTH-T016P`, `AUTH-T016N` |
 | AUTH-MUST-017 | Human `auth-spec.md` portable policy evaluation; canonical `policy.json` | `AUTH-T017P`, `AUTH-T017N` |
 | AUTH-MUST-018 | Human `security-spec.md` approval lifecycle; canonical approval schemas | `AUTH-T018P`, `AUTH-T018N` |
+| AUTH-MUST-019 | Human `auth-spec.md` transport boundary; canonical `auth-context.json` | `AUTH-T019P`, `AUTH-T019N` |
 
 ## 16. Residual Risks & Open Decisions
 
@@ -535,8 +539,8 @@ Why invalid:
 ## Self-Validation Report
 
 - Coverage of required sections: 16/16 (100%)
-- Normative requirements count: 23 total (`18 MUST`, `3 SHOULD`, `2 MAY`)
-- Interfaces with schemas: 11 (`permission_set`, `auth_state`, `auth_context`, `authenticate_request`, `authenticate_response`, `authorize_request`, `authorize_decision`, `auth_whoami_response`, `auth_check_response`, `auth_export_response`, `auth_headers`)
+- Normative requirements count: 24 total (`19 MUST`, `3 SHOULD`, `2 MAY`)
+- Interfaces with schemas: 10 (`permission_set`, `auth_state`, `auth_context`, `authenticate_request`, `authenticate_response`, `authorize_request`, `authorize_decision`, `auth_whoami_response`, `auth_check_response`, `auth_export_response`)
 - Test vectors count: 32 total (`16 positive`, `16 negative`)
 - Conflicts detected/resolved: 5/5 resolved
 - Unresolved ambiguity list:
@@ -548,5 +552,6 @@ Why invalid:
 The canonical contract tree under `contracts/` is authoritative for identity, policy,
 request, and error shapes. Identity status and extensible actor types are published;
 re-created identities remain inactive until the owner reactivates them. Auth remains
-the sole owner of permissions, and transport-neutral identity propagation (S5) and
-tool-definition semantics (S8) remain open follow-up questions.
+the sole owner of permissions, and transport-neutral identity propagation is defined
+by `contracts/schemas/auth-context.json`; tool-definition semantics (S8) remains an
+open follow-up question.

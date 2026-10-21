@@ -9,7 +9,7 @@ hide_table_of_contents: true
 >
 > Each gap is something the spec expects that the published architecture does not deliver today. Classification is a suggestion for triage: **Defect** (published material is broken or contradicts itself), **Decision needed** (the maintainers must choose), **Technical** (contract and technical work), **Spec-only** (wording fix in the architecture docs). A gap marked **Decided, spec update in progress** has a settled answer that is still being written into the specs and contracts.
 
-**Scoreboard:** The contract-source alignment batch, example-shape validation, documentation freshness tooling, configuration alignment, required parallel tool execution, portable policy semantics, and approval lifecycle contracts are complete. Remaining work is concentrated in transport-neutral identity (S5), tool-definition semantics (S8), the local-address decision, and the first executable language-neutral conformance implementation.
+**Scoreboard:** The contract-source alignment batch, example-shape validation, documentation freshness tooling, configuration alignment, required parallel tool execution, portable policy semantics, approval lifecycle contracts, and transport-neutral identity propagation are complete. Remaining work is concentrated in tool-definition semantics (S8), the local-address decision, and the first executable language-neutral conformance implementation.
 
 ## Routes a developer follows
 
@@ -98,3 +98,10 @@ hide_table_of_contents: true
 - **Published:** Optional approval interactions now have canonical request and decision schemas, Gateway/Agent Loop stream events, and explicit pending-to-terminal lifecycle semantics. Requests include a stable ID and expiry; decisions are `approved`, `denied`, `cancelled`, or `expired`, require Auth approval authority, and are idempotent on replay without re-executing the tool.
 - **Evidence:** [approval-request.json](../contracts/schemas/approval-request.json); [approval-decision.json](../contracts/schemas/approval-decision.json); [gateway-engine.yaml](../contracts/openapi/gateway-engine.yaml); [security-spec.md](../architecture/security-spec.md); [auth tests](../build/blueprints/auth/tests.md).
 - **Decided:** the architecture's default remains that the owner can do everything; approval prompts are a product choice, but products that enable them must use this lifecycle and cannot treat presentation as enforcement.
+
+### GAP-PAA-S5: Authenticated identity can be lost when the internal transport changes — Resolved
+
+- **Expected:** An authenticated actor remains the same when Gateway and Agent Loop communicate over HTTP, a message bus, or a direct function call; permissions remain owned by Auth.
+- **Published:** `auth_context.json` is the canonical transport-neutral envelope. It carries the Auth-produced actor, authentication ID, timestamps, and correlation ID, but no credentials or permissions. The internal OpenAPI request requires it, and transport adapters must verify integrity and fail closed for missing, malformed, expired, or caller-supplied context.
+- **Evidence:** [auth-context.json](../contracts/schemas/auth-context.json); [gateway-engine.yaml](../contracts/openapi/gateway-engine.yaml); [auth-spec.md](../architecture/auth-spec.md); [Gateway ↔ Agent Loop tests](../build/blueprints/gateway-agent-loop-contract/tests.md).
+- **Decided:** `X-Actor-ID` is no longer a canonical contract. Headers, message metadata, and direct-call arguments are implementation adapters for the same `auth_context` shape.

@@ -180,10 +180,10 @@ After an `error` event, the stream closes. The Gateway decides how to communicat
 
 Auth is a separate component, not part of the Gateway or the Agent Loop (D60). Permissions live only in Auth. It is called at two points:
 
-1. **Every request.** The Gateway calls Auth before it POSTs to the Agent Loop. Auth validates the request (token, session, API key) and identifies the actor. The Gateway attaches that identity to the request (today via the `X-Actor-ID` header) or rejects the request with HTTP 401. Permissions remain in Auth and are not caller-controlled header data.
+1. **Every request.** The Gateway calls Auth before it POSTs to the Agent Loop. Auth validates the request (token, session, API key) and identifies the actor. The Gateway attaches the canonical transport-neutral `auth_context` returned by Auth or rejects the request with HTTP 401. Permissions remain in Auth and are not carried in the context.
 2. **Each tool call.** Before running a tool call, the Agent Loop asks Auth whether this actor may make it. A refused call is not run; the model is told it was not permitted.
 
-The Agent Loop receives pre-authenticated requests. It never validates identity — Auth already did — and it never decides permissions itself: it asks Auth and honours the answer.
+The Agent Loop receives a pre-authenticated `auth_context` through the internal transport adapter. The adapter verifies the Gateway-to-Agent-Loop boundary and rejects a missing, malformed, expired, or caller-supplied context. The Agent Loop never authenticates credentials itself and never decides permissions: it asks Auth and honours the answer.
 
 ---
 
@@ -256,8 +256,8 @@ Per-component requirements from [security-spec.md](./security-spec.md). Security
 
 - [ ] Every request must pass an Auth check, called by the Gateway, before reaching the Agent Loop — no bypass path
 - [ ] Every tool call must pass an Auth check, asked by the Agent Loop, before it runs
-- [ ] Credentials (tokens, API keys, session IDs) must never appear in the request body — Auth validates and the Gateway carries the authenticated identity through the agreed transport boundary
-- [ ] The Agent Loop must treat identity headers as read-only — it passes the identity to Auth for tool-level checks but must not modify, forge, or strip it
+- [ ] Credentials (tokens, API keys, session IDs) must never appear in the request body or `auth_context` — Auth validates them and the Gateway carries only the authenticated identity context
+- [ ] The internal transport adapter must preserve and integrity-protect `auth_context` across HTTP, messaging, or direct-call transports; the Agent Loop must not modify, forge, or strip it
 - [ ] Correlation IDs must flow end-to-end (Gateway → Auth → Agent Loop → tools → logs) for full request traceability
 - [ ] The SSE stream must not leak internal system paths, stack traces, or credentials in error events — error messages must be safe for client display
 
@@ -269,8 +269,8 @@ The canonical files under `contracts/` are authoritative for the route, request
 fields, structured message parts, stream events, and error shapes. This spec defines
 the ownership and behavioral requirements behind those definitions. The paired Model
 API is streaming-only and identifies each completion event with `_event_type`; the
-Agent Loop executes independent tool calls concurrently and preserves dependency order. S5 (transport-
-neutral identity propagation) and S8 (tool-definition shape/visibility) remain open
+Agent Loop executes independent tool calls concurrently and preserves dependency order. S8
+(tool-definition shape/visibility) remains open.
 follow-up questions.
 
 ---

@@ -127,7 +127,7 @@ An identity re-created after export and import starts with no access: it cannot 
 
 ### Identity travels with the request
 
-Once the Gateway has the identity from Auth, it passes that identity to the Agent Loop with the request, and the Agent Loop uses it for each tool check and for the audit log. The identity must survive a change of transport or a replacement of either the Gateway or the Agent Loop: whatever carries it, the same authenticated identity arrives intact.
+Once the Gateway has the identity from Auth, it passes the canonical `auth_context` to the Agent Loop with the request, and the Agent Loop uses its actor identity for each tool check and for the audit log. `auth_context` contains the authenticated actor, an authentication ID, timestamps, and correlation ID; it contains neither credentials nor permissions. The internal transport adapter verifies the component boundary and preserves the same context across HTTP, a message bus, or a direct function call. A missing, malformed, expired, or caller-supplied context is rejected.
 
 ---
 
@@ -363,9 +363,10 @@ The canonical contract tree under `contracts/` is authoritative for transport an
 payload shapes. Identity records now have an explicit `status` and extensible actor
 `type`; re-created identities remain inactive until the owner reactivates them.
 The Gateway carries the authenticated identity through the transport-neutral Auth
-boundary, currently represented by `X-Actor-ID` on the internal handoff. Permissions
-remain owned by Auth and are not caller-controlled header data. The remaining open
-transport question is tracked outside this spec as S5.
+boundary as the canonical `auth_context` shape in `contracts/schemas/auth-context.json`.
+Headers, message metadata, request-body fields, and direct-call arguments are transport
+adapters for that shape, not competing identity contracts. Permissions remain owned by
+Auth and are never caller-controlled transport data.
 
 ---
 

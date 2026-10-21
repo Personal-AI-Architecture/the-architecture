@@ -64,7 +64,7 @@ The Gateway ↔ Agent Loop Contract defines the bounded internal handoff between
 ### Internal vs External Concepts
 - **Internal**
   - `POST /agent-loop/chat` payload and SSE event semantics.
-  - identity attached by the Gateway after its Auth call.
+- canonical `auth_context` attached by the Gateway after its Auth call; the transport adapter verifies and preserves it.
 - **External**
   - client request/response contract (`/message`, `/conversations`, and `/approvals` where used).
   - model-provider contract via adapter boundary.
@@ -119,14 +119,20 @@ Required:
 ### 4.4 `auth_context`
 
 Required:
-- `actorId`
-- `actorType`
-- `mode`
-- `permissions`
+- `actor` (`identity.json`)
+- `authentication_id`
+- `authenticated_at`
+- `correlation_id`
+- Optional: `expires_at`
 
-Current implementation profile:
-- `actorType = "owner"`
-- `mode = "local-owner"`
+Forbidden:
+- credentials
+- permissions
+- provider-specific opaque fields
+
+The receiving transport adapter verifies the Gateway boundary and rejects missing,
+malformed, expired, or caller-supplied context. Headers, message metadata, and
+direct-call arguments are adapters for this canonical shape.
 
 ### 4.5 `stream_event`
 
@@ -183,6 +189,12 @@ Allowed `code` values:
     }
   ],
   "model": "local/llama-3.1-8b",
+  "auth_context": {
+    "actor": { "id": "owner_abc123", "type": "owner", "display_name": "Owner", "status": "active", "created": "2026-01-15T10:30:00Z" },
+    "authentication_id": "authn_123",
+    "authenticated_at": "2026-10-21T15:00:00Z",
+    "correlation_id": "req_123"
+  },
   "metadata": {
     "correlation_id": "req_123",
     "conversation_id": "conv_123",
@@ -218,7 +230,7 @@ require a separate request timestamp.
 
 ### 5.1 Handoff Sequence
 1. Gateway calls Auth for the request; Auth authenticates and authorizes it, or the Gateway rejects it with 401.
-2. Gateway validates and normalizes client request into internal `messages` + model + `metadata`, reading the owner's current model choice and attaching the identity Auth returned.
+2. Gateway validates and normalizes client request into internal `messages` + model + `auth_context` + `metadata`, reading the owner's current model choice and attaching the identity Auth returned.
 3. Gateway calls Agent Loop handoff path with bounded request.
 4. Agent Loop starts stream and emits typed events through interaction lifecycle.
 5. Gateway forwards events and reconciles completion identifiers as needed.
@@ -413,7 +425,7 @@ require a separate request timestamp.
 ## 13. Normative Requirements (MUST/SHOULD/MAY)
 
 ### MUST
-- `GEC-MUST-001`: Gateway MUST send only bounded `messages` + model + `metadata` request shape.
+- `GEC-MUST-001`: Gateway MUST send only bounded `messages` + model + `auth_context` + `metadata` request shape.
 - `GEC-MUST-002`: `metadata.correlation_id` MUST be present on every request.
 - `GEC-MUST-003`: Metadata MUST be limited to contract-approved keys.
 - `GEC-MUST-004`: Request MUST reject hidden provider/tool/runtime configuration fields and MUST NOT carry a system message.
@@ -429,6 +441,7 @@ require a separate request timestamp.
 - `GEC-MUST-014`: Gateway and Agent Loop MUST remain independently swappable if contract compatibility is preserved.
 - `GEC-MUST-015`: Messages MUST use the single shared shape: content is a list of parts, and tool calls and tool results are ordinary message parts that the Gateway saves in history and sends back on resume.
 - `GEC-MUST-016`: Every request MUST carry a timestamp, and every error (HTTP or SSE) MUST carry the request's correlation ID.
+- `GEC-MUST-017`: The canonical `auth_context` MUST survive transport adapters without credentials or permissions; missing, malformed, expired, or caller-supplied context MUST fail closed.
 
 ### SHOULD
 - `GEC-SHOULD-001`: Correlation IDs SHOULD propagate to logs and tool context for traceability.
@@ -467,6 +480,7 @@ require a separate request timestamp.
 | GEC-MUST-014 | Human swappability goals (`FS-5`, `FS-7` references); AI drift checks | `GEC-T014P`, `GEC-T014N` |
 | GEC-MUST-015 | Human `gateway-agent-loop-contract.md`, `communication-principles.md`; AI matrix `GC-07`, `G-09` | `GEC-T015P`, `GEC-T015N` |
 | GEC-MUST-016 | Human `gateway-agent-loop-contract.md`, `communication-principles.md`; AI matrix `GC-08` | `GEC-T016P`, `GEC-T016N` |
+| GEC-MUST-017 | Human `auth-spec.md`; canonical `contracts/schemas/auth-context.json` | `GEC-T017P`, `GEC-T017N` |
 
 ## 16. Residual Risks & Open Decisions
 
@@ -491,12 +505,12 @@ require a separate request timestamp.
 ## Self-Validation Report
 
 - Coverage of required sections: 16/16 (100%)
-- Normative requirements count: 21 total (`16 MUST`, `3 SHOULD`, `2 MAY`)
+- Normative requirements count: 22 total (`17 MUST`, `3 SHOULD`, `2 MAY`)
 - Interfaces with schemas: 6 (`gateway_engine_request`, `gateway_message`, `gateway_tool_call`, `auth_context`, `stream_event`, `pre_stream_error_response`)
 - Test vectors count: 32 total (`16 positive`, `16 negative`)
 - Conflicts detected/resolved: 3/3 resolved
 - Unresolved ambiguity list:
-  - `A-01 (Medium)`: transport-neutral identity propagation (S5), tool-definition semantics (S8), and approval lifecycle remain open outside this bounded contract.
+  - `A-01 (Medium)`: tool-definition semantics (S8) remains open outside this bounded contract.
 - Final readiness rating: Conditionally Ready
 
 ## Contract Alignment

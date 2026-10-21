@@ -3,6 +3,6 @@
   "$id": "contract-pack://paa/gateway-agent-loop",
   "title": "Gateway-Agent Loop Internal Contract Pack (derived)",
   "description": "Derived source manifest. The internal request and stream shapes are authoritative only in contracts/.",
-  "x-canonical_sources": ["contracts/openapi/gateway-engine.yaml", "contracts/schemas/message.json", "contracts/schemas/authorization-request.json", "contracts/schemas/authorization-result.json"],
+  "x-canonical_sources": ["contracts/openapi/gateway-engine.yaml", "contracts/schemas/message.json", "contracts/schemas/auth-context.json", "contracts/schemas/authorization-request.json", "contracts/schemas/authorization-result.json"],
   "x-status": "derived"
 }

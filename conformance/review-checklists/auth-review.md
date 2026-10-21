@@ -22,6 +22,7 @@ Use this when reviewing runtime auth wiring, identity propagation, permission en
 - [ ] Secrets are not written into Memory or any git-tracked file.
 - [ ] Approval rules the owner sets are enforced through code, not only policy prose or prompt text; none are required by default.
 - [ ] Where approvals are enabled, requests are pending before execution, only approval-authorized identities decide, terminal decisions include cancellation/expiry, and replay is idempotent by request ID.
+- [ ] The canonical `auth_context` survives transport changes without credentials or permissions; receiving adapters reject missing, malformed, expired, or caller-supplied context.
 
 ## Matrix IDs
 
@@ -35,6 +36,7 @@ Use this when reviewing runtime auth wiring, identity propagation, permission en
 - `A-08`
 - `A-09`
 - `A-10`
+- `A-11`
 - `C-04`
 - `GC-04`
 - `S-03`

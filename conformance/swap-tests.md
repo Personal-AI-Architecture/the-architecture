@@ -9,6 +9,9 @@ Approval-enabled implementations must retain the canonical pending/terminal appr
 lifecycle and replay semantics while components are swapped; the architecture default
 still requires no approval prompt.
 
+Identity-enabled swaps must likewise preserve the canonical `auth_context` actor and
+correlation data across the selected transport adapter.
+
 ---
 
 ## SWAP-1: Provider Swap

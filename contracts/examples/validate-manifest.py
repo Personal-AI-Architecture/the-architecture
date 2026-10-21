@@ -23,7 +23,14 @@ def schema(name: str) -> dict:
 
 def validate_schema(payload: object, name: str, file_path: str) -> None:
     try:
-        Draft202012Validator(schema(name)).validate(payload)
+        current = schema(name)
+        if name == "auth-context.json":
+            # Keep the published schema's local reference while validating the
+            # standalone manifest example without a network-backed resolver.
+            current = dict(current)
+            current["properties"] = dict(current["properties"])
+            current["properties"]["actor"] = schema("identity.json")
+        Draft202012Validator(current).validate(payload)
     except ValidationError as exc:
         fail(f"{file_path} does not validate against {name}: {exc.message}")
 
@@ -75,12 +82,14 @@ def validate_contract_example(file_path: str, payload: object, kind: str) -> Non
             and isinstance(payload.get("messages"), list)
             and bool(payload.get("messages"))
             and isinstance(payload.get("model"), str)
+            and isinstance(payload.get("auth_context"), dict)
             and isinstance(payload.get("metadata"), dict)
             and isinstance(payload["metadata"].get("correlation_id"), str)
             and all(isinstance(message, dict) and isinstance(message.get("content"), list) for message in payload["messages"])
             and not any(key in payload["metadata"] for key in ("provider", "api_key", "tool_sources"))
         )
         if valid:
+            validate_schema(payload["auth_context"], "auth-context.json", file_path)
             for message in payload["messages"]:
                 validate_schema(message, "message.json", file_path)
         if (kind == "valid") != valid:

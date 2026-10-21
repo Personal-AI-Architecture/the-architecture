@@ -391,6 +391,5 @@ The canonical contract tree under `contracts/` is authoritative for exact payloa
 routes, shared message parts, and stream events. Identity status and extensible actor
 types, the per-request model, and structured message content are now represented in
 the published contracts. Remaining open contract questions are tracked in the gaps
-file, including transport-neutral identity propagation (S5),
-tool-definition semantics (S8), and the still-to-be-finalized correlation/streaming
-details.
+file, including tool-definition semantics (S8) and the still-to-be-finalized
+correlation/streaming details.

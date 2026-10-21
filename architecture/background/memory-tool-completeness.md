@@ -8,6 +8,9 @@ Where a product adds approval rules to memory writes, the tool boundary uses the
 canonical approval request/decision lifecycle; the owner-default path remains
 approval-free.
 
+The actor reaching that tool boundary is the transport-neutral `auth_context`, not a
+header-specific identity convention.
+
 ## 1. The Binary
 
 The system reduces to two things: **memory and tools** (D135).

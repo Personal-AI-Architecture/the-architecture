@@ -194,6 +194,8 @@ Approval is an optional interaction, but its state transitions are portable. Bef
 
 The request ID is the idempotency key. Replaying the same terminal decision returns the same result and never runs the tool a second time. A conflicting decision after resolution is rejected as already resolved. Cancellation and expiry are terminal non-execution outcomes. Auth verifies the decision maker's approval authority; clients may present these events, but cannot approve by presentation alone. The canonical payloads are `contracts/schemas/approval-request.json` and `contracts/schemas/approval-decision.json`, and the stream wrappers are in the Gateway and Agent Loop OpenAPI contracts.
 
+The same boundary rule applies to identity propagation: the Gateway-to-Agent Loop handoff uses `contracts/schemas/auth-context.json`, which excludes credentials and permissions and must be preserved and integrity-checked by every transport adapter.
+
 ### 3. Audit Logging
 
 **The Architecture provides the mechanism.** The Foundation logs all actions — auth events, tool calls, Memory reads and writes — in a structured, queryable format. Action metadata (what happened, who, when, which tool) is always recorded regardless of logging level. Configurable levels control content detail, not whether actions are recorded.

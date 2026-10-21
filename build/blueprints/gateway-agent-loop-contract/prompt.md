@@ -51,8 +51,9 @@ If conflicts appear, do not guess silently. Create `conflict_register.md` and re
 ## Required Contract Capabilities
 
 Implement these behaviors:
-- Keep one bounded internal handoff request shape (`messages` + model + `metadata`), using the single message shape shared with the Gateway API and Model API (content as a list of parts; tool calls and tool results as message parts).
+- Keep one bounded internal handoff request shape (`messages` + model + `auth_context` + `metadata`), using the single message shape shared with the Gateway API and Model API (content as a list of parts; tool calls and tool results as message parts).
 - Require `metadata.correlation_id` for every request.
+- Require the canonical `auth_context`; preserve it across HTTP, message-bus, and direct-call adapters without carrying credentials or permissions.
 - Reject request-time provider/tool/runtime configuration leakage.
 - Ensure the Gateway calls Auth on every request before Agent Loop execution, and the Agent Loop asks Auth before each tool call.
 - Emit canonical stream events for in-progress and terminal interaction states.
@@ -69,6 +70,7 @@ Implement these behaviors:
 - Required:
   - `messages[]` (no system message; the bootstrap prompt is Agent Loop configuration)
   - `model` (the owner's current model choice)
+- `auth_context` (the Auth-produced actor context; clients must not supply it)
   - `metadata.correlation_id`
 - Optional:
   - `metadata.conversation_id`

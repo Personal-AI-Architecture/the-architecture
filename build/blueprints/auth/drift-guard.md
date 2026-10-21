@@ -17,6 +17,7 @@ This document defines anti-drift controls for Auth implementations.
 - Missing auth tools (`auth_whoami`, `auth_check`, `auth_export`).
 - Actor context not propagated to Agent Loop/tool execution.
 - Audit records missing for denied or approved auth decisions.
+- Authenticated actor context is tied to `X-Actor-ID` or another single transport instead of the canonical `auth_context`.
 
 ## 2. Prohibited Implementation Shortcuts
 
@@ -34,7 +35,7 @@ This document defines anti-drift controls for Auth implementations.
 | Check ID | Assertion | Validation Mechanism | Severity |
 |---|---|---|---|
 | AUTHD-CHK-001 | Gateway calls Auth on every protected request, including list and history reads | Unauthorized integration tests on protected endpoints | Critical |
-| AUTHD-CHK-002 | Auth context parsing and normalization enforced | Header/credential validation tests | Critical |
+| AUTHD-CHK-002 | Auth context parsing and normalization enforced | Canonical `auth-context.json` validation and credential validation tests | Critical |
 | AUTHD-CHK-003 | Fail-closed behavior on invalid auth input | Negative tests for missing/malformed credentials | Critical |
 | AUTHD-CHK-004 | Permission denial enforced when flags are absent | Authorization unit + integration tests | Critical |
 | AUTHD-CHK-005 | Approval authority gate enforced where a product adds approvals | Approval-decision permission tests | Critical |
@@ -48,6 +49,7 @@ This document defines anti-drift controls for Auth implementations.
 | AUTHD-CHK-013 | Default policy lets the owner do everything; other identities start with nothing | Fresh-state policy tests | Critical |
 | AUTHD-CHK-014 | Permissions and approval rules live only in Auth | Static scan of configuration and preferences | Critical |
 | AUTHD-CHK-015 | Imported policies for unknown identities stay dormant | Export/import round-trip tests | High |
+| AUTHD-CHK-016 | Canonical `auth_context` survives transport adapters without credentials or permissions | HTTP/message/direct-call parity and tamper tests | Critical |
 
 ## 4. Contract-Break Indicators
 
@@ -60,6 +62,7 @@ This document defines anti-drift controls for Auth implementations.
 - `auth_export` includes secret-like fields or opaque provider payload.
 - Required auth tools are missing at runtime.
 - Local-owner mode has no effective auth validation.
+- `auth_context` changes or disappears when the internal transport changes.
 - Auth module gains conversation routing or model-loop responsibilities.
 
 ## 5. Fail Build If
@@ -83,6 +86,7 @@ This document defines anti-drift controls for Auth implementations.
 - [ ] Imported policies for unknown identities stay dormant.
 - [ ] Startup creates/loads product-owned auth state.
 - [ ] `auth_export` excludes secret material.
+- [ ] `auth_context` is preserved across transport adapters and fails closed when missing, malformed, expired, or caller-supplied.
 - [ ] `auth_whoami`, `auth_check`, and `auth_export` are present.
 - [ ] Actor context propagates to Agent Loop/tool execution.
 - [ ] Structured auth audit records exist for allow + deny paths.

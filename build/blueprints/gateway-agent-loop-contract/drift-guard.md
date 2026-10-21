@@ -19,6 +19,7 @@ This document defines anti-drift controls for the internal Gateway ↔ Agent Loo
 - Tool calls and tool results are dropped from history, or each interface uses its own message shape.
 - Internal contract is promoted into a third external API.
 - Gateway and Agent Loop become code-coupled beyond contract shape.
+- Authenticated identity is tied to one transport, or `auth_context` is accepted without boundary verification.
 
 ## 2. Prohibited Implementation Shortcuts
 
@@ -35,7 +36,7 @@ This document defines anti-drift controls for the internal Gateway ↔ Agent Loo
 
 | Check ID | Assertion | Validation Mechanism | Severity |
 |---|---|---|---|
-| GECD-CHK-001 | Request remains bounded to `messages` + model + `metadata` | Schema validation against `contracts/openapi/gateway-engine.yaml` | Critical |
+| GECD-CHK-001 | Request remains bounded to `messages` + model + `auth_context` + `metadata` | Schema validation against `contracts/openapi/gateway-engine.yaml` | Critical |
 | GECD-CHK-002 | `metadata.correlation_id` required | Negative request tests | Critical |
 | GECD-CHK-003 | Metadata keys restricted to contract set | Metadata schema and negative tests | Critical |
 | GECD-CHK-004 | Hidden provider/tool/runtime fields rejected | Fuzz/negative payload tests | Critical |
@@ -50,6 +51,7 @@ This document defines anti-drift controls for the internal Gateway ↔ Agent Loo
 | GECD-CHK-013 | Approval represented in contract interaction flow where approval rules apply | Approval-rule stream and decision path tests | Critical |
 | GECD-CHK-014 | One message shape with tool calls and results as parts | Tool-turn replay tests | Critical |
 | GECD-CHK-015 | Correlation ID on every error; timestamp on every request | Error and request inspection tests | High |
+| GECD-CHK-016 | Canonical `auth_context` is preserved and verified across transport adapters | HTTP/message/direct-call parity and tamper tests | Critical |
 | GECD-CHK-014 | Gateway and Agent Loop remain independently swappable | Contract-compatibility swap tests | High |
 
 ## 4. Contract-Break Indicators
@@ -63,6 +65,7 @@ This document defines anti-drift controls for the internal Gateway ↔ Agent Loo
 - `done` lacks `conversation_id` or `message_id`.
 - Actions an approval rule covers occur without contract-visible approval signals.
 - Gateway ↔ Agent Loop contract appears in external/public API listing.
+- `auth_context` is missing, altered, expired, contains permissions/credentials, or is trusted without verifying the internal boundary.
 
 ## 5. Fail Build If
 
@@ -78,6 +81,7 @@ This document defines anti-drift controls for the internal Gateway ↔ Agent Loo
 
 - [ ] All `GEC-MUST-*` vectors pass (positive and negative).
 - [ ] Request payload remains bounded to `messages` + model + `metadata`.
+- [ ] Canonical `auth_context` is present, permission-free, credential-free, and transport-independent.
 - [ ] `metadata.correlation_id` is required and propagated.
 - [ ] Metadata rejects provider/tool/runtime reconfiguration fields.
 - [ ] The Gateway calls Auth on every handoff, and every tool call is checked with Auth.

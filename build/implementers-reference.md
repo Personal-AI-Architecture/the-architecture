@@ -110,7 +110,7 @@ Independent of Gateway -- both are swappable independently. Permissions live onl
 
 **Where it is called:** The Gateway calls Auth on every request, before anything reaches the Agent Loop or conversation data; unauthorized requests are rejected with 401. The Agent Loop asks Auth before each tool call; a refused call is not run and the model is told it was not permitted. If Auth is unavailable, fail closed.
 
-**Identity transport (today):** the Gateway passes the authenticated actor in the `X-Actor-ID` header. Permissions remain owned by Auth and are not transported as a caller-controlled header.
+**Identity transport:** the Gateway passes the canonical `auth_context` from Auth to the Agent Loop. `auth_context` contains the actor, authentication ID, timestamps, and correlation ID, but no credentials or permissions. HTTP headers, message metadata, and direct-call arguments are transport adapters for this shape; the receiving boundary verifies integrity and fails closed on missing, malformed, expired, or caller-supplied context.
 
 **Actor types:** owner, collaborator, system agent, background agent, external agent, service, economic actor, federated
 
@@ -237,7 +237,7 @@ One HTTP endpoint. Not a third API.
 
 **Error message safety:** SSE error event messages must be safe for client display. Never forward raw `Error.message`, stack traces, or file paths into the stream. Map each error code to a fixed safe message; log raw diagnostic detail to structured stdout only.
 
-**Auth path:** Gateway calls Auth -> attach the authenticated identity in `X-Actor-ID` -> reject with 401 on failure. Agent Loop asks Auth before each tool call -> a refused call returns a `tool-result` with `error_code: not_permitted`.
+**Auth path:** Gateway calls Auth -> attach canonical `auth_context` -> reject with 401 on failure. Agent Loop verifies the internal handoff and asks Auth before each tool call -> a refused call returns a `tool-result` with `error_code: not_permitted`.
 
 **Messages:** one shape across all three contracts. Content is a list of parts; tool calls and tool results are ordinary message parts and are saved in conversation history. The bootstrap prompt is Agent Loop configuration, so the request carries no system message.
 

@@ -94,6 +94,12 @@ Standalone file:
     }
   ],
   "model": "local/llama-3.1-8b",
+  "auth_context": {
+    "actor": { "id": "owner_abc123", "type": "owner", "display_name": "Owner", "status": "active", "created": "2026-01-15T10:30:00Z" },
+    "authentication_id": "authn_123",
+    "authenticated_at": "2026-10-21T15:00:00Z",
+    "correlation_id": "req_123"
+  },
   "metadata": {
     "correlation_id": "req_123",
     "conversation_id": "conv_123",
@@ -156,7 +162,7 @@ Why this is drift:
 ## Auth Checks
 
 - The Gateway calls Auth on every request, before anything reaches the Agent Loop. Auth is a separate component called through its contract, not middleware owned by either side.
-- The Gateway attaches the identity Auth returns (today via headers) or rejects the request with 401.
+- The Gateway attaches the canonical `auth_context` Auth returns or rejects the request with 401. The transport adapter may use headers, message metadata, or direct-call arguments, but the payload and integrity rules are identical.
 - Agent Loop consumes already-authenticated context; it does not authenticate requests itself.
 - Before each tool call, the Agent Loop asks Auth whether this actor may make it, and honours the answer. It does not decide permissions itself.
 - If Auth can't be reached, fail closed.
