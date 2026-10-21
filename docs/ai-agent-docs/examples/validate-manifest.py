@@ -5,8 +5,8 @@ import sys
 from pathlib import Path
 
 
-ROOT = Path("/home/hex/Project/References/docs/ai")
-MANIFEST = ROOT / "examples" / "examples-manifest.json"
+ROOT = Path(__file__).resolve().parents[3]
+MANIFEST = Path(__file__).resolve().parent / "examples-manifest.json"
 
 
 def fail(message: str) -> None:
@@ -50,7 +50,7 @@ def main() -> None:
 
         file_path = entry["file"]
         kind = entry["kind"]
-        if not isinstance(file_path, str) or not file_path.startswith("docs/ai/examples/"):
+        if not isinstance(file_path, str) or not file_path.startswith("docs/ai-agent-docs/examples/"):
             fail(f"Entry {idx} has invalid file path: {file_path!r}")
         if kind not in allowed_kinds:
             fail(f"Entry {idx} has invalid kind: {kind!r}")
@@ -58,7 +58,7 @@ def main() -> None:
             fail(f"Duplicate manifest file entry: {file_path}")
         seen_files.add(file_path)
 
-        absolute_file = Path("/home/hex/Project/References") / file_path
+        absolute_file = ROOT / file_path
         if not absolute_file.exists():
             fail(f"Referenced example file does not exist: {file_path}")
 
@@ -68,9 +68,9 @@ def main() -> None:
                 fail(f"Entry {idx} field '{list_key}' must be a non-empty array")
 
         for doc_path in entry["owning_docs"] + entry["related_checklists"]:
-            if not isinstance(doc_path, str) or not doc_path.startswith("docs/ai/"):
+            if not isinstance(doc_path, str) or not doc_path.startswith("docs/ai-agent-docs/"):
                 fail(f"Entry {idx} has invalid doc/checklist path: {doc_path!r}")
-            absolute_doc = Path("/home/hex/Project/References") / doc_path
+            absolute_doc = ROOT / doc_path
             if not absolute_doc.exists():
                 fail(f"Referenced doc/checklist does not exist: {doc_path}")
 
