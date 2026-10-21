@@ -53,6 +53,7 @@ Run the model-tool loop for an interaction without owning product behavior, conv
 - Emit tool calls and tool results in the shared message shape so the Gateway can save them in history.
 - Preserve the authenticated actor identity from `auth_context`; owner authority comes from policy, not implicit identity substitution.
 - Report provider failures and stop the current turn; do not silently fall back to another provider.
+- Accept cancellation targeted by correlation ID; after cancellation, stop the turn, run no further model or tool work, and emit `auth_error` for revocation.
 - Stay separate from conversation ownership.
 - Consume Auth context without becoming Auth.
 

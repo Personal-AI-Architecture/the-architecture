@@ -342,6 +342,26 @@
         "version history",
         "restore"
       ]
+    },
+    {
+      "file": "contracts/examples/audit-record.json",
+      "kind": "valid",
+      "owning_docs": [
+        "build/primers/auth.md",
+        "build/primers/security.md"
+      ],
+      "matrix_ids": [
+        "S-02",
+        "A-10"
+      ],
+      "related_checklists": [
+        "conformance/review-checklists/auth-review.md",
+        "conformance/review-checklists/security-review.md"
+      ],
+      "glossary_terms": [
+        "audit log",
+        "portable contract"
+      ]
     }
   ]
 }

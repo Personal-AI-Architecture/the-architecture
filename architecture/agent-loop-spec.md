@@ -152,15 +152,15 @@ The Agent Loop is one brain with two hands — one model that can dispatch multi
 
 This is the only concurrency the Agent Loop needs to handle: **parallel tool execution within a single loop.** The model calls several tools at once (for example, reading two files), the Agent Loop executes independent calls concurrently, keeps dependent calls ordered, results come back, and the model decides what's next.
 
-**Multi-actor concurrency is not an Agent Loop concern.** When a collaborator or external agent accesses the same Memory, they bring their own system — their own agent loop, their own model calls. Two people don't share a brain. They each have their own brain and access the same filing cabinet through Auth. Memory is inert — it doesn't care who's reading it. Auth gates every request. Tools handle write conflicts. No shared agent loop state needed.
+**Multi-actor concurrency does not create shared Agent Loop state.** A collaborator or external agent may act through this system with a distinct authenticated actor and the permissions the owner grants. They use the same generic Agent Loop boundary, while separate systems may bring their own loops. Memory is inert — it does not care who is reading it. Auth gates every request and tool call, and Memory tools handle write conflicts. No actor receives permissions merely by sharing the owner's system.
 
 | Scenario | What's happening | Agent Loop's role |
 |----------|-----------------|---------------|
 | Owner dispatches parallel tool calls | One model, multiple tool executions | Execute them concurrently, return results |
 | Background task runs while owner chats | A separate trigger through the Gateway, its own loop, shared Memory via tools | Each runs in its own loop — Agent Loop is stateless between loops |
 | Owner runs multiple conversations simultaneously | Separate requests, separate loops, shared Memory via tools | Each request gets its own loop — Agent Loop is stateless between loops |
-| Collaborator accesses Memory simultaneously | Separate system, separate agent loop, same Memory | Not this agent loop's concern — Auth + tools handle it |
-| External agent connects | Separate system, separate agent loop, same Memory | Not this agent loop's concern — Auth + tools handle it |
+| Collaborator accesses Memory simultaneously | A distinct authenticated actor uses this system or another system, with owner-granted permissions | Process the request under that actor's `auth_context`; Auth + tools handle access and write conflicts |
+| External agent connects | A distinct authenticated actor connects through the Gateway, with owner-granted permissions | Process the request under that actor's `auth_context`; never substitute the owner identity |
 
 ---
 
@@ -184,6 +184,7 @@ Items marked *(security)* are the per-component requirements from [security-spec
 - [ ] Tool call results must be passed to the model without modification — the Agent Loop must not inject, filter, or alter tool results *(security)*
 - [ ] The Agent Loop must report tool execution failures to the model, not silently retry or recover *(security)*
 - [ ] The Agent Loop must enforce configured timeouts on tool calls — a slow or hung tool cannot block the loop indefinitely *(security)*
+- [ ] When the Gateway sends cancellation for a revoked actor, the Agent Loop stops the active loop, cancels supported in-flight work, runs no further tool calls, and emits `auth_error`; the cancelled turn cannot be retried under the revoked context *(security)*
 
 ---
 

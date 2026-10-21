@@ -19,7 +19,7 @@ Each test has an ID, description, pass/fail criteria, and maps to a specific arc
 | Category | Tests | What it validates |
 |----------|-------|-------------------|
 | [Swap Tests](swap-tests.md) | SWAP-1 to SWAP-3 | Config-only swappability (D147) |
-| [Architectural Invariant Tests](arch-tests.md) | ARCH-1 to ARCH-9, DEPLOY-5 | Component boundaries and independence, error handling, memory export, Auth tools, version history, and the loopback-only default bind address (DEPLOY-5 is defined in this file) |
+| [Architectural Invariant Tests](arch-tests.md) | ARCH-1 to ARCH-11, DEPLOY-5 | Component boundaries and independence, error handling, memory export, Auth tools, version history, revocation cancellation, portable audit records, and the loopback-only default bind address (DEPLOY-5 is defined in this file) |
 | [Deployment Invariant Tests](deploy-tests.md) | DEPLOY-1 to DEPLOY-4 | Local-first deployment contract |
 | [Foundation User Story Tests](fs-tests.md) | FS-1 to FS-8 | End-to-end architecture promises |
 

@@ -12,6 +12,11 @@ still requires no approval prompt.
 Identity-enabled swaps must likewise preserve the canonical `auth_context` actor and
 correlation data across the selected transport adapter.
 
+If the actor is revoked during a running turn, the selected implementation must
+also preserve the cancellation semantics: the Gateway targets the turn by
+correlation ID, the Agent Loop stops without starting further tool work, and the
+result is recorded using the portable audit record.
+
 Tool swaps must preserve `source.id` + name identity and the canonical visibility
 markers while adapter configuration changes remain outside tool definitions.
 

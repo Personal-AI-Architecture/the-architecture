@@ -226,7 +226,7 @@ Identity records hold an ID, type, display name, creation time and status. Polic
 
 ### Audit log
 
-Every action is recorded: who did what, when, to which resource, and with what result. This includes requests Auth denied, tool calls, and changes to identities and permissions. Audit logging is required from the start, including on a system with only the owner.
+Every action is recorded as the portable [audit record](../contracts/schemas/audit-record.json): who did what, when, to which resource, with what result, and under which correlation ID. This includes requests Auth denied, tool calls, cancellation/revocation events, and changes to identities and permissions. Audit logging is required from the start, including on a system with only the owner. Implementations may add non-sensitive detail, but must not put credentials, secrets, or raw private content in the record.
 
 If the audit log cannot be written, work continues and the owner is alerted. The audit log is the owner's data: protected like Your Memory, exportable and deletable by the owner.
 
@@ -260,7 +260,7 @@ A conforming system needs at least `auth_whoami`, `auth_check` and `auth_export`
 
 **Scenario:** The owner revokes an external agent's access while it is mid-task.
 
-**Required behavior:** The operation stops immediately. The owner said stop, so stop. Writes not yet committed are discarded. The agent receives an auth error and cannot retry. The audit log records the revocation and the stopped operation.
+**Required behavior:** Auth revocation causes the Gateway to send the active request's correlation ID to the Agent Loop's cancellation operation. The Agent Loop stops the loop cooperatively, cancels supported in-flight model/tool work, runs no further tool calls, and emits `auth_error`. Tool implementations must not commit writes after cancellation; writes already committed remain and are recorded. The agent cannot retry under the revoked context. The audit log records the revocation, cancellation request, and stopped operation.
 
 ### Owner locked out
 

@@ -25,6 +25,7 @@ Provide copyable valid and invalid example files so implementers, reviewers, and
 - `adapter-config.json` - canonical adapter config
 - `invalid-adapter-config.json` - drift example with product/runtime concerns (and an approval rule) mixed into adapter config
 - `memory-restore-tool.json` - canonical memory restore tool definition
+- `audit-record.json` - canonical portable audit record
 
 ## Authority Mapping
 

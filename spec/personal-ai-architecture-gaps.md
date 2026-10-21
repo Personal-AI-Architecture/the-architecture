@@ -9,7 +9,7 @@ hide_table_of_contents: true
 >
 > Each gap is something the spec expects that the published architecture does not deliver today. Classification is a suggestion for triage: **Defect** (published material is broken or contradicts itself), **Decision needed** (the maintainers must choose), **Technical** (contract and technical work), **Spec-only** (wording fix in the architecture docs). A gap marked **Decided, spec update in progress** has a settled answer that is still being written into the specs and contracts.
 
-**Scoreboard:** The contract-source alignment batch, example-shape validation, documentation freshness tooling, configuration alignment, required parallel tool execution, portable policy semantics, approval lifecycle contracts, transport-neutral identity propagation, tool-definition visibility/source semantics, local-address decision, first executable language-neutral conformance baseline, template-link cleanup, the five visitor-1 decisions, and the Auth-down fail-closed correction are complete. Three visitor-1 gaps remain: GAP-PAA-17 (spec-only), GAP-PAA-21 (technical), and GAP-PAA-25 (technical).
+**Scoreboard:** The contract-source alignment batch, example-shape validation, documentation freshness tooling, configuration alignment, required parallel tool execution, portable policy semantics, approval lifecycle contracts, transport-neutral identity propagation, tool-definition visibility/source semantics, local-address decision, first executable language-neutral conformance baseline, template-link cleanup, the five visitor-1 decisions, Auth-down fail-closed correction, multi-actor wording, revocation cancellation, and portable audit records are complete. No visitor-1 gaps remain open.
 
 ## Routes a developer follows
 
@@ -121,11 +121,13 @@ hide_table_of_contents: true
 
 ## Open gaps from the component read-through
 
-### GAP-PAA-17: The Agent Loop spec says other actors are not its concern — Spec-only
+### GAP-PAA-17: The Agent Loop spec says other actors are not its concern — Resolved
 
 - **Expected:** US-10 AC-10.1 and AC-10.3. Other people and AI agents acting for the owner act only within the permissions the owner grants.
 - **Published:** The Agent Loop spec's "Concurrency" section says multi-actor concurrency is not an Agent Loop concern, because a collaborator or external agent always brings their own system and agent loop. The overview and the Auth spec say other people and AI agents can act through the owner's own system with the permissions the owner grants, so they get loops in this Agent Loop. The identity rules already cover this (identity travels with each request and is checked on every tool call); the Concurrency prose and its scenario table need rewording to match.
 - **Evidence:** [agent-loop-spec.md](../architecture/agent-loop-spec.md) "Concurrency"; [overview.md](../architecture/overview.md) "The parts" (Auth); [auth-spec.md](../architecture/auth-spec.md).
+- **Published:** The concurrency section now distinguishes shared loop state from multi-actor access: collaborators and external agents may use the same generic Agent Loop under their own authenticated `auth_context` and owner-granted permissions. Their identity is never replaced by the owner identity.
+- **Evidence:** [agent-loop-spec.md](../architecture/agent-loop-spec.md) "Concurrency"; [auth-spec.md](../architecture/auth-spec.md) "Identity travels with the request"; [decisions.md](../architecture/decisions.md) D191.
 
 ### GAP-PAA-18: Two messages to the same conversation at once are not defined — Resolved
 
@@ -148,11 +150,14 @@ hide_table_of_contents: true
 - **Evidence:** [agent-loop-spec.md](../architecture/agent-loop-spec.md) "What the Agent Loop does not do"; [models-spec.md](../architecture/models-spec.md) "Why Models Are Not a Component"; [decisions.md](../architecture/decisions.md) D189.
 - **Decided:** Context-fit enforcement belongs to the Agent Loop, with limits supplied by the selected model or adapter.
 
-### GAP-PAA-21: Revoking access cannot stop a running loop — Technical
+### GAP-PAA-21: Revoking access cannot stop a running loop — Resolved
 
 - **Expected:** US-10. The Auth spec requires that when the owner revokes an agent's access mid-task, the operation stops immediately and uncommitted writes are discarded.
 - **Published:** The Agent Loop checks Auth before each tool call, but no spec or contract defines stopping a loop that is already running: there is no cancel signal between the Gateway and the Agent Loop. With no default iteration cap, a loop for a revoked actor keeps calling the model until its next tool check.
 - **Evidence:** [auth-spec.md](../architecture/auth-spec.md) "Access revoked during an operation"; [agent-loop-spec.md](../architecture/agent-loop-spec.md) "What the Agent Loop guarantees"; [gateway-agent-loop-contract.md](../architecture/gateway-agent-loop-contract.md); `contracts/openapi/gateway-engine.yaml`.
+- **Published:** The internal contract now defines `POST /agent-loop/cancel`, targeted by correlation ID. Revocation sends `reason=auth_revoked`; the Agent Loop cooperatively cancels supported in-flight work, runs no further tool calls, emits `auth_error`, and records the cancellation. Tool implementations do not commit writes after cancellation; already committed writes remain auditable.
+- **Evidence:** [gateway-engine.yaml](../contracts/openapi/gateway-engine.yaml); [auth-spec.md](../architecture/auth-spec.md) "Access revoked during an operation"; [agent-loop-spec.md](../architecture/agent-loop-spec.md) checking list.
+- **Decided:** Cancellation is cooperative at the internal boundary; implementations must cancel supported in-flight operations and must not start further model or tool work after cancellation is observed.
 
 ### GAP-PAA-22: The security spec contradicts the decided fail-closed rule when Auth is down — Resolved
 
@@ -174,8 +179,11 @@ hide_table_of_contents: true
 - **Evidence:** [auth-spec.md](../architecture/auth-spec.md) "Identity travels with the request"; [decisions.md](../architecture/decisions.md) D191.
 - **Decided:** Tool actions use the authenticated actor identity; delegation is represented by Auth policy.
 
-### GAP-PAA-25: The audit record format is not defined — Technical
+### GAP-PAA-25: The audit record format is not defined — Resolved
 
 - **Expected:** US-10 AC-10.4. Every action is recorded in an audit log, which the owner can query and export.
 - **Published:** Every Auth decision now returns an `audit_id`, and requests and tool calls are authorized, so those decisions are audited. But there is no audit record schema in `contracts/schemas`, so what a record holds, and how other actions (for example a conversation being saved) are recorded, is not defined for export or for moving between Auth implementations.
 - **Evidence:** [auth-spec.md](../architecture/auth-spec.md) "Audit log"; [authorization-result.json](../contracts/schemas/authorization-result.json); [security-spec.md](../architecture/security-spec.md).
+- **Published:** `contracts/schemas/audit-record.json` defines the portable record required for audit export and provider swaps: stable ID, timestamp, event, authenticated actor, action, optional resource, result, safe reason, correlation ID, and optional non-sensitive details. A canonical example is validated by the manifest checker.
+- **Evidence:** [audit-record.json](../contracts/schemas/audit-record.json); [audit example](../contracts/examples/audit-record.json); [auth-spec.md](../architecture/auth-spec.md) "Audit log"; [security-spec.md](../architecture/security-spec.md) "Audit Logging".
+- **Decided:** The architecture fixes the portable envelope and privacy boundary; retention, redaction policy beyond the no-secrets rule, indexing, and presentation remain implementation choices.

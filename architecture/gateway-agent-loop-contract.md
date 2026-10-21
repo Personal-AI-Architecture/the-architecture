@@ -236,6 +236,16 @@ Most AI SDKs produce streaming events that map directly to this contract's SSE e
 
 ---
 
+## Cancellation
+
+`POST /agent-loop/cancel` targets an active turn by `correlation_id`. The Gateway
+sends `reason=auth_revoked` when Auth revokes the actor. The Agent Loop cancels
+supported in-flight work, starts no further model or tool work, and closes the
+matching stream with `auth_error`. Cancellation is cooperative at the internal
+boundary; tool implementations must not commit writes after cancellation is
+observed. Repeating cancellation is idempotent and returns `accepted`,
+`already_finished`, or `not_found`.
+
 ## Approval interaction
 
 Approval prompts remain a product choice; the architecture default is that the owner can do everything. When a product enables an approval rule, the Agent Loop emits the canonical `approval-request` event and does not execute the covered call while it is pending. The client submits the canonical decision through the normal Gateway API; the Agent Loop may continue in a new stream. `approved`, `denied`, `cancelled`, and `expired` are terminal outcomes keyed by `request_id`; duplicate decisions are idempotent and cannot replay execution. Auth must authorize the decision maker.

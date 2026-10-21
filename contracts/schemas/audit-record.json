@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "audit-record.json",
+  "title": "Portable Audit Record",
+  "description": "Portable, queryable record of an action or security event. Implementations may add non-sensitive detail but must never include credentials, secrets, or raw private content.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "occurred_at", "event", "actor_id", "action", "result", "correlation_id"],
+  "properties": {
+    "id": { "type": "string", "minLength": 1, "description": "Stable audit record identifier." },
+    "occurred_at": { "type": "string", "format": "date-time" },
+    "event": { "type": "string", "minLength": 1, "description": "Open event name, such as auth.authorized, tool.executed, memory.read, identity.revoked, or loop.cancelled." },
+    "actor_id": { "type": "string", "minLength": 1, "description": "Authenticated actor responsible for the action; never silently replaced by the owner." },
+    "action": { "type": "string", "minLength": 1, "description": "Action performed or attempted." },
+    "resource": { "type": "string", "description": "Resource targeted, when applicable." },
+    "result": { "type": "string", "enum": ["allowed", "denied", "completed", "failed", "cancelled"], "description": "Outcome of the action." },
+    "reason": { "type": "string", "description": "Safe machine-readable or human-readable outcome reason." },
+    "correlation_id": { "type": "string", "minLength": 1, "description": "End-to-end request or operation trace ID." },
+    "details": { "type": "object", "additionalProperties": true, "description": "Optional non-sensitive operational metadata. Must not contain credentials, secrets, or raw private content." }
+  },
+  "examples": [{
+    "id": "audit_123",
+    "occurred_at": "2026-10-21T15:00:00Z",
+    "event": "tool.executed",
+    "actor_id": "agent_system_001",
+    "action": "execute",
+    "resource": "tool:read_file",
+    "result": "completed",
+    "correlation_id": "req_xyz789",
+    "details": { "tool_name": "read_file" }
+  }]
+}

@@ -11,6 +11,10 @@ approval-free.
 The actor reaching that tool boundary is the transport-neutral `auth_context`, not a
 header-specific identity convention.
 
+If Auth revokes that actor while a turn is running, the Gateway cancels the turn
+through the internal contract before any further tool call; the cancellation and
+stopped operation are portable audit records.
+
 Tool definitions retain source provenance and visibility metadata, while the tool
 implementation supplies adapter details outside the definition contract.
 
