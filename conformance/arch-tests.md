@@ -135,17 +135,19 @@
 
 **Setup:**
 1. System running with active traffic
-2. Ability to trigger provider failures, tool failures, and context overflow conditions
+2. Ability to trigger provider failures, tool failures, Auth failures, and context overflow conditions
 
 **Procedure:**
 1. Trigger a model/network failure (e.g., invalid provider URL)
 2. Trigger an unrecoverable tool execution failure (e.g., tool executor crash)
-3. Trigger a context overflow (e.g., send messages exceeding model context window)
-4. Capture the SSE error events emitted in each case
+3. Trigger an Auth failure (e.g., Auth unavailable or a request denied by Auth)
+4. Trigger a context overflow (e.g., send messages exceeding model context window)
+5. Capture the SSE error events emitted in each case
 
 **Pass criteria:**
 - [ ] Provider/network failure emits `provider_error`
 - [ ] Unrecoverable tool failure emits `tool_error`
+- [ ] Auth failure emits `auth_error`
 - [ ] Context overflow emits `context_overflow`
 - [ ] No catch-all error code used for all failure types
 - [ ] Recoverable tool failures (tool returns an error result) go back to the model as `tool-result` events, not as stream-fatal `error` events

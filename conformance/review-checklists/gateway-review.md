@@ -14,7 +14,7 @@ Use this when reviewing Gateway code paths, routes, conversation handling, or cl
 - [ ] Gateway does not choose models or own provider selection; it reads the owner's current model choice on every message and passes it on.
 - [ ] Gateway calls Auth on every request, including conversation list and history reads.
 - [ ] Conversation history keeps tool calls, tool results and every content part.
-- [ ] Client request body uses `{ content, metadata? }` rather than the internal `messages + metadata` shape.
+- [ ] `POST /conversations/messages` uses the canonical client request body `{ content, metadata? }`, with `content` as a non-empty list of structured content parts, rather than the internal `messages + metadata` shape.
 - [ ] `/conversations` and `/conversations/:id` return canonical envelopes rather than raw storage records.
 - [ ] `X-Conversation-ID` is returned when the conversation is resolved.
 - [ ] Client-facing `done` includes `conversation_id` and `message_id`.
