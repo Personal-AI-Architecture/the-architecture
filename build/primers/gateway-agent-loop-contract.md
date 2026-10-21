@@ -8,7 +8,7 @@ Define the exact internal request and stream contract so Gateway and Agent Loop 
 
 ## Contract Shape
 
-- One internal endpoint: `POST /engine/chat` (the path keeps the component's older name until the next contract revision)
+- One internal endpoint: `POST /agent-loop/chat`
 - Request body: `messages`, the model to use, and `metadata`
 - Response: SSE stream
 - The Gateway calls Auth on every request before it POSTs; the Agent Loop asks Auth before each tool call
@@ -20,7 +20,6 @@ Define the exact internal request and stream contract so Gateway and Agent Loop 
 - `messages`
 - the model to use for this request (the owner's current choice, read by the Gateway on every message)
 - `metadata.correlation_id`
-- a request timestamp (ISO 8601)
 
 ### Optional
 
@@ -87,8 +86,14 @@ Standalone file:
 ```json
 {
   "messages": [
-    {"role":"user","content":"Write a project spec."}
+    {
+      "role": "user",
+      "content": [
+        { "type": "text", "text": "Write a project spec." }
+      ]
+    }
   ],
+  "model": "local/llama-3.1-8b",
   "metadata": {
     "correlation_id": "req_123",
     "conversation_id": "conv_123",
@@ -113,7 +118,8 @@ event: done
 data: {"finish_reason":"completed"}
 ```
 
-The request also carries the model to use and a timestamp. Their field names are pending the next revision of `contracts/openapi/gateway-engine.yaml`, so the example does not show them.
+The request carries the model to use as `model`. The canonical request metadata requires
+`correlation_id`; it does not require a separate request timestamp.
 
 ## Invalid Drift Example
 
@@ -200,11 +206,6 @@ Why this is drift:
 
 ## Contract Alignment
 
-This primer follows `architecture/gateway-agent-loop-contract.md`, which is ahead of `contracts/openapi/gateway-engine.yaml` and `contracts/schemas/message.json`:
-
-- No request field yet for the model, and no request timestamp.
-- Message content is a string, and tool calls and tool results are not yet message parts.
-- Auth is described as middleware between the Gateway and the Agent Loop.
-- The system message is described as assembled by the Gateway from configuration.
-- Errors carry only `code` and `message`, not the correlation ID.
-- The `/engine/chat` path and `engine` schema names still use the component's old name.
+The canonical contract files under `contracts/` are authoritative for this primer. The
+request includes `model`, messages use structured content parts, the internal endpoint
+is `/agent-loop/chat`, and shared Auth/error contracts define the boundary behavior.

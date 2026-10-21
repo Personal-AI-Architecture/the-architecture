@@ -78,7 +78,7 @@ These files are compressed, AI-friendly versions of the [full architecture specs
 
 ## How To Run Primer Validation
 
-- Validate the examples manifest: `python /home/hex/Project/References/contracts/examples/validate-manifest.py`
+- Validate the examples manifest: `python3 contracts/examples/validate-manifest.py`
 - Use the audit workflow: `primer-audit-playbook.md`
 - Use the standing proof procedure: `primer-completeness-test.md`
 

@@ -19,13 +19,15 @@ Define the external request, response, conversation, and approval interaction sh
 
 ### Endpoint
 
-- `POST /message`
+- `POST /conversations/messages`
 
 ### Request Body
 
 ```json
 {
-  "content": "user message text",
+  "content": [
+    { "type": "text", "text": "user message text" }
+  ],
   "metadata": {}
 }
 ```
@@ -44,7 +46,7 @@ Define the external request, response, conversation, and approval interaction sh
 - Gateway, not the client, builds the internal `messages` array.
 - Request metadata must not become a hidden configuration channel.
 - The Gateway calls Auth on every request before anything reaches the Agent Loop or conversation data.
-- Message content is a list of parts (text first, room for images and files). A plain string is the shorter form of a single text part.
+- Message content is a list of parts (text first, with room for images, files, tool calls, and tool results). There is no string shorthand in the canonical contract.
 
 ## Streaming Response
 
@@ -114,11 +116,13 @@ Standalone files:
 - `contracts/examples/approval-result-event.json` (product with approvals)
 
 ```http
-POST /message
+POST /conversations/messages
 Content-Type: application/json
 
 {
-  "content": "Create a spec for a fitness tracker app.",
+  "content": [
+    { "type": "text", "text": "Create a spec for a fitness tracker app." }
+  ],
   "metadata": {
     "client": "braindrive-cli"
   }
@@ -154,7 +158,7 @@ Standalone files:
 - `contracts/examples/invalid-approval-result-event.json`
 
 ```http
-POST /message
+POST /conversations/messages
 Content-Type: application/json
 
 {
@@ -217,8 +221,10 @@ Why this is drift:
     {
       "id": "msg_1",
       "role": "user",
-      "content": "hello",
-      "timestamp": "2026-03-17T12:00:00Z"
+      "content": [
+        { "type": "text", "text": "hello" }
+      ],
+      "created_at": "2026-03-17T12:00:00Z"
     }
   ]
 }
@@ -269,8 +275,7 @@ Conversation history includes the tool calls and tool results inside messages, n
 
 ## Contract Alignment
 
-This primer follows the specs in `architecture/`, which are ahead of the contract files here:
-
-- `contracts/openapi/gateway-api.yaml` says requests are authenticated before they reach the Gateway; the specs have the Gateway call Auth on every request.
-- `contracts/openapi/gateway-api.yaml` stores only user and assistant messages, so tool calls and tool results are not yet part of resumable history.
-- `contracts/openapi/gateway-api.yaml` and `contracts/schemas/message.json` define message content as a string, not a list of parts.
+The canonical contract files under `contracts/` are authoritative for this primer. The
+Gateway API uses `POST /conversations/messages`, structured content parts, and the
+shared message shape for conversation history. Authentication is required before the
+Gateway receives a request; the mechanism is deployment-specific.
