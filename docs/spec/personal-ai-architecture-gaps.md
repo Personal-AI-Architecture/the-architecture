@@ -9,21 +9,15 @@ hide_table_of_contents: true
 >
 > Each gap is something the spec expects that the published architecture does not deliver today. Classification is a suggestion for triage: **Defect** (published material is broken or contradicts itself), **Decision needed** (the maintainers must choose), **Technical** (contract and technical work), **Spec-only** (wording fix in the architecture docs). A gap marked **Decided, spec update in progress** has a settled answer that is still being written into the specs and contracts.
 
-**Scoreboard:** 16 gaps — 3 Defect, 10 Technical, 3 Spec-only. 7 are decided with spec updates in progress (GAP-PAA-3, 5, 7, 13, 14, 15 and 16; 5, 7 and 16 only in part). The three Defects and three Spec-only gaps are small documentation fixes anyone can make.
+**Scoreboard:** 13 gaps — 2 Defect, 11 Technical, 0 Spec-only. 6 are decided with spec updates in progress (GAP-PAA-3, 5, 7, 14, 15 and 16; 5, 7 and 16 only in part). The two Defects are small fixes anyone can make.
 
 ## Routes a developer follows
 
-### GAP-PAA-1: Conformance index is incomplete and points at things that do not exist — Spec-only
-
-- **Expected:** US-16, AC-16.2. The index lists every test and links only to real files.
-- **Published:** The index lists ARCH-1 to ARCH-4 and DEPLOY-1 to DEPLOY-4; ARCH-5 to ARCH-9 and DEPLOY-5 exist but are missing (DEPLOY-5 sits in the architecture test file). It tells developers to use "component stubs in `../stubs/`", which does not exist, and says executable tests "will be added when a reference implementation exists" although the TypeScript template exists. A language-neutral conformance kit is now in scope (US-16); until it is published, the wording should say the suite is run by hand. The Guides spec still lists stubs as a deliverable.
-- **Evidence:** [conformance/README.md](../in-depth-overview/conformance/README.md) "How to Use"; [arch-tests.md](../in-depth-overview/conformance/arch-tests.md) ARCH-5 to ARCH-9, DEPLOY-5; [guides-spec.md](../in-depth-overview/guides-spec.md) "Component Stubs / Templates".
-
-### GAP-PAA-2: The example checker cannot run on a fresh copy — Defect
+### GAP-PAA-2: The example checker does not check examples against the contracts — Technical
 
 - **Expected:** US-13, AC-13.4. A developer can check that the published valid and invalid examples behave as labelled.
-- **Published:** `validate-manifest.py` reads from a fixed path on one machine (`/home/hex/Project/References/docs/ai`) and expects example paths to start with `docs/ai/`, while the manifest uses `docs/ai-agent-docs/`. It also checks only the manifest, not the examples against the contracts.
-- **Evidence:** `docs/ai-agent-docs/examples/validate-manifest.py` (ROOT and path-prefix checks); `examples-manifest.json`.
+- **Published:** `validate-manifest.py` now runs from any checkout and checks the manifest: file paths, kinds and links. It does not check the examples against the contracts, so nothing proves a valid example validates or an invalid one fails.
+- **Evidence:** `docs/ai-agent-docs/examples/validate-manifest.py`; `examples-manifest.json`.
 
 ### GAP-PAA-8: Template links to a missing Foundation spec and a missing plan — Defect
 
@@ -31,24 +25,11 @@ hide_table_of_contents: true
 - **Published:** The template README links the Foundation spec at `docs/foundation-spec.md`; it is now the Architecture overview at `docs/in-depth-overview/foundation-spec.md`. Its "Source Of Truth Order" puts `plan.md` first, and no `plan.md` is in the repository.
 - **Evidence:** template:README.md "Source Of Truth Order".
 
-### GAP-PAA-9: Other stale links and section references — Spec-only
-
-- **Expected:** US-12, AC-12.4.
-- **Published:** ARCH-7 says it validates "security-spec.md §Owner Data Rights", a section that does not exist. (The Foundation story tests' link to the overview now resolves.)
-- **Evidence:** [arch-tests.md](../in-depth-overview/conformance/arch-tests.md) ARCH-7 "Validates".
-
 ### GAP-PAA-10: The documentation freshness check is not published — Defect
 
 - **Expected:** US-16 AC-16.3 and US-18 AC-18.4. The lock-in gate and the doc-maintenance spec both rely on `check:docs`.
 - **Published:** The doc-maintenance spec defines `"check:docs": "tsx scripts/check-docs.ts"`, but this repository has no package or script, so the check cannot be run. Where it should live, and how manual triggers work, is open technical work.
 - **Evidence:** [doc-maintenance-spec.md](../in-depth-overview/doc-maintenance-spec.md) "Script: `check:docs`"; [lockin-gate.md](../in-depth-overview/lockin-gate.md).
-
-### GAP-PAA-13: Customization promises an architecture package that does not exist — Spec-only — Decided, spec update in progress
-
-- **Expected:** US-17, AC-17.5.
-- **Published:** The Customization spec says a builder "adds the Architecture as a dependency (package, not fork)" and adopts architecture updates that way. The repository is documents only; runnable code lives in the template, which a builder copies.
-- **Evidence:** [customization-spec.md](../in-depth-overview/customization-spec.md); `CONTRIBUTING.md` "Scope".
-- **Decided:** builders start from the contracts and the template, or from the stories and specs alone in any language. The customization stories CS-1 to CS-6 are retired in favour of US-17, which removes the package promise.
 
 ## Contracts that disagree (Technical)
 

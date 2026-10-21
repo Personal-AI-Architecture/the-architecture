@@ -95,16 +95,9 @@ A minimal working example that boots all 4 components, connects them, and passes
 
 For AI agents specifically, a working reference is the single best piece of context — they can pattern-match against it.
 
-### 5. Component Stubs / Templates (`stubs/`)
+### 5. Template and Conformance Kit
 
-Skeleton implementations for each component with the right interfaces but minimal logic:
-
-- `engine-stub.ts` — generic agent loop skeleton
-- `gateway-stub.ts` — conversation management + routing skeleton
-- `auth-stub.ts` — Auth contract skeleton (authenticate, authorize, manage), called by the Gateway on every request and by the Agent Loop before each tool call
-- `memory-tools-stub.ts` — memory tool interface skeleton
-
-A developer (or agent) picks up a stub, fills in the implementation, and the system works because the contracts are already wired.
+Runnable starting code lives in the separate [TypeScript](https://github.com/Personal-AI-Architecture/ts-architecture-template), [Python](https://github.com/Personal-AI-Architecture/python-architecture-template), [Go](https://github.com/Personal-AI-Architecture/go-architecture-template), [Rust](https://github.com/Personal-AI-Architecture/rust-architecture-template) or [Java](https://github.com/Personal-AI-Architecture/java-architecture-template) templates, which have the right interfaces and minimal logic for each component. Builders using another language start from the contracts and the stories, and check their work with the language-neutral [PAA conformance validator](https://github.com/Personal-AI-Architecture/paa-conformance-validator) (US-16).
 
 ### 6. Conformance Suite (`conformance/`)
 
@@ -165,7 +158,7 @@ Specs (authoritative)
         └── Generated outputs (contracts/generated/) — derived from schemas
   └── Implementer's reference — distilled from specs
   └── AGENT.md — compressed from specs
-  └── Stubs / reference impl — must conform to schemas
+  └── Template / reference impl — must conform to schemas
 ```
 
 ### Update Rules
@@ -222,7 +215,7 @@ Highest leverage first:
 2. **Canonical Contract Schemas** — language-neutral interface definitions
 3. **AGENT.md** — the AI agent entry point
 4. **Conformance Suite** — proves an implementation is correct
-5. **Component Stubs** — accelerates getting started
+5. **TypeScript Template** — accelerates getting started
 6. **Reference Implementation** — the "show me it working" artifact
 
 Items 1-3 should exist before the foundation repo goes public. Items 4-6 can follow.
