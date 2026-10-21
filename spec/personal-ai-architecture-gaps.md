@@ -9,7 +9,7 @@ hide_table_of_contents: true
 >
 > Each gap is something the spec expects that the published architecture does not deliver today. Classification is a suggestion for triage: **Defect** (published material is broken or contradicts itself), **Decision needed** (the maintainers must choose), **Technical** (contract and technical work), **Spec-only** (wording fix in the architecture docs). A gap marked **Decided, spec update in progress** has a settled answer that is still being written into the specs and contracts.
 
-**Scoreboard:** The contract-source alignment batch, example-shape validation, documentation freshness tooling, configuration alignment, required parallel tool execution, portable policy semantics, approval lifecycle contracts, transport-neutral identity propagation, tool-definition visibility/source semantics, local-address decision, and first executable language-neutral conformance baseline are complete. The remaining tracked issue is GAP-PAA-8, the external template's stale Foundation-spec/plan links.
+**Scoreboard:** The contract-source alignment batch, example-shape validation, documentation freshness tooling, configuration alignment, required parallel tool execution, portable policy semantics, approval lifecycle contracts, transport-neutral identity propagation, tool-definition visibility/source semantics, local-address decision, first executable language-neutral conformance baseline, and template-link cleanup are complete. There are no remaining tracked gaps in this ledger.
 
 ## Routes a developer follows
 
@@ -19,11 +19,11 @@ hide_table_of_contents: true
 - **Published:** `validate-manifest.py` runs from any checkout, checks the manifest, validates JSON Schema-backed examples, and applies canonical envelope checks to the OpenAPI examples. Valid examples must pass and invalid examples must fail their corresponding shape checks.
 - **Evidence:** `contracts/examples/validate-manifest.py`; `examples-manifest.json`.
 
-### GAP-PAA-8: Template links to a missing Foundation spec and a missing plan — Defect
+### GAP-PAA-8: Template links to a missing Foundation spec and a missing plan — Resolved
 
 - **Expected:** US-15, AC-15.3.
-- **Published:** The template README links the Foundation spec at `architecture/overview.md`; it is now the Architecture overview at `architecture/overview.md`. Its "Source Of Truth Order" puts `plan.md` first, and no `plan.md` is in the repository.
-- **Evidence:** template:README.md "Source Of Truth Order".
+- **Published:** The template README and agent instructions link the Architecture overview at `architecture/overview.md`. Their "Source Of Truth Order" now starts with the pinned contract source and lists only files that exist in the template; the nonexistent root `plan.md` entry is removed.
+- **Evidence:** template:README.md; template:AGENT.md; template:docs/paa-compatibility.md.
 
 ### GAP-PAA-10: The documentation freshness check is not published — Resolved
 

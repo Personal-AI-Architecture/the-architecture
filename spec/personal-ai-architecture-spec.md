@@ -273,7 +273,7 @@ As a developer, I want a runnable starting point that already follows the archit
 
 - **AC-15.1** — Given the TypeScript template, when a developer creates a repository from it and runs the documented setup, then it installs, starts on localhost only, works offline with a stand-in model, streams a reply to a message and stores the conversation. _(evidence: template:README.md "5-Minute Developer Onboarding")_
 - **AC-15.2** — Given the template, then it ships its own contract, boundary and lock-in checks, and a config-only provider swap demo. _(evidence: template:package.json scripts check:conformance, acceptance:check, demo:provider-swap)_
-- **AC-15.3** — Given the template's README and agent guide, then every document they name exists and every link opens. _(evidence: template:README.md)_ Today the Foundation spec link is broken and the first "source of truth" file, `plan.md`, is not in the repository: GAP-PAA-8.
+- **AC-15.3** — Given the template's README and agent guide, then every document they name exists and every link opens. _(evidence: template:README.md, template:AGENT.md)_ The template points to the Architecture overview at `architecture/overview.md` and its source-of-truth order lists only existing pinned-contract, mirror, validation, and conformance files.
 
 </details>
 
@@ -289,7 +289,7 @@ As a developer, I want published pass/fail tests, so that I can show my implemen
 - **AC-16.3** — Given the lock-in gate and lock-in audit, then a developer can work through each check for a pull request or a release. _(evidence: [lockin-gate.md](../conformance/lockin-gate.md), [lockin-audit.md](../conformance/lockin-audit.md))_ The gate's `check:docs` command has no published tool: GAP-PAA-10.
 - **AC-16.4** — An implementation that passes every test is conformant; passing some is not conformance. _(evidence: [conformance/README.md "How to Use"](../conformance/README.md#how-to-use))_
 
-**In scope:** a conformance kit of language-neutral tests that every implementation and template must pass, whatever language it is written in. It grows from the suite above. Until it is published, the suite is worked through by hand. The contract gaps GAP-PAA-3 to GAP-PAA-7 limit what it can check until they are settled.
+**In scope:** the PAA conformance validator: language-neutral tests that every implementation and template must pass, whatever language it is written in. It grows from the suite above and is published as an executable validator alongside the repository's contract and architecture checks.
 
 </details>
 
@@ -379,7 +379,7 @@ As a contributor, I want a clear way to change the architecture, so that the spe
 - **Technical authority:** the specifications, contracts and conformance tests in this repository. Detailed mechanics stay there; this spec adds no technical rules.
 - **Implementations:** every implementation, BrainDrive included, inherits these promises.
 - **Gaps:** [personal-ai-architecture-gaps.md](./personal-ai-architecture-gaps.md).
-- **Evaluation plan:** the conformance kit (US-16).
+- **Evaluation plan:** the PAA conformance validator (US-16).
 
 ## Approval
 

@@ -38,7 +38,7 @@ Understand the architecture well enough to implement it.
 | [Implementer's Reference](../build/implementers-reference.md) | Condensed contracts — "tell me what to build," no rationale |
 | [Gateway ↔ Agent Loop Contract](../architecture/gateway-agent-loop-contract.md) | The internal handoff between Gateway and Agent Loop — the key boundary |
 
-**Formal specs** (OpenAPI + JSON Schema) live in [`contracts/`](https://github.com/Personal-AI-Architecture/the-architecture/tree/main/specs):
+**Formal specs** (OpenAPI + JSON Schema) live in [`contracts/`](https://github.com/Personal-AI-Architecture/the-architecture/tree/main/contracts):
 - `openapi/gateway-api.yaml` — client-facing API
 - `openapi/gateway-engine.yaml` — internal contract
 - `openapi/model-api.yaml` — Model API
