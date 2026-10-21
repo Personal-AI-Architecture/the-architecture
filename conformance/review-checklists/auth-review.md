@@ -15,6 +15,7 @@ Use this when reviewing runtime auth wiring, identity propagation, permission en
 - [ ] Authorization decisions are made in Auth rather than scattered through Gateway, Agent Loop, tools, or configuration.
 - [ ] Default policy: the owner can do everything; every other identity starts with nothing.
 - [ ] After import, a re-created identity has no access until the owner turns it back on.
+- [ ] Policy evaluation uses the canonical matching, condition, deny-precedence, and fail-closed reference semantics across Auth implementations.
 - [ ] If Auth is unavailable, requests and tool calls fail closed.
 - [ ] Product-owned auth state exists and is inspectable/exportable.
 - [ ] `auth_whoami`, `auth_check`, and `auth_export` exist in the runtime.
@@ -31,6 +32,7 @@ Use this when reviewing runtime auth wiring, identity propagation, permission en
 - `A-06`
 - `A-07`
 - `A-08`
+- `A-09`
 - `C-04`
 - `GC-04`
 - `S-03`

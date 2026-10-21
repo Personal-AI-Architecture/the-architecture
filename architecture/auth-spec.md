@@ -137,6 +137,33 @@ A permission is a rule: **(identity, resource, action) → allow or deny**. Reso
 
 If no rule allows an action, it is denied. The owner is the exception by default: the owner can do everything.
 
+### Portable policy evaluation
+
+Policy records use the matching rules in `contracts/schemas/policy.json` so an
+exported policy has the same meaning across Auth implementations:
+
+- `subject` matches an exact identity ID, `*` for every identity, or
+  `type:<actor_type>` for every identity of that type. A missing or unknown identity
+  reference is dormant and never grants access.
+- `resource` matches exactly, `*`, or a trailing `/*` path prefix. A prefix matches
+  the named path and its descendants; arbitrary mid-string wildcards are invalid.
+- `action` matches exactly or `*`. Resource and action names remain extensible, but
+  an implementation that does not understand a resource or action must preserve the
+  rule, report it as unsupported, and deny rather than guess.
+- All supplied `conditions` must be satisfied. The portable condition set is
+  `time_window`, `max_per_day`, and `requires_approval`; unknown condition names make
+  the rule unsupported and non-granting. `requires_approval` is decision metadata,
+  not a predicate: a matching allow with it set requires the product's approval flow.
+- If multiple applicable rules remain, any matching `deny` wins over every `allow`.
+  If no deny matches but at least one allow matches, the action is allowed; otherwise
+  it is denied. Rule order and provider-specific specificity scoring never change
+  this result.
+
+The `time_window` uses `HH:MM` wall-clock values and an explicit timezone when the
+deployment default is not appropriate. `max_per_day` is counted by Auth for the
+owner's calendar day. These semantics are part of the portable policy meaning, while
+storage, indexing, and evaluation implementation remain product choices.
+
 ### What policies can cover
 
 The model must cover these categories, and new ones can be added without redesign:

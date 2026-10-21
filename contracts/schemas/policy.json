@@ -12,12 +12,14 @@
     },
     "subject": {
       "type": "string",
-      "description": "The identity this policy applies to. References an identity ID from identity.json. Can also be a wildcard ('*') for policies that apply to all actors of a given type, or a type-prefixed wildcard ('type:collaborator') for role-based policies.",
+      "pattern": "^(?:\\*|type:[^*\\s]+|[^*\\s]+)$",
+      "description": "The identity this policy applies to: an exact identity ID, '*' for every identity, or 'type:<actor_type>' for every identity of that type. Unknown identity references remain dormant and grant nothing.",
       "$comment": "Cross-references identity.json via the id field"
     },
     "resource": {
       "type": "string",
-      "description": "What this policy controls access to. Extensible — not a hardcoded enum. Resource types include: memory paths (e.g., 'memory:/life/finances/*'), tool names (e.g., 'tool:read_file'), system actions (e.g., 'system:create_page'), external services (e.g., 'external:calendar'). New resource types can be defined without changing this schema.",
+      "pattern": "^(?:\\*|[^*\\s]+(?:/|:)\\*)$|^[^*\\s]+$",
+      "description": "What this policy controls access to. Matching is exact, '*' (any resource), or a trailing '/*' segment prefix such as 'memory:/life/*'. Arbitrary mid-string wildcards are not portable. Resource types remain extensible.",
       "examples": [
         "memory:*",
         "memory:/life/finances/*",
@@ -34,7 +36,8 @@
     },
     "action": {
       "type": "string",
-      "description": "What operation this policy permits or denies. Extensible — not a hardcoded enum. Common actions: read, write, delete, execute, delegate, approve, configure. New action types can be defined without changing this schema.",
+      "pattern": "^(?:\\*|[^*\\s]+)$",
+      "description": "What operation this policy permits or denies. Matching is exact or '*' (any action); action types remain extensible.",
       "examples": [
         "read",
         "write",
@@ -49,12 +52,34 @@
     "effect": {
       "type": "string",
       "enum": ["allow", "deny"],
-      "description": "Whether this policy allows or denies the action. Deny takes precedence over allow when both match (fail-closed). The owner has the default allow-all policy on their own system; other identities start with no access until granted."
+      "description": "Whether this policy allows or denies the action. If multiple matching rules apply, any matching deny wins over every allow; otherwise a matching allow permits the action. The owner has the default allow-all policy on their own system; other identities start with no access until granted."
     },
     "conditions": {
       "type": "object",
-      "additionalProperties": true,
-      "description": "Optional conditions that must be met for this policy to apply. Extensible for future refinement — rate limits, time windows, approval requirements. E.g., { 'max_per_day': 100 } or { 'requires_approval': true }.",
+      "additionalProperties": false,
+      "description": "Optional portable constraints. Every supplied condition must be satisfied for the rule to match. Unknown condition names make the rule unsupported and it must not grant access. `requires_approval` is decision metadata enforced by Auth, not a condition that changes matching.",
+      "properties": {
+        "requires_approval": {
+          "type": "boolean",
+          "description": "If true on a matching allow, Auth must require the product's approval flow before execution."
+        },
+        "max_per_day": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Maximum number of matching allowed operations in the owner's calendar day; Auth must count and enforce it."
+        },
+        "time_window": {
+          "type": "object",
+          "required": ["start", "end"],
+          "additionalProperties": false,
+          "properties": {
+            "start": { "type": "string", "pattern": "^(?:[01]\\d|2[0-3]):[0-5]\\d$" },
+            "end": { "type": "string", "pattern": "^(?:[01]\\d|2[0-3]):[0-5]\\d$" },
+            "timezone": { "type": "string", "minLength": 1 }
+          },
+          "description": "Inclusive wall-clock window; timezone is explicit when omitted from the deployment default. Overnight windows are evaluated across midnight."
+        }
+      },
       "examples": [
         { "requires_approval": true },
         { "max_per_day": 100 },
@@ -72,6 +97,7 @@
       "$comment": "Cross-references identity.json via the id field"
     }
   },
+  "additionalProperties": false,
   "examples": [
     {
       "id": "pol_001",

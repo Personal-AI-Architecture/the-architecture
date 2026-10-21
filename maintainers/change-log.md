@@ -28,6 +28,11 @@ Track how the primer layer evolves so examples, matrix rows, glossary terms, lim
 - Promoted independent-call concurrency from an optional blueprint enhancement to a mandatory Agent Loop and Tools requirement.
 - Added conformance vectors for overlap, stable result IDs, and dependent-call ordering.
 
+### Portable Policy Semantics
+
+- Defined canonical policy matching, conditions, precedence, and fail-closed reference handling.
+- Added Auth conformance vectors and compliance coverage for provider-independent policy evaluation.
+
 ### Canonical Contract Alignment
 
 - Replaced duplicated blueprint contract packs with derived source manifests.

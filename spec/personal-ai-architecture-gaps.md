@@ -9,7 +9,7 @@ hide_table_of_contents: true
 >
 > Each gap is something the spec expects that the published architecture does not deliver today. Classification is a suggestion for triage: **Defect** (published material is broken or contradicts itself), **Decision needed** (the maintainers must choose), **Technical** (contract and technical work), **Spec-only** (wording fix in the architecture docs). A gap marked **Decided, spec update in progress** has a settled answer that is still being written into the specs and contracts.
 
-**Scoreboard:** The contract-source alignment batch, example-shape validation, documentation freshness tooling, configuration alignment, and required parallel tool execution are complete. Remaining work is concentrated in the approval lifecycle, policy portability, transport-neutral identity (S5), tool-definition semantics (S8), the local-address decision, and the first executable language-neutral conformance implementation.
+**Scoreboard:** The contract-source alignment batch, example-shape validation, documentation freshness tooling, configuration alignment, required parallel tool execution, and portable policy semantics are complete. Remaining work is concentrated in the approval lifecycle, transport-neutral identity (S5), tool-definition semantics (S8), the local-address decision, and the first executable language-neutral conformance implementation.
 
 ## Routes a developer follows
 
@@ -72,11 +72,11 @@ hide_table_of_contents: true
 - **Published:** The Agent Loop and Tools builder materials now make concurrent execution of independent tool calls a MUST, require stable result association, and preserve ordering for dependent calls. Conformance vectors cover both overlap and ordering failures.
 - **Evidence:** [agent-loop-spec.md](../architecture/agent-loop-spec.md) "What the Agent Loop Guarantees"; [build/blueprints/agent-loop/blueprint.md](../build/blueprints/agent-loop/blueprint.md) ENG-MUST-017; [build/blueprints/agent-loop/tests.md](../build/blueprints/agent-loop/tests.md); [build/blueprints/tools/blueprint.md](../build/blueprints/tools/blueprint.md).
 
-### GAP-PAA-12: Permission rules have no shared definition for moving between systems — Technical
+### GAP-PAA-12: Permission rules have no shared definition for moving between systems — Resolved
 
 - **Expected:** US-3 AC-3.3.
-- **Published:** The policy schema checks structure only. Wildcards, conditions, which rule wins when rules disagree, and how references are resolved are not defined, so two systems can read the same rules differently.
-- **Evidence:** `contracts/schemas/policy.json`; [auth-spec.md](../architecture/auth-spec.md) "Data portability".
+- **Published:** The policy schema and Auth materials now define portable matching (exact, whole wildcard, and trailing path prefix), supported conditions, deny-over-allow precedence, and fail-closed handling for unknown references and unsupported conditions. Canonical Auth vectors cover the semantics.
+- **Evidence:** `contracts/schemas/policy.json`; [auth-spec.md](../architecture/auth-spec.md) "Portable policy evaluation"; [build/blueprints/auth/tests.md](../build/blueprints/auth/tests.md); [auth-review.md](../conformance/review-checklists/auth-review.md).
 
 ### GAP-PAA-14: How shipped defaults and owner changes are kept apart is not defined — Resolved
 

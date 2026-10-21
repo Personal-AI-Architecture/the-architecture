@@ -428,6 +428,10 @@ How do we test that content separation works? Adversarial test suites, red team 
 
 ## Related Documents
 
+Policy portability uses the canonical Auth rule semantics: supported matching and
+conditions, deny-over-allow precedence, and fail-closed handling for unsupported
+references. Security enforcement must not reinterpret exported policy data.
+
 [overview.md](../architecture/overview.md) (architecture overview, links to all component specs)
 
 ---

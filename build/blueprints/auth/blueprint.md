@@ -131,6 +131,14 @@ Auth is the independent component that establishes identity, decides permissions
 - Forbidden fields:
   - arbitrary hidden grants not represented by explicit contract fields.
 
+#### Portable policy evaluation
+- Match `subject` by exact identity ID, `*`, or `type:<actor_type>`.
+- Match `resource` by exact value, `*`, or a trailing `/*` path prefix; reject arbitrary mid-string wildcards.
+- Match `action` by exact value or `*`.
+- Require every supplied condition to hold. The portable condition set is `time_window`, `max_per_day`, and `requires_approval`; unknown conditions are unsupported and never grant access.
+- Resolve any applicable deny before allow. Any matching deny wins; otherwise a matching allow wins; no match denies.
+- Preserve unknown identities, resources, actions, and unsupported rules during export/import, but keep them dormant or denied until the implementation can evaluate them safely.
+
 #### `AuthState`
 - Required fields:
   - `actor_id: string`
@@ -462,6 +470,7 @@ Why invalid:
 - `AUTH-MUST-014`: The default policy MUST let the owner do everything with no approval step required by the architecture; every other identity MUST start with no permissions.
 - `AUTH-MUST-015`: Permissions, including approval rules, MUST live only in Auth, not in configuration or preferences.
 - `AUTH-MUST-016`: After import, policies for unknown identities MUST stay dormant, and a re-created identity MUST get no access until the owner turns it back on.
+- `AUTH-MUST-017`: Auth MUST evaluate portable policy rules with the canonical matching, condition, precedence, and fail-closed reference semantics.
 
 ### SHOULD
 
@@ -502,6 +511,7 @@ Why invalid:
 | AUTH-MUST-014 | Human `auth-spec.md`, `tools-spec.md`; AI matrix `A-07` | `AUTH-T014P`, `AUTH-T014N` |
 | AUTH-MUST-015 | Human `auth-spec.md`, `configuration-spec.md`; AI matrix `C-04` | `AUTH-T015P`, `AUTH-T015N` |
 | AUTH-MUST-016 | Human `auth-spec.md` stale permissions after export/import; AI matrix `A-08` | `AUTH-T016P`, `AUTH-T016N` |
+| AUTH-MUST-017 | Human `auth-spec.md` portable policy evaluation; canonical `policy.json` | `AUTH-T017P`, `AUTH-T017N` |
 
 ## 16. Residual Risks & Open Decisions
 
@@ -523,7 +533,7 @@ Why invalid:
 ## Self-Validation Report
 
 - Coverage of required sections: 16/16 (100%)
-- Normative requirements count: 21 total (`16 MUST`, `3 SHOULD`, `2 MAY`)
+- Normative requirements count: 22 total (`17 MUST`, `3 SHOULD`, `2 MAY`)
 - Interfaces with schemas: 11 (`permission_set`, `auth_state`, `auth_context`, `authenticate_request`, `authenticate_response`, `authorize_request`, `authorize_decision`, `auth_whoami_response`, `auth_check_response`, `auth_export_response`, `auth_headers`)
 - Test vectors count: 32 total (`16 positive`, `16 negative`)
 - Conflicts detected/resolved: 5/5 resolved

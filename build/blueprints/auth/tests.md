@@ -24,6 +24,7 @@ This file defines language-agnostic pass/fail vectors for Auth component conform
 - `AUTH-MUST-014`: Default policy lets the owner do everything with no approval step; every other identity starts with nothing.
 - `AUTH-MUST-015`: Permissions, including approval rules, live only in Auth.
 - `AUTH-MUST-016`: After import, a re-created identity has no access until the owner turns it back on.
+- `AUTH-MUST-017`: Policy matching, conditions, precedence, and unsupported-reference handling follow the portable policy contract.
 
 ## Test Vectors
 
@@ -61,11 +62,13 @@ This file defines language-agnostic pass/fail vectors for Auth component conform
 | AUTH-T015N | AUTH-MUST-015 | Negative | Implementation reads tool allow/deny lists from config | Conformance fails | Config-held permissions accepted | Permission-store drift |
 | AUTH-T016P | AUTH-MUST-016 | Positive | Export with a collaborator, import to a fresh system, re-create the collaborator | Collaborator has no access; policy is dormant until the owner turns it back on | Access restored silently | Silent re-grant drift |
 | AUTH-T016N | AUTH-MUST-016 | Negative | Implementation re-activates imported policies when an identity with the same name appears | Conformance fails | Silent re-grant accepted | Silent re-grant drift |
+| AUTH-T017P | AUTH-MUST-017 | Positive | Evaluate exact, wildcard, path-prefix, conditional allow, and deny-over-allow rules | All implementations return the same allow/deny result and approval metadata | Provider-specific match or precedence result | Policy portability drift |
+| AUTH-T017N | AUTH-MUST-017 | Negative | Supply an unknown condition, unsupported reference, arbitrary mid-string wildcard, or missing condition context | Rule is reported unsupported or denied; it never grants access | Unsupported policy grants access or provider guesses semantics | Fail-open policy drift |
 
 ## Coverage Summary
 
-- MUST requirements: 16
-- Positive tests: 16
-- Negative tests: 16
-- Total vectors: 32
+- MUST requirements: 17
+- Positive tests: 17
+- Negative tests: 17
+- Total vectors: 34
 - Critical drift categories covered: auth bypass, fail-open authorization, approval bypass, tool permission bypass, startup readiness drift, secret leakage, audit omission, local-mode boundary disappearance, ownership creep, approval imposed by default, permissions in config, silent re-grant after import.

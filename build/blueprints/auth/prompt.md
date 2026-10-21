@@ -76,6 +76,7 @@ Implement these behaviors:
 
 ### Authorization
 - Permission denial must be explicit and enforced in code.
+- Implement the portable policy semantics from `contracts/schemas/policy.json`: exact or supported wildcard matching, all conditions, deny-over-allow precedence, and fail-closed unsupported references.
 - Where a product adds approvals, approval decision submission requires `approval_authority`.
 - No approval step is required by the architecture for the owner.
 

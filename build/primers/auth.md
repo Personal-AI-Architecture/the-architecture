@@ -45,6 +45,7 @@ Authenticate requests, carry actor identity, and enforce permissions without col
 - Carry or reconstruct actor context consistently; the identity survives a transport change or a replacement of the Gateway or the Agent Loop.
 - Be the only place permissions live. Configuration and preferences hold none.
 - Default policy: the owner can do everything, with no approval prompt required by the architecture. Every other identity starts with nothing until the owner grants it.
+- Evaluate portable policy rules with exact/whole-wildcard/trailing-path-prefix matching, all-condition evaluation, deny-over-allow precedence, and fail-closed handling for unknown references or unsupported conditions.
 - Enforce approval rules the owner sets; requiring approval by default is a product choice, not an architecture rule.
 - Fail closed: requests and tool calls that can't be checked are refused.
 - After export and import, keep policies for unknown identities dormant; a re-created identity gets no access until the owner turns it back on.
