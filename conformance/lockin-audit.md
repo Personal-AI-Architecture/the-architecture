@@ -4,6 +4,8 @@ hide_table_of_contents: true
 
 # Zero Lock-In Audit (Milestone / Release)
 
+Before recording an audit result, run `python3 scripts/check-docs.py` so the audit and its gate are evaluated against the current documentation registry.
+
 ## 1. Universal Architecture Checks
 
 ### Memory and Data Ownership

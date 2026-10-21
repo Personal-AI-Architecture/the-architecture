@@ -8,6 +8,11 @@ Track how the primer layer evolves so examples, matrix rows, glossary terms, lim
 
 ## 2026-10-21
 
+### Documentation Freshness Tooling
+
+- Published `scripts/check-docs.py`.
+- Registered all repository Markdown files and corrected registry covers to current contract paths.
+
 ### Canonical Contract Alignment
 
 - Replaced duplicated blueprint contract packs with derived source manifests.

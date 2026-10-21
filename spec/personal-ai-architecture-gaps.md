@@ -25,11 +25,11 @@ hide_table_of_contents: true
 - **Published:** The template README links the Foundation spec at `architecture/overview.md`; it is now the Architecture overview at `architecture/overview.md`. Its "Source Of Truth Order" puts `plan.md` first, and no `plan.md` is in the repository.
 - **Evidence:** template:README.md "Source Of Truth Order".
 
-### GAP-PAA-10: The documentation freshness check is not published — Defect
+### GAP-PAA-10: The documentation freshness check is not published — Resolved
 
 - **Expected:** US-16 AC-16.3 and US-18 AC-18.4. The lock-in gate and the doc-maintenance spec both rely on `check:docs`.
-- **Published:** The doc-maintenance spec defines `"check:docs": "tsx scripts/check-docs.ts"`, but this repository has no package or script, so the check cannot be run. Where it should live, and how manual triggers work, is open technical work.
-- **Evidence:** [doc-maintenance-spec.md](../maintainers/doc-maintenance-spec.md) "Script: `check:docs`"; [lockin-gate.md](../conformance/lockin-gate.md).
+- **Published:** `scripts/check-docs.py` validates the registry, detects stale documents from Git changes, supports PR `--base`/`--head` refs, and implements the documented Tier 1/2 blocking and Tier 3 warning/strict exit behavior. The registry now covers every Markdown file and only existing repository paths.
+- **Evidence:** [check-docs.py](../scripts/check-docs.py); [doc-registry.json](../maintainers/doc-registry.json); [doc-maintenance-spec.md](../maintainers/doc-maintenance-spec.md); [lockin-gate.md](../conformance/lockin-gate.md).
 
 ## Contracts that disagree (Technical)
 

@@ -141,17 +141,17 @@ For each doc in doc-registry.json:
 
 ### Script: `check:docs`
 
-Added to `package.json` scripts:
+This repository is documentation-only and does not require a Node toolchain for maintenance checks. The runnable implementation is the standard-library Python script `scripts/check-docs.py`:
 
 ```
-"check:docs": "tsx scripts/check-docs.ts"
+"check:docs": "python3 scripts/check-docs.py"
 ```
 
 Added to the `baseline` pipeline. The `check:docs` script uses exit code 1 for Tier 3 warnings (non-blocking) and exit code 2 for Tier 1/2 failures (blocking). The baseline pipeline uses `check:docs` (default mode), which remaps exit code 1 to 0 so Tier 3 warnings don't break CI. Use `check:docs:strict` for full audits where Tier 3 staleness should also fail:
 
 ```
-"check:docs": "tsx scripts/check-docs.ts",
-"check:docs:strict": "tsx scripts/check-docs.ts --strict",
+"check:docs": "python3 scripts/check-docs.py",
+"check:docs:strict": "python3 scripts/check-docs.py --strict",
 "baseline": "npm run build && vitest run --reporter=verbose && eslint src/ && npm run check:imports && npm run check:lockin && npm run check:docs"
 ```
 
@@ -227,7 +227,7 @@ jobs:
         id: check
         run: |
           set +e
-          output=$(npm run check:docs:strict 2>&1)
+          output=$(python3 scripts/check-docs.py --strict 2>&1)
           code=$?
           echo "exit_code=$code" >> "$GITHUB_OUTPUT"
           echo "check_output<<CHECKEOF" >> "$GITHUB_OUTPUT"
@@ -273,7 +273,7 @@ jobs:
                - For Tier 1/2 docs: update content to match code changes
                - For Tier 3 docs: update references, paths, and examples
 
-            After updating, run `npm run check:docs` to verify all docs are now fresh.
+            After updating, run `python3 scripts/check-docs.py` to verify all docs are now fresh.
           claude_args: |
             --model claude-opus-4-6
             --max-turns 20
@@ -293,7 +293,7 @@ jobs:
           node-version: 20
       - run: npm ci
       - name: Final doc freshness gate
-        run: npm run check:docs
+        run: python3 scripts/check-docs.py
 ```
 
 ### Workflow mechanics
@@ -310,7 +310,7 @@ jobs:
 The lock-in gate (`conformance/lockin-gate.md`) gets one new check:
 
 ```
-- [ ] **Documentation freshness verified:** `npm run check:docs` passes — all stale docs
+- [ ] **Documentation freshness verified:** `python3 scripts/check-docs.py` passes — all stale docs
       are updated in this PR.
 ```
 
@@ -351,7 +351,7 @@ The `check:docs` script validates registry integrity:
 
 The doc maintenance system is working correctly when:
 
-1. `npm run check:docs` exits 0 on a clean main branch
+1. `python3 scripts/check-docs.py` exits 0 on a clean main branch
 2. A PR that modifies `src/engine/` without modifying `architecture/agent-loop-spec.md` causes `check:docs` to exit 2
 3. A PR that modifies a Tier 1 doc triggers cascade detection on dependent Tier 2/3 docs
 4. The doc registry has an entry for every markdown file in ` **/*.md` and `*.md` at the repo root

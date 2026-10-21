@@ -6,6 +6,8 @@ hide_table_of_contents: true
 
 Use these documents:
 
+Run `python3 scripts/check-docs.py` before using this checklist so the linked gate and audit documents are fresh.
+
 1. [lockin-gate.md](./lockin-gate.md)
    Mandatory PR gate. Short, high-signal, required for non-trivial changes.
 

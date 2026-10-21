@@ -19,7 +19,7 @@ hide_table_of_contents: true
 - [ ] **No secrets in Your Memory or git-tracked files:** secrets stay in environment variables, an untracked config file, or a secret store.
 - [ ] **Update safety preserved:** change does not introduce data-loss or irreversible-upgrade risk.
 - [ ] **Architecture boundary respected:** no implementation opinion is being baked into architecture behavior.
-- [ ] **Documentation freshness verified:** `npm run check:docs` passes — all stale docs are updated in this PR.
+- [ ] **Documentation freshness verified:** `python3 scripts/check-docs.py` passes — all stale docs are updated in this PR.
 
 ---
 
