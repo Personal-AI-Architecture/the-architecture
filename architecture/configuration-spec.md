@@ -70,7 +70,7 @@ Which model to use is intentionally not here — it is a preference (a product d
 
 **Why it's thin:** Every field that goes in runtime config is a field that can't travel with you. The thinner this file is, the less environment-specific your system becomes. Four fields is enough to bootstrap. Everything else is either a preference (in Your Memory) or discovered from the environment.
 
-**The bootstrap prompt is not runtime config.** The one-line seed that tells the model where to start reading Your Memory (e.g., "Read AGENT.md for your instructions") belongs to the Agent Loop's own configuration — see [memory-spec.md](./memory-spec.md) §The Bootstrap and [agent-loop-spec.md](./agent-loop-spec.md). It is not one of the four fields and not a preference. Everything the model learns after that seed comes from Your Memory.
+**The bootstrap prompt is not runtime config.** The one-line seed that tells the model where to start reading Your Memory (e.g., "Read AGENT.md for your instructions") belongs to the Agent Loop's own configuration — see [agent-loop-spec.md](./agent-loop-spec.md) §Boot-Time Configuration. It is not one of the four fields and not a preference. Everything the model learns after that seed comes from Your Memory.
 
 ### 3. Tool self-description — what tools can do
 
