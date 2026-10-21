@@ -17,7 +17,7 @@ hide_table_of_contents: true
 flowchart LR
     C[Clients external] -->|Gateway API| G[Gateway component]
     G -->|Auth check on every request| A[Auth component]
-    G -->|POST engine chat and SSE stream internal contract D137| E[Agent Loop component]
+    G -->|POST /agent-loop/chat and SSE stream internal contract D137| E[Agent Loop component]
     E -->|Model API| M[Models external]
 
     G -->|Conversation store tool D152| CST[Conversation Store Tool internal]
@@ -110,7 +110,7 @@ Independent of Gateway -- both are swappable independently. Permissions live onl
 
 **Where it is called:** The Gateway calls Auth on every request, before anything reaches the Agent Loop or conversation data; unauthorized requests are rejected with 401. The Agent Loop asks Auth before each tool call; a refused call is not run and the model is told it was not permitted. If Auth is unavailable, fail closed.
 
-**Identity transport (today):** headers `X-Actor-ID`, `X-Actor-Permissions`
+**Identity transport (today):** the Gateway passes the authenticated actor in the `X-Actor-ID` header. Permissions remain owned by Auth and are not transported as a caller-controlled header.
 
 **Actor types:** owner, collaborator, system agent, background agent, external agent, service, economic actor, federated
 
@@ -180,14 +180,19 @@ Model-native tool calling is the current approach. Swappable via adapter.
 
 One HTTP endpoint. Not a third API.
 
-### `POST /engine/chat`
+### `POST /agent-loop/chat`
 
 **Request:**
 
 ```json
 {
   "messages": [
-    { "role": "user", "content": "..." }
+    {
+      "role": "user",
+      "content": [
+        { "type": "text", "text": "..." }
+      ]
+    }
   ],
   "model": "...",
   "metadata": {
@@ -206,7 +211,6 @@ One HTTP endpoint. Not a third API.
 | `messages` | Yes |
 | Model | Yes |
 | `metadata.correlation_id` | Yes |
-| Request timestamp | Yes |
 | `metadata.conversation_id` | No |
 | `metadata.trigger` | No |
 | `metadata.client_context` | No |
@@ -215,11 +219,11 @@ One HTTP endpoint. Not a third API.
 
 | Event | Data Shape |
 |-------|------------|
-| `text-delta` | `{ content: string }` |
-| `tool-call` | `{ id: string, name: string, arguments: object }` |
-| `tool-result` | `{ id: string, output: string }` or `{ id: string, error: string }` |
-| `done` | `{ finish_reason: string, usage: { prompt_tokens, completion_tokens } }` |
-| `error` | `{ code: string, message: string }` |
+| `text-delta` | `{ _event_type: "text-delta", content: string }` |
+| `tool-call` | `{ _event_type: "tool-call", id: string, name: string, arguments?: object }` |
+| `tool-result` | `{ _event_type: "tool-result", id: string, output?: string, error?: string, error_code?: string }` |
+| `done` | `{ _event_type: "done", finish_reason: string, usage?: object }` |
+| `error` | `{ _event_type: "error", code: string, message: string }` |
 
 **Pre-stream errors (HTTP status codes):**
 
@@ -229,17 +233,15 @@ One HTTP endpoint. Not a third API.
 | 401 | Auth rejected |
 | 503 | Agent Loop unavailable |
 
-**Mid-stream error codes:** `provider_error`, `tool_error`, `context_overflow`
+**Mid-stream error codes:** `provider_error`, `tool_error`, `auth_error`, `context_overflow`
 
 **Error message safety:** SSE error event messages must be safe for client display. Never forward raw `Error.message`, stack traces, or file paths into the stream. Map each error code to a fixed safe message; log raw diagnostic detail to structured stdout only.
 
-**Auth path:** Gateway calls Auth -> attach identity (today `X-Actor-ID` + `X-Actor-Permissions` headers) -> reject with 401 on failure. Agent Loop asks Auth before each tool call -> a refused call returns a `tool-result` error saying it was not permitted.
+**Auth path:** Gateway calls Auth -> attach the authenticated identity in `X-Actor-ID` -> reject with 401 on failure. Agent Loop asks Auth before each tool call -> a refused call returns a `tool-result` with `error_code: not_permitted`.
 
 **Messages:** one shape across all three contracts. Content is a list of parts; tool calls and tool results are ordinary message parts and are saved in conversation history. The bootstrap prompt is Agent Loop configuration, so the request carries no system message.
 
 **Errors:** every error, HTTP or SSE, carries the request's correlation ID.
-
-The `/engine/chat` path and `engine` schema names keep the component's older name until the next contract revision.
 
 ---
 
@@ -373,9 +375,8 @@ On every message, the Gateway reads the owner's current model choice and passes 
 
 ## Contract alignment
 
-This reference is ahead of the contract files in these places, pending the next contract revision:
-
-- `contracts/openapi/gateway-engine.yaml`: no request field for the model, no request timestamp, no correlation ID on errors, and the system message is described as assembled by the Gateway.
-- `contracts/schemas/message.json`: content is a string, not a list of parts, and tool calls and tool results are not message parts.
-- `contracts/openapi/gateway-api.yaml`: says requests are authenticated before they reach the Gateway, and stores only user and assistant messages.
-- Memory tool contract: no restore operation.
+The canonical contract tree under `contracts/` is authoritative for this reference.
+The internal handoff is `POST /agent-loop/chat`; it requires `model` and
+`metadata.correlation_id`, uses structured message content parts, and defines the
+shared stream event and error shapes. Validate implementations against the OpenAPI
+files and shared JSON Schemas rather than treating this summary as a second schema.

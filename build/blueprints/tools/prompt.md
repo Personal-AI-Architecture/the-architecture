@@ -13,7 +13,7 @@ Implement **Tools** in **{{TARGET_LANGUAGE}}** so capability discovery and execu
 ## Primary Inputs
 
 - `build/blueprints/tools/blueprint.md`
-- `build/blueprints/tools/contract-pack.json`
+- `build/blueprints/tools/contract-pack.json` (derived source manifest; canonical shapes remain under `contracts/`)
 - `build/blueprints/tools/tests.md`
 - `build/blueprints/tools/drift-guard.md`
 - `build/blueprints/agent-loop/blueprint.md`

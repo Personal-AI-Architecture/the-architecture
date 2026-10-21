@@ -13,7 +13,7 @@ Implement the **Auth** component in **{{TARGET_LANGUAGE}}** so it is architectur
 ## Primary Inputs
 
 - `build/blueprints/auth/blueprint.md`
-- `build/blueprints/auth/contract-pack.json`
+- `build/blueprints/auth/contract-pack.json` (derived source manifest; canonical shapes remain under `contracts/`)
 - `build/blueprints/auth/tests.md`
 - `build/blueprints/auth/drift-guard.md`
 - `build/blueprints/gateway/blueprint.md`

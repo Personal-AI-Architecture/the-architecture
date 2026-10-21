@@ -17,7 +17,7 @@ Important: Gateway API is an external contract boundary, not a standalone archit
 - `build/blueprints/gateway-api/blueprint.md`
 - `build/blueprints/gateway/blueprint.md`
 - `build/blueprints/agent-loop/blueprint.md`
-- `build/blueprints/gateway-api/contract-pack.json`
+- `build/blueprints/gateway-api/contract-pack.json` (derived source manifest; canonical shapes remain under `contracts/`)
 - `build/blueprints/gateway-api/tests.md`
 - `build/blueprints/gateway-api/drift-guard.md`
 
@@ -54,15 +54,15 @@ If conflicts exist, do not guess silently. Create `conflict_register.md` and doc
 
 Implement these endpoints:
 - `GET /health`
-- `POST /message`
+- `POST /conversations/messages`
 - `GET /conversations`
 - `GET /conversations/:id`
 - `POST /approvals/:request_id` (only if the product adds approval prompts)
 
 ## Canonical Gateway API Contract Rules
 
-### `POST /message`
-- Request body: `{ content, metadata? }`, where `content` is a list of content parts (a string is the shorthand for one text part)
+### `POST /conversations/messages`
+- Request body: `{ content, metadata? }`, where `content` is a non-empty list of content parts
 - Reject any attempt to submit internal handoff fields directly (`messages`, provider config, tool config, runtime config-like fields).
 - Response:
   - `text/event-stream`
@@ -90,7 +90,7 @@ Implement these endpoints:
 ### `GET /conversations/:id`
 - Response envelope must be canonical:
   - `id`, `title`, `created_at`, `updated_at`
-  - `messages[]` (id, role, content parts, timestamp), including tool calls and tool results
+  - `messages[]` (id, role, content parts, `created_at`), including tool calls and tool results
 
 ### `POST /approvals/:request_id` (products that add approvals)
 - Request body: `{ decision }`
@@ -122,8 +122,8 @@ Use these for MVP implementation consistency:
 Implement automated contract tests that prove:
 
 1. Every protected-route request is checked with Auth, including list and history reads.
-2. `POST /message` accepts canonical request shape and rejects internal-shape drift.
-3. `POST /message` returns SSE with `X-Conversation-ID`.
+2. `POST /conversations/messages` accepts canonical request shape and rejects internal-shape drift.
+3. `POST /conversations/messages` returns SSE with `X-Conversation-ID`.
 4. Stream emits canonical event types.
 5. `done` includes `conversation_id` and `message_id`.
 6. `GET /conversations` returns canonical envelope.

@@ -16,7 +16,7 @@ Important: Model API is an external API boundary, not a standalone architecture 
 
 - `build/blueprints/model-api/blueprint.md`
 - `build/blueprints/agent-loop/blueprint.md`
-- `build/blueprints/model-api/contract-pack.json`
+- `build/blueprints/model-api/contract-pack.json` (derived source manifest; canonical shapes remain under `contracts/`)
 - `build/blueprints/model-api/tests.md`
 - `build/blueprints/model-api/drift-guard.md`
 

@@ -14,7 +14,7 @@ Implement the **Gateway** component in **{{TARGET_LANGUAGE}}** so it is architec
 
 - `build/blueprints/gateway/blueprint.md`
 - `build/blueprints/gateway-api/blueprint.md`
-- `build/blueprints/gateway/contract-pack.json`
+- `build/blueprints/gateway/contract-pack.json` (derived source manifest; canonical shapes remain under `contracts/`)
 - `build/blueprints/gateway/tests.md`
 - `build/blueprints/gateway/drift-guard.md`
 
@@ -51,7 +51,7 @@ If conflicts exist, do not guess silently. Create `conflict_register.md` and doc
 
 Implement these routes:
 - `GET /health`
-- `POST /message`
+- `POST /conversations/messages`
 - `GET /conversations`
 - `GET /conversations/:id`
 - `POST /approvals/:request_id` (only if the product adds approval prompts)
@@ -71,7 +71,7 @@ Implement these behaviors:
 
 ## Canonical External Contract Rules
 
-### `POST /message`
+### `POST /conversations/messages`
 - Request body: `{ content, metadata? }`
 - Reject client attempts to send internal contract fields (`messages`, provider config, tool config).
 
@@ -120,7 +120,7 @@ Use these for MVP implementation consistency:
 Implement automated tests that prove:
 
 1. Every protected-route request is checked with Auth, including list and history reads.
-2. Happy-path `POST /message` returns stream + `X-Conversation-ID` + `done` identifiers.
+2. Happy-path `POST /conversations/messages` returns stream + `X-Conversation-ID` + `done` identifiers.
 3. Conversation is persisted and retrievable via canonical conversation endpoints.
 4. Invalid request bodies fail safely with 400.
 5. Metadata side-channel attempts (provider/tool config in request) are rejected.

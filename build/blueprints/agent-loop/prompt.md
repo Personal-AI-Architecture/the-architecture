@@ -15,7 +15,7 @@ Implement the **Agent Loop** component in **{{TARGET_LANGUAGE}}** so it is archi
 - `build/blueprints/agent-loop/blueprint.md`
 - `build/blueprints/gateway/blueprint.md`
 - `build/blueprints/gateway-api/blueprint.md`
-- `build/blueprints/agent-loop/contract-pack.json`
+- `build/blueprints/agent-loop/contract-pack.json` (derived source manifest; canonical shapes remain under `contracts/`)
 - `build/blueprints/agent-loop/tests.md`
 - `build/blueprints/agent-loop/drift-guard.md`
 
@@ -68,12 +68,11 @@ Implement these behaviors:
 
 ## Canonical Internal Contract Rules
 
-### Input request (`POST /engine/chat` contract shape)
+### Input request (`POST /agent-loop/chat` contract shape)
 - Required:
   - `messages` (conversation history including tool calls and tool results, plus the current message; content as a list of parts)
-  - the model to use (field name pending the next contract revision)
+  - `model` (the owner's current model choice)
   - `metadata.correlation_id`
-  - a request timestamp (field name pending the next contract revision)
 - Optional:
   - `metadata.conversation_id`
   - `metadata.trigger`

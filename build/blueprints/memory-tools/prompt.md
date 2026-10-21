@@ -13,7 +13,7 @@ Implement **Memory-Tools** in **{{TARGET_LANGUAGE}}** so memory operations are a
 ## Primary Inputs
 
 - `build/blueprints/memory-tools/blueprint.md`
-- `build/blueprints/memory-tools/contract-pack.json`
+- `build/blueprints/memory-tools/contract-pack.json` (derived source manifest; canonical shapes remain under `contracts/`)
 - `build/blueprints/memory-tools/tests.md`
 - `build/blueprints/memory-tools/drift-guard.md`
 - `build/blueprints/memory/blueprint.md`

@@ -17,7 +17,7 @@ Important: This is an internal contract between Gateway and Agent Loop. It is no
 - `build/blueprints/gateway-agent-loop-contract/blueprint.md`
 - `build/blueprints/gateway/blueprint.md`
 - `build/blueprints/agent-loop/blueprint.md`
-- `build/blueprints/gateway-agent-loop-contract/contract-pack.json`
+- `build/blueprints/gateway-agent-loop-contract/contract-pack.json` (derived source manifest; canonical shapes remain under `contracts/`)
 - `build/blueprints/gateway-agent-loop-contract/tests.md`
 - `build/blueprints/gateway-agent-loop-contract/drift-guard.md`
 
@@ -65,12 +65,11 @@ Implement these behaviors:
 
 ## Canonical Contract Rules
 
-### Request (`POST /engine/chat`)
+### Request (`POST /agent-loop/chat`)
 - Required:
   - `messages[]` (no system message; the bootstrap prompt is Agent Loop configuration)
-  - the model to use (field name pending the next contract revision)
+  - `model` (the owner's current model choice)
   - `metadata.correlation_id`
-  - a request timestamp (field name pending the next contract revision)
 - Optional:
   - `metadata.conversation_id`
   - `metadata.trigger`
@@ -137,7 +136,7 @@ Implement automated tests proving:
 12. Internal contract is not exposed as external API.
 13. Gateway and Agent Loop remain independently swappable with contract compatibility.
 14. Tool calls and tool results travel as message parts and are replayed on resume.
-15. Every request has a timestamp and every error carries the correlation ID.
+15. Every request carries `metadata.correlation_id`, and errors use the canonical error shape and safe message rules.
 
 ## Drift-Critical Fail Conditions (Fail Build If Any True)
 

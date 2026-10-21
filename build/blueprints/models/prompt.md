@@ -18,7 +18,7 @@ Important: `Models` is an external dependency boundary, not a runtime component 
 - `build/blueprints/model-api/blueprint.md`
 - `build/blueprints/agent-loop/blueprint.md`
 - `build/blueprints/configuration/blueprint.md`
-- `build/blueprints/models/contract-pack.json`
+- `build/blueprints/models/contract-pack.json` (derived source manifest; canonical shapes remain under `contracts/`)
 - `build/blueprints/models/tests.md`
 - `build/blueprints/models/drift-guard.md`
 

@@ -13,7 +13,7 @@ Implement **Security** in **{{TARGET_LANGUAGE}}** so security behavior is archit
 ## Primary Inputs
 
 - `build/blueprints/security/blueprint.md`
-- `build/blueprints/security/contract-pack.json`
+- `build/blueprints/security/contract-pack.json` (derived source manifest; canonical shapes remain under `contracts/`)
 - `build/blueprints/security/tests.md`
 - `build/blueprints/security/drift-guard.md`
 - `build/blueprints/auth/blueprint.md`

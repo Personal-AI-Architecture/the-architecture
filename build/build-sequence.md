@@ -15,6 +15,9 @@ Build the architecture-dependent runtime path first, then build product behavior
 ### 1. Primer Lock
 
 - Treat `build/primers/*.md` and `build/compliance-matrix.md` as the build authority.
+- Treat the files under `contracts/` as the sole authority for exact routes, payloads,
+  schemas, and event shapes. Blueprint `contract-pack.json` files are derived source
+  manifests only.
 - Classify accepted MVP limits before coding begins.
 - Reject any task that violates required component ownership or contract rules.
 
@@ -57,6 +60,8 @@ Build the architecture-dependent runtime path first, then build product behavior
 - Do not treat Auth, Memory, or Security as post-MVP hardening.
 - Do not defer export, history, or conversation persistence to later milestones.
 - Do not invent client or internal contract payloads after implementation starts.
+- Validate implementation payloads against the canonical OpenAPI and JSON Schema files,
+  not against copied blueprint shapes.
 
 ## Valid Example
 

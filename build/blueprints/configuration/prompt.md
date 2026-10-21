@@ -13,7 +13,7 @@ Implement **Configuration** in **{{TARGET_LANGUAGE}}** so runtime bootstrap, ada
 ## Primary Inputs
 
 - `build/blueprints/configuration/blueprint.md`
-- `build/blueprints/configuration/contract-pack.json`
+- `build/blueprints/configuration/contract-pack.json` (derived source manifest; canonical shapes remain under `contracts/`)
 - `build/blueprints/configuration/tests.md`
 - `build/blueprints/configuration/drift-guard.md`
 - `build/blueprints/gateway/blueprint.md`

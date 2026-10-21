@@ -13,7 +13,7 @@ Implement the **Memory** component in **{{TARGET_LANGUAGE}}** so it is architect
 ## Primary Inputs
 
 - `build/blueprints/memory/blueprint.md`
-- `build/blueprints/memory/contract-pack.json`
+- `build/blueprints/memory/contract-pack.json` (derived source manifest; canonical shapes remain under `contracts/`)
 - `build/blueprints/memory/tests.md`
 - `build/blueprints/memory/drift-guard.md`
 - `build/blueprints/gateway/blueprint.md`

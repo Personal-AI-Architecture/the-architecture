@@ -19,7 +19,7 @@ Important: Adapter is a pattern within existing APIs, not a standalone component
 - `build/blueprints/model-api/blueprint.md`
 - `build/blueprints/models/blueprint.md`
 - `build/blueprints/configuration/blueprint.md`
-- `build/blueprints/adapter/contract-pack.json`
+- `build/blueprints/adapter/contract-pack.json` (derived source manifest; canonical shapes remain under `contracts/`)
 - `build/blueprints/adapter/tests.md`
 - `build/blueprints/adapter/drift-guard.md`
 

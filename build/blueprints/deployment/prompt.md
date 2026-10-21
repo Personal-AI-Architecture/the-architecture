@@ -19,7 +19,7 @@ Important: Deployment is an operational boundary, not a runtime component or API
 - `build/blueprints/models/blueprint.md`
 - `build/blueprints/model-api/blueprint.md`
 - `build/blueprints/security/blueprint.md`
-- `build/blueprints/deployment/contract-pack.json`
+- `build/blueprints/deployment/contract-pack.json` (derived source manifest; canonical shapes remain under `contracts/`)
 - `build/blueprints/deployment/tests.md`
 - `build/blueprints/deployment/drift-guard.md`
 
