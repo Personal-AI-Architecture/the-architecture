@@ -9,7 +9,7 @@ hide_table_of_contents: true
 >
 > Each gap is something the spec expects that the published architecture does not deliver today. Classification is a suggestion for triage: **Defect** (published material is broken or contradicts itself), **Decision needed** (the maintainers must choose), **Technical** (contract and technical work), **Spec-only** (wording fix in the architecture docs). A gap marked **Decided, spec update in progress** has a settled answer that is still being written into the specs and contracts.
 
-**Scoreboard:** The contract-source alignment batch, example-shape validation, documentation freshness tooling, configuration alignment, required parallel tool execution, portable policy semantics, approval lifecycle contracts, and transport-neutral identity propagation are complete. Remaining work is concentrated in tool-definition semantics (S8), the local-address decision, and the first executable language-neutral conformance implementation.
+**Scoreboard:** The contract-source alignment batch, example-shape validation, documentation freshness tooling, configuration alignment, required parallel tool execution, portable policy semantics, approval lifecycle contracts, transport-neutral identity propagation, and tool-definition visibility/source semantics are complete. Remaining work is concentrated in the local-address decision and the first executable language-neutral conformance implementation.
 
 ## Routes a developer follows
 
@@ -51,7 +51,7 @@ hide_table_of_contents: true
 - **Expected:** US-13 AC-13.3.
 - **Published:** The internal request schema requires `metadata.correlation_id`; Model API stream events carry `_event_type` discriminators; `stream` is required and must be `true`; tool definitions consistently use canonical `parameters`; and message schemas enforce role-appropriate tool-call/tool-result parts.
 - **Evidence:** `contracts/openapi/gateway-engine.yaml`; `contracts/openapi/model-api.yaml`; `contracts/schemas/tool-definition.json`; `contracts/schemas/message.json`; [model-api blueprint](../build/blueprints/model-api/blueprint.md); [tools blueprint](../build/blueprints/tools/blueprint.md).
-- **Boundary:** Tool visibility/source semantics remain tracked separately as S8 work; this gap covered the contract-shape inconsistencies.
+- **Boundary:** Tool visibility/source semantics were tracked separately as S8 and are now resolved below; this gap covers the contract-shape inconsistencies.
 
 ### GAP-PAA-6: Identity allows only a fixed list of actor types — Resolved
 
@@ -105,3 +105,10 @@ hide_table_of_contents: true
 - **Published:** `auth_context.json` is the canonical transport-neutral envelope. It carries the Auth-produced actor, authentication ID, timestamps, and correlation ID, but no credentials or permissions. The internal OpenAPI request requires it, and transport adapters must verify integrity and fail closed for missing, malformed, expired, or caller-supplied context.
 - **Evidence:** [auth-context.json](../contracts/schemas/auth-context.json); [gateway-engine.yaml](../contracts/openapi/gateway-engine.yaml); [auth-spec.md](../architecture/auth-spec.md); [Gateway ↔ Agent Loop tests](../build/blueprints/gateway-agent-loop-contract/tests.md).
 - **Decided:** `X-Actor-ID` is no longer a canonical contract. Headers, message metadata, and direct-call arguments are implementation adapters for the same `auth_context` shape.
+
+### GAP-PAA-S8: Tool-definition visibility and source semantics are inconsistent — Resolved
+
+- **Expected:** A tool definition identifies its source without coupling the architecture to an adapter, and it distinguishes owner-selected model visibility from the current actor's Auth permission.
+- **Published:** `tool-definition.json` now requires `source.id` plus `source.kind` (`mcp`, `cli`, `native`, `manifest`, or `builtin`) and a `visibility` object with `mode` (`always_send` or `discoverable`) and `authorization` (`permitted` or `not_permitted`). Tool calls carry `source_id`, so same-named tools from different sources remain distinct. Endpoints, credentials, and adapter configuration are forbidden from definitions.
+- **Evidence:** [tool-definition.json](../contracts/schemas/tool-definition.json); [message.json](../contracts/schemas/message.json); [model-api.yaml](../contracts/openapi/model-api.yaml); [tools tests](../build/blueprints/tools/tests.md).
+- **Decided:** The owner controls visibility mode; Auth controls only the per-actor authorization marker. Installed but unauthorized tools remain visible/marked rather than being reported as unknown.

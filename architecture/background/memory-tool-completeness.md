@@ -11,6 +11,9 @@ approval-free.
 The actor reaching that tool boundary is the transport-neutral `auth_context`, not a
 header-specific identity convention.
 
+Tool definitions retain source provenance and visibility metadata, while the tool
+implementation supplies adapter details outside the definition contract.
+
 ## 1. The Binary
 
 The system reduces to two things: **memory and tools** (D135).

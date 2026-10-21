@@ -99,9 +99,10 @@ Enforce required fields, optional fields, defaults, forbidden fields, and condit
 Use these for MVP consistency:
 
 1. Self-describing tools are normative; static source maps are acceptable only as transitional implementation evidence.
-2. Model visibility of not-permitted tools is required (TOL-MUST-015): mark them, do not hide them. The contract has no field for this yet; report the shape you chose.
+2. Model visibility of not-permitted tools is required (TOL-MUST-015): preserve the definition and set `visibility.authorization=not_permitted`; do not hide it or report it as an unknown tool.
 3. Keep always-send/discoverable split architecture-ready even if initial deployment runs with a small fixed set.
-4. Isolate tools the owner has not said they trust, by default. Containers are one option; separate processes or sandboxes are others.
+4. `source.id` plus tool `name` is the stable tool identity. `source.kind` is provenance only; endpoints and credentials belong to adapter/runtime configuration, never the tool definition.
+5. Isolate tools the owner has not said they trust, by default. Containers are one option; separate processes or sandboxes are others.
 
 ## Non-Negotiable Constraints
 

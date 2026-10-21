@@ -178,7 +178,9 @@ This also aligns with existing practice. Existing AI SDKs already work this way 
 
 The canonical Model API contract is streaming-only at the boundary, with normalized
 completion events identified by `_event_type`; provider-specific streaming or
-non-streaming transport remains an adapter implementation detail.
+non-streaming transport remains an adapter implementation detail. Tool definitions
+retain canonical source identity and visibility semantics while adapters provide only
+provider-specific translation and runtime configuration.
 
 | # | Decision | Rationale |
 |---|----------|-----------|

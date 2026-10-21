@@ -142,7 +142,9 @@ The canonical contract tree under `contracts/` is authoritative for the model-fa
 payloads and the internal request handoff. The Agent Loop receives the selected model
 through `AgentLoopRequest.model`; Model API requests require `stream: true`, and every
 completion event carries an `_event_type` discriminator. Capability reporting remains
-an implementation and future contract-extension concern.
+an implementation and future contract-extension concern. Tool definitions supplied to
+the Model API use canonical source provenance and visibility/authorization markers;
+the model must preserve source_id on emitted tool calls.
 
 ---
 

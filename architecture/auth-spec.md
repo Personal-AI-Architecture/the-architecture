@@ -368,6 +368,10 @@ Headers, message metadata, request-body fields, and direct-call arguments are tr
 adapters for that shape, not competing identity contracts. Permissions remain owned by
 Auth and are never caller-controlled transport data.
 
+Tool definitions use the same boundary discipline: source provenance and visibility
+metadata are canonical, while adapter endpoints and credentials remain outside the
+definition contract.
+
 ---
 
 *Auth is the gatekeeper that makes the other components safely swappable. A personal AI system needs access control that persists whatever intelligence is plugged in.*

@@ -318,4 +318,7 @@ the Model API does not define an embeddings route.
 
 ---
 
+Tool-call message parts retain `source_id` alongside the tool name, so conversation
+history remains unambiguous when two sources expose the same tool name.
+
 *Your Memory is the platform — the only component that can exist completely on its own. The Agent Loop brings it alive. The model gives it intelligence. The tools give it access. Auth protects it. The client reveals it. But Your Memory is what persists when everything else is swapped, upgraded, or replaced. It's what makes the system yours.*

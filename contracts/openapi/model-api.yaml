@@ -64,6 +64,13 @@ paths:
                   tools:
                     - name: read_file
                       description: Read a file from the user's library
+                      source:
+                        id: 'mcp:filesystem'
+                        kind: 'mcp'
+                      visibility:
+                        mode: 'always_send'
+                        authorization: 'permitted'
+                      read_only: true
                       parameters:
                         type: object
                         properties:
@@ -74,6 +81,13 @@ paths:
                           - path
                     - name: write_file
                       description: Write content to a file in the user's library
+                      source:
+                        id: 'mcp:filesystem'
+                        kind: 'mcp'
+                      visibility:
+                        mode: 'always_send'
+                        authorization: 'permitted'
+                      read_only: false
                       parameters:
                         type: object
                         properties:
@@ -182,12 +196,16 @@ components:
       type: object
       required:
         - id
+        - source_id
         - name
         - arguments
       properties:
         id:
           type: string
           description: Unique identifier for this tool call
+        source_id:
+          type: string
+          description: Stable source identity from the tool definition; source_id plus name identifies the tool
         name:
           type: string
           description: Name of the tool to call
@@ -240,6 +258,7 @@ components:
       required:
         - _event_type
         - id
+        - source_id
         - name
         - arguments
       properties:
@@ -249,6 +268,9 @@ components:
         id:
           type: string
           description: Tool call identifier — used to match results
+        source_id:
+          type: string
+          description: Stable source identity from the tool definition
         name:
           type: string
           description: Name of the tool to call

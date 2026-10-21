@@ -2,9 +2,10 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "tool-definition.json",
   "title": "Tool Definition",
-  "description": "How a tool describes itself. Tools self-describe (D146) — definitions come from the tools themselves, not from manual configuration. MCP tools describe themselves via protocol, CLI tools provide manifest files, native functions are defined in code. Nobody writes tool definitions manually. Tool definitions are sent through the Model API alongside system instructions and conversation history so the model knows what tools are available.",
+  "description": "How a tool describes itself. Tools self-describe (D146) — definitions come from the tools themselves, not from manual configuration. MCP tools describe themselves via protocol, CLI tools provide manifest files, native functions are defined in code. Each definition is uniquely identified by source.id plus name. Source is provenance only; connection credentials and adapter configuration live outside this definition.",
   "type": "object",
-  "required": ["name", "description", "parameters"],
+  "additionalProperties": false,
+  "required": ["name", "description", "parameters", "source", "visibility"],
   "properties": {
     "name": {
       "type": "string",
@@ -42,13 +43,44 @@
       "additionalProperties": true
     },
     "source": {
-      "type": "string",
-      "description": "Where this tool comes from — the tool source that provided it. Preserves provenance so the model and the owner can see where each tool originated. E.g., 'mcp:filesystem', 'cli:git', 'native:approval-gate'."
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Stable source identity. source.id plus tool name is the unique tool identity."
+        },
+        "kind": {
+          "type": "string",
+          "enum": ["mcp", "cli", "native", "manifest", "builtin"],
+          "description": "How the source exposes tools. This is provenance, not an adapter configuration contract."
+        }
+      },
+      "description": "Provenance supplied by the tool source. It must not contain endpoints, credentials, or runtime adapter settings."
     },
-    "category": {
-      "type": "string",
-      "enum": ["always-send", "discoverable"],
-      "description": "Whether this tool is in the always-send set (sent with every prompt, D109) or the discoverable set (available on demand through the discovery tool). The owner controls this classification — it reflects how they work, not a product decision."
+    "visibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "authorization"],
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": ["always_send", "discoverable"],
+          "description": "Owner-controlled model-context visibility. always_send includes the definition in every prompt; discoverable exposes it through discovery."
+        },
+        "authorization": {
+          "type": "string",
+          "enum": ["permitted", "not_permitted"],
+          "description": "Auth's current-actor projection. not_permitted tools remain visible/marked so the model distinguishes unavailable permission from an unknown tool."
+        }
+      },
+      "description": "Visibility combines owner-selected context mode with Auth's per-actor permitted/not_permitted marker. It is not a permission store."
+    },
+    "read_only": {
+      "type": "boolean",
+      "description": "Descriptive capability metadata only; Auth and the tool enforce the actual action policy."
     }
   },
   "examples": [
@@ -65,8 +97,9 @@
         },
         "required": ["path"]
       },
-      "source": "mcp:filesystem",
-      "category": "always-send"
+      "source": { "id": "mcp:filesystem", "kind": "mcp" },
+      "visibility": { "mode": "always_send", "authorization": "permitted" },
+      "read_only": true
     },
     {
       "name": "write_file",
@@ -85,8 +118,9 @@
         },
         "required": ["path", "content"]
       },
-      "source": "mcp:filesystem",
-      "category": "always-send"
+      "source": { "id": "mcp:filesystem", "kind": "mcp" },
+      "visibility": { "mode": "always_send", "authorization": "permitted" },
+      "read_only": false
     },
     {
       "name": "git_commit",
@@ -101,8 +135,9 @@
         },
         "required": ["message"]
       },
-      "source": "cli:git",
-      "category": "always-send"
+      "source": { "id": "cli:git", "kind": "cli" },
+      "visibility": { "mode": "always_send", "authorization": "permitted" },
+      "read_only": false
     },
     {
       "name": "memory_restore",
@@ -121,8 +156,9 @@
         },
         "required": ["path", "version"]
       },
-      "source": "memory",
-      "category": "discoverable"
+      "source": { "id": "builtin:memory", "kind": "builtin" },
+      "visibility": { "mode": "discoverable", "authorization": "permitted" },
+      "read_only": false
     }
   ]
 }

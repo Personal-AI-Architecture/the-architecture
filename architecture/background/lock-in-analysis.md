@@ -4,6 +4,10 @@ hide_table_of_contents: true
 
 # Lock-In Risk Analysis: Foundation Architecture
 
+Adapter swaps preserve canonical tool provenance and visibility: `source.id` + name
+identifies the capability, while endpoints and credentials stay in adapter/runtime
+configuration rather than tool definitions.
+
 > **Purpose:** Explain how the architecture achieves zero lock-in at every layer, and identify the implementation disciplines required to keep it that way.
 > **Architecture:** [Foundation Spec](../overview.md) — component definitions, 12 architecture specs, decisions D1-D159
 

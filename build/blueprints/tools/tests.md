@@ -13,7 +13,7 @@ This file defines language-agnostic pass/fail vectors for Tools capability-bound
 - `TOL-MUST-003`: Tool execution must occur in Agent Loop and authorization must occur in Auth.
 - `TOL-MUST-004`: Tool availability must be environment/configuration plus Auth permission driven.
 - `TOL-MUST-005`: Request payloads must not override runtime tool source/availability truth.
-- `TOL-MUST-006`: Tool definitions must expose canonical fields (`name`, `description`, `parameters`, `read_only`, `requires_approval`).
+- `TOL-MUST-006`: Tool definitions must expose canonical fields (`name`, `description`, `parameters`, `source`, and `visibility`), with source provenance and owner/Auth visibility semantics separated.
 - `TOL-MUST-007`: Invalid/unsupported tool sources or definitions must fail clearly before readiness.
 - `TOL-MUST-008`: Tool-call/tool-result exchanges must preserve stable call IDs and contract-visible shape.
 - `TOL-MUST-009`: Where an approval rule in Auth covers a call, it must be blocked until coded approval decision.
@@ -23,6 +23,7 @@ This file defines language-agnostic pass/fail vectors for Tools capability-bound
 - `TOL-MUST-013`: Tool unavailability/timeout/crash must be surfaced explicitly (no silent failure).
 - `TOL-MUST-014`: Tool add/remove swap path must remain config/preference-driven without architecture rewrites.
 - `TOL-MUST-017`: Independent tool calls in one Agent Loop turn execute concurrently; dependent calls remain ordered.
+- `TOL-MUST-018`: Tool identity is the pair (`source.id`, `name`); tool calls carry `source_id`, and no definition may contain adapter endpoints or credentials.
 
 ## Test Vectors
 
@@ -62,11 +63,13 @@ This file defines language-agnostic pass/fail vectors for Tools capability-bound
 | TOL-T016N | TOL-MUST-016 | Negative | Put an approval rule in a tool definition or config file instead of Auth | Conformance gate fails | Approval rule outside Auth accepted | Permission-in-config drift |
 | TOL-T017P | TOL-MUST-017 | Positive | Model emits two independent tool calls in one turn | Calls overlap, results retain their call IDs, and the loop continues after both complete | Independent calls are serialized or results are mismatched | Parallel-execution drift |
 | TOL-T017N | TOL-MUST-017 | Negative | Model emits independent calls but implementation serializes them, or starts a dependent call before its prerequisite result | Conformance gate fails | Independent work serialized or dependency order violated | Concurrency/order drift |
+| TOL-T018P | TOL-MUST-018 | Positive | Register two tools named `search` from different sources and emit a call for each | Both definitions remain distinct and each call resolves by `source_id` + name | One source overwrites the other or call resolves ambiguously | Source identity drift |
+| TOL-T018N | TOL-MUST-018 | Negative | Omit source identity, add an endpoint/token, or accept a definition without visibility authorization | Definition/call validation fails before use | Ambiguous or secret-bearing definition accepted | Definition provenance drift |
 
 ## Coverage Summary
 
-- MUST requirements: 17
-- Positive tests: 17
-- Negative tests: 17
-- Total vectors: 34
+- MUST requirements: 18
+- Positive tests: 18
+- Negative tests: 18
+- Total vectors: 36
 - Critical drift categories covered: fifth-component drift, API proliferation, auth bypass, hidden config channels, definition-shape drift, stream-shape drift, approval bypass, error sanitization, memory-boundary bypass, trust-boundary violations, silent-failure behavior, swap lock-in, hidden not-permitted tools, approval-default drift.

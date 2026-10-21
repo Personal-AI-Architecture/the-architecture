@@ -255,6 +255,7 @@ components:
       required:
         - _event_type
         - id
+        - source_id
         - name
         - arguments
       properties:
@@ -264,6 +265,9 @@ components:
         id:
           type: string
           description: Unique identifier for this tool call within the stream
+        source_id:
+          type: string
+          description: Stable source identity; source_id plus name identifies the tool
         name:
           type: string
           description: Name of the tool being called

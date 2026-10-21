@@ -179,4 +179,7 @@ behavioral requirements behind those canonical definitions.
 
 ---
 
+The canonical tool definition also carries source provenance and separate visibility
+and authorization markers; tool calls retain source_id so same-named tools remain distinct.
+
 *The Agent Loop is intentionally the thinnest spec in the project. The value is in Your Memory, not in the loop that reads it. The Agent Loop's job is to bring the system alive and get out of the way.*

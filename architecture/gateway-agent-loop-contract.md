@@ -270,7 +270,8 @@ fields, structured message parts, stream events, and error shapes. This spec def
 the ownership and behavioral requirements behind those definitions. The paired Model
 API is streaming-only and identifies each completion event with `_event_type`; the
 Agent Loop executes independent tool calls concurrently and preserves dependency order. S8
-(tool-definition shape/visibility) remains open.
+(tool-definition shape/visibility) is canonical: source.id + name identifies a tool,
+visibility separates owner mode from Auth authorization, and tool calls carry source_id.
 follow-up questions.
 
 ---

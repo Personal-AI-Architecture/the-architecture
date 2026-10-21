@@ -15,6 +15,7 @@
     },
     "required": ["path", "version"]
   },
-  "source": "memory",
-  "category": "discoverable"
+  "source": { "id": "builtin:memory", "kind": "builtin" },
+  "visibility": { "mode": "discoverable", "authorization": "permitted" },
+  "read_only": false
 }

@@ -99,10 +99,11 @@
     },
     "ToolCallPart": {
       "type": "object",
-      "required": ["type", "id", "name", "arguments"],
+      "required": ["type", "id", "source_id", "name", "arguments"],
       "properties": {
         "type": { "const": "tool_call" },
         "id": { "type": "string" },
+        "source_id": { "type": "string", "minLength": 1, "description": "Stable source identity from the tool definition; source_id plus name identifies the tool." },
         "name": { "type": "string" },
         "arguments": { "type": "object", "additionalProperties": true }
       },
@@ -136,6 +137,7 @@
         {
           "type": "tool_call",
           "id": "tc_1",
+          "source_id": "mcp:filesystem",
           "name": "read_file",
           "arguments": { "path": "/finances/AGENT.md" }
         }

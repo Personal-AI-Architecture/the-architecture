@@ -47,7 +47,8 @@ Define what tools are, where they live, how they are executed, and how they avoi
 
 - Tool availability follows configuration and discovery rules.
 - Tool scope changes do not require architecture rewrites.
-- The always-send and discoverable split can evolve without changing the architecture.
+- The always-send and discoverable split is owner-controlled and can evolve without changing the architecture.
+- Tool identity is `source.id` plus `name`; `source.kind` is provenance only. Auth marks installed but unavailable tools as `not_permitted` instead of hiding them, and adapter endpoints/credentials never belong in a tool definition.
 
 ## Audit Questions
 

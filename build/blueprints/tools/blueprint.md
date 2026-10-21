@@ -96,7 +96,7 @@ Tools define the callable capability surface of the system: operations executed 
 ### 4.2 `tool_source_entry`
 - Required fields:
   - `source_id` (string, non-empty)
-  - `source_kind` enum: `mcp | cli | native | manifest`
+  - `source_kind` enum: `mcp | cli | native | manifest | builtin`
   - `enabled` (boolean)
 - Optional fields:
   - `trust_level` enum: `system_shipped | owner_installed | untrusted` (default `owner_installed`)
@@ -132,17 +132,12 @@ Tools define the callable capability surface of the system: operations executed 
   - `name` (string, non-empty)
   - `description` (string, non-empty)
   - `parameters` (object)
-  - `read_only` (boolean)
-  - `requires_approval` (boolean): reflects approval rules held in Auth for the current actor; `false` under the default policy
+  - `source` object: `id` (stable source identity) and `kind` (`mcp | cli | native | manifest | builtin`)
+  - `visibility` object: `mode` (`always_send | discoverable`) and `authorization` (`permitted | not_permitted`)
 - Optional fields:
-  - `source_id` (string)
-  - `availability` enum: `always_send | discoverable`
-  - `tags` (string[])
-  - `timeout_ms` (positive integer)
-- Defaults:
-  - `availability=discoverable`
+  - `read_only` (descriptive boolean; enforcement remains in Auth and the tool)
 - Forbidden fields:
-  - `provider`, `model`, `auth_policy`, `execute_code`, `api_key`, `secret_value`
+  - `provider`, `model`, `auth_policy`, `execute_code`, `api_key`, `secret_value`, endpoint or adapter configuration
 - Error shape:
   - pre-stream: `tool_failure` with `code=invalid_definition`
   - mid-stream: if unknown tool name is requested, emit stream `error` (`tool_error`) with safe message
@@ -159,10 +154,9 @@ Tools define the callable capability surface of the system: operations executed 
     },
     "required": ["query"]
   },
-  "read_only": true,
-  "requires_approval": false,
-  "source_id": "memory-tools/file-ops/server.ts",
-  "availability": "always_send"
+  "source": { "id": "builtin:memory", "kind": "builtin" },
+  "visibility": { "mode": "always_send", "authorization": "permitted" },
+  "read_only": true
 }
 ```
 - Invalid example:
@@ -170,8 +164,8 @@ Tools define the callable capability surface of the system: operations executed 
 {
   "name": "memory_write",
   "description": "Write file",
-  "read_only": false,
-  "requires_approval": true,
+  "source": { "id": "mcp:filesystem", "kind": "mcp" },
+  "visibility": { "mode": "always_send", "authorization": "permitted" },
   "provider": "openrouter"
 }
 ```
@@ -563,7 +557,7 @@ Tools define the callable capability surface of the system: operations executed 
 
 ### 5.8 Edge Cases and Error Handling
 - Unsupported source IDs: startup failure, clear message.
-- Duplicate tool names from multiple sources: deterministic conflict handling required.
+  - Duplicate tool names from multiple sources: resolve by the stable `source.id` + name identity; never silently overwrite.
 - Repeated destructive tool calls on same path: loop/mutation guards may block and return recoverable failure.
 - Approval request not found: reject decision route safely without leaking internals.
 - Path escape and reserved-path access: explicit classified failure codes.
@@ -739,7 +733,8 @@ Tools define the callable capability surface of the system: operations executed 
 - `TOL-MUST-003`: Tool execution MUST occur in Agent Loop and authorization MUST occur in Auth.
 - `TOL-MUST-004`: Tool availability MUST be determined by environment/configuration plus Auth permissions.
 - `TOL-MUST-005`: Request payloads MUST NOT override runtime tool sources, tool definitions, or availability policy.
-- `TOL-MUST-006`: Tool definitions MUST include canonical fields (`name`, `description`, `parameters`, `read_only`, `requires_approval`).
+- `TOL-MUST-006`: Tool definitions MUST include canonical fields (`name`, `description`, `parameters`, `source`, and `visibility`); source provenance and owner/Auth visibility semantics MUST remain separate.
+- `TOL-MUST-018`: Tool identity MUST be the pair (`source.id`, `name`); tool calls MUST carry `source_id`, and definitions MUST NOT contain adapter endpoints or credentials.
 - `TOL-MUST-007`: Unsupported or invalid tool sources/definitions MUST fail clearly before runtime readiness.
 - `TOL-MUST-008`: Tool calls and tool results MUST preserve stable call IDs and contract-visible event shape.
 - `TOL-MUST-009`: Where an approval rule in Auth covers a tool call, the call MUST be gated by coded approval enforcement before execution.
@@ -798,7 +793,7 @@ Tools define the callable capability surface of the system: operations executed 
 - `TOL-RISK-002 (Medium)`: Missing explicit always-send/discoverable machinery can increase context/token overhead as tool count grows.
 - `TOL-RISK-003 (Medium)`: Incomplete trust-level isolation controls create security exposure when third-party tools are introduced.
 - `TOL-RISK-004 (Low)`: Implementations that still filter not-permitted tools out of model context will fail TOL-MUST-015 until they mark them instead.
-- `TOL-DECISION-OPEN-001`: Standardize duplicate tool-name conflict policy across sources (source precedence vs explicit disambiguation).
+- `TOL-DECISION-OPEN-001`: Resolved by explicit disambiguation: `source.id` + tool `name` is the stable identity; duplicate names are valid across distinct sources.
 - `TOL-DECISION-OPEN-002`: Define required observability metrics for discovery quality (hit rate, false positives, load latency).
 
 ## Related Blueprint Artifacts

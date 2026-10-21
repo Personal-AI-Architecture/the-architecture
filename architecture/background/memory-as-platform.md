@@ -4,6 +4,9 @@ hide_table_of_contents: true
 
 # Memory as the Platform
 
+Tool definitions and their source/visibility metadata are portable descriptions; the
+adapter configuration that reaches external memory remains outside owner Memory.
+
 # Part 1: Memory Is the Platform
 
 This is a personal AI system — one you own, one you control, and one that grows with you. Memory is what makes it personal. Not the model, not the interface, not the infrastructure. Memory — the structured knowledge of who you are, what you've decided, what you're working toward, and how you think. It took your actual life to build. It can't be downloaded, replicated, or bought.

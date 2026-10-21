@@ -175,6 +175,10 @@ Tool definitions are sent through the Model API with the system instructions and
 
 The **discovery tool** is always in the always-send set. When the model needs something not in context, it searches, finds the tool and loads its definition. The model decides when to search. The Agent Loop stays a pass-through.
 
+Auth does not hide installed tools from the catalog. It marks a definition with
+`visibility.authorization=not_permitted`, so the model distinguishes an installed
+capability it cannot use from an unknown tool.
+
 On many AI platforms, the platform decides which tools every user gets. You can't drop tools you never use, or add ones that matter to you. Here the owner makes that trade-off.
 
 This scales in both directions. With few tools, everything is always sent and discovery rarely fires. With thousands, discovery becomes essential and the always-send set stays lean. The architecture doesn't change.
@@ -185,7 +189,7 @@ This scales in both directions. With few tools, everything is always sent and di
 
 **Discovery has two steps: search, then load.** The model describes what it needs. The discovery tool returns a short list of names and descriptions. The model picks one and loads its full definition. The model never sees every definition at once.
 
-**Tools are identified by source and name.** MCP servers expose a namespace, CLI tools have command names, native functions have function names. The source is part of the identity, so two tools named `search` from different sources stay distinct without a central naming authority.
+**Tools are identified by source and name.** MCP servers expose a namespace, CLI tools have command names, native functions have function names. The canonical identity is `source.id` plus tool `name`, and a tool call carries `source_id`; two tools named `search` from different sources stay distinct without a central naming authority. `source.kind` records provenance only. Endpoints, credentials, and adapter settings are runtime configuration, not tool-definition fields.
 
 ---
 
@@ -324,15 +328,14 @@ Per-component requirements from [security-spec.md](./security-spec.md). The secu
 ## Contract alignment
 
 The canonical contract tree under `contracts/` is authoritative for tool-definition
-and message shapes. Tool definitions use `parameters` for their JSON Schema input;
-the shared message contract enforces role-appropriate tool-call and tool-result parts,
-and the Model API stream uses explicit event discriminators. The generic tool-definition contract now includes a canonical
-`memory_restore` example with an opaque `version` identifier. S8 remains open for
-the owner-controlled visibility/source semantics and adapter configuration details;
-approval lifecycle remains open for products that add approval prompts. Parallel
-execution and “exists but not permitted” behavior remain architectural requirements
-that implementations must enforce even where the generic tool schema is intentionally
-extensible.
+and message shapes. Tool definitions use `parameters` for their JSON Schema input,
+`source.id` plus `name` as stable identity, and separate owner-selected visibility
+mode from Auth's permitted/not-permitted marker. Adapter endpoints and credentials
+are not definition fields. The shared message contract carries `source_id` on tool
+calls, and the Model API stream uses explicit event discriminators. The generic
+tool-definition contract includes a canonical `memory_restore` example with an opaque
+`version` identifier. Approval lifecycle, parallel execution, and “exists but not
+permitted” behavior remain architectural requirements that implementations must enforce.
 
 ---
 

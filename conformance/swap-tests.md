@@ -12,6 +12,9 @@ still requires no approval prompt.
 Identity-enabled swaps must likewise preserve the canonical `auth_context` actor and
 correlation data across the selected transport adapter.
 
+Tool swaps must preserve `source.id` + name identity and the canonical visibility
+markers while adapter configuration changes remain outside tool definitions.
+
 ---
 
 ## SWAP-1: Provider Swap
