@@ -76,7 +76,7 @@ The Gateway is the system's external interaction boundary. It accepts client req
 #### `POST /message`
 - Purpose: submit a new user message; create or continue a conversation.
 - Request body:
-  - `content` (required; a list of content parts, text first with room for images and files; a non-empty string is the shorthand for one text part)
+  - `content` (required; a list of content parts, text first with room for images and files)
   - `metadata` (optional object; must remain client-context data, not config side-channel)
 - Optional conversation continuation identifier:
   - Via request-scoped conversation identifier (implementation commonly uses `X-Conversation-ID` request header).
@@ -215,8 +215,8 @@ The model choice is not part of startup: the Gateway reads it on every message.
 - Stored conversations are replayed into model-compatible message order.
 - Tool interaction continuity rules:
   - Preserve tool result payload content for future turns.
-  - Preserve or infer assistant `tool_calls` metadata when missing in older transcripts.
-  - Keep `tool_call_id` linkage stable across replay.
+  - Preserve or infer assistant tool-call parts when missing in older transcripts.
+  - Keep tool-result part linkage stable across replay.
 
 ### 5.4 Approval Workflow (products that add approvals)
 Applies only where the owner's Auth rules require approval for a tool call. The architecture default is that the owner can do everything.
@@ -519,8 +519,7 @@ Applies only where the owner's Auth rules require approval for a tool call. The 
 
 ## Contract Alignment
 
-This blueprint follows the human specs, which are ahead of the contract files in these places:
-
-- `build/blueprints/gateway/contract-pack.json`, `contracts/openapi/gateway-api.yaml` and `contracts/schemas/message.json` define message content as a string, not a list of parts, and store only user and assistant messages (GW-MUST-016).
-- `contracts/openapi/gateway-api.yaml` says requests are authenticated before they reach the Gateway; the specs have the Gateway call Auth on every request (GW-MUST-005).
-- `contracts/openapi/gateway-engine.yaml` has no request field for the model or a timestamp, and describes the system message as assembled by the Gateway (GW-MUST-004, GW-MUST-015).
+The canonical contracts define structured message content parts, preserve tool-call and
+tool-result continuity, and require the Gateway/Auth boundary described by the API and
+Agent Loop contracts. The adjacent `contract-pack.json` is a derived source manifest;
+it does not override files under `contracts/`.

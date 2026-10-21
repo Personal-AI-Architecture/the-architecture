@@ -857,4 +857,4 @@ Models define the external-intelligence boundary of the architecture. The system
 
 ## Contract alignment
 
-`build/blueprints/models/contract-pack.json` has no way to report that a model lacks a capability the request needs (MOD-MUST-016), and `model_request_guard` lists `model` as a forbidden request field without separating client metadata from the internal request, which now carries the model on every call (MOD-MUST-015). Build to the behaviour described here; the schema follows in the next contract revision.
+The Models package manifest points to the canonical Model API and adapter example; capability reporting remains derived implementation guidance.

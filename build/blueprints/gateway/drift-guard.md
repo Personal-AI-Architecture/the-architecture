@@ -1,5 +1,9 @@
 # Gateway Drift Guard
 
+## Canonical contract sources
+
+This package is derived from the canonical contract tree. The adjacent `contract-pack.json` is a source manifest, not an independent schema. Validate payloads against the listed files under `contracts/`; do not add competing shapes here.
+
 This document defines anti-drift controls for Gateway implementations.
 
 ## 1. Top Drift Patterns
@@ -29,7 +33,7 @@ This document defines anti-drift controls for Gateway implementations.
 | Check ID | Assertion | Validation Mechanism | Severity |
 |---|---|---|---|
 | GWD-CHK-001 | Gateway calls Auth on every protected route | Integration tests for unauthorized calls on `POST /message`, `GET /conversations`, `GET /conversations/:id`, and `POST /approvals/:request_id` where present | Critical |
-| GWD-CHK-002 | Client request schema is canonical | Schema test against `Gateway.schema.json` `client_message_request` | Critical |
+| GWD-CHK-002 | Client request schema is canonical | Schema test against `contracts/openapi/gateway-api.yaml` `client_message_request` | Critical |
 | GWD-CHK-003 | Internal fields rejected from external payload | Negative tests with `messages`, provider/tool fields | Critical |
 | GWD-CHK-004 | Gateway->Agent Loop handoff remains bounded | Adapter boundary inspection test and payload snapshot check | Critical |
 | GWD-CHK-005 | Conversation responses are canonical envelopes | Contract tests for list/detail response schemas | Critical |

@@ -104,7 +104,7 @@ Defaults:
 
 Required:
 - `role: user | assistant | tool` (no `system` message: the bootstrap prompt is Agent Loop configuration)
-- `content`: a list of content parts (text first, room for images and files); a string is the shorthand for one text part
+- `content`: a list of content parts (text first, room for images and files)
 
 Optional:
 - `tool_call_id: string` (tool-role continuity)
@@ -437,7 +437,7 @@ The valid example omits the model and timestamp because their field names are pe
 
 ## 14. Acceptance Gates (Pass/Fail)
 
-- `GEC-GATE-01 Contract Gate`: Pass if request/event/error shapes validate against `contracts/Gateway-Engine-Contract.schema.json`; fail otherwise.
+- `GEC-GATE-01 Contract Gate`: Pass if request/event/error shapes validate against `contracts/openapi/gateway-engine.yaml`; fail otherwise.
 - `GEC-GATE-02 Conformance Gate`: Pass if all vectors in `build/blueprints/gateway-agent-loop-contract/tests.md` pass (16 positive + 16 negative); fail on any `GEC-MUST-*` violation.
 - `GEC-GATE-03 Drift Gate`: Pass if all Critical checks in `build/blueprints/gateway-agent-loop-contract/drift-guard.md` pass; fail on any Critical check failure.
 - `GEC-GATE-04 Security Gate`: Pass if auth path and safe error-surface requirements pass; fail on auth bypass or unsafe leakage.
@@ -497,11 +497,8 @@ The valid example omits the model and timestamp because their field names are pe
 
 ## Contract Alignment
 
-This blueprint follows `architecture/gateway-agent-loop-contract.md`, which is ahead of `contracts/Gateway-Engine-Contract.schema.json`, `contracts/openapi/gateway-engine.yaml` and `contracts/schemas/message.json` in these places:
-
-- No request field for the model and no request timestamp (GEC-MUST-001, GEC-MUST-016); `model` is still listed as a forbidden field.
-- The `system` role and Gateway-assembled system message are still present (GEC-MUST-004).
-- Content is a string, and tool calls and tool results are not message parts (GEC-MUST-015).
-- Auth is described as middleware between the Gateway and the Agent Loop, and there is no "not permitted" tool-result shape (GEC-MUST-005).
-- Error bodies and error events carry only `code` and `message` (GEC-MUST-016).
-- The `/engine/chat` path and `engine` schema names still use the component's old name.
+The canonical contracts are authoritative for this blueprint. The internal boundary is
+`POST /agent-loop/chat`; requests include the selected `model`, messages use structured
+content parts, and shared Auth/error schemas define the cross-component result shapes.
+The adjacent `contract-pack.json` records these canonical sources and is not a second
+contract authority.

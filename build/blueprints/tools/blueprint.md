@@ -839,4 +839,4 @@ Tools define the callable capability surface of the system: operations executed 
 
 ## Contract alignment
 
-`build/blueprints/tools/contract-pack.json` has no "not permitted" result shape and no way to mark a tool as existing but not permitted for the current actor (TOL-MUST-015). `requires_approval` stays a boolean on the tool definition; under the default policy it is `false`, and the decision comes from Auth. `tool_isolation_profile.isolation_mode` names only container modes. Build to the behaviour described here; the schema follows in the next contract revision.
+The Tools package manifest points to canonical tool, message, and authorization contracts; isolation profiles remain derived implementation guidance.

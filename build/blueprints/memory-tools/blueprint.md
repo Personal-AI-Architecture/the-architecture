@@ -784,4 +784,4 @@ Memory Tools define the always-present operational surface used to read, write, 
 
 ## Contract alignment
 
-`build/blueprints/memory-tools/contract-pack.json` is behind this blueprint: it has no restore tool in the `name` enum (MTL-MUST-015), no failure code for a write conflict (MTL-MUST-016), and no "not permitted" result shape for a refused call. `requires_approval` remains a boolean on the tool definition; under the default policy it is `false`. Build to the behaviour described here; the names follow in the next contract revision.
+The Memory Tools package manifest points to canonical tool, message, and authorization contracts; the operation surface remains derived implementation guidance.

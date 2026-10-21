@@ -537,7 +537,7 @@ Why invalid:
 
 This blueprint follows `architecture/auth-spec.md`, which is ahead of the contract files in these places:
 
-- `build/blueprints/auth/contract-pack.json` and `contracts/schemas/policy.json` need the default policy to be "the owner can do everything" (AUTH-MUST-014).
+- The canonical policy contract now records the owner allow-all default and no-access default for other identities (AUTH-MUST-014).
 - `contracts/schemas/identity.json` needs a starting status for re-created identities that grants no access until the owner turns it back on (AUTH-MUST-016).
 - `contracts/openapi/gateway-engine.yaml` and `gateway-agent-loop-contract` material describe Auth as middleware; there is no "not permitted" tool-result shape or denied-action error code (AUTH-MUST-001, AUTH-MUST-006).
 - `contracts/openapi/gateway-api.yaml` describes API keys as full-access only.

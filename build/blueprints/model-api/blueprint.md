@@ -486,4 +486,4 @@ Why invalid:
 
 ## Contract alignment
 
-`build/blueprints/model-api/contract-pack.json` still lists `model` as a forbidden request field and has string-only message content. This blueprint requires the model on every call (MAPI-MUST-015) and content as a list of parts (MAPI-MUST-016), so the valid example here uses a text part. There is also no way to report a missing model capability. Build to the behaviour described here; the schema follows in the next contract revision.
+The Model API package manifest points to the canonical Model API, message, and tool-definition contracts.

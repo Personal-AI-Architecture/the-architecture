@@ -1,5 +1,9 @@
 # Gateway Conformance Test Vectors
 
+## Canonical contract sources
+
+This package is derived from the canonical contract tree. The adjacent `contract-pack.json` is a source manifest, not an independent schema. Validate payloads against the listed files under `contracts/`; do not add competing shapes here.
+
 This file defines language-agnostic pass/fail vectors for Gateway conformance.
 
 ## Requirement Set (MUST)
@@ -27,7 +31,7 @@ This file defines language-agnostic pass/fail vectors for Gateway conformance.
 |---|---|---|---|---|---|---|
 | GW-T001P | GW-MUST-001 | Positive | Send `POST /message`, then call list/detail endpoints for returned conversation ID | Message appears in persisted conversation history and listing | Conversation not found or missing persisted message | Ownership drift |
 | GW-T001N | GW-MUST-001 | Negative | Simulate Gateway restart/new process after message write | Conversation still retrievable from Memory boundary | Conversation disappears after process recycle | In-process state drift |
-| GW-T002P | GW-MUST-002 | Positive | `POST /message` body `{ content: "hello", metadata: { client: "cli" } }` | 200 stream starts | 400/shape rejection for valid payload | External request contract drift |
+| GW-T002P | GW-MUST-002 | Positive | `POST /message` body `{ content: [{ type: "text", text: "hello" }], metadata: { client: "cli" } }` | 200 stream starts | 400/shape rejection for valid payload | External request contract drift |
 | GW-T002N | GW-MUST-002 | Negative | `POST /message` body `{ metadata: {} }` | 400 safe invalid-request response | Request accepted or unsafe parser error exposed | Validation drift |
 | GW-T003P | GW-MUST-003 | Positive | Client sends only external contract fields | Gateway normalizes to internal shape itself | Client required/allowed to send internal fields | Boundary ownership drift |
 | GW-T003N | GW-MUST-003 | Negative | `POST /message` includes `messages`, `provider`, or `tool_definitions` | 400 safe reject | Payload accepted | Internal contract fabrication |

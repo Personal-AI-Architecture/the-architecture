@@ -730,4 +730,4 @@ This flow applies only where an approval rule in Auth covers the call. Under the
 
 ## Contract alignment
 
-`build/blueprints/security/contract-pack.json` lags this blueprint in three places: `secret_reference.source` has no value for an untracked config file, `tool_isolation_policy.isolation_mode` names only container modes (separate processes or sandboxes are also allowed), and there is no "not permitted" result shape for a refused tool call. `security_policy_profile.approval_mode` stays, with `ask_nothing` as the architecture default. Build to the behaviour described here; the schema follows in the next contract revision.
+The security package manifest points to the canonical API, Auth, identity, policy, and authorization contracts; security-specific implementation profiles remain derived guidance.

@@ -826,4 +826,4 @@ Deployment defines where and how the system runs, with owner control as the defa
 
 ## Contract alignment
 
-`build/blueprints/deployment/contract-pack.json` requires `container_runtime` in `dependency_escape_profile.critical_dependencies` and names `documented_docker_local_option`, which reads as if containers were the default. This blueprint treats containers as one supported option (D173): a container runtime is a dependency only when an implementation chooses container packaging. Build to the behaviour described here; the schema follows in the next contract revision.
+The deployment package has no dedicated machine-readable contract yet; its manifest records the configuration contract it depends on, while deployment requirements remain in `architecture/deployment-spec.md`.

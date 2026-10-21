@@ -1,5 +1,9 @@
 # Gateway API Drift Guard
 
+## Canonical contract sources
+
+This package is derived from the canonical contract tree. The adjacent `contract-pack.json` is a source manifest, not an independent schema. Validate payloads against the listed files under `contracts/`; do not add competing shapes here.
+
 This document defines anti-drift controls for the external Gateway API boundary.
 
 ## 1. Top Drift Patterns
@@ -24,7 +28,7 @@ This document defines anti-drift controls for the external Gateway API boundary.
 
 | Check ID | Assertion | Validation Mechanism | Severity |
 |---|---|---|---|
-| GAPID-CHK-001 | `POST /message` request schema is canonical | Schema tests against `Gateway-API.schema.json` `message_request` | Critical |
+| GAPID-CHK-001 | `POST /message` request schema is canonical | Schema tests against `contracts/openapi/gateway-api.yaml` `message_request` | Critical |
 | GAPID-CHK-002 | Internal/config fields rejected | Negative payload tests for internal shape fields | Critical |
 | GAPID-CHK-003 | Stream events are canonical only | Event taxonomy contract tests | Critical |
 | GAPID-CHK-004 | `done` includes required IDs | Stream payload validation tests | Critical |

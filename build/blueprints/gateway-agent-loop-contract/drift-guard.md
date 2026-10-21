@@ -1,5 +1,9 @@
 # Gateway ↔ Agent Loop Contract Drift Guard
 
+## Canonical contract sources
+
+This package is derived from the canonical contract tree. The adjacent `contract-pack.json` is a source manifest, not an independent schema. Validate payloads against the listed files under `contracts/`; do not add competing shapes here.
+
 This document defines anti-drift controls for the internal Gateway ↔ Agent Loop handoff contract.
 
 ## 1. Top Drift Patterns
@@ -31,7 +35,7 @@ This document defines anti-drift controls for the internal Gateway ↔ Agent Loo
 
 | Check ID | Assertion | Validation Mechanism | Severity |
 |---|---|---|---|
-| GECD-CHK-001 | Request remains bounded to `messages` + model + `metadata` | Schema validation against `Gateway-Engine-Contract.schema.json` | Critical |
+| GECD-CHK-001 | Request remains bounded to `messages` + model + `metadata` | Schema validation against `contracts/openapi/gateway-engine.yaml` | Critical |
 | GECD-CHK-002 | `metadata.correlation_id` required | Negative request tests | Critical |
 | GECD-CHK-003 | Metadata keys restricted to contract set | Metadata schema and negative tests | Critical |
 | GECD-CHK-004 | Hidden provider/tool/runtime fields rejected | Fuzz/negative payload tests | Critical |

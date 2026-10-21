@@ -416,7 +416,7 @@ The Agent Loop is the generic execution loop that processes one interaction requ
 
 ## 14. Acceptance Gates (Pass/Fail)
 
-- `ENG-GATE-01 Contract Gate`: Pass if request/event/result schemas validate against `contracts/Engine.schema.json`; fail otherwise.
+- `ENG-GATE-01 Contract Gate`: Pass if request/event/result schemas validate against `contracts/openapi/gateway-engine.yaml`; fail otherwise.
 - `ENG-GATE-02 Conformance Gate`: Pass if all vectors in `build/blueprints/agent-loop/tests.md` pass (16 positive + 16 negative); fail on any `ENG-MUST-*` failure.
 - `ENG-GATE-03 Drift Gate`: Pass if all Critical checks in `build/blueprints/agent-loop/drift-guard.md` pass; fail on any Critical check failure.
 - `ENG-GATE-04 Boundary Gate`: Pass if static/runtime checks confirm no conversation persistence ownership and no provider-wire logic in core loop; fail on any ownership breach.
@@ -473,10 +473,8 @@ The Agent Loop is the generic execution loop that processes one interaction requ
 
 ## Contract Alignment
 
-This blueprint follows the human specs, which are ahead of the contract files in these places:
-
-- `contracts/Engine.schema.json` and `contracts/openapi/gateway-engine.yaml` have no request field for the model and no request timestamp (ENG-MUST-001, ENG-MUST-015).
-- `contracts/openapi/gateway-engine.yaml` describes the system message as assembled by the Gateway from configuration (ENG-MUST-016).
-- `contracts/schemas/message.json` defines content as a string and does not carry tool calls and tool results as message parts.
-- No contract has a "not permitted" tool-result shape distinct from a tool failure (ENG-MUST-011).
-- Error events carry only `code` and `message`, not the correlation ID.
+The canonical contracts are authoritative for this blueprint. The Agent Loop request
+includes the selected `model`, messages use structured content parts, and tool calls
+and tool results are represented as message parts. Auth results and error events use
+the shared schemas under `contracts/`; this blueprint must not introduce competing
+shapes.

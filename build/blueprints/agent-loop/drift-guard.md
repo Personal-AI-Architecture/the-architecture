@@ -1,5 +1,9 @@
 # Agent Loop Drift Guard
 
+## Canonical contract sources
+
+This package is derived from the canonical contract tree. The adjacent `contract-pack.json` is a source manifest, not an independent schema. Validate payloads against the listed files under `contracts/`; do not add competing shapes here.
+
 This document defines anti-drift controls for Agent Loop implementations.
 
 ## 1. Top Drift Patterns
@@ -31,7 +35,7 @@ This document defines anti-drift controls for Agent Loop implementations.
 
 | Check ID | Assertion | Validation Mechanism | Severity |
 |---|---|---|---|
-| ENGD-CHK-001 | Input contract bounded to `messages` + model + `metadata` | Request schema tests against `Engine.schema.json` (model field pending contract revision) | Critical |
+| ENGD-CHK-001 | Input contract bounded to `messages` + model + `metadata` | Request schema tests against `contracts/openapi/gateway-engine.yaml` | Critical |
 | ENGD-CHK-002 | `metadata.correlation_id` required | Negative schema/integration tests for missing ID | Critical |
 | ENGD-CHK-003 | Metadata side-channel fields rejected | Negative tests for provider/tool/secret metadata keys | Critical |
 | ENGD-CHK-004 | Loop termination behavior is deterministic | Completion-path and safety-bound tests | Critical |

@@ -1,5 +1,9 @@
 # Auth Drift Guard
 
+## Canonical contract sources
+
+This package is derived from the canonical contract tree. The adjacent `contract-pack.json` is a source manifest, not an independent schema. Validate payloads against the listed files under `contracts/`; do not add competing shapes here.
+
 This document defines anti-drift controls for Auth implementations.
 
 ## 1. Top Drift Patterns

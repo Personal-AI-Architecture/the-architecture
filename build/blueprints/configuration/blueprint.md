@@ -640,4 +640,4 @@ Configuration defines how runtime truth is split across environment bootstrap, a
 
 ## Contract alignment
 
-`build/blueprints/configuration/contract-pack.json` still requires `approval_mode` in `preferences`, which CFG-MUST-016 forbids, so the valid preferences example here does not yet validate against it. The schema also describes model binding as resolved once per startup, while CFG-MUST-015 resolves it on every message. Build to the behaviour described here; the schema follows in the next contract revision.
+The configuration package manifest points to `contracts/schemas/configuration.json`; model selection and permission ownership are defined by the canonical contracts.

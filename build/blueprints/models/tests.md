@@ -1,5 +1,9 @@
 # Models Boundary Conformance Test Vectors
 
+## Canonical contract sources
+
+This package is derived from the canonical contract tree. The adjacent `contract-pack.json` is a source manifest, not an independent schema. Validate payloads against the listed files under `contracts/`; do not add competing shapes here.
+
 This file defines language-agnostic pass/fail vectors for the Models boundary.
 
 ## Requirement Set (MUST)

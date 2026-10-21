@@ -583,4 +583,4 @@ Why invalid:
 
 ## Contract alignment
 
-`build/blueprints/memory/contract-pack.json` is behind this blueprint in three places: it has no restore operation (MEM-MUST-015), conversation message `content` is still a plain string with no saved tool calls (MEM-MUST-017), and the message role list still includes `system`. Build to the behaviour described here; the field names follow in the next contract revision.
+The Memory package manifest points to the canonical message and conversation examples; storage and restore behavior remain implementation requirements.

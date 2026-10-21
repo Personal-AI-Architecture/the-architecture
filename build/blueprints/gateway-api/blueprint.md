@@ -113,7 +113,7 @@ The Gateway API is the external contract through which clients interact with the
 
 #### Message request
 - Shape:
-  - `content: ContentPart[]` (required; a string is the shorthand for one text part)
+  - `content: ContentPart[]` (required)
   - `metadata?: object`
 - Rule:
   - metadata is contextual payload, not configuration channel
@@ -418,6 +418,6 @@ The Gateway API is the external contract through which clients interact with the
 
 This blueprint follows the human specs, which are ahead of the contract files in these places:
 
-- `build/blueprints/gateway-api/contract-pack.json`, `contracts/openapi/gateway-api.yaml` and `contracts/schemas/message.json` define message content as a string, not a list of parts.
+- The canonical Gateway API and shared message contracts define content as a list of parts (GW-MUST-016).
 - `contracts/openapi/gateway-api.yaml` stores only user and assistant messages, so tool calls and tool results are not part of conversation detail (GAPI-MUST-014).
 - `contracts/openapi/gateway-api.yaml` says requests are authenticated before they reach the Gateway; the specs have the Gateway call Auth on every request (GAPI-MUST-012).

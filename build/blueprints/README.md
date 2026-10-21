@@ -7,7 +7,7 @@ files are derived build guidance.
 Every package contains:
 
 - `blueprint.md` — what to build and why
-- `contract-pack.json` — the package-level contract schema
+- `contract-pack.json` — a generated manifest of the canonical sources used by the package
 - `tests.md` — positive and negative conformance vectors
 - `drift-guard.md` — architecture drift checks
 - `prompt.md` — implementation handoff for an AI coding agent

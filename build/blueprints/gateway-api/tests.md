@@ -1,5 +1,9 @@
 # Gateway API Conformance Test Vectors
 
+## Canonical contract sources
+
+This package is derived from the canonical contract tree. The adjacent `contract-pack.json` is a source manifest, not an independent schema. Validate payloads against the listed files under `contracts/`; do not add competing shapes here.
+
 This file defines language-agnostic pass/fail vectors for the Gateway API boundary.
 
 ## Requirement Set (MUST)
@@ -23,7 +27,7 @@ This file defines language-agnostic pass/fail vectors for the Gateway API bounda
 
 | Test ID | Requirement ID | Test Type | Input / Setup | Expected Output / Event / Error | Failure Signal | Drift Category |
 |---|---|---|---|---|---|---|
-| GAPI-T001P | GAPI-MUST-001 | Positive | `POST /message` with `{ content: "hello", metadata: { client: "cli" } }` | 200 stream response opens | Valid request rejected | Request-shape drift |
+| GAPI-T001P | GAPI-MUST-001 | Positive | `POST /message` with `{ content: [{ type: "text", text: "hello" }], metadata: { client: "cli" } }` | 200 stream response opens | Valid request rejected | Request-shape drift |
 | GAPI-T001N | GAPI-MUST-001 | Negative | `POST /message` with missing `content` | 400 safe validation error | Request accepted | Validation drift |
 | GAPI-T002P | GAPI-MUST-002 | Positive | Client sends only external fields | Request accepted and normalized internally | Client forced to send internal fields | Boundary drift |
 | GAPI-T002N | GAPI-MUST-002 | Negative | `POST /message` with `messages`, `provider`, `tool_definitions` | 400 safe reject | Payload accepted | Internal contract fabrication |
