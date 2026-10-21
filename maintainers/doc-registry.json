@@ -23,7 +23,7 @@
     },
     {
       "path": "architecture/gateway-agent-loop-contract.md",
-      "covers": ["contracts/openapi/"],
+      "covers": ["contracts/openapi/gateway-engine.yaml"],
       "tier": 1,
       "update_trigger": "code",
       "depends_on": ["architecture/overview.md", "architecture/gateway-spec.md", "architecture/agent-loop-spec.md"]
@@ -31,63 +31,63 @@
 
     {
       "path": "architecture/agent-loop-spec.md",
-      "covers": ["contracts/openapi/"],
+      "covers": ["contracts/openapi/gateway-engine.yaml", "contracts/openapi/model-api.yaml"],
       "tier": 2,
       "update_trigger": "code",
       "depends_on": ["architecture/overview.md"]
     },
     {
       "path": "architecture/memory-spec.md",
-      "covers": ["contracts/schemas/"],
+      "covers": ["contracts/schemas/message.json"],
       "tier": 2,
       "update_trigger": "code",
       "depends_on": ["architecture/overview.md"]
     },
     {
       "path": "architecture/gateway-spec.md",
-      "covers": ["contracts/openapi/"],
+      "covers": ["contracts/openapi/gateway-api.yaml"],
       "tier": 2,
       "update_trigger": "code",
       "depends_on": ["architecture/overview.md"]
     },
     {
       "path": "architecture/auth-spec.md",
-      "covers": ["contracts/schemas/"],
+      "covers": ["contracts/schemas/identity.json", "contracts/schemas/policy.json"],
       "tier": 2,
       "update_trigger": "code",
       "depends_on": ["architecture/overview.md", "architecture/security-spec.md"]
     },
     {
       "path": "architecture/tools-spec.md",
-      "covers": ["contracts/openapi/", "contracts/schemas/"],
+      "covers": ["contracts/openapi/gateway-engine.yaml", "contracts/openapi/model-api.yaml", "contracts/schemas/tool-definition.json", "contracts/schemas/message.json"],
       "tier": 2,
       "update_trigger": "code",
       "depends_on": ["architecture/overview.md"]
     },
     {
       "path": "architecture/models-spec.md",
-      "covers": ["contracts/openapi/"],
+      "covers": ["contracts/openapi/model-api.yaml"],
       "tier": 2,
       "update_trigger": "code",
       "depends_on": ["architecture/overview.md"]
     },
     {
       "path": "architecture/security-spec.md",
-      "covers": ["contracts/schemas/", "contracts/openapi/"],
+      "covers": ["contracts/schemas/identity.json", "contracts/schemas/policy.json", "contracts/openapi/gateway-engine.yaml"],
       "tier": 2,
       "update_trigger": "code",
       "depends_on": ["architecture/overview.md"]
     },
     {
       "path": "architecture/adapter-spec.md",
-      "covers": ["contracts/openapi/", "contracts/schemas/"],
+      "covers": ["contracts/openapi/model-api.yaml"],
       "tier": 2,
       "update_trigger": "code",
       "depends_on": ["architecture/overview.md", "architecture/models-spec.md"]
     },
     {
       "path": "architecture/configuration-spec.md",
-      "covers": ["contracts/schemas/", "contracts/schemas/configuration.json"],
+      "covers": ["contracts/schemas/configuration.json"],
       "tier": 2,
       "update_trigger": "code",
       "depends_on": ["architecture/overview.md"]

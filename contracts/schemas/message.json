@@ -5,6 +5,45 @@
   "description": "The shared message shape used by the Gateway API, Gateway-Agent Loop contract, and Model API (D178). Content is a list of parts (D179); tool calls and results are ordinary parts and are preserved in conversation history.",
   "type": "object",
   "required": ["role", "content"],
+  "allOf": [
+    {
+      "if": { "properties": { "role": { "const": "tool" } } },
+      "then": {
+        "properties": {
+          "content": {
+            "items": { "$ref": "#/$defs/ToolResultPart" }
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "role": { "enum": ["system", "user"] } } },
+      "then": {
+        "properties": {
+          "content": {
+            "items": {
+              "not": {
+                "oneOf": [
+                  { "$ref": "#/$defs/ToolCallPart" },
+                  { "$ref": "#/$defs/ToolResultPart" }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "role": { "const": "assistant" } } },
+      "then": {
+        "properties": {
+          "content": {
+            "items": { "not": { "$ref": "#/$defs/ToolResultPart" } }
+          }
+        }
+      }
+    }
+  ],
   "properties": {
     "role": {
       "type": "string",

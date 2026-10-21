@@ -16,6 +16,10 @@ The system reduces to two things: **memory and tools** (D135).
 
 This framing resolves D122 — BrainDrive doesn't define "tool" more broadly than the AI industry. It defines it more precisely by separating the noun (memory) from the verb (tool). The AI industry conflates a tool with the data it accesses. A "RAG tool" is actually a retrieval *operation* (tool) acting on a vector *store* (memory). Two distinct things wearing one label.
 
+The canonical message contract keeps tool calls and results as role-appropriate
+message parts, while the Model API carries normalized streaming events. Those transport
+shapes do not introduce a new memory or tool component.
+
 ---
 
 ## 2. Two Exceptions — Both from the Same Root

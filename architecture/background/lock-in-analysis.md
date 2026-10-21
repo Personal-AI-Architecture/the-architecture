@@ -19,6 +19,11 @@ This document explains how the architecture achieves zero lock-in and what disci
 
 ## The Core Argument
 
+The canonical contracts are the shape authority: Model API requests stream with
+`stream: true`, completion events carry `_event_type`, and tool definitions use
+`parameters`. Adapters remain free to translate provider-specific transport behind
+that boundary.
+
 The architecture achieves zero lock-in through one principle: **everything is either an open standard, a file, or behind a contract you own.** And the contracts themselves are swappable via adapters (D139) — thin translation layers between each contract and the components on either side.
 
 The D147 anti-lock-in CI test makes this concrete: three normal swaps (provider, model, tool) must succeed with config-only changes, zero code edits. CI-testable on every release.

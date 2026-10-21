@@ -88,6 +88,7 @@ Defined interfaces:
   - `messages: CompletionMessage[]` (min 1)
   - `tools: ModelToolDefinition[]` (can be empty)
   - `model`: the owner's current choice, which came with the Gateway's request
+  - `stream: true` (the Model API boundary is streaming-only)
 - Optional fields:
   - `metadata.correlation_id`
 - Forbidden fields:
@@ -98,6 +99,7 @@ Defined interfaces:
   - `api_key_env`
 - Behavior:
   - Accepts only generic interaction payload plus the model for this call, never provider selection or secrets.
+  - Rejects `stream: false`; callers collect the stream when they need a complete response.
   - Messages use the same shape as the Gateway API and the Gateway ↔ Agent Loop contract: content is a list of parts (text, images, files), and tool calls and tool results are ordinary parts of messages.
   - The Agent Loop puts its own bootstrap prompt first; it comes from Agent Loop configuration, not from the Gateway.
 
@@ -115,7 +117,7 @@ Defined interfaces:
 - Required fields:
   - `name: string`
   - `description: string`
-  - `input_schema: object`
+  - `parameters: object`
 
 ### 4.5 `adapter_config`
 - Required fields:
@@ -168,7 +170,7 @@ Defined interfaces:
     {
       "name": "memory_search",
       "description": "Search owner memory",
-      "input_schema": {
+      "parameters": {
         "type": "object",
         "properties": { "query": { "type": "string" } },
         "required": ["query"]

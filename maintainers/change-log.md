@@ -18,6 +18,11 @@ Track how the primer layer evolves so examples, matrix rows, glossary terms, lim
 - Aligned the Configuration blueprint and primer with the exact four-field runtime schema.
 - Removed deployment, persistence, and loop-tuning fields from runtime configuration examples and guidance.
 
+### Contract Rule Alignment
+
+- Made Model API streaming explicit and added discriminated event shapes.
+- Enforced role-appropriate message parts and aligned builder materials on `parameters` for tool definitions.
+
 ### Canonical Contract Alignment
 
 - Replaced duplicated blueprint contract packs with derived source manifests.

@@ -131,7 +131,7 @@ Tools define the callable capability surface of the system: operations executed 
 - Required fields:
   - `name` (string, non-empty)
   - `description` (string, non-empty)
-  - `input_schema` (object)
+  - `parameters` (object)
   - `read_only` (boolean)
   - `requires_approval` (boolean): reflects approval rules held in Auth for the current actor; `false` under the default policy
 - Optional fields:
@@ -151,7 +151,7 @@ Tools define the callable capability surface of the system: operations executed 
 {
   "name": "memory_search",
   "description": "Search file contents inside memory root",
-  "input_schema": {
+  "parameters": {
     "type": "object",
     "properties": {
       "query": { "type": "string" },
@@ -175,7 +175,7 @@ Tools define the callable capability surface of the system: operations executed 
   "provider": "openrouter"
 }
 ```
-- Why invalid: missing `input_schema`; forbidden field `provider`.
+- Why invalid: missing `parameters`; forbidden field `provider`.
 
 ### 4.4 `tool_visibility_policy`
 - Required fields:
@@ -734,7 +734,7 @@ Tools define the callable capability surface of the system: operations executed 
 - `TOL-MUST-003`: Tool execution MUST occur in Agent Loop and authorization MUST occur in Auth.
 - `TOL-MUST-004`: Tool availability MUST be determined by environment/configuration plus Auth permissions.
 - `TOL-MUST-005`: Request payloads MUST NOT override runtime tool sources, tool definitions, or availability policy.
-- `TOL-MUST-006`: Tool definitions MUST include canonical fields (`name`, `description`, `input_schema`, `read_only`, `requires_approval`).
+- `TOL-MUST-006`: Tool definitions MUST include canonical fields (`name`, `description`, `parameters`, `read_only`, `requires_approval`).
 - `TOL-MUST-007`: Unsupported or invalid tool sources/definitions MUST fail clearly before runtime readiness.
 - `TOL-MUST-008`: Tool calls and tool results MUST preserve stable call IDs and contract-visible event shape.
 - `TOL-MUST-009`: Where an approval rule in Auth covers a tool call, the call MUST be gated by coded approval enforcement before execution.

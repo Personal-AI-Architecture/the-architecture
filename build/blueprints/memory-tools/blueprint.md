@@ -98,7 +98,7 @@ Memory Tools define the always-present operational surface used to read, write, 
   - `description` (string, non-empty)
   - `read_only` (boolean)
   - `requires_approval` (boolean): reflects the approval rules held in Auth; `false` under the default policy, where the owner can do everything
-  - `input_schema` (object)
+  - `parameters` (object)
 - Optional fields:
   - `source_id` (string)
   - `timeout_ms` (positive integer)
@@ -115,7 +115,7 @@ Memory Tools define the always-present operational surface used to read, write, 
   "description": "Write a file inside memory root",
   "read_only": false,
   "requires_approval": false,
-  "input_schema": {
+  "parameters": {
     "type": "object",
     "properties": {
       "path": { "type": "string" },
@@ -135,7 +135,7 @@ Memory Tools define the always-present operational surface used to read, write, 
   "provider": "openrouter"
 }
 ```
-- Why invalid: missing `input_schema`; forbidden provider field.
+- Why invalid: missing `parameters`; forbidden provider field.
 
 ### 4.3 `memory_path_policy`
 - Required fields:

@@ -176,6 +176,10 @@ This also aligns with existing practice. Existing AI SDKs already work this way 
 
 ## Decisions Made
 
+The canonical Model API contract is streaming-only at the boundary, with normalized
+completion events identified by `_event_type`; provider-specific streaming or
+non-streaming transport remains an adapter implementation detail.
+
 | # | Decision | Rationale |
 |---|----------|-----------|
 | D139 | Contracts are swappable via adapters — completing the zero-lock-in architecture | Components are swappable through contracts, but contracts bind to a specific standard. Adapters absorb the standard: components speak an internal interface, adapters translate to/from the external standard. Swap the standard → swap the adapter → nothing else changes. Completes the chain: Your Memory via tools, Components via contracts, Contracts via adapters. |

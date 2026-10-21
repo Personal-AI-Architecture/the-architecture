@@ -2,6 +2,9 @@
 
 > Validates D147: three normal swaps must succeed with config-only changes — zero code edits.
 
+The Model API contract remains streaming-only (`stream: true`) with discriminated
+completion events; adapter transport details may vary behind that boundary.
+
 ---
 
 ## SWAP-1: Provider Swap

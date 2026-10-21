@@ -172,8 +172,9 @@ Per-component requirements from [security-spec.md](./security-spec.md). Security
 
 The canonical `contracts/openapi/gateway-engine.yaml` and shared message schema are
 authoritative for the internal route, request fields, structured message parts, and
-stream event shapes. This spec describes the ownership and behavioral requirements
-behind those canonical definitions.
+stream event shapes. The Model API handoff is streaming-only (`stream: true`), and
+its events are discriminated by `_event_type`. This spec describes the ownership and
+behavioral requirements behind those canonical definitions.
 
 ---
 

@@ -303,7 +303,8 @@ Per-component requirements from [security-spec.md](./security-spec.md). Security
 ## Contract alignment
 
 The canonical message schema under `contracts/` defines structured content parts and
-preserves tool calls and tool results in conversation history. The generic
+preserves tool calls and tool results in conversation history, with role-specific
+validation preventing tool results from appearing in non-tool messages. The generic
 tool-definition contract now includes the canonical `memory_restore` operation shape
 (`path` plus an opaque `version` identifier); concrete history storage and result
 transport remain implementation-defined. Semantic search remains optional because

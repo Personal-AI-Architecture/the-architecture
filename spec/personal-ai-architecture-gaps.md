@@ -46,12 +46,12 @@ hide_table_of_contents: true
 - **Published:** The Configuration blueprint and primer now use the exact four-field runtime contract. Deployment bind/port, persistence, and loop-tuning concerns are no longer presented as runtime-config fields, and the valid example validates against the canonical schema.
 - **Evidence:** `contracts/schemas/configuration.json`; [build/blueprints/configuration/blueprint.md](../build/blueprints/configuration/blueprint.md); [build/primers/configuration.md](../build/primers/configuration.md); `contracts/examples/runtime-config.json`.
 
-### GAP-PAA-5: Contract definitions miss rules the prose requires — Technical — Partly resolved
+### GAP-PAA-5: Contract definitions miss rules the prose requires — Resolved
 
 - **Expected:** US-13 AC-13.3.
-- **Published:** The internal contract requires `metadata.correlation_id` in prose, security and blueprint, but its schema does not. Stream events have no field saying which kind they are, and tool-call and tool-result shapes overlap. The Model API schema accepts `stream=false` although the prose says it always streams. Tool definitions use `parameters` in `contracts/` and `input_schema` in the blueprint pack. The message schema describes role-dependent fields but does not enforce them.
-- **Evidence:** `contracts/openapi/gateway-engine.yaml`; `contracts/openapi/model-api.yaml`; `contracts/schemas/tool-definition.json`; `contracts/schemas/message.json`.
-- **Decided:** the tool-call, tool-result and message-shape parts follow the single message shape (see GAP-PAA-3), and stream events now carry an explicit discriminator. The `stream=false` and `parameters`/`input_schema` points remain open; correlation is required in the internal request metadata and must remain traceable through implementation errors.
+- **Published:** The internal request schema requires `metadata.correlation_id`; Model API stream events carry `_event_type` discriminators; `stream` is required and must be `true`; tool definitions consistently use canonical `parameters`; and message schemas enforce role-appropriate tool-call/tool-result parts.
+- **Evidence:** `contracts/openapi/gateway-engine.yaml`; `contracts/openapi/model-api.yaml`; `contracts/schemas/tool-definition.json`; `contracts/schemas/message.json`; [model-api blueprint](../build/blueprints/model-api/blueprint.md); [tools blueprint](../build/blueprints/tools/blueprint.md).
+- **Boundary:** Tool visibility/source semantics remain tracked separately as S8 work; this gap covered the contract-shape inconsistencies.
 
 ### GAP-PAA-6: Identity allows only a fixed list of actor types — Resolved
 

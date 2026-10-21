@@ -320,7 +320,9 @@ Per-component requirements from [security-spec.md](./security-spec.md). The secu
 ## Contract alignment
 
 The canonical contract tree under `contracts/` is authoritative for tool-definition
-and message shapes. The generic tool-definition contract now includes a canonical
+and message shapes. Tool definitions use `parameters` for their JSON Schema input;
+the shared message contract enforces role-appropriate tool-call and tool-result parts,
+and the Model API stream uses explicit event discriminators. The generic tool-definition contract now includes a canonical
 `memory_restore` example with an opaque `version` identifier. S8 remains open for
 the owner-controlled visibility/source semantics and adapter configuration details;
 approval lifecycle remains open for products that add approval prompts. Parallel

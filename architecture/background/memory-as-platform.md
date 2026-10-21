@@ -229,6 +229,10 @@ You can't be undercut by a more open alternative if you're already maximally ope
 
 ## Related Documents
 
+The canonical message contract preserves tool calls and results as ordinary history
+parts; role validation and Model API stream details remain contract concerns rather
+than storage-format requirements.
+
 [overview.md](../overview.md) (architecture overview, links to all component specs)
 
 ---

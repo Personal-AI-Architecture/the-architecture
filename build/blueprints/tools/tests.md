@@ -13,7 +13,7 @@ This file defines language-agnostic pass/fail vectors for Tools capability-bound
 - `TOL-MUST-003`: Tool execution must occur in Agent Loop and authorization must occur in Auth.
 - `TOL-MUST-004`: Tool availability must be environment/configuration plus Auth permission driven.
 - `TOL-MUST-005`: Request payloads must not override runtime tool source/availability truth.
-- `TOL-MUST-006`: Tool definitions must expose canonical fields (`name`, `description`, `input_schema`, `read_only`, `requires_approval`).
+- `TOL-MUST-006`: Tool definitions must expose canonical fields (`name`, `description`, `parameters`, `read_only`, `requires_approval`).
 - `TOL-MUST-007`: Invalid/unsupported tool sources or definitions must fail clearly before readiness.
 - `TOL-MUST-008`: Tool-call/tool-result exchanges must preserve stable call IDs and contract-visible shape.
 - `TOL-MUST-009`: Where an approval rule in Auth covers a call, it must be blocked until coded approval decision.
@@ -38,7 +38,7 @@ This file defines language-agnostic pass/fail vectors for Tools capability-bound
 | TOL-T005P | TOL-MUST-005 | Positive | Send normal metadata free of runtime tool overrides | Request accepted | Safe metadata rejected | Over-restrictive metadata gate |
 | TOL-T005N | TOL-MUST-005 | Negative | Include `tool_sources` or tool-def fields in request metadata | Request rejected safely pre-stream | Hidden override accepted | Hidden config-channel drift |
 | TOL-T006P | TOL-MUST-006 | Positive | Validate discovered tool definitions against canonical schema | Definitions pass with required fields present | Valid definitions rejected | Contract rigidity drift |
-| TOL-T006N | TOL-MUST-006 | Negative | Provide tool definition missing `input_schema` or with forbidden fields | Validation fails clearly | Invalid definition accepted | Definition-shape drift |
+| TOL-T006N | TOL-MUST-006 | Negative | Provide tool definition missing `parameters` or with forbidden fields | Validation fails clearly | Invalid definition accepted | Definition-shape drift |
 | TOL-T007P | TOL-MUST-007 | Positive | Startup with supported tool sources and valid definitions | System reaches ready phase | Supported source fails unexpectedly | Discovery regression |
 | TOL-T007N | TOL-MUST-007 | Negative | Configure unknown source or malformed definition | Startup fails clearly before ready | Unknown source ignored silently | Silent-discovery drift |
 | TOL-T008P | TOL-MUST-008 | Positive | Execute tool call and emit result with same call ID | `tool-call.id` == `tool-result.id` and shape is contract-valid | Call/result ID mismatch | Event-contract drift |

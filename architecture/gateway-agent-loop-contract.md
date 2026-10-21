@@ -267,7 +267,8 @@ Per-component requirements from [security-spec.md](./security-spec.md). Security
 
 The canonical files under `contracts/` are authoritative for the route, request
 fields, structured message parts, stream events, and error shapes. This spec defines
-the ownership and behavioral requirements behind those definitions. S5 (transport-
+the ownership and behavioral requirements behind those definitions. The paired Model
+API is streaming-only and identifies each completion event with `_event_type`. S5 (transport-
 neutral identity propagation) and S8 (tool-definition shape/visibility) remain open
 follow-up questions.
 

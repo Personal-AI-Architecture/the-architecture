@@ -129,6 +129,7 @@ components:
       required:
         - messages
         - model
+        - stream
       properties:
         messages:
           type: array
@@ -153,11 +154,10 @@ components:
             which tools to use — that decision is intelligence (D108).
         stream:
           type: boolean
-          default: true
+          const: true
           description: |
-            Whether to stream the response. Always true in this architecture —
-            the system is streaming-first. Included for adapter compatibility
-            with providers that require an explicit stream flag.
+            Must be true. The Model API is streaming-only; callers collect the
+            stream when they need a complete response.
         model:
           type: string
           description: |
@@ -210,13 +210,24 @@ components:
         - $ref: '#/components/schemas/ToolCallDelta'
         - $ref: '#/components/schemas/CompletionDone'
         - $ref: '#/components/schemas/CompletionError'
+      discriminator:
+        propertyName: _event_type
+        mapping:
+          text-delta: '#/components/schemas/TextDelta'
+          tool-call: '#/components/schemas/ToolCallDelta'
+          done: '#/components/schemas/CompletionDone'
+          error: '#/components/schemas/CompletionError'
 
     TextDelta:
       type: object
       description: A chunk of generated text from the model
       required:
+        - _event_type
         - content
       properties:
+        _event_type:
+          type: string
+          const: text-delta
         content:
           type: string
           description: Text chunk
@@ -227,10 +238,14 @@ components:
         The model requests a tool call. The Agent Loop will execute the tool and
         send the result back to the model in the next completion request.
       required:
+        - _event_type
         - id
         - name
         - arguments
       properties:
+        _event_type:
+          type: string
+          const: tool-call
         id:
           type: string
           description: Tool call identifier — used to match results
@@ -249,8 +264,12 @@ components:
         complete — if the completion contains tool calls, the Agent Loop will execute
         them and make another completion request.
       required:
+        - _event_type
         - finish_reason
       properties:
+        _event_type:
+          type: string
+          const: done
         finish_reason:
           type: string
           enum:
@@ -276,9 +295,13 @@ components:
       type: object
       description: Error from the model or adapter
       required:
+        - _event_type
         - code
         - message
       properties:
+        _event_type:
+          type: string
+          const: error
         code:
           type: string
           description: Error category

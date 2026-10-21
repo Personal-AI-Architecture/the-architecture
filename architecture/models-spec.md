@@ -140,8 +140,9 @@ None. Models is the thinnest spec because models are the most external thing in 
 
 The canonical contract tree under `contracts/` is authoritative for the model-facing
 payloads and the internal request handoff. The Agent Loop receives the selected model
-through `AgentLoopRequest.model`; capability reporting remains an implementation and
-future contract-extension concern.
+through `AgentLoopRequest.model`; Model API requests require `stream: true`, and every
+completion event carries an `_event_type` discriminator. Capability reporting remains
+an implementation and future contract-extension concern.
 
 ---
 
