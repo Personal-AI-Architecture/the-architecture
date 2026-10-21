@@ -96,11 +96,7 @@ Configuration defines how runtime truth is split across environment bootstrap, a
   - `provider_adapter: string`
   - `auth_mode: enum(local-owner|local|managed)`
   - `tool_sources: string[]`
-- Optional fields:
-  - `conversation_store` enum `markdown` (default `markdown`)
-  - `bind_address` (default `127.0.0.1`)
-  - `port` (default `8787`)
-  - `safety_iteration_limit` positive integer
+- Optional fields: none. The canonical schema rejects unknown fields (`additionalProperties: false`).
 - Forbidden fields:
   - `model`, `default_model`, `api_key`, `api_key_env`, `approval_mode`, `base_url`
   - any permission or approval rule (these live only in Auth)
@@ -117,9 +113,7 @@ Configuration defines how runtime truth is split across environment bootstrap, a
     "memory-tools/file-ops/server.ts",
     "builtin/auth-tools",
     "builtin/memory-tools"
-  ],
-  "conversation_store": "markdown",
-  "bind_address": "127.0.0.1"
+  ]
 }
 ```
 - Invalid example:
@@ -246,7 +240,7 @@ Configuration defines how runtime truth is split across environment bootstrap, a
 - Optional fields:
   - `client: string`
 - Forbidden fields:
-  - `provider`, `provider_adapter`, `model`, `base_url`, `api_key`, `api_key_env`, `tool_sources`, `tool_definitions`, `auth_mode`, `memory_root`, `safety_iteration_limit`
+  - `provider`, `provider_adapter`, `model`, `base_url`, `api_key`, `api_key_env`, `tool_sources`, `tool_definitions`, `auth_mode`, `memory_root`, `approval_mode`, `conversation_store`, `bind_address`, `port`, `safety_iteration_limit`
 - Error shape:
   - pre-stream: `configuration_error` (`forbidden_request_metadata`) returned as invalid request
   - mid-stream: not applicable; request should be rejected before stream start
@@ -380,9 +374,9 @@ Configuration defines how runtime truth is split across environment bootstrap, a
   - model binding resolution per message
 
 ### 5.7 Edge Cases
-- Missing optional fields (`conversation_store`, `bind_address`, `port`) resolve to defaults.
+- Missing required fields fail validation; there is no optional runtime-config extension point.
 - Unknown tool source is hard failure, not silent skip.
-- Localhost bind default is required unless deployment explicitly overrides.
+- Bind address and port are deployment concerns, not runtime configuration fields.
 - Legacy bootstrap model behavior must be explicitly documented in binding resolution.
 - Changing runtime config, adapter config or installed tools may need a restart (or hot-reload); a model change never does.
 
@@ -497,7 +491,7 @@ Configuration defines how runtime truth is split across environment bootstrap, a
 - `D-07`: day-one startup readiness surfaces.
 
 ### Primer/Implementation Tensions
-- Primer examples emphasize localhost-first bind posture, while checked-in sample runtime config may be overridden for containerized scenarios.
+- Deployment guidance owns bind posture; runtime configuration remains limited to the four canonical fields.
 - Primer describes pure preference ownership for model choice; current runtime keeps a documented legacy bootstrap fallback for compatibility.
 
 ---
@@ -511,16 +505,13 @@ Configuration defines how runtime truth is split across environment bootstrap, a
 - Anti-lock-in swap philosophy and config-only swaps.
 
 ### Documented Discrepancies To Reconcile
-1. **Runtime field count strictness**
-   - Human docs frame four-field runtime bootstrap.
-   - Current runtime includes operational extensions (`conversation_store`, `bind_address`, `port`, `safety_iteration_limit`).
-2. **Secret reference naming**
+1. **Secret reference naming**
    - Human examples use `api_key_ref`.
    - Current implementation uses `api_key_env`.
-3. **Bind posture examples**
+2. **Bind posture examples**
    - Human/primer posture favors localhost-first defaults.
-   - Sample runtime config may specify explicit non-localhost bind for deployment context.
-4. **Model binding transition behavior**
+   - Deployment guidance may specify explicit non-localhost bind outside runtime configuration.
+3. **Model binding transition behavior**
    - Human docs expect preference-driven selection.
    - Runtime includes documented legacy fallback behavior to preserve migration compatibility.
 
@@ -535,7 +526,7 @@ Configuration defines how runtime truth is split across environment bootstrap, a
 
 | Conflict ID | Conflicting Statements | Chosen Resolution | Rationale | Risk if Unresolved |
 |---|---|---|---|---|
-| CFG-CF-001 | Human docs describe four runtime fields; runtime evidence includes additional operational fields | Keep four fields as canonical core; allow optional operational extensions that do not collapse ownership boundaries | Preserves thin-bootstrap intent while allowing practical runtime controls | Implementers may over-expand runtime config and reintroduce lock-in |
+| CFG-CF-001 | Human docs and the canonical schema define exactly four runtime fields | Keep the runtime contract exactly four fields; place deployment, persistence, and loop tuning elsewhere | Keeps the bootstrap portable and makes schema validation authoritative | Implementers may reintroduce operational fields and create non-portable config |
 | CFG-CF-002 | Human adapter examples use `api_key_ref`; runtime uses `api_key_env` | Normalize on reference-by-name semantics; treat field-name differences as alias-level implementation detail | Maintains security invariant without forcing naming lock-in | Teams may fragment adapter config contracts by naming drift |
 | CFG-CF-003 | Localhost-first posture in architecture vs explicit bind overrides in deployment samples | Keep localhost default mandatory when unspecified; allow explicit deployment override | Aligns deployment flexibility with secure default posture | Accidental exposure from permissive defaults |
 | CFG-CF-004 | Preference-driven model selection vs runtime legacy bootstrap fallback | Keep preference-first as normative, document fallback as temporary compatibility path | Enables migration without immediate breaking behavior | Hidden fallback can mask misconfiguration and delay cleanup |

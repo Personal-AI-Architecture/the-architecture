@@ -102,7 +102,7 @@ Use these for MVP consistency:
 - Do not allow request metadata to override runtime/provider/tool bootstrap.
 - Do not store raw secrets in Memory or in any file git tracks.
 - Do not fix the model at startup.
-- Do not store permissions or approval modes in configuration or preferences, even if the current schema still has `approval_mode`; report that gap.
+- Do not store permissions or approval modes in configuration or preferences; `approval_mode` is not a runtime configuration field.
 - Do not let any product or environment rule override the owner.
 - Do not move owner preferences into runtime/adapter config.
 - Do not hardcode provider/model selection in Gateway or Agent Loop code.

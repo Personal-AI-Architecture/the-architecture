@@ -75,8 +75,7 @@ Standalone files:
   "memory_root": "/library",
   "provider_adapter": "openai-compatible",
   "auth_mode": "local-owner",
-  "tool_sources": ["/app/tools"],
-  "bind_address": "127.0.0.1"
+  "tool_sources": ["/app/tools"]
 }
 ```
 

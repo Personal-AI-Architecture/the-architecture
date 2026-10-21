@@ -9,7 +9,7 @@ hide_table_of_contents: true
 >
 > Each gap is something the spec expects that the published architecture does not deliver today. Classification is a suggestion for triage: **Defect** (published material is broken or contradicts itself), **Decision needed** (the maintainers must choose), **Technical** (contract and technical work), **Spec-only** (wording fix in the architecture docs). A gap marked **Decided, spec update in progress** has a settled answer that is still being written into the specs and contracts.
 
-**Scoreboard:** The contract-source alignment batch and example-shape validation are complete. Remaining work is concentrated in documentation freshness tooling, the approval lifecycle, policy portability, transport-neutral identity (S5), tool-definition semantics (S8), the local-address decision, and the first executable language-neutral conformance implementation.
+**Scoreboard:** The contract-source alignment batch, example-shape validation, documentation freshness tooling, and configuration alignment are complete. Remaining work is concentrated in the approval lifecycle, policy portability, transport-neutral identity (S5), tool-definition semantics (S8), the local-address decision, and the first executable language-neutral conformance implementation.
 
 ## Routes a developer follows
 
@@ -40,11 +40,11 @@ hide_table_of_contents: true
 - **Evidence:** `contracts/openapi/gateway-engine.yaml`; `contracts/openapi/gateway-api.yaml`; [build/blueprints/gateway-agent-loop-contract/blueprint.md](../build/blueprints/gateway-agent-loop-contract/blueprint.md); [build/primers/client-gateway-contract.md](../build/primers/client-gateway-contract.md); [build/blueprints/templates/implement-blueprint-template.md](../build/blueprints/templates/implement-blueprint-template.md).
 - **Decided:** one message shape for all three contracts, with tool calls and tool results as normal parts of messages saved in conversation history, and message content as a list of parts. The contract tree is now the sole authority.
 
-### GAP-PAA-4: Configuration has four fields, but examples and the blueprint add more — Technical
+### GAP-PAA-4: Configuration has four fields, but examples and the blueprint add more — Resolved
 
 - **Expected:** US-13 AC-13.3; Functional requirements (exactly four runtime fields).
-- **Published:** The configuration schema allows exactly four fields. The Configuration blueprint adds `conversation_store`, `bind_address`, `port` and `safety_iteration_limit`, and the example marked valid includes `bind_address`, so it fails the schema it illustrates.
-- **Evidence:** `contracts/schemas/configuration.json`; [build/blueprints/configuration/blueprint.md](../build/blueprints/configuration/blueprint.md); `contracts/examples/runtime-config.json`.
+- **Published:** The Configuration blueprint and primer now use the exact four-field runtime contract. Deployment bind/port, persistence, and loop-tuning concerns are no longer presented as runtime-config fields, and the valid example validates against the canonical schema.
+- **Evidence:** `contracts/schemas/configuration.json`; [build/blueprints/configuration/blueprint.md](../build/blueprints/configuration/blueprint.md); [build/primers/configuration.md](../build/primers/configuration.md); `contracts/examples/runtime-config.json`.
 
 ### GAP-PAA-5: Contract definitions miss rules the prose requires — Technical — Partly resolved
 
