@@ -6,6 +6,14 @@
 
 Track how the primer layer evolves so examples, matrix rows, glossary terms, limits, and review guidance can be understood in historical context.
 
+## 2026-10-21
+
+### Canonical Contract Alignment
+
+- Replaced duplicated blueprint contract packs with derived source manifests.
+- Synchronized primers, builder references, conformance checklists, architecture specs, and examples with the canonical `contracts/` tree.
+- Extended `contracts/examples/validate-manifest.py` to validate valid and invalid example shapes, including JSON Schema-backed examples and canonical contract envelopes.
+
 ## 2026-03-17
 
 ### Initial Primer Layer

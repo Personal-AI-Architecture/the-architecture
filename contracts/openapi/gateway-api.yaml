@@ -339,7 +339,7 @@ components:
           type: string
           description: Unique conversation identifier
         title:
-          type: string
+          type: [string, 'null']
           description: Conversation title (derived from first message or set by user)
         created_at:
           type: string
@@ -365,7 +365,7 @@ components:
           type: string
           description: Unique conversation identifier
         title:
-          type: string
+          type: [string, 'null']
           description: Conversation title
         messages:
           type: array

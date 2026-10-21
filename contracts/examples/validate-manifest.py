@@ -4,6 +4,8 @@ import json
 import sys
 from pathlib import Path
 
+from jsonschema import Draft202012Validator, ValidationError
+
 
 ROOT = Path(__file__).resolve().parents[2]
 MANIFEST = Path(__file__).resolve().parent / "examples-manifest.json"
@@ -12,6 +14,123 @@ MANIFEST = Path(__file__).resolve().parent / "examples-manifest.json"
 def fail(message: str) -> None:
     print(f"ERROR: {message}")
     raise SystemExit(1)
+
+
+def schema(name: str) -> dict:
+    path = ROOT / "contracts" / "schemas" / name
+    return json.loads(path.read_text())
+
+
+def validate_schema(payload: object, name: str, file_path: str) -> None:
+    try:
+        Draft202012Validator(schema(name)).validate(payload)
+    except ValidationError as exc:
+        fail(f"{file_path} does not validate against {name}: {exc.message}")
+
+
+def validate_content_parts(parts: object, file_path: str) -> None:
+    if not isinstance(parts, list) or not parts:
+        fail(f"{file_path} content must be a non-empty list of parts")
+    for part in parts:
+        validate_schema({"role": "user", "content": [part]}, "message.json", file_path)
+
+
+def validate_contract_example(file_path: str, payload: object, kind: str) -> None:
+    """Validate the example-specific contract envelope not represented by one JSON Schema."""
+    name = Path(file_path).name
+
+    if name in {"runtime-config.json", "invalid-runtime-config.json"}:
+        validator = Draft202012Validator(schema("configuration.json"))
+        errors = list(validator.iter_errors(payload))
+        if kind == "valid" and errors:
+            fail(f"{file_path} does not validate against configuration.json: {errors[0].message}")
+        if kind == "invalid" and not errors:
+            fail(f"{file_path} is marked invalid but validates against configuration.json")
+        return
+
+    if name == "memory-restore-tool.json":
+        validate_schema(payload, "tool-definition.json", file_path)
+        if payload.get("name") != "memory_restore":
+            fail(f"{file_path} must define memory_restore")
+        return
+
+    if name in {"client-message-request.json", "invalid-client-message-request.json"}:
+        valid = (
+            isinstance(payload, dict)
+            and isinstance(payload.get("content"), list)
+            and "messages" not in payload
+            and "provider" not in payload
+            and "model" not in payload
+            and "tool_definitions" not in payload
+        )
+        if valid:
+            validate_content_parts(payload["content"], file_path)
+        if (kind == "valid") != valid:
+            fail(f"{file_path} has kind={kind} but its client request shape is {'valid' if valid else 'invalid'}")
+        return
+
+    if name in {"gateway-engine-request.json", "invalid-gateway-engine-request.json"}:
+        valid = (
+            isinstance(payload, dict)
+            and isinstance(payload.get("messages"), list)
+            and bool(payload.get("messages"))
+            and isinstance(payload.get("model"), str)
+            and isinstance(payload.get("metadata"), dict)
+            and isinstance(payload["metadata"].get("correlation_id"), str)
+            and all(isinstance(message, dict) and isinstance(message.get("content"), list) for message in payload["messages"])
+            and not any(key in payload["metadata"] for key in ("provider", "api_key", "tool_sources"))
+        )
+        if valid:
+            for message in payload["messages"]:
+                validate_schema(message, "message.json", file_path)
+        if (kind == "valid") != valid:
+            fail(f"{file_path} has kind={kind} but its internal request shape is {'valid' if valid else 'invalid'}")
+        return
+
+    if name in {"conversation-list-response.json", "invalid-conversation-list-response.json"}:
+        valid = (
+            isinstance(payload, dict)
+            and isinstance(payload.get("conversations"), list)
+            and isinstance(payload.get("total"), int)
+            and not isinstance(payload.get("total"), bool)
+            and all(isinstance(item, dict) and {"id", "created_at", "updated_at"} <= item.keys() for item in payload["conversations"])
+        )
+        if (kind == "valid") != valid:
+            fail(f"{file_path} has kind={kind} but its conversation-list shape is {'valid' if valid else 'invalid'}")
+        return
+
+    if name in {"conversation-detail-response.json", "invalid-conversation-detail-response.json"}:
+        valid = (
+            isinstance(payload, dict)
+            and isinstance(payload.get("id"), str)
+            and isinstance(payload.get("messages"), list)
+            and isinstance(payload.get("created_at"), str)
+            and isinstance(payload.get("updated_at"), str)
+        )
+        if valid:
+            for message in payload["messages"]:
+                if not isinstance(message, dict) or not {"id", "created_at"} <= message.keys():
+                    valid = False
+                    break
+                validate_schema(message, "message.json", file_path)
+        if (kind == "valid") != valid:
+            fail(f"{file_path} has kind={kind} but its conversation-detail shape is {'valid' if valid else 'invalid'}")
+        return
+
+    if name in {"approval-request-event.json", "approval-result-event.json", "invalid-approval-request-event.json", "invalid-approval-result-event.json"}:
+        required = {"request_id", "tool_name", "summary"} if "request" in name else {"request_id", "decision"}
+        valid = isinstance(payload, dict) and required <= payload.keys()
+        if (kind == "valid") != valid:
+            fail(f"{file_path} has kind={kind} but its approval shape is {'valid' if valid else 'invalid'}")
+        return
+
+    if name in {"adapter-config.json", "invalid-adapter-config.json"}:
+        valid = isinstance(payload, dict) and {"base_url", "model", "api_key_env"} <= payload.keys() and "memory_root" not in payload and "approval_mode" not in payload
+        if (kind == "valid") != valid:
+            fail(f"{file_path} has kind={kind} but its adapter-config shape is {'valid' if valid else 'invalid'}")
+        return
+
+    fail(f"No example validator is registered for {file_path}")
 
 
 def main() -> None:
@@ -62,6 +181,12 @@ def main() -> None:
         if not absolute_file.exists():
             fail(f"Referenced example file does not exist: {file_path}")
 
+        try:
+            payload = json.loads(absolute_file.read_text())
+        except json.JSONDecodeError as exc:
+            fail(f"Referenced example is not valid JSON: {file_path}: {exc}")
+        validate_contract_example(file_path, payload, kind)
+
         for list_key in ["owning_docs", "matrix_ids", "related_checklists", "glossary_terms"]:
             value = entry[list_key]
             if not isinstance(value, list) or not value:
@@ -81,7 +206,7 @@ def main() -> None:
             if not isinstance(matrix_id, str) or "-" not in matrix_id:
                 fail(f"Entry {idx} has invalid matrix ID: {matrix_id!r}")
 
-    print(f"OK: validated {len(examples)} manifest entries")
+    print(f"OK: validated {len(examples)} manifest entries and contract example shapes")
 
 
 if __name__ == "__main__":

@@ -9,14 +9,14 @@ hide_table_of_contents: true
 >
 > Each gap is something the spec expects that the published architecture does not deliver today. Classification is a suggestion for triage: **Defect** (published material is broken or contradicts itself), **Decision needed** (the maintainers must choose), **Technical** (contract and technical work), **Spec-only** (wording fix in the architecture docs). A gap marked **Decided, spec update in progress** has a settled answer that is still being written into the specs and contracts.
 
-**Scoreboard:** The contract-source alignment batch is complete. Remaining work is concentrated in the example checker, documentation freshness tooling, the approval lifecycle, policy portability, transport-neutral identity (S5), tool-definition semantics (S8), and the first executable language-neutral conformance implementation.
+**Scoreboard:** The contract-source alignment batch and example-shape validation are complete. Remaining work is concentrated in documentation freshness tooling, the approval lifecycle, policy portability, transport-neutral identity (S5), tool-definition semantics (S8), the local-address decision, and the first executable language-neutral conformance implementation.
 
 ## Routes a developer follows
 
-### GAP-PAA-2: The example checker does not check examples against the contracts — Technical
+### GAP-PAA-2: The example checker does not check examples against the contracts — Resolved
 
 - **Expected:** US-13, AC-13.4. A developer can check that the published valid and invalid examples behave as labelled.
-- **Published:** `validate-manifest.py` now runs from any checkout and checks the manifest: file paths, kinds and links. It does not check the examples against the contracts, so nothing proves a valid example validates or an invalid one fails.
+- **Published:** `validate-manifest.py` runs from any checkout, checks the manifest, validates JSON Schema-backed examples, and applies canonical envelope checks to the OpenAPI examples. Valid examples must pass and invalid examples must fail their corresponding shape checks.
 - **Evidence:** `contracts/examples/validate-manifest.py`; `examples-manifest.json`.
 
 ### GAP-PAA-8: Template links to a missing Foundation spec and a missing plan — Defect
