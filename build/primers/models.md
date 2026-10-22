@@ -27,6 +27,7 @@ Define how the system talks to external models without turning models or provide
 - Provider and model swaps happen through config and preference changes where defined.
 - The model and provider profile travel with each request: the Gateway reads the owner's current choices on every message and passes them to the Agent Loop, so the next message uses the new model or provider with no restart.
 - Capabilities a model lacks (images, tool calls, context size) are reported, not faked: no silently dropped image, no pretended tool call, no quiet substitution of another model.
+- Gateway budgets saved history for the selected model's context limit; Agent Loop checks actual calls. A provider adapter may expose limit metadata but does not choose or truncate history.
 - The internal model-facing contract stays stable and generic, and uses the same message shape as the other two contracts.
 
 ## Forbidden Behaviors

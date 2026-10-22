@@ -307,7 +307,7 @@ These requirements apply to each component. Cross-referenced into component spec
 
 - [ ] The Gateway must validate input structure before routing to the Agent Loop — reject malformed requests
 - [ ] The Gateway must enforce request size limits — configurable, with sensible defaults
-- [ ] The Gateway must not interpret, filter, or modify message content — content-agnostic
+- [ ] The Gateway must not interpret, filter, or modify stored message content. It may select complete older turns for the model's working context without changing the full record; current input and selected parts remain unchanged — content-agnostic
 - [ ] The Gateway must provide extension points for rate limiting and abuse detection — implementations configure policies
 - [ ] The Gateway must support TLS for all external-facing connections
 

@@ -49,6 +49,7 @@ Run the model-tool loop for an interaction without owning product behavior, conv
 - Execute permitted model-requested tools.
 - Execute independent tool calls in the same loop turn concurrently; keep dependent calls ordered.
 - Pass tool results back into model context.
+- Check the selected model's safe context limit before every model call, including after live tool results; emit `context_overflow` if it cannot fit, without shortening a result.
 - Emit tool calls and tool results in the shared message shape so the Gateway can save them in history.
 - Preserve the authenticated actor identity from `auth_context` for every tool check and audit record.
 - Report provider failures and stop the current turn; do not silently fall back to another provider.

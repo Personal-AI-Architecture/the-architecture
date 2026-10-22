@@ -88,6 +88,7 @@ retry or provider change is a separate owner/product action.
 - [ ] Zero code changes were required
 - [ ] Only a preference or config value was changed
 - [ ] Response format is identical from the Gateway's perspective (same SSE events)
+- [ ] The next request uses Model B's verified context limit; full saved history remains readable even if its working context is shorter
 
 **Failure indicators:**
 - The Agent Loop required modification to support the new model

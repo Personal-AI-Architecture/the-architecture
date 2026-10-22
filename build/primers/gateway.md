@@ -39,7 +39,8 @@ Accept external requests, manage conversation lifecycle, call Auth on every requ
 - Manage conversation load, create, append, and retrieval behavior.
 - Access conversation data through a dedicated conversation-store boundary or tool rather than a private in-process store.
 - Accept client messages plus client metadata. Message content is a list of parts.
-- Save tool calls and tool results as ordinary parts of messages in conversation history, and send them back on resume.
+- Save tool calls and tool results as ordinary parts of messages in full conversation history. On resume, select a model-sized working context without rewriting saved parts.
+- Use the selected model's known or verified conservative limit, reserving space for instructions, tools and response; report `context_overflow` for a current message that cannot fit and notify the owner when older turns are omitted or summarized.
 - Read the owner's current model and provider choice on every message and pass both to the Agent Loop, so a change applies to the next message with no restart.
 - Store the model and provider profile that produced each assistant reply on the saved message (D194).
 - Forward only bounded interaction data to the Agent Loop. The bootstrap prompt is Agent Loop configuration, not something the Gateway adds.

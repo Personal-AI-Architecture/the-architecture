@@ -152,6 +152,15 @@
 - [ ] No catch-all error code used for all failure types
 - [ ] Recoverable tool failures (tool returns an error result) go back to the model as `tool-result` events, not as stream-fatal `error` events
 
+**Context-window cases:** Resume a conversation long enough to exceed the chosen
+model's safe budget. Verify the Gateway keeps full history, selects complete older
+turns or a labelled summary, and gives the owner a visible notice. Switch to a
+smaller model and verify the next budget changes without rewriting history. Send
+an oversized current message and verify `context_overflow` rather than truncation.
+Finally, return a live tool result that makes a continuation too large: the Agent
+Loop must emit `context_overflow`, preserve the original result in history, and
+never send a silently shortened result to the model.
+
 **Failure indicators:**
 - All errors emit the same code regardless of cause
 - Tool execution errors that the model could recover from terminate the stream

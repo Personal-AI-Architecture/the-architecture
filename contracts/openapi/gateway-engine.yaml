@@ -202,9 +202,11 @@ components:
           items:
             $ref: '#/components/schemas/Message'
           description: |
-            System prompt + conversation history + current message. Follows the
-            industry-standard role + content format (D16: use the prevailing standard,
-            not a custom protocol).
+            Model-sized working context from selected complete conversation turns,
+            an optional labelled summary, and the unchanged current message.
+            The Agent Loop adds its own bootstrap prompt. Full history stays in
+            Your Memory. Follows the industry-standard role + content format
+            (D16: use the prevailing standard, not a custom protocol).
           minItems: 1
         model:
           type: string

@@ -15,6 +15,9 @@ Use this when reviewing Gateway code paths, routes, conversation handling, or cl
 - [ ] Gateway stores the model and provider profile that produced each assistant reply on the saved message (D194).
 - [ ] Gateway calls Auth on every request, including conversation list and history reads.
 - [ ] Conversation history keeps tool calls, tool results and every content part.
+- [ ] A model switch recalculates the working-context budget from the selected model's safe limit, without changing full saved history.
+- [ ] Older complete turns may be left out or summarized with an owner-visible notice; current input and selected parts are not silently shortened.
+- [ ] An oversized current input reports `context_overflow`; every selected tool call retains its corresponding result.
 - [ ] `POST /conversations/messages` uses the canonical client request body `{ content, metadata? }`, with `content` as a non-empty list of structured content parts, rather than the internal `messages + metadata` shape.
 - [ ] `/conversations` and `/conversations/:id` return canonical envelopes rather than raw storage records.
 - [ ] `X-Conversation-ID` is returned when the conversation is resolved.

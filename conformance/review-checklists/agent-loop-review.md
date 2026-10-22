@@ -18,6 +18,7 @@ Use this when reviewing Agent Loop behavior, stream semantics, provider integrat
 - [ ] Assistant text is preserved correctly across tool-continuation turns.
 - [ ] The loop uses the model named in each request; a model change applies to the next message with no restart.
 - [ ] The bootstrap prompt comes from Agent Loop configuration, not from a system message in the request.
+- [ ] Every actual model call, including a continuation with live tool results, fits the selected model's safe limit or reports `context_overflow` without shortening results.
 - [ ] Every tool call is checked with Auth before it runs; a refused call returns a "not permitted" tool result.
 - [ ] Tool calls and tool results use the shared message shape so they can be saved in history.
 - [ ] Where a product adds approvals, approval semantics are represented in the contract rather than trapped inside product-specific runtime flow.

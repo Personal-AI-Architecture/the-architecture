@@ -376,6 +376,10 @@ Headers, message metadata, request-body fields, and direct-call arguments are tr
 adapters for that shape, not competing identity contracts. Permissions remain owned by
 Auth and are never caller-controlled transport data.
 
+Preparing a shorter model working context does not change the Auth boundary: the
+Gateway authenticates before reading saved history, and any full-history read by a
+client receives its own Auth check. A summary or omitted turn grants no new access.
+
 Tool definitions use the same boundary discipline: source provenance and visibility
 metadata are canonical, while adapter endpoints and credentials remain outside the
 definition contract.

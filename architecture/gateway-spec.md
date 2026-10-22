@@ -30,12 +30,12 @@ When a message arrives, the Gateway:
 1. Asks Auth who sent it and whether they're allowed.
 2. Loads the conversation from Your Memory, or starts a new one.
 3. Reads your current choice of model and provider.
-4. Passes the conversation, the new message and the model and provider choice to the Agent Loop.
+4. Prepares a model-sized working context from the saved conversation, then passes it, the new message, model and provider choice to the Agent Loop.
 5. Streams the Agent Loop's response back to the client as it arrives, and saves the exchange to the conversation in Your Memory.
 
 Like every other part, it reaches Your Memory through tools: a dedicated conversation tool for creating, loading, listing and saving conversations, and the Memory tools to read your model and provider choice. Even listing or reading a conversation goes through Auth first.
 
-Just as important is what it doesn't do. It doesn't understand messages; the model does. It doesn't run the model's tools; the Agent Loop does. It doesn't decide who's allowed to do what; Auth does. It doesn't pick the model; you do. Whatever the content (text, images, audio, files), it passes it through unchanged, checking only that the request is well-formed and not too large. That keeps it from being tied to any one client or kind of content.
+Just as important is what it doesn't do. It doesn't understand messages; the model does. It doesn't run the model's tools; the Agent Loop does. It doesn't decide who's allowed to do what; Auth does. It doesn't pick the model; you do. It preserves every original content part in the conversation record and never rewrites a selected part. It may select older history for the model-sized working context described below, regardless of content type.
 
 ---
 
@@ -54,7 +54,7 @@ The Gateway sits between clients and the Agent Loop. Their relationship:
 | Gateway's job | Agent Loop's job |
 |--------------|-------------|
 | Manage conversations (create, list, resume, store) | Process individual interactions (message → model → tools → response) |
-| Package conversation history, with the owner's current model and provider choice, and pass it to the Agent Loop | Accept message + history + model + provider as input, return streamed response |
+| Package a bounded working context from conversation history, with the owner's current model and provider choice, and pass it to the Agent Loop | Accept message + working context + model + provider as input, return streamed response; check each model call fits |
 | Store the Agent Loop's response in the conversation, with the model and provider that produced it (D194) | Stream the response back, then it's done |
 | Handle multiple clients connecting simultaneously; serialize messages within each conversation and queue later messages in arrival order | Handle the agent loop for each interaction; different conversations may run concurrently |
 
@@ -69,7 +69,7 @@ These are explicit boundaries. They exist to prevent the Gateway from becoming o
 | Understanding content | The model | Gateway doesn't interpret messages |
 | Executing model-driven tools | The Agent Loop | Gateway doesn't execute tool calls from the model (it uses the conversation store tool for its own operational needs — D152) |
 | Authenticating requests and deciding permissions | Auth | Gateway calls Auth on every request and honours the answer, but doesn't verify identity or hold permissions itself |
-| Deciding what the model should do | Skills/instructions in Your Memory | Gateway doesn't influence model behavior |
+| Deciding what the model should do | Skills/instructions in Your Memory | Gateway doesn't supply product instructions; its history selection only enforces the model's size bound |
 | Choosing which model and provider to use | The owner (a preference) | Gateway reads the owner's current model and provider choice on every message and passes them to the Agent Loop; it doesn't pick a model or provider or route to models |
 | Content processing (speech-to-text, image analysis) | Model capabilities or tools | Gateway doesn't transform content |
 | Context injection (client metadata, folder scoping) | The interface sends it, the model reads it | Gateway passes metadata through — it doesn't add or interpret it |
@@ -77,7 +77,17 @@ These are explicit boundaries. They exist to prevent the Gateway from becoming o
 | Rate limiting | Operational / hosting concern | The architecture sets no rate-limit policy; the Gateway provides extension points that implementations configure |
 | Content filtering | Model or operational policy | Gateway doesn't filter |
 
-The context injection boundary is worth emphasizing. D20 says the client sends client metadata (folder path, context files) alongside messages. It would be tempting to have the Gateway handle this — "when the owner is in a certain context, automatically attach the right files." But that's an implementation opinion. In the architecture, the Gateway passes through whatever the client sends. It doesn't add, modify, or interpret content. Making the Gateway context-aware would make it product-specific.
+The context injection boundary is worth emphasizing. D20 says the client sends client metadata (folder path, context files) alongside messages. The Gateway passes that metadata through. Its separate context-window job selects saved history by size and turn boundary; it does not decide which client files matter or interpret message meaning.
+
+### Preparing the model working context (GAP-PAA-20 proposal)
+
+The full conversation in Your Memory and the messages sent to the Agent Loop are different things. The Gateway preserves the original current message, assistant replies, tool calls and tool results in the conversation record. For each request it reads the owner's selected model and prepares only the history that can fit that model's known context limit. A deployment may use a verified conservative limit for a model whose provider does not publish one. If it cannot establish a safe limit, it reports an error instead of assuming one universal window.
+
+Gateway and Agent Loop use the same configured model-limit source. Provider metadata may inform that source, but an adapter does not decide which conversation content to keep.
+
+The budget includes the current message and an allowance for the Agent Loop's bootstrap instructions, tool definitions, protocol overhead and model response. Older complete turns may be omitted from the working context; an implementation may include a clearly identified summary of them. A summary is new derived context, never a replacement for the originals in Your Memory. The owner is told when older history was omitted or summarized and can still inspect the full conversation through the history API. The exact selection and summary method is an implementation choice.
+
+The Gateway does not truncate or rewrite the current message, a selected message part, or a selected tool result to make the budget fit. It keeps tool-call/result relationships intact when selecting history. If the current message plus required overhead cannot fit, it reports `context_overflow`. The Agent Loop separately checks every actual model call, including calls after live tool results arrive.
 
 ---
 
@@ -89,7 +99,7 @@ The context injection boundary is worth emphasizing. D20 says the client sends c
 | 2 | **Persist conversations** | Messages and responses, including the tool calls and tool results inside them, are stored in Your Memory — nothing is lost between interactions |
 | 3 | **Resume** | Any client can pick up any conversation where it left off |
 | 4 | **Stream** | Responses from the Agent Loop stream back to the calling client in real time |
-| 5 | **Content-agnostic** | Message content is a list of parts — text first, with room for images, audio, video and files — and the Gateway passes every part through without interpretation |
+| 5 | **Content-agnostic** | Message content is a list of parts — text first, with room for images, audio, video and files — and the Gateway saves every part and passes selected parts through without interpretation |
 | 6 | **Interface-agnostic** | Web, CLI, mobile, bot, voice, future paradigms — the Gateway serves them all identically |
 
 ---
@@ -120,7 +130,7 @@ Clients are not components of the system. They connect through the Gateway (D57)
 
 ## The Gateway contract
 
-The Gateway ↔ Agent Loop interface is defined in [gateway-agent-loop-contract.md](./gateway-agent-loop-contract.md) (D137). The Gateway calls Auth, then packages the messages array (conversation history + current message), the model and provider choice it has just read, and metadata, and POSTs to the Agent Loop. The bootstrap prompt is not part of the request: it is the Agent Loop's own configuration. The Agent Loop returns an SSE stream. All three contracts use one message shape, with tool calls and tool results as ordinary parts of messages, so what the Agent Loop streams back can be stored and replayed as history without conversion.
+The Gateway ↔ Agent Loop interface is defined in [gateway-agent-loop-contract.md](./gateway-agent-loop-contract.md) (D137). The Gateway calls Auth, then packages the messages array (selected conversation history + unchanged current message), the model and provider choice it has just read, and metadata, and POSTs to the Agent Loop. The bootstrap prompt is not part of the request: it is the Agent Loop's own configuration. The Agent Loop returns an SSE stream. All three contracts use one message shape, with tool calls and tool results as ordinary parts of messages, so what the Agent Loop streams back can be stored and replayed as history without conversion.
 
 Where a product enables approvals, the Gateway forwards the canonical `approval-request` and `approval-result` events and accepts decisions through the product's Gateway route. It does not approve locally: Auth verifies authority, and `request_id` makes terminal decisions replay-safe.
 
@@ -169,7 +179,7 @@ This follows the zero-outward-dependencies principle. The dependency points the 
 |-----------|-------|--------|
 | Create | (implicit — send a message without conversation ID) | New conversation ID + response |
 | List | Query parameters (optional — time range, search) | Conversation summaries |
-| Resume | Conversation ID + new message | Response with full history context |
+| Resume | Conversation ID + new message | Response with model-sized working context; full history remains available through History |
 | History | Conversation ID | All messages in the conversation, including tool calls and tool results |
 
 ### Error output
@@ -197,11 +207,14 @@ Items marked *(security)* are the per-component requirements from [security-spec
 - [ ] Auth and the Gateway are independent — swapping either doesn't require changing the other
 - [ ] A changed model or provider choice applies to the next message with no restart
 - [ ] Tool calls and tool results are saved in conversation history and come back when a conversation is resumed
+- [ ] Full conversation history stays available across model changes; a resumed model call receives a bounded working context for the selected model
+- [ ] The budget accounts for bootstrap instructions, tool definitions, protocol overhead and response headroom; a selected message is never silently truncated
+- [ ] The owner can tell when older history was omitted or summarized, and an oversized current message produces `context_overflow`
 - [ ] The Agent Loop remains generic — adding the Gateway didn't push conversation management into the Agent Loop
 - [ ] Your Memory remains unopinionated — conversations are stored as data, Your Memory doesn't know they're conversations
 - [ ] The Gateway must validate input structure before routing to the Agent Loop — reject malformed requests *(security)*
 - [ ] The Gateway must enforce request size limits — configurable, with sensible defaults *(security)*
-- [ ] The Gateway must not interpret, filter, or modify message content — content-agnostic (D59) *(security)*
+- [ ] The Gateway must not interpret, filter, or modify stored message content; selecting complete older turns for a model-sized working context is permitted (D59) *(security)*
 - [ ] The Gateway must provide extension points for rate limiting and abuse detection — implementations configure policies *(security)*
 - [ ] The Gateway must support TLS for all external-facing connections *(security)*
 

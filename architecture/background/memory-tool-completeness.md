@@ -33,6 +33,9 @@ This framing resolves D122 — BrainDrive doesn't define "tool" more broadly tha
 The canonical message contract keeps tool calls and results as role-appropriate
 message parts, while the Model API carries normalized streaming events. Those transport
 shapes do not introduce a new memory or tool component.
+Full conversation history remains in Your Memory even when the Gateway selects
+fewer older turns for one model call; a live tool result is never shortened by
+the Agent Loop to fit that call (GAP-PAA-20 proposal).
 
 ---
 
