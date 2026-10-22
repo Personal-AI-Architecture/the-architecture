@@ -27,7 +27,7 @@ That means you can use the best standard available without being tied to it. Whe
 
 This works because translating is a small, well-defined job. Every model provider does the same thing, taking a request and sending back a reply, just in slightly different formats. Every client app does the same thing, sending a message and getting a reply. The differences are only in format, so a small translator can absorb them.
 
-- **Between the Agent Loop and models:** the adapter turns the Agent Loop's request into the provider's format and turns the provider's reply back. The provider's quirks stay inside the adapter, such as how it takes API keys, how it streams and how it writes tool requests. Changing provider means using a different adapter, and the Agent Loop never knows.
+- **Between the Agent Loop and models:** the adapter turns the Agent Loop's request into the provider's format and turns the provider's reply back. The provider's quirks stay inside the adapter, such as how it takes API keys, how it streams and how it writes tool requests. Changing to a provider in a new format means using a different adapter, and the Agent Loop never knows. Switching between provider profiles the loaded adapter already lists is just a preference (D193).
 - **Between client apps and the Gateway:** PAA's Gateway API is a plain web API. If client apps expect a different format, such as the one many chat apps already speak, an adapter can translate it, and the Gateway never knows. This swap is rare.
 - **Between the Agent Loop and tools:** each kind of tool source, such as MCP, has its own adapter, so a new tool protocol is one more adapter, not a change to the Agent Loop.
 - **One job only:** an adapter only translates. If describing what it does needs an "and," it's doing too much, and that extra logic belongs in one of the system's parts.
@@ -74,7 +74,7 @@ Adapters are an implementation pattern at the system's edges. They add no compon
 - Handles provider-specific details (auth headers, streaming formats, tool call schemas)
 - Reports provider failures to the Agent Loop; it does not silently switch to another provider
 
-**Swap scenario:** Switch from OpenRouter to a direct Anthropic integration, or to a local Ollama instance. Write (or select) an adapter for the new provider. Agent Loop doesn't change. Gateway doesn't change. Your Memory doesn't change.
+**Swap scenario:** Switch from OpenRouter to a direct Anthropic integration, or to a local Ollama instance. If the loaded adapter lists the provider as a profile, change the active provider preference; if it is in a new format, write (or select) an adapter for it. Agent Loop doesn't change. Gateway doesn't change. Your Memory doesn't change.
 
 Provider errors are translated too, into the error categories of the Model API and Agent Loop contracts. Which codes those include for missing models and abilities is open (GAP-PAA-27).
 
@@ -91,7 +91,7 @@ Provider errors are translated too, into the error categories of the Model API a
 
 **Swap scenario:** a new tool protocol arrives. Write (or select) a tool-source adapter for it. The Agent Loop doesn't change, the model sees the same kind of tool definitions, and Auth governs the new tools the same way. This adapter is internal: it does not make tools an API (D53). (GAP-PAA-30: `source.kind` is a fixed list, so a new protocol currently needs a contract change to be labelled.)
 
-**Which swap is common:** provider adapters change whenever the owner changes model provider. Tool-source adapters change when a new tool protocol is adopted. The Gateway API adapter changes only if the standard clients expect shifts.
+**Which swap is common:** provider adapters change when the owner adopts a provider in a new format; moving between listed provider profiles is a preference change. Tool-source adapters change when a new tool protocol is adopted. The Gateway API adapter changes only if the standard clients expect shifts.
 
 ## How Model Configuration Works in Practice
 
@@ -166,7 +166,7 @@ Nothing stops an implementation from bypassing adapters, hard-coding a provider 
 - [ ] Client protocol details live in the Gateway API adapter, not the Gateway
 - [ ] The Agent Loop works only with canonical tool definitions, calls and results; tool-protocol details live in tool-source adapters
 - [ ] Each adapter is stateless and does one job: translate
-- [ ] Swapping a model provider changes only the adapter, its config, the startup config and the API key secret
+- [ ] Switching to another listed provider profile changes only the provider preference; swapping to a provider in a new format changes only the adapter, its config, the startup config and the API key secret
 - [ ] Adding a tool protocol means adding a tool-source adapter, with no change to the Agent Loop, Gateway, Auth or Your Memory
 - [ ] Runtime config, adapter config and owner preferences stay distinct
 - [ ] *(security)* Adapter config holds references to secrets, never the secrets themselves

@@ -9,7 +9,7 @@ Define the exact internal request and stream contract so Gateway and Agent Loop 
 ## Contract Shape
 
 - Two internal operations: `POST /agent-loop/chat` and `POST /agent-loop/cancel`
-- Request body: `messages`, the model to use, and `metadata`
+- Request body: `messages`, the model and provider to use, and `metadata`
 - Response: SSE stream
 - The Gateway calls Auth on every request before it POSTs; the Agent Loop asks Auth before each tool call
 
@@ -19,6 +19,7 @@ Define the exact internal request and stream contract so Gateway and Agent Loop 
 
 - `messages`
 - the model to use for this request (the owner's current choice, read by the Gateway on every message)
+- the owner's active provider profile as `provider` (read by the Gateway on every message with the model)
 - `metadata.correlation_id`
 
 ### Optional
@@ -43,9 +44,9 @@ The bootstrap prompt is not in the request. It is Agent Loop configuration, and 
 ## What Must Not Be In The Request
 
 - Tool definitions as per-request config.
-- Provider configuration as per-request config.
+- Provider adapter or endpoint configuration as per-request config (the active provider profile name is carried, not its connection details).
 - A system message assembled by the Gateway from configuration.
-- Hidden reconfiguration state that belongs to startup config or preferences. (The model is the one per-request choice the request carries.)
+- Hidden reconfiguration state that belongs to startup config or preferences. (The model and provider profile are the per-request choices the request carries.)
 
 ## Response Events
 
@@ -102,6 +103,7 @@ Standalone file:
     }
   ],
   "model": "local/llama-3.1-8b",
+  "provider": "local",
   "auth_context": {
     "actor": { "id": "owner_abc123", "type": "owner", "display_name": "Owner", "status": "active", "created": "2026-01-15T10:30:00Z" },
     "authentication_id": "authn_123",
@@ -132,7 +134,7 @@ event: done
 data: {"finish_reason":"completed"}
 ```
 
-The request carries the model to use as `model`. The canonical request metadata requires
+The request carries the model to use as `model` and the active provider profile as `provider`. The canonical request metadata requires
 `correlation_id`; it does not require a separate request timestamp.
 
 ## Invalid Drift Example
@@ -178,7 +180,7 @@ Why this is drift:
 ## Required Behaviors
 
 - Keep the internal handoff bounded.
-- Pass the owner's current model choice on every request, so a change applies to the next message with no restart.
+- Pass the owner's current model and provider choice on every request, so a change applies to the next message with no restart.
 - Preserve explicit stream event semantics.
 - Keep the contract internal rather than treating it as a third public API.
 - Allow Gateway and Agent Loop to evolve independently as long as the contract holds.
@@ -195,7 +197,7 @@ Why this is drift:
 - What exactly may Gateway send to Agent Loop?
 - What exactly may Agent Loop emit back?
 - Is forbidden configuration leaking through the contract?
-- Does every request carry the model, and does a model change apply without a restart?
+- Does every request carry the model and provider, and does a change to either apply without a restart?
 - Are tool calls and tool results saved in history and replayed on resume?
 - Are error and tool events contract-compliant?
 - Does the Gateway call Auth on every request, and does the Agent Loop ask Auth before each tool call?

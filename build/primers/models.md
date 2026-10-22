@@ -25,7 +25,7 @@ Define how the system talks to external models without turning models or provide
 - Model access happens through the Model API.
 - Provider-specific details stay in adapters.
 - Provider and model swaps happen through config and preference changes where defined.
-- The model travels with each request: the Gateway reads the owner's current choice on every message and passes it to the Agent Loop, so the next message uses the new model with no restart.
+- The model and provider profile travel with each request: the Gateway reads the owner's current choices on every message and passes them to the Agent Loop, so the next message uses the new model or provider with no restart.
 - Capabilities a model lacks (images, tool calls, context size) are reported, not faked: no silently dropped image, no pretended tool call, no quiet substitution of another model.
 - The internal model-facing contract stays stable and generic, and uses the same message shape as the other two contracts.
 
@@ -39,9 +39,9 @@ Define how the system talks to external models without turning models or provide
 
 ## Lifecycle Rules
 
-- Provider readiness follows the architecture's configuration model (read at startup; a provider swap may need a restart).
-- Same-provider model swaps should remain a preference change that applies to the next message.
-- Provider swaps should remain adapter and config changes, not code rewrites.
+- Provider readiness follows the architecture's configuration model (adapter read at startup; a provider in a new format may need a restart).
+- Model swaps and switches between provider profiles the adapter lists should remain preference changes that apply to the next message.
+- A provider in a new format should remain an adapter and config change, not a code rewrite.
 
 ## Audit Questions
 

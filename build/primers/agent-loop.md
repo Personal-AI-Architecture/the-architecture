@@ -43,7 +43,7 @@ Run the model-tool loop for an interaction without owning product behavior, conv
 
 - Remain generic rather than product-specific.
 - Continue the loop until the model signals completion through the contract-defined finish behavior.
-- Use the model named in the request, so a changed model choice applies to the next message with no restart.
+- Use the model and provider named in the request, so a changed choice applies to the next message with no restart.
 - Put its configured bootstrap prompt first when it calls the model.
 - Ask Auth before each tool call; do not run a call Auth refuses, and tell the model it was not permitted.
 - Execute permitted model-requested tools.
@@ -71,7 +71,7 @@ Run the model-tool loop for an interaction without owning product behavior, conv
 ## Lifecycle Rules
 
 - Tool/provider readiness should follow the architecture's configuration model (boot time).
-- The model is not boot-time configuration: it arrives with each request.
+- The model and active provider profile are not boot-time configuration: they arrive with each request.
 - Per-request payloads must not become a hidden configuration channel.
 - Runtime behavior must preserve the internal contract shape.
 

@@ -235,11 +235,11 @@ These four owner outcomes are values, not code — but they produce observable p
 
 ### C-5. Gateway ↔ Agent Loop contract is bounded (D137)
 
-**Claim:** Gateway calls Auth, then POSTs a request (messages array + the owner's current model choice + metadata) to the Agent Loop. The Agent Loop returns an SSE stream (text, tool calls, results, completion) and asks Auth before each tool call. The Agent Loop is pre-configured with its bootstrap prompt, tools and provider adapter; these don't change per-request. The model travels with each request.
+**Claim:** Gateway calls Auth, then POSTs a request (messages array + the owner's current model and provider choice + metadata) to the Agent Loop. The Agent Loop returns an SSE stream (text, tool calls, results, completion) and asks Auth before each tool call. The Agent Loop is pre-configured with its bootstrap prompt, tools and provider adapter; these don't change per-request. The model and the active provider profile travel with each request.
 
-**Verification:** Inspect the internal contract. Confirm the request/response format matches the spec. Confirm the only per-request choice the Gateway passes is the model. Confirm the request carries no system message (the bootstrap prompt is Agent Loop configuration). Confirm a changed model choice applies to the next message with no restart.
+**Verification:** Inspect the internal contract. Confirm the request/response format matches the spec. Confirm the only per-request choices the Gateway passes are the model and the active provider profile (D193). Confirm the request carries no system message (the bootstrap prompt is Agent Loop configuration). Confirm a changed model or provider-profile choice applies to the next message with no restart.
 
-**Fail condition:** The Gateway sends per-request configuration other than the model (tools, provider, bootstrap prompt) that changes Agent Loop behavior. Or a model change needs a restart. Or the internal contract carries data not specified in [gateway-agent-loop-contract.md](../architecture/gateway-agent-loop-contract.md).
+**Fail condition:** The Gateway sends per-request configuration other than the model and provider profile (tools, bootstrap prompt) that changes Agent Loop behavior. Or the request omits the provider. Or a model or provider-profile change needs a restart. Or the internal contract carries data not specified in [gateway-agent-loop-contract.md](../architecture/gateway-agent-loop-contract.md).
 
 ---
 
@@ -410,8 +410,8 @@ Each story is an acceptance test for the architecture itself.
 
 **Test procedure:**
 1. Run a baseline conversation with Provider A.
-2. Change provider configuration (and adapter if protocol differs).
-3. Continue the conversation with Provider B.
+2. Change the active provider preference to Provider B (a profile in the loaded adapter), or, if it is in a new format, change provider configuration and adapter.
+3. Continue the conversation with Provider B. For a listed profile, confirm the next message uses it with no restart.
 
 **Pass criteria:** Only config/adapter changed. No component code changed. Conversation history preserved.
 

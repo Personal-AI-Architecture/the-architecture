@@ -86,6 +86,7 @@ def validate_contract_example(file_path: str, payload: object, kind: str) -> Non
             and isinstance(payload.get("messages"), list)
             and bool(payload.get("messages"))
             and isinstance(payload.get("model"), str)
+            and isinstance(payload.get("provider"), str)
             and isinstance(payload.get("auth_context"), dict)
             and isinstance(payload.get("metadata"), dict)
             and isinstance(payload["metadata"].get("correlation_id"), str)
@@ -123,6 +124,9 @@ def validate_contract_example(file_path: str, payload: object, kind: str) -> Non
         if valid:
             for message in payload["messages"]:
                 if not isinstance(message, dict) or not {"id", "created_at"} <= message.keys():
+                    valid = False
+                    break
+                if message.get("role") == "assistant" and not (isinstance(message.get("model"), str) and isinstance(message.get("provider"), str)):
                     valid = False
                     break
                 validate_schema(message, "message.json", file_path)

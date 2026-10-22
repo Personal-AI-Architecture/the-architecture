@@ -32,7 +32,7 @@ Every setting answers one question: **is this about you, or about this machine?*
 3. **Tools describe themselves.** Adding a tool means installing it where the system looks; the tool tells the system what it does.
 4. **Two things look like configuration but aren't.** Permissions live only in Auth, so no setting can widen or narrow access. Secrets like API keys stay outside Your Memory and out of anything git tracks; settings refer to them by name, never by value.
 5. **You have the last word.** A product ships defaults, and you can change every one of them on your own hardware. An update replaces the product's defaults without overwriting your changes.
-6. **Timing follows the split.** Machine facts are read once at startup, so changing them may need a restart. Your model choice is read on every message, so switching models takes effect on the next one.
+6. **Timing follows the split.** Machine facts are read once at startup, so changing them may need a restart. Your model and provider choice are read on every message, so switching either takes effect on the next one.
 
 The rest of this doc is the specification: what any implementation of configuration must do.
 
@@ -181,7 +181,7 @@ This is the same pattern as the architecture's contracts: components speak a gen
 
 ## How the System Boots
 
-Configuration is read at two different times. **Environment facts are read once, at startup.** **The owner's model choice is read on every message.** Everything else in this section follows from that split.
+Configuration is read at two different times. **Environment facts are read once, at startup.** **The owner's model and provider choice are read on every message.** Everything else in this section follows from that split.
 
 ### At startup
 
@@ -292,7 +292,7 @@ Per-component requirements from [security-spec.md](./security-spec.md). Security
 ## Contract alignment
 
 The canonical contract tree under `contracts/` is authoritative for exact runtime,
-adapter, message, and internal-handoff shapes. The model choice is carried by the
+adapter, message, and internal-handoff shapes. The model and provider choice are carried by the
 internal request, while the bootstrap prompt, provider adapter, and tool definitions
 remain startup configuration. Adapter configuration remains intentionally
 implementation-specific until a dedicated schema is agreed.

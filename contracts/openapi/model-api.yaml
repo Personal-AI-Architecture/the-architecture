@@ -8,8 +8,9 @@ info:
 
     This is an internal interface (what the Agent Loop speaks), not a specific provider's
     API. An adapter translates between this generic internal interface and
-    provider-specific formats (OpenRouter, Anthropic, Ollama, etc.). Swapping a
-    provider means swapping an adapter — no Agent Loop changes.
+    provider-specific formats (OpenRouter, Anthropic, Ollama, etc.). Switching
+    to another provider profile the adapter lists is an owner preference (D193); a provider
+    in a new format means swapping an adapter. Neither changes the Agent Loop.
 
     Direction:
     - Agent Loop → Model: Prompt (system instructions + conversation + tool definitions + context)

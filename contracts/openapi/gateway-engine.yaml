@@ -73,6 +73,7 @@ paths:
                 summary: A budgeting conversation with history
                 value:
                   model: 'local/llama-3.1-8b'
+                  provider: 'local'
                   auth_context:
                     actor:
                       id: 'owner_abc123'
@@ -193,6 +194,7 @@ components:
       required:
         - messages
         - model
+        - provider
         - auth_context
       properties:
         messages:
@@ -212,9 +214,8 @@ components:
         provider:
           type: string
           description: |
-            The owner's active provider profile, when the loaded adapter config lists
-            more than one (D193). The Gateway reads it for every request with the model;
-            the Agent Loop uses that profile and must not substitute another.
+            The owner's active provider profile. The Gateway reads it with the model for
+            every request; the Agent Loop uses it and must not substitute another.
         auth_context:
           $ref: '../schemas/auth-context.json'
           description: |

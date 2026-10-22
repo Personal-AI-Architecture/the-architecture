@@ -54,7 +54,7 @@ The Gateway sits between clients and the Agent Loop. Their relationship:
 | Gateway's job | Agent Loop's job |
 |--------------|-------------|
 | Manage conversations (create, list, resume, store) | Process individual interactions (message → model → tools → response) |
-| Package conversation history, with the owner's current model choice, and pass it to the Agent Loop | Accept message + history + model as input, return streamed response |
+| Package conversation history, with the owner's current model and provider choice, and pass it to the Agent Loop | Accept message + history + model + provider as input, return streamed response |
 | Store the Agent Loop's response in the conversation, with the model and provider that produced it (D194) | Stream the response back, then it's done |
 | Handle multiple clients connecting simultaneously; serialize messages within each conversation and queue later messages in arrival order | Handle the agent loop for each interaction; different conversations may run concurrently |
 
@@ -120,7 +120,7 @@ Clients are not components of the system. They connect through the Gateway (D57)
 
 ## The Gateway contract
 
-The Gateway ↔ Agent Loop interface is defined in [gateway-agent-loop-contract.md](./gateway-agent-loop-contract.md) (D137). The Gateway calls Auth, then packages the messages array (conversation history + current message), the model choice it has just read, and metadata, and POSTs to the Agent Loop. The bootstrap prompt is not part of the request: it is the Agent Loop's own configuration. The Agent Loop returns an SSE stream. All three contracts use one message shape, with tool calls and tool results as ordinary parts of messages, so what the Agent Loop streams back can be stored and replayed as history without conversion.
+The Gateway ↔ Agent Loop interface is defined in [gateway-agent-loop-contract.md](./gateway-agent-loop-contract.md) (D137). The Gateway calls Auth, then packages the messages array (conversation history + current message), the model and provider choice it has just read, and metadata, and POSTs to the Agent Loop. The bootstrap prompt is not part of the request: it is the Agent Loop's own configuration. The Agent Loop returns an SSE stream. All three contracts use one message shape, with tool calls and tool results as ordinary parts of messages, so what the Agent Loop streams back can be stored and replayed as history without conversion.
 
 Where a product enables approvals, the Gateway forwards the canonical `approval-request` and `approval-result` events and accepts decisions through the product's Gateway route. It does not approve locally: Auth verifies authority, and `request_id` makes terminal decisions replay-safe.
 
@@ -135,7 +135,7 @@ These must survive a replacement of either the Gateway or the Agent Loop (AC-7.2
 
 ### How the Gateway reaches Your Memory
 
-The Gateway uses its conversation store tool for conversations (D152), and reads the owner's model choice through the Memory tools on every message (see [configuration-spec.md](./configuration-spec.md) "How the System Boots").
+The Gateway uses its conversation store tool for conversations (D152), and reads the owner's model and provider choice through the Memory tools on every message (see [configuration-spec.md](./configuration-spec.md) "How the System Boots").
 
 The Gateway doesn't go through the agent loop's tool loop (that would be circular — the Gateway needs conversation history to assemble the request it's about to send to the Agent Loop). It calls the conversation store tool directly. Same tool interface, different caller — one key to the mailbox, not a copy of every key to every room.
 
@@ -195,7 +195,7 @@ Items marked *(security)* are the per-component requirements from [security-spec
 - [ ] The Gateway routes to the Agent Loop without knowing what the Agent Loop does with the message
 - [ ] Every request passes an Auth check before it reaches the Agent Loop or conversation data
 - [ ] Auth and the Gateway are independent — swapping either doesn't require changing the other
-- [ ] A changed model choice applies to the next message with no restart
+- [ ] A changed model or provider choice applies to the next message with no restart
 - [ ] Tool calls and tool results are saved in conversation history and come back when a conversation is resumed
 - [ ] The Agent Loop remains generic — adding the Gateway didn't push conversation management into the Agent Loop
 - [ ] Your Memory remains unopinionated — conversations are stored as data, Your Memory doesn't know they're conversations
@@ -217,7 +217,7 @@ Items marked *(security)* are the per-component requirements from [security-spec
 | D60 | Auth is independent of the Gateway | Neither depends on how the other is built, and both can be swapped independently. The Gateway calls Auth on every request before anything reaches the Agent Loop (D176). |
 | D61 | Conversations live in the system, not in any client — enabling seamless client switching | Conversations are data in Your Memory, managed by the Gateway. Start on web, continue on mobile, pick up on CLI. The conversation persists regardless of which client connects. This is what makes clients truly external and interchangeable. |
 | D62 | Models are external intelligence, not a system component — addressed in Models interview | The interview raised the question of whether Models is a component. Models are called through the Model API but aren't part of the system the way Your Memory, Agent Loop, Auth, and Gateway are. Full treatment deferred to the Models interview. |
-| D137 | Gateway ↔ Agent Loop is a plain HTTP API contract | `POST /agent-loop/chat` with messages array, model and metadata. Agent Loop returns SSE stream. Tool definitions are boot-time; the model travels with each request. See [gateway-agent-loop-contract.md](./gateway-agent-loop-contract.md). |
+| D137 | Gateway ↔ Agent Loop is a plain HTTP API contract | `POST /agent-loop/chat` with messages array, model, provider and metadata. Agent Loop returns SSE stream. Tool definitions are boot-time; the model and provider travel with each request. See [gateway-agent-loop-contract.md](./gateway-agent-loop-contract.md). |
 | D152 | Gateway accesses Your Memory through a dedicated conversation store tool, not directly | Purpose-built internal tool for conversation management (store, load, list, create). Same tool interface as memory tools, called directly by Gateway — not through Agent Loop's tool loop (circular dependency). One key to the mailbox, not a copy of every key. |
 
 ---

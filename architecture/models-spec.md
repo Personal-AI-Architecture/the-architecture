@@ -34,7 +34,7 @@ The Model API defines that exchange. A small adapter translates it into each pro
 
 **Choosing a model:** your choice of model is a preference saved in Your Memory. On every message, the Gateway reads that preference and passes it along, and the Agent Loop sends the request to that model. If you change the preference, your next message goes to the new model, with no restart.
 
-**Changing providers:** moving from one provider to another, such as from a cloud provider to a model running locally on your computer, means choosing that provider's adapter and giving it the provider's connection details. Any API key is kept separately as a secret, never in Your Memory. The system may need a restart to pick up the change.
+**Changing providers:** if the adapter's config already lists the provider as a profile, switching to it is a preference in Your Memory beside the model: the Gateway reads it on every message, so your next message uses it, with no restart. A provider in a new format, such as a model running locally on your computer, means installing that provider's adapter and giving it the provider's connection details. Any API key is kept separately as a secret, never in Your Memory. That change may need a restart.
 
 **What the Model API doesn't do:** it only carries the exchange between the Agent Loop and the model. It doesn't decide:
 
@@ -89,7 +89,7 @@ The Model API only carries the exchange. It doesn't decide what goes into the re
 
 ## What reaches the model provider
 
-Each request sends the instructions, the conversation and the Memory content the model read to the model's provider. That is why the provider must be the owner's choice (above), and why a model on the owner's own hardware is the option for keeping that content on their machine. Every saved reply records the model and provider that produced it, so the owner can see afterwards which company saw which part of a conversation (D194). See [security-spec.md](./security-spec.md) §Model Provider Data Flow.
+Each request sends the instructions, the conversation and the Memory content the model read to the model's provider. That is why the provider must be the owner's choice (above), and why a model on the owner's own hardware is the option for keeping that content on their machine. Every saved reply records the model and provider that produced it, so the owner can see afterwards which model and provider profile produced each saved reply (D194). See [security-spec.md](./security-spec.md) §Model Provider Data Flow.
 
 ## Errors
 

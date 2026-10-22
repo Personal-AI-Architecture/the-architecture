@@ -9,8 +9,8 @@ Use this when reviewing bootstrap code, config loaders, adapter wiring, secret h
 ## Checklist
 
 - [ ] Runtime config, adapter config, and preferences are separate layers.
-- [ ] Request payloads are not used as a hidden configuration channel (the model choice is the one per-request value).
-- [ ] The model is an owner preference read on every message, not fixed at startup; a change applies to the next message with no restart.
+- [ ] Request payloads are not used as a hidden configuration channel (the model and the active provider profile are the two per-request values).
+- [ ] The model and the active provider profile are owner preferences read on every message, not fixed at startup; a change to either applies to the next message with no restart. Only a provider in a new adapter format may need a restart.
 - [ ] Permissions and approval rules are not in configuration or preferences; they live only in Auth.
 - [ ] No layer sits above the owner: product defaults are changeable by the owner on their own hardware.
 - [ ] Secrets are referenced rather than stored by value; their values live outside Memory and outside anything git tracks.

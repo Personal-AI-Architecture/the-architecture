@@ -80,9 +80,9 @@ Run the sections that match changed areas.
 
 ### Models and Provider Integration
 
-- [ ] Model choice remains an owner preference passed with each request; a change applies to the next message with no restart (D63, D147, D175).
+- [ ] Model and provider-profile choice remain owner preferences passed with each request; a change applies to the next message with no restart (D63, D147, D175).
 - [ ] Provider-specific request/stream/tool-call details remain adapter concerns (D139).
-- [ ] Fallback routing strategy remains possible via config/adapters.
+- [ ] A provider failure is reported as `provider_error` and stops the turn, with no silent fallback to another model or provider (D188); an explicit owner retry or provider change outside the turn is optional product behavior.
 
 ### Tools
 
@@ -119,7 +119,7 @@ Run this for milestone/release and for major adapter/config changes.
 ### Provider Swap
 
 - [ ] Run baseline scenario with Provider A.
-- [ ] Switch provider adapter/config to Provider B.
+- [ ] Switch to Provider B (change the active provider preference if it is a listed profile; otherwise provider adapter/config).
 - [ ] Re-run same scenario.
 - [ ] Verify no cross-component code edits were required.
 

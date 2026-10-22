@@ -86,7 +86,7 @@ def check_contract_baseline(root: Path) -> list[str]:
     require("source_id" in call["required"], "tool calls do not preserve source identity")
 
     gateway_request = read_json(root, "contracts/examples/gateway-engine-request.json")
-    require(set(gateway_request) >= {"messages", "model", "auth_context", "metadata"}, "internal request is missing a bounded required field")
+    require(set(gateway_request) >= {"messages", "model", "provider", "auth_context", "metadata"}, "internal request is missing a bounded required field")
     auth_context = gateway_request["auth_context"]
     require(set(auth_context) >= {"actor", "authentication_id", "authenticated_at", "correlation_id"}, "auth_context is incomplete")
     require(not ({"permissions", "credential", "token", "api_key"} & set(auth_context)), "auth_context carries credentials or permissions")

@@ -388,6 +388,16 @@ components:
           required:
             - id
             - created_at
+          if:
+            properties:
+              role:
+                const: assistant
+            required:
+              - role
+          then:
+            required:
+              - model
+              - provider
           properties:
             id:
               type: string
