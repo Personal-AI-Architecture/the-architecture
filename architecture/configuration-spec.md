@@ -302,7 +302,7 @@ Per-component requirements from [security-spec.md](./security-spec.md). Security
 - [ ] Runtime and adapter config must not contain secrets by value — only the secret's name (for example `"api_key_env": "PROVIDER_API_KEY"`)
 - [ ] Preferences in Your Memory must not contain environment-specific references (server addresses, ports, paths) — only personal choices
 - [ ] Adapter config files must not leak across deployments — provider-specific settings stay with the deployment, not with Your Memory
-- [ ] Startup must not require network access — the startup phases complete without any outbound calls
+- [ ] Startup must not require network access. With no network, startup completes; a remote tool or provider that can't be reached is reported, not a startup failure. Outbound calls at startup go only where the owner has configured them
 
 ---
 
