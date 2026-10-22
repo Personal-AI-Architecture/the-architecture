@@ -9,7 +9,7 @@ hide_table_of_contents: true
 >
 > Each gap is something the spec expects that the published architecture does not deliver today. Classification is a suggestion for triage: **Defect** (published material is broken or contradicts itself), **Decision needed** (the maintainers must choose), **Technical** (contract and technical work), **Spec-only** (wording fix in the architecture docs). A gap marked **Decided, spec update in progress** has a settled answer that is still being written into the specs and contracts.
 
-**Scoreboard:** The contract-source alignment batch, example-shape validation, documentation freshness tooling, configuration alignment, required parallel tool execution, portable policy semantics, approval lifecycle contracts, transport-neutral identity propagation, tool-definition visibility/source semantics, local-address decision, first executable language-neutral conformance baseline, template-link cleanup, the visitor-1 decisions on GAP-PAA-18, 19 and 23, the v1 identity rule for GAP-PAA-24 (agent identities deferred to the agents step), the Auth-down fail-closed correction, multi-actor wording, revocation cancellation, and portable audit records are complete. GAP-PAA-20 stays open with Dave J.
+**Scoreboard:** The contract-source alignment batch, example-shape validation, documentation freshness tooling, configuration alignment, required parallel tool execution, portable policy semantics, approval lifecycle contracts, transport-neutral identity propagation, tool-definition visibility/source semantics, local-address decision, first executable language-neutral conformance baseline, template-link cleanup, the visitor-1 decisions on GAP-PAA-18, 19 and 23, the v1 identity rule for GAP-PAA-24 (agent identities deferred to the agents step), the Auth-down fail-closed correction, multi-actor wording, revocation cancellation, portable audit records, and the provider decisions on GAP-PAA-26 and 28 are complete. Still open: GAP-PAA-20 (with Dave J), and from the visitor-1 read-through of the Models, Tools, Adapter and Communication docs GAP-PAA-27, 29, 30 and 31.
 
 ## Routes a developer follows
 
@@ -188,12 +188,13 @@ hide_table_of_contents: true
 - **Evidence:** [audit-record.json](../contracts/schemas/audit-record.json); [audit example](../contracts/examples/audit-record.json); [auth-spec.md](../architecture/auth-spec.md) "Audit log"; [security-spec.md](../architecture/security-spec.md) "Audit Logging".
 - **Decided:** The architecture fixes the portable envelope and privacy boundary; retention, redaction policy beyond the no-secrets rule, indexing, and presentation remain implementation choices.
 
-### GAP-PAA-26: Switching provider needs a restart, but the reference build switches per message — Decision needed
+### GAP-PAA-26: Switching provider needs a restart, but the reference build switches per message — Resolved
 
 - **Expected:** US-5. The owner can use different models for different tasks, across cloud and local providers, without being stuck with one company.
 - **Published:** Runtime config names one `provider_adapter`, and a provider swap changes runtime config, the adapter config and a secret, with a restart allowed. Only a model change within the loaded adapter takes effect on the next message. BrainDrive goes further: one adapter config lists several provider profiles (for example BrainDrive Models, OpenRouter and Ollama), the active profile is an owner preference in Your Memory next to the model, and both are re-read on every message, so switching provider needs no restart. Keys stay out of Your Memory: a profile names a secret reference.
 - **Proposed:** Adopt that pattern. The adapter config may list provider profiles; the active provider is an owner preference read on every message, like the model; a restart stays allowed only when a new kind of adapter (a new format) is installed. Choosing a model per task within one conversation stays out of scope.
 - **Evidence:** [configuration-spec.md](../architecture/configuration-spec.md) "Provider swap" and "Model swap"; [adapter-spec.md](../architecture/adapter-spec.md); [configuration.json](../contracts/schemas/configuration.json) `provider_adapter`; [adapter-config.json](../contracts/examples/adapter-config.json); BrainDrive `builds/typescript/adapters/openai-compatible.json` (`provider_profiles`) and `gateway/server.ts` (per-message `active_provider_profile`).
+- **Decided (2026-10-22 dev call):** Adopted as proposed (D193). Written into the Models, Configuration and Adapter specs, the Gateway–Agent Loop contract (`provider` on the request) and SWAP-1b.
 
 ### GAP-PAA-27: The promises to report a missing model or capability have no error codes — Technical
 
@@ -202,12 +203,13 @@ hide_table_of_contents: true
 - **Proposed:** Define only the codes a promise depends on: `model_unavailable` and `capability_unsupported` (naming the missing capability), on both the Model API error and the Agent Loop error stream, whose `code` list (`provider_error`, `tool_error`, `auth_error`, `context_overflow`) is in `gateway-engine.yaml`. Other provider errors (rate limits, quota, rejected keys) stay free text, and how an adapter detects any of them stays its own business. Advance capability discovery is out of scope.
 - **Evidence:** [models-spec.md](../architecture/models-spec.md) "What the system guarantees about models"; [configuration-spec.md](../architecture/configuration-spec.md) "If the chosen model isn't available through the loaded adapter"; `contracts/openapi/model-api.yaml` `CompletionError`.
 
-### GAP-PAA-28: Saved conversations don't record which model and provider produced each reply — Decision needed
+### GAP-PAA-28: Saved conversations don't record which model and provider produced each reply — Resolved
 
 - **Expected:** The owner knows which provider processes their data (security-spec, Model Provider Data Flow), including afterwards: which company saw which conversation.
 - **Published:** The current provider is set in startup and adapter config, which the owner can read, so the owner can find out the current one. But the Gateway API has no way to read the current model or provider, and saved conversation messages carry no model or provider, so after a switch there is no record of where earlier replies were processed. BrainDrive shows the provider on its own settings routes, outside the architecture's APIs.
 - **Proposed:** Each saved assistant reply records the model and provider that produced it. Whether to record it is a values call, so it is a decision before it is a contract change.
 - **Evidence:** [security-spec.md](../architecture/security-spec.md) "Model Provider Data Flow"; `contracts/openapi/gateway-api.yaml`; [conversation-detail-response.json](../contracts/examples/conversation-detail-response.json).
+- **Decided (2026-10-22 dev call):** Adopted (D194). Assistant messages in the Gateway API carry `model` and `provider`; the Models, Security and Gateway specs say so, and the conversation example shows it.
 
 ### GAP-PAA-29: How tools that run as separate services are found — Decision needed
 

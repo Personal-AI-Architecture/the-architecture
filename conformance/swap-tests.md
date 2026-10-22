@@ -38,7 +38,7 @@ markers while adapter configuration changes remain outside tool definitions.
 5. Start the system
 6. Run the same test conversation
 
-A restart is allowed here: the provider adapter is startup configuration. Changing only the model never needs a restart (see SWAP-2).
+A restart is allowed here: the provider adapter is startup configuration. Changing only the model never needs a restart (see SWAP-2), and neither does switching to another provider profile in the loaded adapter (SWAP-1b, D193).
 
 Provider failure is reported by the Agent Loop as a provider error. This test
 does not require or permit a silent fallback to another provider; an explicit
@@ -54,6 +54,19 @@ retry or provider change is a separate owner/product action.
 - Any source code file was modified
 - Any component other than the Agent Loop's adapter needed changes
 - The system required a rebuild or recompilation
+
+### SWAP-1b: Provider Profile Switch
+
+**Setup:** The loaded adapter config lists two provider profiles (e.g., OpenRouter and a local Ollama endpoint), with the first active.
+
+**Procedure:**
+1. Send a test message and note the provider recorded on the reply
+2. Change the active provider preference in Your Memory to the second profile, without restarting
+3. Send the same test message
+
+**Pass criteria:**
+- [ ] The second message uses the second provider with no restart and no code change
+- [ ] Each saved reply records the model and provider that produced it (D194)
 
 ---
 

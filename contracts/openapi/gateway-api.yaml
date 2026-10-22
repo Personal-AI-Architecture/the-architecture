@@ -400,6 +400,12 @@ components:
               type: object
               additionalProperties: true
               description: Client-provided metadata that was sent with this message
+            model:
+              type: string
+              description: For assistant messages, the model that produced this reply (D194)
+            provider:
+              type: string
+              description: For assistant messages, the provider profile that produced this reply (D194)
 
     # --- Client SSE Stream ---
 

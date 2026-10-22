@@ -55,7 +55,7 @@ The Gateway sits between clients and the Agent Loop. Their relationship:
 |--------------|-------------|
 | Manage conversations (create, list, resume, store) | Process individual interactions (message → model → tools → response) |
 | Package conversation history, with the owner's current model choice, and pass it to the Agent Loop | Accept message + history + model as input, return streamed response |
-| Store the Agent Loop's response in the conversation | Stream the response back, then it's done |
+| Store the Agent Loop's response in the conversation, with the model and provider that produced it (D194) | Stream the response back, then it's done |
 | Handle multiple clients connecting simultaneously; serialize messages within each conversation and queue later messages in arrival order | Handle the agent loop for each interaction; different conversations may run concurrently |
 
 The Gateway knows about conversations. The Agent Loop doesn't. The Agent Loop knows about models and tools. The Gateway doesn't. Clean separation.

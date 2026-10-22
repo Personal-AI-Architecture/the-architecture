@@ -70,7 +70,7 @@ A model is external wherever it runs:
 |---|---|
 | **One way in** | Every model is reached through the Model API, through an adapter. Provider-specific formats stay in the adapter, never in the Agent Loop or Gateway. |
 | **Switching models is a preference** | The model is an owner preference in Your Memory (a product default until the owner changes it). The Gateway reads it on every message and passes it with the request, so a change takes effect on the next message, with no restart and no code change. If no model has been chosen, by a product default or the owner, the system reports it rather than picking one. |
-| **Switching providers is configuration** | A provider swap changes only the adapter, its config, the startup config and the API key secret, never component code. A restart is allowed. (GAP-PAA-26 proposes making the provider a per-message preference too.) |
+| **Switching providers is a preference too** | An adapter config can list several provider profiles. Which one is active is an owner preference beside the model, read on every message, so switching provider takes effect on the next message with no restart (D193). Adding a provider in a new format means installing a new adapter: a configuration change that never touches component code, and a restart is allowed. |
 | **Missing abilities are reported, not faked** | Models differ: one reads images and another doesn't, one supports tool calls and another doesn't, context windows differ. Switching models does not promise identical abilities. When the chosen model can't do something a request needs, or isn't available through the loaded adapter, that is reported to the Agent Loop and through it to the owner. The system must not silently drop content, pretend a tool was called, or quietly substitute another model. |
 | **The provider is the owner's choice** | The provider is only ever a product default or the owner's choice, kept where the owner can read it, and it is never changed without the owner. |
 
@@ -89,7 +89,7 @@ The Model API only carries the exchange. It doesn't decide what goes into the re
 
 ## What reaches the model provider
 
-Each request sends the instructions, the conversation and the Memory content the model read to the model's provider. That is why the provider must be the owner's choice (above), and why a model on the owner's own hardware is the option for keeping that content on their machine. See [security-spec.md](./security-spec.md) §Model Provider Data Flow.
+Each request sends the instructions, the conversation and the Memory content the model read to the model's provider. That is why the provider must be the owner's choice (above), and why a model on the owner's own hardware is the option for keeping that content on their machine. Every saved reply records the model and provider that produced it, so the owner can see afterwards which company saw which part of a conversation (D194). See [security-spec.md](./security-spec.md) §Model Provider Data Flow.
 
 ## Errors
 
@@ -98,7 +98,7 @@ Each request sends the instructions, the conversation and the Memory content the
 | The chosen model lacks an ability the request needs | Reported, not faked (above). GAP-PAA-27 proposes the `capability_unsupported` code. |
 | The chosen model isn't available through the loaded adapter, or none is chosen | Reported; no other model is substituted. GAP-PAA-27 proposes the `model_unavailable` code. |
 | The request is too large for the model's context window | Reported as `context_overflow`. Who keeps requests within the window is open (GAP-PAA-20). |
-| The provider is down or times out | Reported as `provider_error`. Whether anything falls back to another provider is open (GAP-PAA-19). |
+| The provider is down or times out | Reported as `provider_error`, and the current turn stops. No other provider or model is substituted; PAA defines no fallback model (D188). The owner can switch provider and try again. |
 
 ## How model access grows
 
@@ -113,7 +113,10 @@ Each request sends the instructions, the conversation and the Memory content the
 - [ ] Provider-specific request formatting lives in the adapter, not the Agent Loop or Gateway
 - [ ] Changing the model preference takes effect on the next message, with no restart and no code change
 - [ ] With no model chosen, the system reports it rather than picking one
-- [ ] Swapping providers changes only the adapter, its config, the startup config and the API key secret
+- [ ] Switching to another provider profile in the loaded adapter takes effect on the next message, with no restart and no code change
+- [ ] Adding a provider in a new format changes only the adapter, its config, the startup config and the API key secret
+- [ ] A provider failure is reported and stops the turn; no other provider or model is substituted
+- [ ] *(security)* Every saved assistant reply records the model and provider that produced it
 - [ ] Local and cloud models go through the same Model API
 - [ ] A request needing an ability the chosen model lacks is reported: no content silently dropped, no tool call pretended, no model quietly substituted
 - [ ] *(security)* The provider is only a product default or the owner's choice, readable by the owner, and never changed without the owner

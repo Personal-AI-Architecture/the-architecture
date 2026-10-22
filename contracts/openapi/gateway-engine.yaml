@@ -59,8 +59,9 @@ paths:
         The Gateway checks Auth before routing. The Agent Loop also checks Auth before every
         tool call; permissions live only in Auth.
 
-        The Agent Loop is pre-configured with tool definitions and provider configuration at
-        startup. These are not per-request data.
+        The Agent Loop is pre-configured with tool definitions and the adapter and its
+        provider profiles at startup. The model and the active provider profile are
+        owner preferences and arrive with each request (D193).
       requestBody:
         required: true
         content:
@@ -208,6 +209,12 @@ components:
           description: |
             The owner's current model choice. The Gateway reads this for every
             request and passes it through; the Agent Loop must not pin it at startup.
+        provider:
+          type: string
+          description: |
+            The owner's active provider profile, when the loaded adapter config lists
+            more than one (D193). The Gateway reads it for every request with the model;
+            the Agent Loop uses that profile and must not substitute another.
         auth_context:
           $ref: '../schemas/auth-context.json'
           description: |

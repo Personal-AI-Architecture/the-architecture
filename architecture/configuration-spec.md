@@ -171,7 +171,9 @@ Each adapter (see [adapter-spec.md](../architecture/adapter-spec.md), D139) may 
 }
 ```
 
-**Swapping a provider = swapping an adapter file.** Runtime config points to which adapter (`provider_adapter: "openrouter"`). The adapter file contains everything provider-specific. Nothing else in the system knows or cares about provider details. See [adapter-spec.md](../architecture/adapter-spec.md) §How Model Configuration Works in Practice for the full walkthrough of model and provider swaps — what changes, what doesn't, and the two kinds of change (same provider vs different provider).
+**An adapter config can list provider profiles.** One adapter format (for example OpenAI-compatible) often reaches several providers. The adapter config may list each as a profile with its endpoint and a secret reference; which profile is active is an owner preference in Your Memory, read on every message like the model (D193). Switching between profiles is a preference change with no restart. Only a provider in a new format needs a new adapter, named by `provider_adapter`.
+
+**Swapping to a new adapter format = swapping an adapter file.** Runtime config points to which adapter (`provider_adapter: "openrouter"`). The adapter file contains everything provider-specific. Nothing else in the system knows or cares about provider details. See [adapter-spec.md](../architecture/adapter-spec.md) §How Model Configuration Works in Practice for the full walkthrough of model and provider swaps — what changes, what doesn't, and the two kinds of change (same provider vs different provider).
 
 This is the same pattern as the architecture's contracts: components speak a generic internal interface, adapters translate to/from the specific external standard. Configuration follows the same principle: runtime config speaks generically, adapter config handles the specifics.
 
@@ -195,11 +197,12 @@ Changing runtime config, adapter config, or installed tools changes the environm
 
 ### On every message
 
-1. **Gateway reads the owner's current model choice** from preferences in Your Memory, through the Memory tools.
-2. **Gateway passes it to the Agent Loop** with the request, after Auth has checked the request.
-3. **Agent Loop calls the model** through the Model API using that choice and the loaded adapter.
+1. **Gateway reads the owner's current model and provider choice** from preferences in Your Memory, through the Memory tools.
+2. **Gateway passes them to the Agent Loop** with the request, after Auth has checked the request.
+3. **Agent Loop calls the model** through the Model API using that model, that provider profile and the loaded adapter.
+4. **Gateway stores the reply** with the model and provider that produced it (D194).
 
-Because the model choice travels with each request, a change takes effect on the next message — no restart, no code change. If the chosen model isn't available through the loaded adapter, the owner is told rather than silently switched.
+Because the model and provider choice travel with each request, a change takes effect on the next message — no restart, no code change. If the chosen model isn't available through the loaded adapter, the owner is told rather than silently switched.
 
 Other preferences are also read through the Memory tools; how often to re-read them is the implementation's choice.
 
@@ -217,7 +220,8 @@ Three swap types constitute "normal":
 
 | Swap | What changes | Config changes required |
 |------|-------------|----------------------|
-| **Provider swap** | OpenRouter → Anthropic direct (or Ollama) | 1. `provider_adapter` in runtime config. 2. New adapter config file. 3. API key secret. A restart is allowed. |
+| **Provider swap** (profile in the loaded adapter) | OpenRouter → Ollama, both listed in the OpenAI-compatible adapter config | 1. Active provider preference in Your Memory. Next message uses the new provider; no restart (D193). |
+| **Provider swap** (new adapter format) | OpenRouter → a provider with its own format | 1. `provider_adapter` in runtime config. 2. New adapter config file. 3. API key secret. A restart is allowed. |
 | **Model swap** (within adapter) | Claude → Gemini (both on OpenRouter) | 1. Model preference in Your Memory. Next message uses the new model; no restart. |
 | **Tool swap** | Add/remove a tool | 1. Install/uninstall the tool in a `tool_sources` path. 2. Update preferences if it was in the always-send set. |
 
@@ -254,13 +258,14 @@ This is a CI test, not a guideline. Run it on every release.
 | # | Decision | Rationale |
 |---|----------|-----------|
 | D143 | Configuration is a cross-cutting concern — not owned by any single component, defined in its own spec | Every component has configuration, and it is where lock-in hides. Three categories: preferences (Your Memory), runtime config (thin bootstrap), tool self-description. |
-| D147 | Anti-lock-in test: three normal swaps (provider, model, tool) must succeed with config-only changes | Provider swap = change adapter + secret. Model swap = change preference. Tool swap = install/uninstall + update preferences. If any requires code changes, lock-in has been introduced. CI-testable on every release. |
+| D147 | Anti-lock-in test: three normal swaps (provider, model, tool) must succeed with config-only changes | Provider swap = change the provider preference (D193), or for a new format change adapter + secret. Model swap = change preference. Tool swap = install/uninstall + update preferences. If any requires code changes, lock-in has been introduced. CI-testable on every release. |
 
 ---
 
 ## Success Criteria
 
-- [ ] Swapping a model provider requires only changing `provider_adapter`, providing a new adapter config file, and setting the secret — zero code changes
+- [ ] Switching to another provider profile in the loaded adapter takes effect on the next message — no restart, no code change (D193)
+- [ ] Swapping to a provider in a new format requires only changing `provider_adapter`, providing a new adapter config file, and setting the secret — zero code changes
 - [ ] Changing the model preference takes effect on the next message — no restart, no code change
 - [ ] Swapping the Agent Loop requires only changing the Agent Loop binary/container — runtime config, preferences, and Your Memory are unaffected
 - [ ] Adding a tool requires only installing it in a `tool_sources` path — the tool self-describes, no config editing beyond that
