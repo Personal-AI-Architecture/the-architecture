@@ -141,9 +141,9 @@ At boot, the system loads the adapter. On every message, the Gateway reads your 
 
 | Before | After | What changed |
 |--------|-------|-------------|
-| `provider_adapter: "openrouter"` | `provider_adapter: "ollama"` | Runtime config (1 field) |
-| `adapters/openrouter.json` | `adapters/ollama.json` | Adapter config (1 file) |
-| `$OPENROUTER_API_KEY` | *(not needed — Ollama is local)* | Environment variable |
+| `provider_adapter: "openai-compatible"` | `provider_adapter: "anthropic"` | Runtime config (1 field) |
+| `adapters/openai-compatible.json` | `adapters/anthropic.json` | Adapter config (1 file) |
+| `"api_key_env": "OPENROUTER_API_KEY"` | `"api_key_env": "ANTHROPIC_API_KEY"` | Secret reference and its environment variable |
 
 In both cases: Agent Loop doesn't change. Gateway doesn't change. Auth doesn't change. Your Memory doesn't change (except the preference). Your client doesn't change. This is the D147 anti-lock-in test — if any swap requires code changes, lock-in has been introduced.
 

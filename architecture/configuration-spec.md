@@ -123,7 +123,7 @@ Tool definitions (name, description, parameters, capabilities) are not written b
 | **The startup file stays thin** | Runtime config has exactly four fields, all about this machine (D144). The owner can read and change it. |
 | **Tools describe themselves** | Tool definitions come from the tools, never from config, so they can't drift (D146). Config only says where to find tools. |
 | **Normal swaps never need code** | Switching a model, a provider or a tool is a configuration change only (D147). Everyday use, like using an installed tool or starting a new project, needs no config edit at all. |
-| **Config stays generic** | Config fields never name internal services, proprietary formats or implementation details: `provider_adapter: "openrouter"`, not `openrouter_v2_internal_bridge: true`. |
+| **Config stays generic** | Config fields never name internal services, proprietary formats or implementation details: `provider_adapter: "openai-compatible"`, not `openrouter_v2_internal_bridge: true`. |
 | **Permissions live only in Auth** | No permission is stored in or applied from configuration or preferences. |
 | **Secrets are named, never stored** | Config names a secret; its value lives outside Your Memory and outside anything git tracks (D172). |
 | **The owner has the last word** | The owner can change every product default on their own hardware, and an update never silently overwrites an owner change (D171). |
@@ -138,7 +138,7 @@ Each adapter (see [adapter-spec.md](../architecture/adapter-spec.md), D139) may 
 | **OpenAI-compatible adapter** | Provider profiles (OpenRouter, Ollama, OpenAI and others), each with a base URL and, when the provider needs a key, a secret reference; plus the default profile | `adapters/openai-compatible.json` |
 | **A provider's own format** (for example Anthropic's) | Base URL, API version, secret reference | `adapters/anthropic.json` |
 
-**Example adapter config** (`adapters/openai-compatible.json`). It lists provider profiles and pins no model, since the model is a preference:
+**Example adapter config** (`adapters/openai-compatible.json`). It lists provider profiles and pins no model, since the model is a preference. `default_provider_profile` is the product's default, used until the owner chooses a provider:
 
 ```json
 {
@@ -195,7 +195,7 @@ Because the model and provider choice travel with each request, a change takes e
 
 Other preferences are also read through the Memory tools; how often to re-read them is the implementation's choice.
 
-If any preference references a tool that doesn't exist in this environment (e.g., "always load web scraper" but no web scraper is installed), the system notes the mismatch and continues. The model will tell the owner "web scraper is configured as preferred but not available in this environment" when relevant. This is not an error — it's information.
+If any preference references a tool that doesn't exist in this environment (e.g., "always load web scraper" but no web scraper is installed), the system continues and reports the mismatch to the owner. This is not an error — it's information.
 
 Permissions are not part of either sequence. The Gateway asks Auth on every request, and the Agent Loop asks Auth before each tool call ([auth-spec.md](./auth-spec.md)). Configuration never applies access rules.
 
