@@ -32,7 +32,4 @@ For larger architectural changes, open an issue first so we can align on intent 
 
 ## License
 
-By contributing, you agree your contributions are licensed under:
-
-- **Code:** MIT License
-- **Documentation:** CC BY 4.0
+By contributing, you agree your contributions are licensed under the MIT License, like everything in this repository. See [LICENSE](LICENSE).
