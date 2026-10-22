@@ -15,7 +15,7 @@ Accept external requests, manage conversation lifecycle, call Auth on every requ
 
 ## Does Not Own
 
-- Model choice as an architectural responsibility (the owner chooses; the Gateway only reads the current choice and passes it on).
+- Model choice as an architectural responsibility (the owner chooses the model and provider profile; the Gateway only reads the current choices and passes them on).
 - Tool execution.
 - Memory storage internals.
 - Auth policy internals.
@@ -30,7 +30,7 @@ Accept external requests, manage conversation lifecycle, call Auth on every requ
 ## Interfaces
 
 - Exposes the Gateway API to clients.
-- Uses the internal `messages + model + metadata` contract with the Agent Loop.
+- Uses the internal `messages + model + provider + metadata` contract with the Agent Loop.
 - Calls Auth on every request, before anything reaches the Agent Loop or conversation data.
 - Uses dedicated conversation access to Memory.
 
@@ -40,7 +40,8 @@ Accept external requests, manage conversation lifecycle, call Auth on every requ
 - Access conversation data through a dedicated conversation-store boundary or tool rather than a private in-process store.
 - Accept client messages plus client metadata. Message content is a list of parts.
 - Save tool calls and tool results as ordinary parts of messages in conversation history, and send them back on resume.
-- Read the owner's current model choice on every message and pass it to the Agent Loop, so a change applies to the next message with no restart.
+- Read the owner's current model and provider choice on every message and pass both to the Agent Loop, so a change applies to the next message with no restart.
+- Store the model and provider profile that produced each assistant reply on the saved message (D194).
 - Forward only bounded interaction data to the Agent Loop. The bootstrap prompt is Agent Loop configuration, not something the Gateway adds.
 - Stream or proxy Agent Loop results back to clients.
 - Permit only one active Agent Loop turn per conversation; queue later messages in arrival order while allowing different conversations to run concurrently.
@@ -65,7 +66,7 @@ Accept external requests, manage conversation lifecycle, call Auth on every requ
 ## Audit Questions
 
 - Does Gateway still own conversation lifecycle?
-- Is the Gateway passing the owner's current model choice, rather than picking one or fixing it at startup?
+- Is the Gateway passing the owner's current model and provider choice, rather than picking either or fixing it at startup?
 - Is Gateway talking to Memory through the right boundary?
 - Does the Gateway call Auth on every request, including list and history reads?
 - Are tool calls and tool results saved in conversation history?

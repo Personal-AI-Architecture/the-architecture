@@ -53,6 +53,7 @@ paths:
                 summary: Prompt with tool definitions
                 value:
                   model: 'local/llama-3.1-8b'
+                  provider: 'local'
                   messages:
                     - role: system
                       content:
@@ -144,6 +145,7 @@ components:
       required:
         - messages
         - model
+        - provider
         - stream
       properties:
         messages:
@@ -178,6 +180,11 @@ components:
           description: |
             Model identifier. The Gateway/Agent Loop supplies the owner's current
             choice for every request; the adapter resolves it to the provider's native ID.
+        provider:
+          type: string
+          description: |
+            The provider profile to call, from the request's active provider (D193). The
+            adapter uses it to pick the endpoint and secret; it must not substitute another.
         max_tokens:
           type: integer
           description: Maximum number of tokens in the completion

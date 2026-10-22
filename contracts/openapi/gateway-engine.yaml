@@ -48,7 +48,7 @@ paths:
       operationId: agentLoopChat
       summary: Send messages to the Agent Loop for processing
       description: |
-        Gateway POSTs a request containing the current model, messages array (system prompt +
+        Gateway POSTs a request containing the current model, provider, messages array (system prompt +
         conversation history + current message), and metadata. Agent Loop returns an SSE stream.
 
         The Gateway assembles the messages array from three sources:

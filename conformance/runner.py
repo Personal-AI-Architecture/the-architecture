@@ -92,6 +92,21 @@ def check_contract_baseline(root: Path) -> list[str]:
     require(not ({"permissions", "credential", "token", "api_key"} & set(auth_context)), "auth_context carries credentials or permissions")
     require(isinstance(gateway_request["metadata"].get("correlation_id"), str), "internal request lacks metadata correlation_id")
 
+    import yaml  # PyYAML, used only to read the OpenAPI files
+
+    def read_yaml(relative: str) -> dict:
+        return yaml.safe_load((root / relative).read_text())
+
+    engine_schemas = read_yaml("contracts/openapi/gateway-engine.yaml")["components"]["schemas"]
+    require("provider" in engine_schemas["AgentLoopRequest"]["required"], "AgentLoopRequest does not require provider (D193)")
+    api_schemas = read_yaml("contracts/openapi/gateway-api.yaml")["components"]["schemas"]
+    message_object = next(part for part in api_schemas["ConversationMessage"]["allOf"] if "properties" in part)
+    assistant_rule = message_object.get("if", {})
+    require(assistant_rule.get("properties", {}).get("role", {}).get("const") == "assistant", "ConversationMessage lacks the assistant role condition")
+    require(set(message_object.get("then", {}).get("required", [])) >= {"model", "provider"}, "assistant messages do not require model and provider (D194)")
+    model_schemas = read_yaml("contracts/openapi/model-api.yaml")["components"]["schemas"]
+    require("provider" in model_schemas["CompletionRequest"]["required"], "CompletionRequest does not require provider (D193)")
+
     policy = read_json(root, "contracts/schemas/policy.json")
     conditions = policy["properties"]["conditions"]["properties"]
     require(set(conditions) == {"time_window", "max_per_day", "requires_approval"}, "portable policy condition set drifted")

@@ -66,7 +66,7 @@ Adapters are an implementation pattern at the system's edges. They add no compon
 
 **External standard (today):** Provider-specific formats (OpenAI, Anthropic, OpenRouter — all variations on prompt + tool definitions in, completion + tool calls out).
 
-**Internal interface:** Prompt in, completion out. The Agent Loop sends a normalized request (system instructions, messages, tool definitions, context) and receives a normalized response stream (text, tool calls, done). It doesn't know what model or provider is behind the adapter.
+**Internal interface:** Prompt in, completion out. The Agent Loop sends a normalized request (system instructions, messages, tool definitions, context) and receives a normalized response stream (text, tool calls, done). The request names the model and the provider profile to call; the Agent Loop doesn't know what is behind the adapter.
 
 **What the adapter does:**
 - Translates outbound Agent Loop requests from the internal interface into the provider's format
@@ -101,24 +101,31 @@ Three pieces of config control this:
 
 **1. Runtime config** tells the system which adapter to use:
 ```json
-{ "provider_adapter": "openrouter" }
+{ "provider_adapter": "openai-compatible" }
 ```
 
-**2. Adapter config** tells the adapter how to reach the provider:
+**2. Adapter config** tells the adapter how to reach each provider profile it supports (an endpoint and a secret reference per profile; no model is pinned here):
 ```json
-// adapters/openrouter.json
+// adapters/openai-compatible.json
 {
-  "base_url": "https://openrouter.ai/api/v1",
-  "api_key_env": "OPENROUTER_API_KEY"
+  "provider_profiles": {
+    "openrouter": {
+      "base_url": "https://openrouter.ai/api/v1",
+      "api_key_env": "OPENROUTER_API_KEY"
+    },
+    "local": { "base_url": "http://127.0.0.1:11434/v1" }
+  },
+  "default_provider_profile": "openrouter"
 }
 ```
 
-**3. Your preference** (in Your Memory) tells the system which model you want:
+**3. Your preference** (in Your Memory) tells the system which model and which provider profile you want:
 ```
 "I prefer anthropic/claude-sonnet-4-6 via OpenRouter"
+// saved as: model = anthropic/claude-sonnet-4-6, active_provider_profile = openrouter
 ```
 
-At boot, the system loads the adapter. On every message, the Gateway reads your current model preference and passes it to the Agent Loop with the request, and every request flows through the same path: Agent Loop → Model API Adapter → model. Your client doesn't need to know which model is behind the system — it sends messages to the Gateway API and gets responses back.
+At boot, the system loads the adapter. On every message, the Gateway reads your current model and provider preferences and passes both to the Agent Loop with the request, and every request flows through the same path: Agent Loop → Model API Adapter → model. Your client doesn't need to know which model or provider is behind the system — it sends messages to the Gateway API and gets responses back.
 
 ### Two kinds of change
 

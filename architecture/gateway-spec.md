@@ -29,11 +29,11 @@ When a message arrives, the Gateway:
 
 1. Asks Auth who sent it and whether they're allowed.
 2. Loads the conversation from Your Memory, or starts a new one.
-3. Reads your current choice of model.
-4. Passes the conversation, the new message and the model choice to the Agent Loop.
+3. Reads your current choice of model and provider.
+4. Passes the conversation, the new message and the model and provider choice to the Agent Loop.
 5. Streams the Agent Loop's response back to the client as it arrives, and saves the exchange to the conversation in Your Memory.
 
-Like every other part, it reaches Your Memory through tools: a dedicated conversation tool for creating, loading, listing and saving conversations, and the Memory tools to read your model choice. Even listing or reading a conversation goes through Auth first.
+Like every other part, it reaches Your Memory through tools: a dedicated conversation tool for creating, loading, listing and saving conversations, and the Memory tools to read your model and provider choice. Even listing or reading a conversation goes through Auth first.
 
 Just as important is what it doesn't do. It doesn't understand messages; the model does. It doesn't run the model's tools; the Agent Loop does. It doesn't decide who's allowed to do what; Auth does. It doesn't pick the model; you do. Whatever the content (text, images, audio, files), it passes it through unchanged, checking only that the request is well-formed and not too large. That keeps it from being tied to any one client or kind of content.
 
@@ -70,7 +70,7 @@ These are explicit boundaries. They exist to prevent the Gateway from becoming o
 | Executing model-driven tools | The Agent Loop | Gateway doesn't execute tool calls from the model (it uses the conversation store tool for its own operational needs — D152) |
 | Authenticating requests and deciding permissions | Auth | Gateway calls Auth on every request and honours the answer, but doesn't verify identity or hold permissions itself |
 | Deciding what the model should do | Skills/instructions in Your Memory | Gateway doesn't influence model behavior |
-| Choosing which model to use | The owner (a preference) | Gateway reads the owner's current model choice on every message and passes it to the Agent Loop; it doesn't pick a model or route to models |
+| Choosing which model and provider to use | The owner (a preference) | Gateway reads the owner's current model and provider choice on every message and passes them to the Agent Loop; it doesn't pick a model or provider or route to models |
 | Content processing (speech-to-text, image analysis) | Model capabilities or tools | Gateway doesn't transform content |
 | Context injection (client metadata, folder scoping) | The interface sends it, the model reads it | Gateway passes metadata through — it doesn't add or interpret it |
 | Owning the storage mechanism | Your Memory | Gateway stores conversations in Your Memory but doesn't define how Your Memory works |

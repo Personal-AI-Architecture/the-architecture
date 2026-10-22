@@ -161,13 +161,27 @@ Each adapter (see [adapter-spec.md](../architecture/adapter-spec.md), D139) may 
 | **Anthropic direct adapter** | API version, model IDs, token limits | `adapters/anthropic.json` |
 | **Ollama adapter** | Local server URL, available models | `adapters/ollama.json` |
 
-**Example adapter config** (`adapters/openrouter.json`):
+**Example adapter config** (`adapters/openai-compatible.json`). It lists provider profiles and pins no model, since the model is a preference:
 
 ```json
 {
-  "base_url": "https://openrouter.ai/api/v1",
-  "models": ["anthropic/claude-sonnet-4-6", "google/gemini-2.5-pro"],
-  "api_key_ref": "$OPENROUTER_API_KEY"
+  "provider_profiles": {
+    "openrouter": {
+      "base_url": "https://openrouter.ai/api/v1",
+      "api_key_env": "OPENROUTER_API_KEY"
+    },
+    "local": { "base_url": "http://127.0.0.1:11434/v1" }
+  },
+  "default_provider_profile": "openrouter"
+}
+```
+
+**Example preferences** (in Your Memory), the owner's active choices beside each other:
+
+```json
+{
+  "model": "anthropic/claude-sonnet-4-6",
+  "active_provider_profile": "openrouter"
 }
 ```
 

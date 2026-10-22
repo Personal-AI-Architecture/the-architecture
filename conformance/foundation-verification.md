@@ -357,7 +357,7 @@ Foundation decisions are architectural commitments. Each is verifiable.
 | D135 | Memory/tool binary holds | Every new capability maps to memory (data) or tools (actions), not new infrastructure | A capability requires a new component or API |
 | D139 | Swappability chain is complete | For every element: Memory → tools, components → contracts, contracts → adapters | An element exists with no intermediary absorbing change |
 | D143 | Configuration is cross-cutting, three categories | Preferences in Memory, runtime config is thin bootstrap, tool self-description — no single component owns all config | Configuration is owned by one component or requires a config service |
-| D147 | Three swaps pass config-only | Provider swap, model swap, tool swap — each with config/adapter changes only; a model swap applies to the next message with no restart (D175) | Any swap requires cross-component code changes, or a model swap requires a restart |
+| D147 | Three swaps pass config-only | Provider swap, model swap, tool swap — each with config/adapter changes only; a model swap, or a switch to another listed provider profile, applies to the next message with no restart (D175, D193) | Any swap requires cross-component code changes, or a model swap or listed-profile switch requires a restart |
 | D176 | The Gateway calls Auth on every request; the Agent Loop asks Auth before each tool call | Permissions live only in Auth; no request or tool call bypasses the check | A request path or tool call skips Auth, or permissions are stored in configuration |
 | D177 | The default policy is that the owner can do everything | No approval prompt is required by the architecture | The architecture requires approval for the owner's own actions by default |
 | D178 | One message shape across the three contracts | Tool calls and tool results are saved in conversation history and replayed on resume | Tool calls or results are dropped from history |
@@ -514,11 +514,11 @@ Each story is an acceptance test for the architecture itself.
 
 ### X-1. Configuration follows the three-category model (D143)
 
-**Claim:** Preferences in Memory, runtime config is thin bootstrap (4 fields), tool self-description. Permissions are not configuration: they live only in Auth. The model choice is a preference, read on every message.
+**Claim:** Preferences in Memory, runtime config is thin bootstrap (4 fields), tool self-description. Permissions are not configuration: they live only in Auth. The model and the active provider profile are preferences, read on every message.
 
-**Verification:** Enumerate all configuration in the system. Classify each into one of the three categories. Confirm runtime bootstrap is thin (connection info only). Confirm preferences are stored in Memory. Confirm no permissions are stored in configuration or preferences.
+**Verification:** Enumerate all configuration in the system. Classify each into one of the three categories. Confirm runtime bootstrap is thin (connection info only). Confirm preferences are stored in Memory, including the active provider profile beside the model. Confirm no permissions are stored in configuration or preferences.
 
-**Fail condition:** Configuration exists that doesn't fit the three categories. Or runtime bootstrap grows beyond thin connection setup. Or preferences are stored outside Memory. Or configuration stores or applies permissions.
+**Fail condition:** Configuration exists that doesn't fit the three categories. Or runtime bootstrap grows beyond thin connection setup. Or preferences are stored outside Memory. Or configuration stores or applies permissions. Or the active provider profile is fixed at startup so switching to a listed profile needs a restart.
 
 ### X-2. No secrets in source or Memory files
 

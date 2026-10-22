@@ -62,6 +62,7 @@ Client → Gateway API → Gateway → POST /agent-loop/chat → Agent Loop → 
     { "role": "user", "content": [{ "type": "text", "text": "Focus on budgeting" }] }
   ],
   "model": "local/llama-3.1-8b",
+  "provider": "local",
   "metadata": {
     "conversation_id": "conv_abc123",
     "correlation_id": "req_xyz789",
@@ -83,7 +84,7 @@ The Gateway packages this array from two sources:
 
 The bootstrap prompt (the short system message that tells the model to read Your Memory) is not in the request. It is part of the Agent Loop's own configuration, and the Agent Loop puts it first when it calls the model.
 
-**Model.** Every request also carries the model to use. The Gateway reads the owner's current model choice on every message and passes it here, so a changed choice applies to the next message with no restart of either component.
+**Model and provider.** Every request also carries the model to use and the owner's active provider profile. The Gateway reads both choices on every message and passes them here, so a changed choice applies to the next message with no restart of either component.
 
 **Metadata** is pass-through context. The Agent Loop can use it or ignore it.
 
@@ -105,7 +106,7 @@ The bootstrap prompt (the short system message that tells the model to read Your
 - **Provider configuration** — provider adapter, API key reference, base URL
 - **Optional implementation bounds** — implementations MAY pass a `maxIterations` safety bound. This is an optional, implementation-provided parameter with no default. The Agent Loop itself does not impose an iteration cap — it loops until the model signals completion. If an implementation provides `maxIterations`, that is the implementation's deployment choice, not an architectural constraint.
 
-These are Agent Loop startup configuration, not per-request data. They don't change between requests. The model is not in this list: it travels with each request.
+These are Agent Loop startup configuration, not per-request data. They don't change between requests. The model and the active provider profile are not in this list: they travel with each request.
 
 ### Trigger types
 
@@ -286,7 +287,7 @@ Most AI SDKs produce streaming events that map directly to this contract's SSE e
 - [ ] Swapping the Agent Loop does not require Gateway changes — the contract shape is the only dependency
 - [ ] Swapping the Gateway does not require Agent Loop changes — the Agent Loop accepts any caller that sends the right shape
 - [ ] The Gateway calls Auth on every request and the Agent Loop asks Auth before each tool call, without either component knowing how Auth decides
-- [ ] A changed model choice applies to the next request with no restart
+- [ ] A changed model or provider choice applies to the next request with no restart
 - [ ] Tool calls and tool results use the shared message shape and are saved in conversation history
 - [ ] Tool calls are visible in the stream — clients can display status, and products that add approval prompts can present them
 - [ ] Every request carries a correlation ID, and every error carries the correlation ID

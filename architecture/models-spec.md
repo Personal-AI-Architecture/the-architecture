@@ -80,7 +80,7 @@ The Model API is one of the system's two APIs. It carries one exchange:
 
 | Direction | What flows |
 |---|---|
-| **Agent Loop → model** | The model to use, system instructions, the conversation, and the tool definitions available for this turn |
+| **Agent Loop → model** | The model to use, the provider profile to call, system instructions, the conversation, and the tool definitions available for this turn |
 | **Model → Agent Loop** | A streamed completion: text, tool calls, or both |
 
 The exchange is the same whichever model or provider is behind it. An adapter translates it to and from the provider's own format. See [adapter-spec.md](./adapter-spec.md) §How Model Configuration Works in Practice for the walkthrough of model and provider changes.

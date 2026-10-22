@@ -82,7 +82,7 @@ These are dependencies that could prevent the system from functioning if they di
 
 **The dependency:** Whether local (Ollama, llama.cpp) or cloud (OpenRouter, Anthropic), the owner depends on a model provider.
 
-**Escape path:** The Model API adapter pattern makes switching providers a config change, not a code change (D147). Cloud to cloud, cloud to local, local to local — the swap cost is one adapter file. No single provider can hold the system hostage because the architecture is designed to swap between them. The offline contract (guarantee #2) ensures a local path always exists.
+**Escape path:** The Model API adapter pattern makes switching providers a config change, not a code change (D147). Cloud to cloud, cloud to local, local to local — if the loaded adapter lists both as provider profiles, the swap cost is one preference change with no restart (D193); a provider in a new format costs one adapter file plus the runtime config field and its secret, and a restart is allowed. No single provider can hold the system hostage because the architecture is designed to swap between them. The offline contract (guarantee #2) ensures a local path always exists.
 
 **Lock-in risk:** Low — architectural. The adapter pattern eliminates protocol lock-in. The remaining risk is capability lock-in (a weaker local model can't do what a cloud model can), which is an industry constraint, not an architecture constraint.
 
