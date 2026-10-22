@@ -194,6 +194,32 @@
       ]
     },
     {
+      "file": "contracts/examples/context-notice-event.json",
+      "kind": "valid",
+      "owning_docs": [
+        "build/primers/client-gateway-contract.md",
+        "build/primers/gateway.md"
+      ],
+      "matrix_ids": ["G-06", "GC-01"],
+      "related_checklists": [
+        "conformance/review-checklists/gateway-review.md"
+      ],
+      "glossary_terms": ["client contract", "contract-visible"]
+    },
+    {
+      "file": "contracts/examples/invalid-context-notice-event.json",
+      "kind": "invalid",
+      "owning_docs": [
+        "build/primers/client-gateway-contract.md",
+        "build/primers/gateway.md"
+      ],
+      "matrix_ids": ["G-06", "GC-01"],
+      "related_checklists": [
+        "conformance/review-checklists/gateway-review.md"
+      ],
+      "glossary_terms": ["client contract", "drift"]
+    },
+    {
       "file": "contracts/examples/gateway-engine-request.json",
       "kind": "valid",
       "owning_docs": [

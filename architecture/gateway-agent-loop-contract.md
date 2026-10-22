@@ -86,11 +86,15 @@ The bootstrap prompt (the short system message that tells the model to read Your
 
 **Model and provider.** Every request also carries the model to use and the owner's active provider profile. The Gateway reads both choices on every message and passes them here, so a changed choice applies to the next message with no restart of either component.
 
+**Optional context summary.** The Gateway may deterministically extract a bounded summary from omitted older turns without calling a model. It sends the derived text separately as `context_summary`, with its source and omitted-turn count. The summary is not a saved conversation message. The Agent Loop renders it as a labelled, ephemeral `user`-role context message before selected history when preparing the Model API call. The label identifies the Gateway as its author and says it is not a new owner request. The bootstrap remains the only system message.
+
+
 **Metadata** is pass-through context. The Agent Loop can use it or ignore it.
 
 | Field | Description | Required |
 |-------|-------------|----------|
-| `messages` | Model-sized working context: selected complete history (including associated tool calls and results), optional labelled summary, and unchanged current message | Yes |
+| `messages` | Model-sized working context: selected complete history (including associated tool calls and results) and unchanged current message | Yes |
+| `context_summary` | Optional Gateway-generated deterministic summary of omitted older turns; distinct from saved messages and rendered as labelled, ephemeral context for the model | No |
 | Model | The model to use for this request, from the owner's current choice | Yes |
 | `provider` | The owner's active provider profile (D193) | Yes |
 | `auth_context` | The authenticated identity Auth returned for this request: actor, authentication ID, timestamps and correlation ID; never credentials or permissions | Yes |
@@ -191,6 +195,7 @@ The stream started, then something failed.
 | `provider_error` | Model unreachable or timeout |
 | `tool_error` | Tool failed and model cannot recover |
 | `auth_error` | Auth denied the request or could not check it |
+| `context_limit_unknown` | No safe context limit is known for the selected provider and model; no model call is made |
 | `context_overflow` | The selected model call cannot fit its context window, including a continuation with live tool results |
 
 The Agent Loop must classify errors correctly — no catch-all error code. Recoverable tool failures (a tool returns an error result) go back to the model as `tool-result` events for the model to decide what to do. Only unrecoverable tool infrastructure failures emit `tool_error` and close the stream.

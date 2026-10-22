@@ -2,10 +2,16 @@
   "provider_profiles": {
     "openrouter": {
       "base_url": "https://openrouter.ai/api/v1",
-      "api_key_env": "OPENROUTER_API_KEY"
+      "api_key_env": "OPENROUTER_API_KEY",
+      "model_context_limits": {
+        "example/text-model": 8192
+      }
     },
     "local": {
-      "base_url": "http://127.0.0.1:11434/v1"
+      "base_url": "http://127.0.0.1:11434/v1",
+      "model_context_limits": {
+        "local/llama-3.1-8b": 8192
+      }
     }
   },
   "default_provider_profile": "openrouter"

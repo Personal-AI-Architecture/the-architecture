@@ -40,7 +40,8 @@ Accept external requests, manage conversation lifecycle, call Auth on every requ
 - Access conversation data through a dedicated conversation-store boundary or tool rather than a private in-process store.
 - Accept client messages plus client metadata. Message content is a list of parts.
 - Save tool calls and tool results as ordinary parts of messages in full conversation history. On resume, select a model-sized working context without rewriting saved parts.
-- Use the selected model's known or verified conservative limit, reserving space for instructions, tools and response; report `context_overflow` for a current message that cannot fit and notify the owner when older turns are omitted or summarized.
+- Resolve a known or verified conservative context limit for the selected provider profile and model (D193), reserving space for instructions, tools and response. Report `context_limit_unknown` when no safe limit exists, and `context_overflow` when the current message cannot fit.
+- When older turns are omitted, optionally build a deterministic summary without a model call and send it as `context_summary`, separate from saved messages. Emit `context_notice` before model output so every client can show the owner what was left out.
 - Read the owner's current model and provider choice on every message and pass both to the Agent Loop, so a change applies to the next message with no restart.
 - Store the model and provider profile that produced each assistant reply on the saved message (D194).
 - Forward only bounded interaction data to the Agent Loop. The bootstrap prompt is Agent Loop configuration, not something the Gateway adds.

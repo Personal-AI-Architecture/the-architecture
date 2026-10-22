@@ -89,6 +89,7 @@ These are explicit boundaries. They exist to prevent product-specific logic from
 - When the model emits text and tool calls in the same turn, the Agent Loop preserves the text in the assistant message for the next loop iteration. Streamed text is never silently discarded on tool continuation.
 - The model can dispatch multiple tool calls in parallel within a single loop — the Agent Loop executes independent calls concurrently, preserves stable call/result association, and keeps dependent calls ordered before returning all results
 - Before each model call, including a continuation after live tool results, the Agent Loop checks the actual request against the selected model's known or verified conservative context limit. It includes its bootstrap prompt, tool definitions and response headroom. If the call cannot fit, it reports `context_overflow` without shortening the live result or silently dropping parts.
+- It reads that limit from the selected provider profile and model (D193). If no safe limit exists, it reports `context_limit_unknown` and makes no model call.
 
 ---
 

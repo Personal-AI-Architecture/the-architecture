@@ -65,8 +65,15 @@ Define the external request, response, conversation, and approval interaction sh
 - `tool-result`
 - `approval-request` (only in products that add approval prompts)
 - `approval-result` (only in products that add approval prompts)
+- `context_notice` (optional Gateway event before model output when older turns were omitted or summarized)
 - `done`
 - `error`
+
+The `context_notice` payload names whether history was omitted or summarized,
+counts omitted complete turns, and gives safe owner-readable text. The complete
+conversation remains available through the history API. Before streaming, the
+Gateway reports an unknown safe provider/model limit as `context_limit_unknown`
+and a current message that cannot fit as `context_overflow`.
 
 ## Done Event
 
