@@ -184,7 +184,7 @@ Items marked *(security)* are the per-component requirements from [security-spec
 - [ ] Swapping agent loops requires only changing the Agent Loop — Memory, Tools, Client, Auth, and Models are unaffected
 - [ ] The Agent Loop must never store credentials, API keys, or tokens in its own state *(security)*
 - [ ] The Agent Loop must not persist data between loops — each loop starts clean (the model reconstitutes from Memory) *(security)*
-- [ ] Tool call results must be passed to the model without modification — the Agent Loop must not inject, filter, or alter tool results *(security)*
+- [ ] Tool call results reach the model without modification or not at all, with `context_overflow` reported when the call cannot fit — the Agent Loop must not inject, filter, or alter tool results *(security)*
 - [ ] Every model call is checked against the selected model's safe context limit, including continuation after tool results; overflow reports `context_overflow` without changing results
 - [ ] The Agent Loop must report tool execution failures to the model, not silently retry or recover *(security)*
 - [ ] The Agent Loop must enforce configured timeouts on tool calls — a slow or hung tool cannot block the loop indefinitely *(security)*

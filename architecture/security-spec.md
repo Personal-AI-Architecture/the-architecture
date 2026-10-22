@@ -290,7 +290,7 @@ These requirements apply to each component. Cross-referenced into component spec
 
 - [ ] The Agent Loop must never store credentials, API keys, or tokens in its own state
 - [ ] The Agent Loop must not persist data between loops — each loop starts clean (the model reconstitutes from Memory)
-- [ ] Tool call results must be passed to the model without modification — the Agent Loop must not inject, filter, or alter tool results
+- [ ] Tool call results reach the model without modification or not at all, with `context_overflow` reported when the call cannot fit — the Agent Loop must not inject, filter, or alter tool results
 - [ ] The Agent Loop must report tool execution failures to the model, not silently retry or recover
 - [ ] The Agent Loop must enforce configured timeouts on tool calls — a slow or hung tool cannot block the agent loop indefinitely
 
