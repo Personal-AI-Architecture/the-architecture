@@ -82,7 +82,7 @@ def validate_contract_example(file_path: str, payload: object, kind: str) -> Non
 
     if name in {"gateway-engine-request.json", "invalid-gateway-engine-request.json", "invalid-gateway-engine-request-missing-provider.json"}:
         summary = payload.get("context_summary") if isinstance(payload, dict) else None
-        summary_valid = summary is None or (
+        summary_valid = isinstance(payload, dict) and ("context_summary" not in payload or (
             isinstance(summary, dict)
             and summary.get("source") == "gateway"
             and summary.get("method") == "deterministic"
@@ -91,7 +91,7 @@ def validate_contract_example(file_path: str, payload: object, kind: str) -> Non
             and summary["omitted_turn_count"] > 0
             and isinstance(summary.get("text"), str)
             and bool(summary["text"].strip())
-        )
+        ))
         valid = (
             isinstance(payload, dict)
             and isinstance(payload.get("messages"), list)

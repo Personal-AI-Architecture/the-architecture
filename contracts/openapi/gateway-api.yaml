@@ -578,6 +578,7 @@ components:
           minimum: 1
         message:
           type: string
+          minLength: 1
           description: Safe owner-readable notice, with no omitted content
 
     DoneEvent:
