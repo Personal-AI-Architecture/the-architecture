@@ -102,13 +102,13 @@ At boot, the system loads the adapter. On every message, the Gateway reads your 
 
 ### Two kinds of change
 
-**Same provider, different model** — change your model preference in Your Memory. One change: the next message uses the new model, with no restart.
+**Same provider, different model** — change your model preference in Your Memory. One change: the next message uses the new model, with no restart. This holds for models the loaded adapter supports; a model it can't reach is reported, never silently replaced (see [models-spec.md](./models-spec.md) §Errors).
 
 | Before | After | What changed |
 |--------|-------|-------------|
 | Preference: `claude-sonnet-4-6` | Preference: `claude-opus-4-6` | One preference in Your Memory |
 
-**Different provider** — change `provider_adapter` in runtime config and provide the new adapter config. Two changes, still config-only, zero code.
+**Different provider** — change `provider_adapter` in runtime config and provide the new adapter config. Two changes, still config-only, zero code. A restart is allowed. (GAP-PAA-26 proposes making the provider a per-message preference, as the model already is.)
 
 | Before | After | What changed |
 |--------|-------|-------------|
