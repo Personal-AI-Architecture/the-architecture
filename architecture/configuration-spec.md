@@ -3,21 +3,38 @@ sidebar_label: Configuration
 hide_table_of_contents: true
 ---
 
-# Configuration: The Thin Bootstrap
+# Configuration
 
 **Serves stories:** US-5, US-10, US-11 in the [PAA spec](../spec/personal-ai-architecture-spec.md).
 
-Every system has configuration — Docker Compose files, .env files, settings.json, config.yaml. Every AI system has settings for which model to use, what tools are available, how to connect to services. So what's different here?
+## What configuration is
 
-In most systems, configuration is a grab bag. User preferences, server addresses, API keys, feature flags, tool definitions, behavioral settings — all dumped into the same place. Move to a new environment and half of it breaks. Change a provider and you're editing files across the system. Configuration becomes a quiet source of lock-in that nobody notices until they try to leave.
+Configuration is the settings that tell your AI system how to run: which model to use, which tools are available, where your files are and how to reach outside services.
 
-Here, configuration is split by what it actually is. **Preferences are personal data — they live in Your Memory and travel with you. Runtime config is a thin bootstrap — it tells the system what's here, not what you want. Tools describe themselves — you don't write their definitions, they do.** Three categories, each with a natural home. Nothing bleeds across.
+Most systems keep all of it in one place. Your preferences, server addresses, API keys, tool lists and feature flags are mixed together in a settings file that belongs to the app. Move to a new machine or a new product and half of it breaks, and your preferences stay behind.
 
-Why this matters: configuration is where lock-in hides. The architecture promises zero lock-in at every level — components via contracts, contracts via adapters, Your Memory via tools. But if swapping a provider means editing code, the architecture's promise is hollow. Configuration must be as swappable as everything else. The anti-lock-in principle applies here: **a normal swap is a configuration change, never a code change.**
+We think that's lock-in nobody notices until they try to leave. Your choices about how your AI works are about you, so they should go wherever you go. And if switching providers means editing code, the promise that every part can be swapped isn't real.
 
-This is an **Architecture** document — it defines how configuration works at the generic, unopinionated level. Product-specific defaults (which provider, which tools ship, what starter content) are Implementation opinions.
+So PAA splits configuration by what it's about. Your preferences (the model you like, the tools to always load, how you want answers) are your data, so they live in Your Memory. The few facts about this machine (where Your Memory is, which adapter connects to models, how sign-in works and where tools are installed) live in a small startup file that stays with the machine. Tools describe themselves, so nobody writes their definitions by hand.
 
-**Related documents:** [overview.md](../architecture/overview.md) (architecture overview, links to all component specs)
+That means your preferences come with you to a new machine or a new product, and switching a model, provider or tool is a settings change, never a code change.
+
+<p align="center">
+  <img src="../assets/configuration-split.svg" alt="Settings about you live in Your Memory and travel with you. Settings about this machine live in a startup file that stays with the machine. What a tool does and needs lives in the tool itself. Permissions live only in Auth, and secrets stay outside Your Memory." width="900" />
+</p>
+
+## How it works
+
+Every setting answers one question: **is this about you, or about this machine?** Answer it the same way every time and nothing gets stranded when you move.
+
+1. **Preferences travel.** They're files in Your Memory, read through the Memory tools like everything else. Move to a new machine and you bring Your Memory; installing the system there sets up its own startup file and tools. The system tries to honor your preferences and tells you about any it can't, such as a preferred tool that isn't installed there.
+2. **The startup file stays thin.** It holds four facts about this machine and nothing about you. Every field in it is something you leave behind when you move, so it stays as small as possible.
+3. **Tools describe themselves.** Adding a tool means installing it where the system looks; the tool tells the system what it does.
+4. **Two things look like configuration but aren't.** Permissions live only in Auth, so no setting can widen or narrow access. Secrets like API keys stay outside Your Memory and out of anything git tracks; settings refer to them by name, never by value.
+5. **You have the last word.** A product ships defaults, and you can change every one of them on your own hardware. An update replaces the product's defaults without overwriting your changes.
+6. **Timing follows the split.** Machine facts are read once at startup, so changing them may need a restart. Your model choice is read on every message, so switching models takes effect on the next one.
+
+The rest of this doc is the specification: what any implementation of configuration must do.
 
 ---
 
@@ -66,7 +83,7 @@ Which model to use is intentionally not here — it is a preference (a product d
 }
 ```
 
-**Where it lives:** With the deployment, not in Your Memory. A single file at a well-known path (e.g., `config.json` in the system root, or an environment variable pointing to it). When you move to a new system, the new system provides its own runtime config. You never carry it.
+**Where it lives:** With the deployment, not in Your Memory. A single file at a well-known path (e.g., `config.json` in the system root, or an environment variable pointing to it). It is created when the system is installed on this machine, from the product's defaults, and the owner can read and change it. How it is created (an installer, a setup screen, by hand) is an implementation choice. When you move to a new system, the new system provides its own runtime config. You never carry it.
 
 **Why it's thin:** Every field that goes in runtime config is a field that can't travel with you. The thinner this file is, the less environment-specific your system becomes. Four fields is enough to bootstrap. Everything else is either a preference (in Your Memory) or discovered from the environment.
 
