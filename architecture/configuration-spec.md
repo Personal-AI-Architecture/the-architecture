@@ -135,8 +135,8 @@ Each adapter (see [adapter-spec.md](../architecture/adapter-spec.md), D139) may 
 
 | Adapter (one per format) | What its config contains | Example |
 |---------|------------------------|---------|
-| **OpenAI-compatible adapter** | Provider profiles (OpenRouter, Ollama, OpenAI and others), each with a base URL and, when the provider needs a key, a secret reference; plus the default profile | `adapters/openai-compatible.json` |
-| **A provider's own format** (for example Anthropic's) | Base URL, API version, secret reference | `adapters/anthropic.json` |
+| **OpenAI-compatible adapter** | Provider profiles (OpenRouter, Ollama, OpenAI and others), each with a base URL, optional secret reference, and model context limits; plus the default profile | `adapters/openai-compatible.json` |
+| **A provider's own format** (for example Anthropic's) | Base URL, API version, optional secret reference, and model context limits | `adapters/anthropic.json` |
 
 **Example adapter config** (`adapters/openai-compatible.json`). It lists provider profiles and pins no model, since the model is a preference. `default_provider_profile` is the product's default, used until the owner chooses a provider:
 
@@ -145,9 +145,13 @@ Each adapter (see [adapter-spec.md](../architecture/adapter-spec.md), D139) may 
   "provider_profiles": {
     "openrouter": {
       "base_url": "https://openrouter.ai/api/v1",
-      "api_key_env": "OPENROUTER_API_KEY"
+      "api_key_env": "OPENROUTER_API_KEY",
+      "model_context_limits": { "example/text-model": 8192 }
     },
-    "local": { "base_url": "http://127.0.0.1:11434/v1" }
+    "local": {
+      "base_url": "http://127.0.0.1:11434/v1",
+      "model_context_limits": { "local/llama-3.1-8b": 8192 }
+    }
   },
   "default_provider_profile": "openrouter"
 }
@@ -163,6 +167,8 @@ Each adapter (see [adapter-spec.md](../architecture/adapter-spec.md), D139) may 
 ```
 
 **An adapter config can list provider profiles.** One adapter format (for example OpenAI-compatible) often reaches several providers. The adapter config may list each as a profile with its endpoint and a secret reference; which profile is active is an owner preference in Your Memory, read on every message like the model (D193). Switching between profiles is a preference change with no restart. Only a provider in a new format needs a new adapter, named by `provider_adapter`.
+
+Each provider profile lists known or verified conservative context limits by model ID (D193). The Gateway and Agent Loop read the limit for the active provider and model. If no safe limit is known, the request reports `context_limit_unknown` before a model call; it does not assume a universal window.
 
 **Swapping to a new adapter format = swapping an adapter file.** Runtime config points to which adapter (`provider_adapter: "openai-compatible"`). The adapter file contains everything provider-specific. Nothing else in the system knows or cares about provider details. See [adapter-spec.md](../architecture/adapter-spec.md) §How Model Configuration Works in Practice for the full walkthrough of model and provider swaps — what changes, what doesn't, and the two kinds of change (same provider vs different provider).
 

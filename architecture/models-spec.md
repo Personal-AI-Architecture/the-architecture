@@ -97,7 +97,7 @@ Each request sends the instructions, the conversation and the Memory content the
 |---|---|
 | The chosen model lacks an ability the request needs | Reported, not faked (above). GAP-PAA-27 proposes the `capability_unsupported` code. |
 | The chosen model isn't available through the loaded adapter, or none is chosen | Reported; no other model is substituted. GAP-PAA-27 proposes the `model_unavailable` code. |
-| The request is too large for the model's context window | Reported as `context_overflow`. Who keeps requests within the window is open (GAP-PAA-20). |
+| The request is too large for the model's context window | Reported as `context_overflow`. The proposed GAP-PAA-20 rule has the Gateway select bounded saved history and the Agent Loop check each actual call, including live tool results. An unknown safe limit reports `context_limit_unknown`. |
 | The provider is down or times out | Reported as `provider_error`, and the current turn stops. No other provider or model is substituted; PAA defines no fallback model (D188). The owner can switch provider and try again. |
 
 ## How model access grows
@@ -121,6 +121,7 @@ Each request sends the instructions, the conversation and the Memory content the
 - [ ] A request needing an ability the chosen model lacks is reported: no content silently dropped, no tool call pretended, no model quietly substituted
 - [ ] *(security)* The provider is only a product default or the owner's choice, readable by the owner, and never changed without the owner
 - [ ] *(security)* API keys are supplied as secrets, never stored in Your Memory
+- [ ] The Gateway and Agent Loop use the same safe limit for the active provider profile and model; unknown limits and overflows are reported without silent truncation
 
 ## Decisions
 
