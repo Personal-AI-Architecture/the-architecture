@@ -112,7 +112,7 @@ Tool definitions (name, description, parameters, capabilities) are not written b
 | Store tool definitions in config | Duplicates what the tool already knows about itself. Creates drift. | Let tools self-describe. Config just points to where tools are. |
 | Store owner preferences in runtime config | Preferences are personal data. Putting them in runtime config means they don't travel with you. | Put preferences in Your Memory. |
 | Store permissions in config or preferences | A second permission store can drift from Auth or bypass it. | Permissions live only in Auth. |
-| Store secrets in Your Memory or tracked files | Secrets in tracked files get committed, shared, leaked. | Keep them outside Your Memory, somewhere git never tracks. Config references secrets by name (`$PROVIDER_API_KEY`), never by value. |
+| Store secrets in Your Memory or tracked files | Secrets in tracked files get committed, shared, leaked. | Keep them outside Your Memory, somewhere git never tracks. Config names the secret (for example `"api_key_env": "PROVIDER_API_KEY"`), never its value. |
 | Require config changes for normal operations | If using a new tool or starting a new project requires editing config, the system is too rigid. | Normal operations flow through Your Memory and tools. Config only changes when the environment changes. |
 | Couple config to a specific implementation | Config that references internal service names, proprietary formats, or implementation details creates lock-in. | Config fields must be generic. `provider_adapter: "openrouter"` not `openrouter_v2_internal_bridge: true`. |
 
@@ -144,7 +144,7 @@ Secrets (API keys, tokens, credentials) live anywhere outside Your Memory that g
 
 | Principle | Detail |
 |-----------|--------|
-| **Reference, never value** | Config refers to secrets by name: `$PROVIDER_API_KEY`. The value comes from wherever the deployment keeps secrets. |
+| **Reference, never value** | Config names the secret, for example `"api_key_env": "PROVIDER_API_KEY"`. The value comes from wherever the deployment keeps secrets. |
 | **Never in Your Memory** | Your Memory is portable, shareable, versioned. Secrets in Your Memory are secrets leaked. |
 | **Never in tracked config** | Runtime config and adapter config may be shared across deployments or checked into a repo. They hold references only. |
 | **Not portable** | Secrets do not travel with Your Memory. On a new system, the owner sets them up again. |
@@ -299,7 +299,7 @@ This is a CI test, not a guideline. Run it on every release.
 Per-component requirements from [security-spec.md](./security-spec.md). Security-spec owns the "why"; this section owns the "what" for Configuration.
 
 - [ ] Secrets (API keys, tokens, credentials) must never be stored in Your Memory or in any file git tracks — environment variables, untracked config files, or a secret store only
-- [ ] Runtime and adapter config must not contain secrets by value — only references (`$PROVIDER_API_KEY`)
+- [ ] Runtime and adapter config must not contain secrets by value — only the secret's name (for example `"api_key_env": "PROVIDER_API_KEY"`)
 - [ ] Preferences in Your Memory must not contain environment-specific references (server addresses, ports, paths) — only personal choices
 - [ ] Adapter config files must not leak across deployments — provider-specific settings stay with the deployment, not with Your Memory
 - [ ] Startup must not require network access — the startup phases complete without any outbound calls
