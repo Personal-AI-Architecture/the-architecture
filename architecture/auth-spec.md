@@ -278,7 +278,7 @@ A conforming system needs at least `auth_whoami`, `auth_check` and `auth_export`
 
 **Scenario:** The audit log's storage is full or unavailable.
 
-**Required behavior:** Work continues and the owner is alerted. The failure itself is logged wherever logging is still possible.
+**Required behavior:** Tool calls that can't be recorded don't run, so every tool call that does run is in the audit log. The owner is alerted, and conversation without tool calls continues. The failure itself is logged wherever logging is still possible. See [security-spec.md](security-spec.md#failure-modes).
 
 ### Stale permissions after export/import
 
