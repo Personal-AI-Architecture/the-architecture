@@ -155,11 +155,10 @@ Secrets (API keys, tokens, credentials) live anywhere outside Your Memory that g
 
 Each adapter (see [adapter-spec.md](../architecture/adapter-spec.md), D139) may have its own config file. This is where provider-specific settings live — not in runtime config, not in preferences.
 
-| Adapter | What its config contains | Example |
+| Adapter (one per format) | What its config contains | Example |
 |---------|------------------------|---------|
-| **OpenRouter adapter** | Base URL, supported models list, rate limits | `adapters/openrouter.json` |
-| **Anthropic direct adapter** | API version, model IDs, token limits | `adapters/anthropic.json` |
-| **Ollama adapter** | Local server URL, available models | `adapters/ollama.json` |
+| **OpenAI-compatible adapter** | Provider profiles (OpenRouter, Ollama, OpenAI and others), each with a base URL and, when the provider needs a key, a secret reference; plus the default profile | `adapters/openai-compatible.json` |
+| **A provider's own format** (for example Anthropic's) | Base URL, API version, secret reference | `adapters/anthropic.json` |
 
 **Example adapter config** (`adapters/openai-compatible.json`). It lists provider profiles and pins no model, since the model is a preference:
 
