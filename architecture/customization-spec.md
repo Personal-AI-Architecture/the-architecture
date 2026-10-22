@@ -24,7 +24,7 @@ So in PAA, a product is mostly content, not code. The four components stay gener
 
 The product's personality and know-how live in files the model reads, not inside the system.
 
-That means a product built on PAA is still your system. You get the product's defaults, you can change any of them, and your changes survive updates. Tools built for one product work in any other, and you can leave a product without leaving your data.
+That means a product built on PAA is still your system. You get the product's defaults, you can change any of them, and your changes survive updates. Tools built for one product can work in any other, and you can leave a product without leaving your data.
 
 ## How it works
 
@@ -44,7 +44,7 @@ The rest of this doc is the specification: what any implementation of customizat
 
 ### Fixed contracts, overridable defaults
 
-The architecture ships sensible defaults for everything a working system needs — runtime config shape, tool discovery mechanism, basic configuration behavior. **These are defaults, not fixed contracts.** Override any of them, as long as the result still meets the published contracts.
+The architecture ships sensible defaults for everything a working system needs — runtime config shape, tool discovery mechanism, basic configuration behavior. **These are defaults, not fixed contracts.** Override any of them, as long as the result still meets the published specs and contracts.
 
 The fixed contracts are the two APIs, plus the internal Gateway ↔ Agent Loop contract and the shared shapes in `contracts/` (such as the four-field runtime config):
 
@@ -112,7 +112,7 @@ There are four ways to customize the Architecture. All implementation and owner 
 
 **What it is:** Capabilities in the environment that the Agent Loop can execute.
 
-**How it works:** Tools are data — definitions, code, instructions — that live in the environment (D51, D52). Your product ships the tools needed for its use case. The Agent Loop executes tool calls without knowing what the tools do. Auth controls who can use which tools.
+**How it works:** Tools are capabilities in the environment; their definitions, code and instructions ship with them (D51). Your product ships the tools needed for its use case. The Agent Loop executes tool calls without knowing what the tools do. Auth controls who can use which tools.
 
 **What you provide:**
 
@@ -191,7 +191,7 @@ Each coaching client receives their own system. It behaves as a personal coachin
 
 | Scenario | Expected Behavior |
 |----------|-------------------|
-| Implementation ships malformed bootstrap file | Agent Loop reports error at startup — model can't load instructions. Clear error message pointing to the bootstrap file. |
+| Bootstrap file missing or unreadable | The model can't load its instructions, and the failure is reported to the owner in the reply, naming the bootstrap file. |
 | Implementation ships tools that aren't available | Agent Loop reports tool connection failure. Model informed of unavailable tools. System continues with available tools. |
 | Architecture update changes a default that an implementation was relying on | Implementation's explicit override takes precedence. If the implementation relied on the old default implicitly, the change surfaces as different behavior — caught by the implementation's test suite. |
 
@@ -215,7 +215,7 @@ Each coaching client receives their own system. It behaves as a personal coachin
 | # | Decision | Rationale |
 |---|----------|-----------|
 | D43 | Your Memory is an unopinionated substrate — it stores anything, has no opinions about structure | Customization content (bootstrap, skills, folders) lives in Your Memory, but Your Memory doesn't know what any of it means. The model gives it meaning. |
-| D51 | Tools are data — definitions, code, instructions that live in the environment | Products ship tools for their use case. The Agent Loop executes tool calls without knowing what the tools do. |
+| D51 | Tools are not a component — they are capabilities in the environment | Products ship tools for their use case. The Agent Loop executes tool calls without knowing what the tools do. |
 | D50 | Bootstrap prompt is Agent Loop configuration; product entrypoint content lives in Your Memory | The architecture provides minimal bootstrap mechanism. Products provide/override entrypoint content and conventions. |
 | D57 | Clients are external — not a system component | Products ship branded clients that connect through the Gateway API. The system doesn't know or care what the client looks like. |
 | D109 | Always-send tool set vs. discoverable set | A product ships the default always-send set; the owner decides which tools are always sent and which are found on demand, and can change the product's choice. |
