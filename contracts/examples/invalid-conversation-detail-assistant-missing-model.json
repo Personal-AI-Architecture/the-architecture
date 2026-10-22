@@ -24,6 +24,7 @@
           "text": "Hi - what would you like to build?"
         }
       ],
+      "provider": "openrouter",
       "created_at": "2026-03-17T12:00:05Z"
     }
   ]

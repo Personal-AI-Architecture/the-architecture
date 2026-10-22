@@ -27,7 +27,7 @@ That means you can replace the Agent Loop without touching the Gateway, or the G
 
 This works because the handoff only needs to carry a few things. A review of every possible connection in the system found that all the others already go through something that exists, such as a tool, an API, configuration or Auth's own interface. This was the only one left to define (D136).
 
-- **What goes in:** the conversation so far plus the new message, the model to use, who is asking (the identity Auth confirmed), and a little context, such as an ID for tracing the request. Anything that doesn't change between messages, like the starting instructions, the tools and the provider, is set up in the Agent Loop once rather than sent every time.
+- **What goes in:** the conversation so far plus the new message, the model and provider profile to use, who is asking (the identity Auth confirmed), and a little context, such as an ID for tracing the request. Anything that doesn't change between messages, like the starting instructions, the tools and the adapter with its provider profiles, is set up in the Agent Loop once rather than sent every time.
 - **What comes back:** a live stream: text as the model writes it, each tool call and its result, and a final "done." Client apps can show what's happening as it happens.
 - **Auth at both ends:** the Gateway checks every request with Auth before handing it over, and the Agent Loop checks with Auth before every tool call.
 - **Same for every trigger:** a message from you, a webhook from another service and a scheduled job all arrive in the same shape. A label says which it was, but the Agent Loop doesn't need to treat them differently.

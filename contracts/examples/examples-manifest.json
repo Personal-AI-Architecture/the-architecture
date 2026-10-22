@@ -405,6 +405,23 @@
         "client contract",
         "drift"
       ]
+    },
+    {
+      "file": "contracts/examples/invalid-conversation-detail-assistant-missing-provider.json",
+      "kind": "invalid",
+      "owning_docs": [
+        "build/primers/client-gateway-contract.md"
+      ],
+      "matrix_ids": [
+        "G-06"
+      ],
+      "related_checklists": [
+        "conformance/review-checklists/gateway-review.md"
+      ],
+      "glossary_terms": [
+        "client contract",
+        "drift"
+      ]
     }
   ]
 }
