@@ -76,7 +76,7 @@ The system must be capable of operating with zero internet connectivity. This me
 
 The contract requires that **a fully offline path exists** — not that every deployment is offline. An owner who uses cloud models is making a valid choice, but the architecture must never require it.
 
-What "functional" means: the full agent loop completes (message → model → tool calls → response) without any network traffic. The model may be less capable. The tool set may be smaller. But the system works.
+What "functional" means: the full agent loop completes (message → model → tool calls → response) without internet or other non-loopback network traffic. The model may be less capable. The tool set may be smaller. But the system works.
 
 ### 3. Data stays local by default
 
@@ -199,6 +199,6 @@ Updates must never compromise the owner's data or control. Two principles — me
 | # | Decision | Rationale |
 |---|----------|-----------|
 | D22 | Auth on both local and managed hosting | Auth is a memory concern (who can access your system), not a hosting concern. Even local deployments need auth for remote access and more than one actor. |
-| D29 | Zero lock-in by design | No part of the architecture requires a dependency the owner can't escape; any remaining lock-in risk comes from how an implementation is built. The deployment contract enforces this at the infrastructure level. |
+| D29 | Zero lock-in by design | No part of the architecture requires a dependency the owner can't escape. Where lock-in risk remains, it comes from how an implementation is built or from limits of the industry, like a weaker local model, never from the architecture. The deployment contract enforces this at the infrastructure level. |
 | D148 | The architecture defines local deployment only | The architecture defines how the system runs on hardware the owner controls. Managed hosting, VPS and cloud hosting are product offerings. |
 | D173 | Containers are one supported way to run the system, not the default | Packaging is an implementation choice. The architecture must run with no licence activation. |
