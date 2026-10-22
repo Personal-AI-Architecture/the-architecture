@@ -44,7 +44,7 @@ The rest of this doc is the specification: what any implementation of customizat
 
 ### Fixed contracts, overridable defaults
 
-The architecture ships sensible defaults for everything a working system needs — runtime config shape, tool discovery mechanism, basic configuration behavior. **These are defaults, not fixed contracts.** Override any of them, as long as the result still meets the published specs and contracts.
+The architecture ships sensible defaults for everything a working system needs — runtime config values, tool discovery mechanism, basic configuration behavior. **These are defaults, not fixed contracts.** Override any of them, as long as the result still meets the published specs and contracts.
 
 The fixed contracts are the two APIs, plus the internal Gateway ↔ Agent Loop contract and the shared shapes in `contracts/` (such as the four-field runtime config):
 
