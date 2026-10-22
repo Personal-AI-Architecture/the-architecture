@@ -105,7 +105,7 @@ The rest of the system depends on the Auth contract. The auth provider behind it
 | Decide what to do | Model (via Agent Loop) | Auth makes no content decisions |
 | Route requests | Gateway | Auth does not route |
 | Execute tools | Agent Loop | Auth does not execute |
-| Manage conversations | Gateway | Auth does not track conversations |
+| Manage conversations and record reply provenance | Gateway, which stores the model and provider with each saved assistant reply (D194) | Auth does not track conversations or choose models and providers |
 | Define product behavior | Your Memory (instructions, skills) | Auth has no product logic |
 | Keep secrets | Outside Your Memory, never tracked by git (environment variables, an untracked config file or a secret store) | Auth checks credentials; it does not put them in memory |
 

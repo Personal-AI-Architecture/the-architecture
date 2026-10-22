@@ -253,7 +253,7 @@ components:
           default: message
           description: |
             How this request was triggered. The Agent Loop gets the same messages array
-            regardless of trigger source — it genuinely does not know the difference.
+            regardless of trigger source and need not branch on this label.
             - message: Client sent a message through the Gateway API
             - webhook: External service triggered via Gateway API
             - schedule: Cron tool triggered via Gateway

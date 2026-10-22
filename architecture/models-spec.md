@@ -143,4 +143,3 @@ the Model API use canonical source provenance and visibility/authorization marke
 the model must preserve source_id on emitted tool calls. Optional generation settings such as `max_tokens` and
 `temperature` use the provider's defaults unless a caller sets them; who sets them is an
 implementation choice.
-
