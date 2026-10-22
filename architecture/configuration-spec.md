@@ -186,7 +186,7 @@ Each adapter (see [adapter-spec.md](../architecture/adapter-spec.md), D139) may 
 
 **An adapter config can list provider profiles.** One adapter format (for example OpenAI-compatible) often reaches several providers. The adapter config may list each as a profile with its endpoint and a secret reference; which profile is active is an owner preference in Your Memory, read on every message like the model (D193). Switching between profiles is a preference change with no restart. Only a provider in a new format needs a new adapter, named by `provider_adapter`.
 
-**Swapping to a new adapter format = swapping an adapter file.** Runtime config points to which adapter (`provider_adapter: "openrouter"`). The adapter file contains everything provider-specific. Nothing else in the system knows or cares about provider details. See [adapter-spec.md](../architecture/adapter-spec.md) §How Model Configuration Works in Practice for the full walkthrough of model and provider swaps — what changes, what doesn't, and the two kinds of change (same provider vs different provider).
+**Swapping to a new adapter format = swapping an adapter file.** Runtime config points to which adapter (`provider_adapter: "openai-compatible"`). The adapter file contains everything provider-specific. Nothing else in the system knows or cares about provider details. See [adapter-spec.md](../architecture/adapter-spec.md) §How Model Configuration Works in Practice for the full walkthrough of model and provider swaps — what changes, what doesn't, and the two kinds of change (same provider vs different provider).
 
 This is the same pattern as the architecture's contracts: components speak a generic internal interface, adapters translate to/from the specific external standard. Configuration follows the same principle: runtime config speaks generically, adapter config handles the specifics.
 
@@ -240,11 +240,12 @@ Three swap types constitute "normal":
 
 **The test, concretely (CI-ready):**
 
-1. Start the system with provider A (e.g., OpenRouter)
-2. Run a standard conversation + tool-call test suite — verify pass
-3. Change `provider_adapter` to provider B, provide adapter config, set the secret
-4. Run the same test suite — verify pass
-5. **If any code change was required between steps 2 and 4, the test fails.** Lock-in has been introduced.
+For each swap in the table:
+
+1. Start the system and run a standard conversation + tool-call test suite — verify pass
+2. Make only the config changes that row lists
+3. Run the same test suite — verify pass. For a provider-profile or model swap, the very next message uses the new choice with no restart
+4. **If any code change was required, the test fails.** Lock-in has been introduced.
 
 This is a CI test, not a guideline. Run it on every release.
 
