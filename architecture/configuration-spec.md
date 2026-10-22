@@ -38,11 +38,19 @@ The rest of this doc is the specification: what any implementation of configurat
 
 ---
 
-## The Three Categories
+## What counts as configuration
 
-Configuration looks like one thing but is actually three things, each with a different owner and a different home. Two other things are often mistaken for configuration and live elsewhere: **permissions** (who may do what) live only in Auth, and **secrets** live outside Your Memory in places git never tracks (see [Secrets](#secrets)).
+Configuration is three things, each with its own home, sorted by one question: **is this about you, or about this machine?**
 
-### 1. Preferences — what you want
+- "I prefer Claude" → about you → Your Memory
+- "Claude is available at this API endpoint" → about this machine → runtime/adapter config
+- "Always load git tools" → about you → Your Memory
+- "Git tools are installed at /usr/local/bin/git" → about this machine → tool self-description
+- "Auth uses local mode" → about this machine → runtime config
+- "This actor may write files" → a permission → Auth, nowhere else
+- "sk-abc123..." → a secret → outside Your Memory, never tracked by git
+
+### Preferences: what you want
 
 Your choices about how the system behaves. These are personal data. They describe you, not the environment.
 
@@ -57,9 +65,7 @@ Your choices about how the system behaves. These are personal data. They describ
 
 **What format:** Files in Your Memory. A config file in your library (e.g., `config/preferences.md` or `config/preferences.json`) — human-readable, editable, portable. The format is an implementation decision. The principle is architectural: preferences are personal data.
 
-**What preferences are not:** permissions. "Allow the web scraper" or "deny system access tools" decides what an actor may do, so it lives in Auth and nowhere else ([auth-spec.md](./auth-spec.md)). Auth stores its records in its own way and manages them through Auth tools. Configuration never stores, reads, or applies permissions, and a preference never widens or narrows access.
-
-### 2. Runtime config — what's here
+### Runtime config: what is on this machine
 
 The thin bootstrap that tells the system what exists in this environment. Exactly four fields. This is the "desk setup" — it describes the desk, not the person sitting at it.
 
@@ -70,7 +76,7 @@ The thin bootstrap that tells the system what exists in this environment. Exactl
 | `auth_mode` | How authentication works in this deployment | `local` (architecture default). Implementations may define other modes. |
 | `tool_sources` | Where the system finds installed tools | `["/opt/your-ai/tools/", "/usr/local/mcp-servers/"]` |
 
-Which model to use is intentionally not here — it is a preference (a product default or the owner's choice), not an environment fact. It lives in preferences in Your Memory.
+Which model and which provider profile to use are intentionally not here. They are preferences (a product default or the owner's choice), not environment facts, so they live in Your Memory (D193).
 
 **Example runtime config:**
 
@@ -89,7 +95,7 @@ Which model to use is intentionally not here — it is a preference (a product d
 
 **The bootstrap prompt is not runtime config.** The one-line seed that tells the model where to start reading Your Memory (e.g., "Read AGENT.md for your instructions") belongs to the Agent Loop's own configuration — see [agent-loop-spec.md](./agent-loop-spec.md) §Boot-Time Configuration. It is not one of the four fields and not a preference. Everything the model learns after that seed comes from Your Memory.
 
-### 3. Tool self-description — what tools can do
+### Tool self-description: what tools can do
 
 Tool definitions (name, description, parameters, capabilities) are not written by the owner or stored in config. **Tools describe themselves.**
 
@@ -103,55 +109,27 @@ Tool definitions (name, description, parameters, capabilities) are not written b
 
 **Why this matters:** The tool says what it does. Adding a tool is: install it, point `tool_sources` at it, done. No definition to maintain, and no drift between config and tool.
 
----
+### Not configuration: permissions and secrets
 
-## What Configuration Does NOT Do
+**Permissions** decide what an actor may do. "Allow the web scraper" or "deny system access tools" lives in Auth and nowhere else ([auth-spec.md](./auth-spec.md)). Auth stores its records in its own way and manages them through Auth tools. Configuration never stores, reads, or applies permissions, and a preference never widens or narrows access.
 
-| Anti-pattern | Why it's wrong | What to do instead |
-|-------------|---------------|-------------------|
-| Store tool definitions in config | Duplicates what the tool already knows about itself. Creates drift. | Let tools self-describe. Config just points to where tools are. |
-| Store owner preferences in runtime config | Preferences are personal data. Putting them in runtime config means they don't travel with you. | Put preferences in Your Memory. |
-| Store permissions in config or preferences | A second permission store can drift from Auth or bypass it. | Permissions live only in Auth. |
-| Store secrets in Your Memory or tracked files | Secrets in tracked files get committed, shared, leaked. | Keep them outside Your Memory, somewhere git never tracks. Config names the secret (for example `"api_key_env": "PROVIDER_API_KEY"`), never its value. |
-| Require config changes for normal operations | If using a new tool or starting a new project requires editing config, the system is too rigid. | Normal operations flow through Your Memory and tools. Config only changes when the environment changes. |
-| Couple config to a specific implementation | Config that references internal service names, proprietary formats, or implementation details creates lock-in. | Config fields must be generic. `provider_adapter: "openrouter"` not `openrouter_v2_internal_bridge: true`. |
+**Secrets** (API keys, tokens, credentials) live outside Your Memory, somewhere git never tracks. Configuration only names them; see [Secrets](#secrets).
 
----
+## What the system guarantees about configuration
 
-## Layered Overrides
+| Guarantee | What it means |
+|---|---|
+| **Preferences travel with you** | Preferences are personal data in Your Memory (D145), never in runtime config. Your Memory holds no environment-specific references (server addresses, ports, paths). On a new system, a preference that can't be honored is reported, not an error. |
+| **The startup file stays thin** | Runtime config has exactly four fields, all about this machine (D144). The owner can read and change it. |
+| **Tools describe themselves** | Tool definitions come from the tools, never from config, so they can't drift (D146). Config only says where to find tools. |
+| **Normal swaps never need code** | Switching a model, a provider or a tool is a configuration change only (D147). Everyday use, like using an installed tool or starting a new project, needs no config edit at all. |
+| **Config stays generic** | Config fields never name internal services, proprietary formats or implementation details: `provider_adapter: "openrouter"`, not `openrouter_v2_internal_bridge: true`. |
+| **Permissions live only in Auth** | No permission is stored in or applied from configuration or preferences. |
+| **Secrets are named, never stored** | Config names a secret; its value lives outside Your Memory and outside anything git tracks (D172). |
+| **The owner has the last word** | The owner can change every product default on their own hardware, and an update never silently overwrites an owner change (D171). |
+| **Startup never depends on the network** | With no network, startup completes; a remote tool or provider that can't be reached is reported. |
 
-Configuration is layered: the architecture, then the implementation, then the owner. Each layer can override the one below it. Last layer wins.
-
-| Layer | What it provides | Example |
-|-------|-----------------|---------|
-| **Architecture — Foundation defaults** | Sensible defaults that make the system work out of the box | `auth_mode: "local"`, no tools pre-configured |
-| **Implementation — Product defaults** | Opinionated defaults from the product built on the architecture | A product picks a provider adapter, ships starter tools, sets a default model |
-| **Owner overrides** | The owner's choices, always final | Owner changes model, adds tools, changes the always-send set |
-
-**Merge order is deterministic:** Architecture → Implementation → Owner. An owner override always wins. An implementation default applies unless the owner overrides it. An architecture default applies unless the product or owner overrides it.
-
-**There is no layer above the owner.** On the owner's own hardware, no product rule beats the owner's choice. A product ships defaults, including safety-minded ones, and the owner can change every one of them. Rules the owner cannot change only make sense where someone else runs the hardware (hosting), which this architecture does not cover.
-
-**Owner changes survive updates.** Product defaults and owner overrides are kept apart, so a product update replaces its own defaults without touching the owner's choices. Where an update conflicts with an owner change, the owner is told; the change is never overwritten silently. How a product keeps the two apart is an implementation choice.
-
-**Preferences use the same layering:** The Architecture has no preferences (the foundation is unopinionated). Implementations ship product defaults ("default to a fast model"). Owner preferences are the owner's choices ("use the larger model"). The owner wins.
-
----
-
-## Secrets
-
-Secrets (API keys, tokens, credentials) live anywhere outside Your Memory that git never tracks: environment variables, an untracked config file (such as a gitignored `.env`), or a secret store. Which one is an implementation choice.
-
-| Principle | Detail |
-|-----------|--------|
-| **Reference, never value** | Config names the secret, for example `"api_key_env": "PROVIDER_API_KEY"`. The value comes from wherever the deployment keeps secrets. |
-| **Never in Your Memory** | Your Memory is portable, shareable, versioned. Secrets in Your Memory are secrets leaked. |
-| **Never in tracked config** | Runtime config and adapter config may be shared across deployments or checked into a repo. They hold references only. |
-| **Not portable** | Secrets do not travel with Your Memory. On a new system, the owner sets them up again. |
-
----
-
-## Adapter Config
+## Adapter config
 
 Each adapter (see [adapter-spec.md](../architecture/adapter-spec.md), D139) may have its own config file. This is where provider-specific settings live — not in runtime config, not in preferences.
 
@@ -190,8 +168,6 @@ Each adapter (see [adapter-spec.md](../architecture/adapter-spec.md), D139) may 
 
 This is the same pattern as the architecture's contracts: components speak a generic internal interface, adapters translate to/from the specific external standard. Configuration follows the same principle: runtime config speaks generically, adapter config handles the specifics.
 
----
-
 ## How the System Boots
 
 Configuration is read at two different times. **Environment facts are read once, at startup.** **The owner's model and provider choice are read on every message.** Everything else in this section follows from that split.
@@ -223,7 +199,34 @@ If any preference references a tool that doesn't exist in this environment (e.g.
 
 Permissions are not part of either sequence. The Gateway asks Auth on every request, and the Agent Loop asks Auth before each tool call ([auth-spec.md](./auth-spec.md)). Configuration never applies access rules.
 
----
+## Layered Overrides
+
+Configuration is layered: the architecture, then the implementation, then the owner. Each layer can override the one below it. Last layer wins.
+
+| Layer | What it provides | Example |
+|-------|-----------------|---------|
+| **Architecture — Foundation defaults** | Sensible defaults that make the system work out of the box | `auth_mode: "local"`, no tools pre-configured |
+| **Implementation — Product defaults** | Opinionated defaults from the product built on the architecture | A product picks a provider adapter, ships starter tools, sets a default model |
+| **Owner overrides** | The owner's choices, always final | Owner changes model, adds tools, changes the always-send set |
+
+**Merge order is deterministic:** Architecture → Implementation → Owner. An owner override always wins. An implementation default applies unless the owner overrides it. An architecture default applies unless the product or owner overrides it.
+
+**There is no layer above the owner.** On the owner's own hardware, no product rule beats the owner's choice. A product ships defaults, including safety-minded ones, and the owner can change every one of them. Rules the owner cannot change only make sense where someone else runs the hardware (hosting), which this architecture does not cover.
+
+**Owner changes survive updates.** Product defaults and owner overrides are kept apart, so a product update replaces its own defaults without touching the owner's choices. Where an update conflicts with an owner change, the owner is told; the change is never overwritten silently. How a product keeps the two apart is an implementation choice.
+
+**Preferences use the same layering:** The Architecture has no preferences (the foundation is unopinionated). Implementations ship product defaults ("default to a fast model"). Owner preferences are the owner's choices ("use the larger model"). The owner wins.
+
+## Secrets
+
+Secrets (API keys, tokens, credentials) live anywhere outside Your Memory that git never tracks: environment variables, an untracked config file (such as a gitignored `.env`), or a secret store. Which one is an implementation choice.
+
+| Principle | Detail |
+|-----------|--------|
+| **Reference, never value** | Config names the secret, for example `"api_key_env": "PROVIDER_API_KEY"`. The value comes from wherever the deployment keeps secrets. |
+| **Never in Your Memory** | Your Memory is portable, shareable, versioned. Secrets in Your Memory are secrets leaked. |
+| **Never in tracked config** | Runtime config and adapter config may be shared across deployments or checked into a repo. They hold references only. |
+| **Not portable** | Secrets do not travel with Your Memory. On a new system, the owner sets them up again. |
 
 ## The Anti-Lock-In Test (D147)
 
@@ -249,37 +252,7 @@ For each swap in the table:
 
 This is a CI test, not a guideline. Run it on every release.
 
----
-
-## Configuration and Your Memory: The Line
-
-**One question: is this about you, or about this desk?**
-
-- "I prefer Claude" → about you → Your Memory
-- "Claude is available at this API endpoint" → about this desk → runtime/adapter config
-- "Always load git tools" → about you → Your Memory
-- "Git tools are installed at /usr/local/bin/git" → about this desk → tool self-description
-- "Auth uses local mode" → about this desk → runtime config
-- "This actor may write files" → a permission → Auth, nowhere else
-- "sk-abc123..." → a secret → outside Your Memory, never tracked by git
-
-**Your Memory stays clean of environment-specific references.** When you move, your preferences come with you. The new environment provides its own runtime config, its own adapter config, its own installed tools. The system matches your preferences against what's available and tells you about any gaps.
-
----
-
-## Decisions Made
-
-| # | Decision | Rationale |
-|---|----------|-----------|
-| D143 | Configuration is a cross-cutting concern — not owned by any single component, defined in its own spec | Every component has configuration, and it is where lock-in hides. Three categories: preferences (Your Memory), runtime config (thin bootstrap), tool self-description. |
-| D144 | Runtime config is exactly four fields | Every field describes this machine and can't travel with you. Four is enough to start; everything else is a preference or discovered. |
-| D145 | Preferences live in Your Memory | "Is this about you, or about this desk?" Preferences are personal data, so they travel with you. Permissions are not preferences; they live only in Auth. |
-| D146 | Tools describe themselves | Definitions come from the tools, not from config, so they never drift. Config only says where to find tools. |
-| D147 | Anti-lock-in test: three normal swaps (provider, model, tool) must succeed with config-only changes | Provider swap = change the provider preference (D193), or for a new format change adapter + secret. Model swap = change preference. Tool swap = install/uninstall + update preferences. If any requires code changes, lock-in has been introduced. CI-testable on every release. |
-
----
-
-## Success Criteria
+## Checking an implementation
 
 - [ ] Switching to another provider profile in the loaded adapter takes effect on the next message — no restart, no code change (D193)
 - [ ] Swapping to a provider in a new format requires only changing `provider_adapter`, providing a new adapter config file, and setting the secret — zero code changes
@@ -291,20 +264,23 @@ This is a CI test, not a guideline. Run it on every release.
 - [ ] Runtime config has exactly four fields
 - [ ] No permission is stored in or applied from configuration or preferences
 - [ ] An AI agent can read and understand every config file without documentation
+- [ ] *(security)* Secrets (API keys, tokens, credentials) must never be stored in Your Memory or in any file git tracks — environment variables, untracked config files, or a secret store only
+- [ ] *(security)* Runtime and adapter config must not contain secrets by value — only the secret's name (for example `"api_key_env": "PROVIDER_API_KEY"`)
+- [ ] *(security)* Preferences in Your Memory must not contain environment-specific references (server addresses, ports, paths) — only personal choices
+- [ ] *(security)* Adapter config files must not leak across deployments — provider-specific settings stay with the deployment, not with Your Memory
+- [ ] *(security)* Startup must not require network access. With no network, startup completes; a remote tool or provider that can't be reached is reported, not a startup failure. Outbound calls at startup go only where the owner has configured them
 
----
+The security requirements come from [security-spec.md](./security-spec.md), which owns the why.
 
-## Security Requirements
+## Decisions
 
-Per-component requirements from [security-spec.md](./security-spec.md). Security-spec owns the "why"; this section owns the "what" for Configuration.
-
-- [ ] Secrets (API keys, tokens, credentials) must never be stored in Your Memory or in any file git tracks — environment variables, untracked config files, or a secret store only
-- [ ] Runtime and adapter config must not contain secrets by value — only the secret's name (for example `"api_key_env": "PROVIDER_API_KEY"`)
-- [ ] Preferences in Your Memory must not contain environment-specific references (server addresses, ports, paths) — only personal choices
-- [ ] Adapter config files must not leak across deployments — provider-specific settings stay with the deployment, not with Your Memory
-- [ ] Startup must not require network access. With no network, startup completes; a remote tool or provider that can't be reached is reported, not a startup failure. Outbound calls at startup go only where the owner has configured them
-
----
+| # | Decision | Rationale |
+|---|----------|-----------|
+| D143 | Configuration is a cross-cutting concern — not owned by any single component, defined in its own spec | Every component has configuration, and it is where lock-in hides. Three categories: preferences (Your Memory), runtime config (thin bootstrap), tool self-description. |
+| D144 | Runtime config is exactly four fields | Every field describes this machine and can't travel with you. Four is enough to start; everything else is a preference or discovered. |
+| D145 | Preferences live in Your Memory | "Is this about you, or about this desk?" Preferences are personal data, so they travel with you. Permissions are not preferences; they live only in Auth. |
+| D146 | Tools describe themselves | Definitions come from the tools, not from config, so they never drift. Config only says where to find tools. |
+| D147 | Anti-lock-in test: three normal swaps (provider, model, tool) must succeed with config-only changes | Provider swap = change the provider preference (D193), or for a new format change adapter + secret. Model swap = change preference. Tool swap = install/uninstall + update preferences. If any requires code changes, lock-in has been introduced. CI-testable on every release. |
 
 ## Contract alignment
 
@@ -313,7 +289,3 @@ adapter, message, and internal-handoff shapes. The model and provider choice are
 internal request, while the bootstrap prompt, provider adapter, and tool definitions
 remain startup configuration. Adapter configuration remains intentionally
 implementation-specific until a dedicated schema is agreed.
-
----
-
-*Configuration is where lock-in hides. The architecture promises zero lock-in at every level — but if configuration quietly introduces dependencies, proprietary formats, or environment coupling, the promise is hollow. This spec exists to make sure the desk setup is as simple and swappable as everything else.*
