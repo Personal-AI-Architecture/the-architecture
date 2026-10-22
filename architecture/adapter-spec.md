@@ -59,7 +59,7 @@ WITH ADAPTERS:
 
 **External standard (today):** Provider-specific formats (OpenAI, Anthropic, OpenRouter — all variations on prompt + tool definitions in, completion + tool calls out).
 
-**Internal interface:** Prompt in, completion out. The Agent Loop sends a normalized request (system instructions, messages, tool definitions, context) and receives a normalized response stream (text, tool calls, done). The selected model and adapter make the model's context limit available to the Agent Loop, which enforces context fit. It doesn't know what model or provider is behind the adapter.
+**Internal interface:** Prompt in, completion out. The Agent Loop sends a normalized request (system instructions, messages, tool definitions, context) and receives a normalized response stream (text, tool calls, done). It doesn't know what model or provider is behind the adapter.
 
 **What the adapter does:**
 - Translates outbound Agent Loop requests from the internal interface into the provider's format

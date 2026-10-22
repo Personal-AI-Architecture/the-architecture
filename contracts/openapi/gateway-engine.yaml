@@ -438,14 +438,12 @@ components:
             - provider_error
             - tool_error
             - auth_error
-            - auth_revoked
             - context_overflow
           description: |
             Error category:
             - provider_error: Model unreachable or timeout
             - tool_error: Tool failed and model cannot recover
             - auth_error: Auth denied the request or could not check it
-            - auth_revoked: The actor was revoked while the turn was running
             - context_overflow: Messages exceed model context window
         message:
           type: string

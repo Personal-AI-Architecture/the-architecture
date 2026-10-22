@@ -10,7 +10,7 @@
     "id": { "type": "string", "minLength": 1, "description": "Stable audit record identifier." },
     "occurred_at": { "type": "string", "format": "date-time" },
     "event": { "type": "string", "minLength": 1, "description": "Open event name, such as auth.authorized, tool.executed, memory.read, identity.revoked, or loop.cancelled." },
-    "actor_id": { "type": "string", "minLength": 1, "description": "Authenticated actor responsible for the action; never silently replaced by the owner." },
+    "actor_id": { "type": "string", "minLength": 1, "description": "Authenticated actor responsible for the action." },
     "action": { "type": "string", "minLength": 1, "description": "Action performed or attempted." },
     "resource": { "type": "string", "description": "Resource targeted, when applicable." },
     "result": { "type": "string", "enum": ["allowed", "denied", "completed", "failed", "cancelled"], "description": "Outcome of the action." },

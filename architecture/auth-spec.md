@@ -148,7 +148,7 @@ An identity re-created after export and import starts with no access: it cannot 
 
 ### Identity travels with the request
 
-Once the Gateway has the identity from Auth, it passes the canonical `auth_context` to the Agent Loop with the request, and the Agent Loop uses that same actor identity for each tool check and for the audit log. An AI acting for the owner remains the actor in the context; the owner's authority is expressed by the policy that grants the actor access, never by silently substituting the owner's identity. `auth_context` contains the authenticated actor, an authentication ID, timestamps, and correlation ID; it contains neither credentials nor permissions. The internal transport adapter verifies the component boundary and preserves the same context across HTTP, a message bus, or a direct function call. A missing, malformed, expired, or caller-supplied context is rejected.
+Once the Gateway has the identity from Auth, it passes the canonical `auth_context` to the Agent Loop with the request, and the Agent Loop uses that same actor identity for each tool check and for the audit log. In v1 the AI in a conversation acts under the owner's identity; distinct identities for AI agents acting for the owner are deferred to the agents step (D190). `auth_context` contains the authenticated actor, an authentication ID, timestamps, and correlation ID; it contains neither credentials nor permissions. The internal transport adapter verifies the component boundary and preserves the same context across HTTP, a message bus, or a direct function call. A missing, malformed, expired, or caller-supplied context is rejected.
 
 ---
 

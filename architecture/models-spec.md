@@ -63,7 +63,7 @@ Every model-related concern maps to an existing component or configuration:
 | Which model to call (including per-task selection) | The owner's model preference, passed with each request | A preference, not a component |
 | Provider routing (OpenRouter vs Anthropic vs Ollama) | Agent Loop implementation or SDK | How the Agent Loop calls models is an implementation detail |
 | Fallback if a provider is down | No automatic fallback; the Agent Loop reports the provider error and stops the current turn | A product may offer an explicit retry or provider change, but PAA does not silently switch providers |
-| Context window awareness | The selected model or adapter supplies the limit; the Agent Loop checks request fit | The Agent Loop owns enforcement and reports `context_overflow` when no safe, explicit compaction policy can make the request fit |
+| Context window awareness | Agent Loop or Model API | The Agent Loop knows the limits of what it's calling |
 
 Nothing is left over. There is no gap that requires a dedicated component.
 
@@ -112,7 +112,7 @@ The primary model can't be a tool — it *is* the intelligence making tool decis
 | # | Decision | Rationale |
 |---|----------|-----------|
 | D44 | Your Memory + Model = the brain — neither is complete alone | Your Memory is the persistent half (stored patterns, knowledge, skills). The model is the intelligence half. The brain reconstitutes every time — the model arrives fresh and reads Your Memory to become capable. |
-| D63 | Models are not a component — they are external intelligence accessed through the Model API | Every model-related concern maps to existing components or configuration: provider routing (Agent Loop implementation), API keys (configuration/Auth), model selection (configuration), provider failure reporting (Agent Loop), and context-fit enforcement (Agent Loop with model/adapter limits). There is no gap. The system calls a model. It doesn't contain one. |
+| D63 | Models are not a component — they are external intelligence accessed through the Model API | Every model-related concern maps to existing components or configuration: provider routing (Agent Loop implementation), API keys (configuration/Auth), model selection (configuration), provider failure reporting (Agent Loop), and context window awareness (Agent Loop/Model API). There is no gap. The system calls a model. It doesn't contain one. |
 | D64 | The system has four components, two APIs, and three external dependencies | The six component interviews resolved the architecture. Four components (Your Memory, Agent Loop, Auth, Gateway), two APIs (Gateway API, Model API), three external dependencies (Clients, Models, Tools). What started as six components and three APIs simplified as each interview revealed concerns mapping to existing components. |
 | D108 | Model API must remain an API, not a tool | Intelligence is a requirement — the model decides which tools to use, so "call the model" can't itself be a tool (circular dependency). Sub-agents are the exception: the primary model can delegate to a secondary model as a tool. |
 | D135 | Memory/tool binary — if it's data, it's memory; if it's not data, it's a tool | Models conceptually decompose (weights = memory, inference = tool) but are elevated to an external dependency because swappable intelligence needs a clean boundary, and storage is not computation. |

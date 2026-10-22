@@ -73,7 +73,7 @@ These are explicit boundaries. They exist to prevent product-specific logic from
 | Scope constraints | Tool configuration (which tools are available) + Auth (which tools this actor may call) | Agent Loop asks Auth before each tool call and honours the answer; it does not decide permissions itself |
 | Context loading | Model reads files through tools based on its instructions | Agent Loop does not decide what context to load |
 | Conversation persistence | The Gateway, which stores conversations in Your Memory through its conversation store tool (D152) | Agent Loop does not own conversation storage |
-| Context window management | The selected model or adapter supplies its limit; the Agent Loop checks request fit and applies only an explicit, owner-visible compaction policy | Agent Loop never silently drops or rewrites history; it reports `context_overflow` when the request cannot safely fit |
+| Context window management | Model/provider handles compaction, or instructions tell the model how to summarize | Agent Loop does not decide what to cut |
 | Error recovery | Agent Loop reports provider failures; a product or caller may explicitly retry or change provider | Agent Loop does not silently fall back to another provider or recover the failed turn automatically |
 | Authentication | The Gateway calls Auth on every request before it reaches the Agent Loop | Agent Loop does not authenticate requests |
 | Product personality | Memory files the model reads | Agent Loop has no personality; its bootstrap prompt only says where to look |

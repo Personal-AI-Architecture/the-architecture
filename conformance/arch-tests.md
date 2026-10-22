@@ -332,7 +332,7 @@
 
 **Pass criteria:**
 - [ ] Every action has the required portable audit fields
-- [ ] `actor_id` is the authenticated actor, not an implicit owner substitution
+- [ ] `actor_id` is the authenticated actor of the originating request
 - [ ] Correlation IDs connect records to the originating request or operation
 - [ ] Records contain no credentials, secrets, or raw private content
 - [ ] The owner can query and export the records in an open format

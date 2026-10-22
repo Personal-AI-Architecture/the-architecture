@@ -239,11 +239,11 @@ One HTTP endpoint. Not a third API.
 
 **Auth path:** Gateway calls Auth -> attach canonical `auth_context` -> reject with 401 on failure. Agent Loop verifies the internal handoff and asks Auth before each tool call -> a refused call returns a `tool-result` with `error_code: not_permitted`.
 
-**Messages:** one shape across all three contracts. Content is a list of parts; tool calls and tool results are ordinary message parts and are saved in conversation history. The bootstrap prompt is Agent Loop configuration, so the request carries no system message. The Agent Loop enforces the selected model's context limit without silently dropping or rewriting history.
+**Messages:** one shape across all three contracts. Content is a list of parts; tool calls and tool results are ordinary message parts and are saved in conversation history. The bootstrap prompt is Agent Loop configuration, so the request carries no system message.
 
 **Errors:** every error, HTTP or SSE, carries the request's correlation ID.
 
-**Provider failures:** the Agent Loop reports a provider error and stops the current turn; provider fallback requires an explicit retry or provider change. The authenticated actor in `auth_context` remains the actor for Auth checks and audit records even when acting under owner authority.
+**Provider failures:** the Agent Loop reports a provider error and stops the current turn; provider fallback requires an explicit retry or provider change. The authenticated actor in `auth_context` is the actor for Auth checks and audit records; in v1 the AI in a conversation acts as the owner (D190).
 
 ---
 

@@ -9,7 +9,7 @@ hide_table_of_contents: true
 >
 > Each gap is something the spec expects that the published architecture does not deliver today. Classification is a suggestion for triage: **Defect** (published material is broken or contradicts itself), **Decision needed** (the maintainers must choose), **Technical** (contract and technical work), **Spec-only** (wording fix in the architecture docs). A gap marked **Decided, spec update in progress** has a settled answer that is still being written into the specs and contracts.
 
-**Scoreboard:** The contract-source alignment batch, example-shape validation, documentation freshness tooling, configuration alignment, required parallel tool execution, portable policy semantics, approval lifecycle contracts, transport-neutral identity propagation, tool-definition visibility/source semantics, local-address decision, first executable language-neutral conformance baseline, template-link cleanup, the five visitor-1 decisions, Auth-down fail-closed correction, multi-actor wording, revocation cancellation, and portable audit records are complete. No visitor-1 gaps remain open.
+**Scoreboard:** The contract-source alignment batch, example-shape validation, documentation freshness tooling, configuration alignment, required parallel tool execution, portable policy semantics, approval lifecycle contracts, transport-neutral identity propagation, tool-definition visibility/source semantics, local-address decision, first executable language-neutral conformance baseline, template-link cleanup, the visitor-1 decisions on GAP-PAA-18, 19 and 23, the v1 identity rule for GAP-PAA-24 (agent identities deferred to the agents step), the Auth-down fail-closed correction, multi-actor wording, revocation cancellation, and portable audit records are complete. GAP-PAA-20 stays open with Dave J.
 
 ## Routes a developer follows
 
@@ -127,7 +127,7 @@ hide_table_of_contents: true
 - **Published:** The Agent Loop spec's "Concurrency" section says multi-actor concurrency is not an Agent Loop concern, because a collaborator or external agent always brings their own system and agent loop. The overview and the Auth spec say other people and AI agents can act through the owner's own system with the permissions the owner grants, so they get loops in this Agent Loop. The identity rules already cover this (identity travels with each request and is checked on every tool call); the Concurrency prose and its scenario table need rewording to match.
 - **Evidence:** [agent-loop-spec.md](../architecture/agent-loop-spec.md) "Concurrency"; [overview.md](../architecture/overview.md) "The parts" (Auth); [auth-spec.md](../architecture/auth-spec.md).
 - **Published:** The concurrency section now distinguishes shared loop state from multi-actor access: collaborators and external agents may use the same generic Agent Loop under their own authenticated `auth_context` and owner-granted permissions. Their identity is never replaced by the owner identity.
-- **Evidence:** [agent-loop-spec.md](../architecture/agent-loop-spec.md) "Concurrency"; [auth-spec.md](../architecture/auth-spec.md) "Identity travels with the request"; [decisions.md](../architecture/decisions.md) D191.
+- **Evidence:** [agent-loop-spec.md](../architecture/agent-loop-spec.md) "Concurrency"; [auth-spec.md](../architecture/auth-spec.md) "Identity travels with the request".
 
 ### GAP-PAA-18: Two messages to the same conversation at once are not defined — Resolved
 
@@ -143,12 +143,12 @@ hide_table_of_contents: true
 - **Evidence:** [agent-loop-spec.md](../architecture/agent-loop-spec.md) "What the Agent Loop does not do"; [models-spec.md](../architecture/models-spec.md) "Why Models Are Not a Component"; [decisions.md](../architecture/decisions.md) D188.
 - **Decided:** No silent or automatic provider fallback in the architecture.
 
-### GAP-PAA-20: Nobody owns preventing a conversation from outgrowing the model's context window — Resolved
+### GAP-PAA-20: Nobody owns preventing a conversation from outgrowing the model's context window — Decision needed
 
 - **Expected:** One owner for keeping a request inside the model's context window. (US-5 says models differ; no user story promises long conversations work with every model.)
-- **Published:** The selected model or adapter supplies its context limit; the Agent Loop checks request fit and owns enforcement. Explicit owner-visible compaction is allowed, but silent history loss is not; otherwise the Agent Loop reports `context_overflow`.
-- **Evidence:** [agent-loop-spec.md](../architecture/agent-loop-spec.md) "What the Agent Loop does not do"; [models-spec.md](../architecture/models-spec.md) "Why Models Are Not a Component"; [decisions.md](../architecture/decisions.md) D189.
-- **Decided:** Context-fit enforcement belongs to the Agent Loop, with limits supplied by the selected model or adapter.
+- **Published:** When a request is too large, a `context_overflow` error is reported. Who prevents it is unsettled: the Agent Loop spec says the Agent Loop does not decide what to cut, leaving it to the model, the provider or instructions; the Models spec says the Agent Loop knows the limits of what it is calling; and tool results must reach the model unmodified.
+- **Evidence:** [agent-loop-spec.md](../architecture/agent-loop-spec.md) "What the Agent Loop does not do" (Context window management), "Error output" and "Checking an implementation"; [models-spec.md](../architecture/models-spec.md) (concerns table: "Context window awareness"); [build/blueprints/agent-loop](../build/blueprints/agent-loop/) (`context_overflow`).
+- **Status (2026-10-22 call):** With Dave J to investigate. BrainDrive's reference build handles this in the Gateway (`gateway/context-window.ts`): it keeps the newest turns within a token budget, replaces older turns with a short summary, saves the dropped text to memory, and warns the owner. Open points: BrainDrive caps tool results at 4,000 characters, against the rule that tool results reach the model unmodified, and its budget is one fixed setting rather than the selected model's limit.
 
 ### GAP-PAA-21: Revoking access cannot stop a running loop — Resolved
 
@@ -169,15 +169,15 @@ hide_table_of_contents: true
 
 - **Expected:** US-6 AC-6.3. The system never reports a message as saved when it was not.
 - **Published:** The Gateway persists the incoming message before dispatch when possible. If the stream fails, it retains observed assistant text, tool calls, tool results and an explicit error outcome as an incomplete turn; it never reports the turn as complete. If initial persistence fails, it does not dispatch the request.
-- **Evidence:** [gateway-spec.md](../architecture/gateway-spec.md) "Concurrent messages in one conversation" and "Error output"; [decisions.md](../architecture/decisions.md) D190.
+- **Evidence:** [gateway-spec.md](../architecture/gateway-spec.md) "Concurrent messages in one conversation" and "Error output"; [decisions.md](../architecture/decisions.md) D189.
 - **Decided:** Preserve partial history with a terminal error outcome; completion is reported only after successful persistence.
 
 ### GAP-PAA-24: Whose identity the AI acts under in conversation is not defined — Resolved
 
 - **Expected:** US-10 AC-10.1, AC-10.3 and AC-10.4. Each identity acts only within its permissions, and actions are attributed in the audit log.
-- **Published:** An AI acting for the owner remains the authenticated actor in `auth_context`, Auth checks and audit records. The owner's authority is expressed by policy granting that actor access; the owner identity is never substituted silently.
-- **Evidence:** [auth-spec.md](../architecture/auth-spec.md) "Identity travels with the request"; [decisions.md](../architecture/decisions.md) D191.
-- **Decided:** Tool actions use the authenticated actor identity; delegation is represented by Auth policy.
+- **Published:** In v1 the AI in a conversation acts under the owner's identity. Every v1 tool call is internal, on the owner's own memory.
+- **Evidence:** [auth-spec.md](../architecture/auth-spec.md) "Identity travels with the request"; [decisions.md](../architecture/decisions.md) D190.
+- **Decided (2026-10-22 call):** Owner identity for v1. Distinct identities for AI agents acting for the owner are deferred to the agents step, when PAA adds external tool calls or external agents.
 
 ### GAP-PAA-25: The audit record format is not defined — Resolved
 
