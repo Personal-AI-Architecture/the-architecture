@@ -4,20 +4,6 @@ hide_table_of_contents: true
 
 # Memory/Tool Completeness: Why the Architecture Needs No New Components
 
-Where a product adds approval rules to memory writes, the tool boundary uses the
-canonical approval request/decision lifecycle; the owner-default path remains
-approval-free.
-
-The actor reaching that tool boundary is the transport-neutral `auth_context`, not a
-header-specific identity convention.
-
-If Auth revokes that actor while a turn is running, the Gateway cancels the turn
-through the internal contract before any further tool call; the cancellation and
-stopped operation are portable audit records.
-
-Tool definitions retain source provenance and visibility metadata, while the tool
-implementation supplies adapter details outside the definition contract.
-
 ## 1. The Binary
 
 The system reduces to two things: **memory and tools** (D135).
@@ -28,7 +14,7 @@ The system reduces to two things: **memory and tools** (D135).
 
 **Memory is the nouns. Tools are the verbs.** Clean binary.
 
-This framing resolves D122 — BrainDrive doesn't define "tool" more broadly than the AI industry. It defines it more precisely by separating the noun (memory) from the verb (tool). The AI industry conflates a tool with the data it accesses. A "RAG tool" is actually a retrieval *operation* (tool) acting on a vector *store* (memory). Two distinct things wearing one label.
+**Where tool calls fit.** A tool call is one use of a verb: the model asks to run a tool with specific inputs. Running it is the operation. The request and its result are data, saved in conversation history, so they're memory. A tool call is a sentence: a verb applied to nouns.
 
 The canonical message contract keeps tool calls and results as role-appropriate
 message parts, while the Model API carries normalized streaming events. Those transport
@@ -36,6 +22,8 @@ shapes do not introduce a new memory or tool component.
 Full conversation history remains in Your Memory even when the Gateway selects
 fewer older turns for one model call; a live tool result is never shortened by
 the Agent Loop to fit that call (GAP-PAA-20 proposal).
+
+This framing doesn't define "tool" more broadly than the AI industry. It defines it more precisely by separating the noun (memory) from the verb (tool). The AI industry conflates a tool with the data it accesses. A "RAG tool" is actually a retrieval *operation* (tool) acting on a vector *store* (memory). Two distinct things wearing one label.
 
 ---
 
@@ -93,14 +81,14 @@ Every concept people might think needs its own subsystem decomposes into memory 
 
 | What people call it | Memory (data/noun) | Tool (operation/verb) | Infrastructure concern |
 |---|---|---|---|
-| **Skills** | Skill definitions, prompts, instructions — data in Memory | Skill execution — the Agent Loop reads skill data and follows it | Auth controls who can use which skills |
+| **Skills** | Skill definitions, prompts, instructions — data in Memory | Skill execution — the model follows the instructions; any included script runs through an execution tool | Auth controls who can use which skills |
 | **RAG** | Vector store (indexed content) | `semantic_search(query)` — retrieval is an operation | Agent Loop augments the prompt with results (its normal loop) |
 | **CAG** | Cached context — data pre-loaded or pre-processed | `retrieve_context(key)` — retrieval is an operation | Cache invalidation is a tool or Agent Loop concern |
 | **Databases (SQL, NoSQL, vector)** | Stored records — data | `sql_query(statement)`, `nosql_get(key)` — queries are operations | Auth controls database access permissions |
 | **Knowledge graphs** | Nodes and edges — data | `graph_traverse(start, relation)` — traversal is an operation | — |
 | **Search indexes** | Indexed content — derived data | `full_text_search(terms)` — searching is an operation | Index maintenance is a tool (rebuild, update) |
-| **External services (Salesforce, Stripe)** | CRM/payment data — your memory, externally hosted | `salesforce_query(filter)`, `stripe_charge(params)` — API calls are operations | Auth manages API keys and access |
-| **Email/messaging (Gmail, Slack)** | Message history — provider-hosted memory | `send_email`, `post_message` — tools calling provider APIs (tool calling tool) | Auth manages OAuth tokens |
+| **External services (Salesforce, Stripe)** | CRM/payment data — your memory, externally hosted | `salesforce_query(filter)`, `stripe_charge(params)` — API calls are operations | Auth controls who may use the tool; its credentials are kept outside Your Memory (D172) |
+| **Email/messaging (Gmail, Slack)** | Message history — provider-hosted memory | `send_email`, `post_message` — tools calling provider APIs (tool calling tool) | Auth controls who may use the tool; its credentials are kept outside Your Memory (D172) |
 | **Caching** | Cached data — memory (ephemeral or persistent) | Cache get/set/invalidate — operations | Agent Loop or tools decide what to cache |
 | **Analytics/logging** | Collected metrics, log entries — data | `analyze(query)`, `aggregate(params)` — analysis is an operation | Log collection is a tool writing to memory |
 | **Workflows/orchestration** | Workflow definitions — data (skills, prompts, step descriptions) | Execution steps — tools; orchestration is the Agent Loop's loop | Auth gates each step independently |
@@ -115,13 +103,11 @@ Every row decomposes. No row has a remainder that requires a new component.
 
 ## 4. The Skills Case
 
-This is the key case because it's an active disagreement. Dave J argues skills should be separate nodes so they can evolve independently: "If Anthropic says we have a better way of doing skills, we want to be able to adjust" (flagged decision, 2026-02-26 call).
+A common proposal is to make skills their own component, so how skills work can change without touching the rest of the system. The goal is right; a separate component isn't needed.
 
-The concern is valid. The conclusion isn't.
+### The goal: evolvability
 
-### What Dave J wants
-
-Evolvability — the ability to change how skills work without touching other parts of the system. If the industry invents a better skill format, BrainDrive should adopt it without a rewrite. If skills need more structure, less structure, or different structure, that change should be isolated.
+Evolvability — the ability to change how skills work without touching other parts of the system. If the industry invents a better skill format, the system should adopt it without a rewrite. If skills need more structure, less structure, or different structure, that change should be isolated.
 
 ### What the architecture already provides
 
@@ -129,7 +115,9 @@ Evolvability — the ability to change how skills work without touching other pa
 
 This means:
 
-1. **Skill definitions (data/noun) live in Memory.** Today a skill is a markdown file with instructions. Tomorrow it could be a JSON schema, a DSL, a compiled prompt template, or whatever Anthropic invents. Memory doesn't care. It stores the bytes. Changing skill format is changing file content — no Memory change required.
+1. **Skill definitions (data/noun) live in Memory.** Today a skill is a markdown file with instructions. Tomorrow it could be a JSON schema, a DSL, a compiled prompt template, or whatever the industry invents next. Memory doesn't care. It stores the bytes. Changing skill format is changing file content — no Memory change required.
+
+   **Skills that include scripts.** Some skills ship scripts or templates alongside their instructions. Those files are data in Your Memory like the rest of the skill. Running a script is an operation: the model calls a tool that can execute it, Auth checks that call, and the tool runs with the isolation its trust level calls for. Still no new component.
 
 2. **Skill execution (operation/verb) is the Agent Loop's job.** The Agent Loop reads skill data from Memory, passes it to the model as part of the prompt, and the model follows the instructions. The Agent Loop doesn't understand what a skill is either — it reads files and includes them in the context. How the model interprets skill instructions can change with every model upgrade. No Agent Loop change required.
 
@@ -139,7 +127,7 @@ This means:
 
 ### Why the decoupling already exists
 
-The separation Dave J wants is real. It's just expressed through the existing architecture rather than through dedicated skill infrastructure:
+The separation that goal needs is real. It's just expressed through the existing architecture rather than through dedicated skill infrastructure:
 
 | Concern | Where it lives | Can it change independently? |
 |---|---|---|
@@ -149,7 +137,7 @@ The separation Dave J wants is real. It's just expressed through the existing ar
 | Skill permissions | Auth — gates access | Yes — change Auth rules |
 | Skill discovery | Memory — skills are files in known locations | Yes — change folder conventions |
 
-Five independent concerns, five independent change points. No coupling between them. The evolvability Dave J wants is already present — not because skills are a separate node, but because Memory is unopinionated and the Agent Loop is generic.
+Five independent concerns, five independent change points. No coupling between them. The evolvability that goal asks for is already present — not because skills are a separate node, but because Memory is unopinionated and the Agent Loop is generic.
 
 Making skills a separate node would actually *reduce* evolvability by adding a new component boundary to maintain. Today, changing skill format means changing file content. With a dedicated skill node, changing skill format means changing file content *and* updating the skill node's schema, validation, and processing logic. The abstraction adds a layer without adding capability.
 
@@ -216,7 +204,7 @@ New capabilities arrive by adding tools and memory content, not by adding compon
 
 - Want RAG? Add a vector store (memory) and a semantic search tool. No new component.
 - Want scheduling? Add schedule definitions (memory) and a cron tool. No new component.
-- Want Salesforce integration? Add API credentials (memory) and a Salesforce query tool. No new component.
+- Want Salesforce integration? Add a Salesforce query tool and its credential, which is kept outside Your Memory (D172). No new component.
 - Want skills? Add skill files (memory). The Agent Loop already reads files and the model already follows instructions. No new component.
 
 The four components, two APIs, and three externals are sufficient. The architecture is complete — not because it anticipated every capability, but because it decomposed to a level where new capabilities compose from existing primitives rather than requiring new infrastructure.
