@@ -3,111 +3,123 @@ sidebar_label: Model API
 hide_table_of_contents: true
 ---
 
-# Models: External Intelligence
+# Models
 
 **Serves stories:** US-5 in the [PAA spec](../spec/personal-ai-architecture-spec.md).
 
-Every AI system uses a model — ChatGPT runs GPT, Copilot runs its own models, agent frameworks wire up whatever LLM the developer chooses. So what's different here?
+## What models are
 
-Nothing about how the model is used. What's different is where it sits in the architecture. **Models are not a component of the system — they are external intelligence accessed through the Model API.** The system doesn't contain a model. It calls one. The system has four components (Your Memory, Agent Loop, Auth, Gateway). Models aren't one of them.
+The AI model is the intelligence in your AI system. It reads what you ask, works out what needs to be done, and delivers the result.
 
-In the human analogy that runs through this architecture: Memory is the persistent half of the brain. The model is the other half — the intelligence, the reasoning, the processing. Memory + Model = the brain (D44). Neither is complete alone. Memory without the model is a filing cabinet nobody's reading. The model without memory is a genius with amnesia.
+In most AI products, the model and the product come as a package. ChatGPT runs OpenAI's models and Gemini runs Google's. If a better model comes out somewhere else, your conversations and preferences don't come with you.
 
-But unlike a human brain, a digital brain can separate memory from intelligence — and that changes everything. In a biological brain, your memory and your intelligence are fused to the same hardware. You can't upgrade your neurons. You can't swap in better reasoning. You're stuck with both. A digital brain doesn't have that constraint. Your Memory persists as the platform. Intelligence arrives fresh through the Model API — a clean boundary that makes the model pluggable. Different models for different tasks, from any provider, swapped with a config change. The brain reconstitutes from the same Memory with upgraded intelligence every time a better model ships.
+We think that's the wrong approach. Models are the fastest-changing part of AI. New ones arrive every few months from many companies, and some now run on your own computer. Tie your memory to one product's models, and you're stuck with that product's pace, prices and rules.
 
-This is the superpower a digital brain has over a biological one, and it's why the architecture treats models as external intelligence rather than a component. The Model API is the mechanism that makes it real. Models are the most volatile part of AI — new capabilities, new providers, new paradigms arrive constantly. The fastest-changing part of AI is the cheapest thing to change in this system.
+So in PAA, the model isn't part of the system. The system doesn't contain a model; it calls one. Your Memory stays where it is, and the intelligence comes from whichever model you choose.
 
-Models are external regardless of where they run:
+That gives you a choice for every situation. Use the most powerful cloud model when you want the best results. Use a model on your own hardware when you want what you ask to stay on your own machine. Use different models for different tasks. When you switch, Your Memory, your conversations and your tools come with you. The fastest-changing part of AI becomes the cheapest thing to change.
 
-| Model location | How the system calls it | External? |
-|---------------|------------------------|-----------|
-| Cloud API (OpenRouter, Anthropic, OpenAI) | HTTPS request through Model API | Yes — someone else's servers |
-| Local (Ollama on your machine) | HTTP request through Model API | Yes — same interface, different endpoint. The model is third-party weights running locally. |
-| Future (on-device, embedded) | Through Model API | Yes — the calling pattern is the same |
+<p align="center">
+  <img src="../assets/readme-hero.svg" alt="Your Memory (conversations, preferences, skills, documents and more, in files you own) stays under your control, while models, interfaces and tools can be swapped freely." width="680" />
+</p>
 
-This is an **Architecture spec** — it defines what models are at the generic, unopinionated level. Product-specific model choices (OpenRouter default, single-model V1, pricing/allowances) are implementation opinions.
+## How it works
 
-**Related documents:** [overview.md](../architecture/overview.md) (architecture overview, links to all component specs), [memory-tool-completeness.md](./background/memory-tool-completeness.md) (completeness proof — why the architecture needs no new components)
+This works because every model the system uses follows the same basic exchange: a request goes in, a reply comes back. Models differ in what they can do, but the rest of the system reaches them all the same way.
+
+- **The request** contains your instructions, the conversation so far, and the tools the model can use. The model can use those tools to read anything else it needs from Your Memory.
+- **The reply** streams back as text, requests to use tools, or both. The Agent Loop runs the tools and sends the results back to the model.
+
+The Model API defines that exchange. A small adapter translates it into each provider's own format, so a cloud model and a local model look the same to the rest of the system. A model running on your own computer is still outside the system in this sense: the system reaches it through the Model API, the same way it reaches a cloud model.
+
+**Choosing a model:** your choice of model is a preference saved in Your Memory. On every message, the Gateway reads that preference and passes it along, and the Agent Loop sends the request to that model. If you change the preference, your next message goes to the new model, with no restart.
+
+**Changing providers:** moving from one provider to another, such as from a cloud provider to a model running locally on your computer, means choosing that provider's adapter and giving it the provider's connection details. Any API key is kept separately as a secret, never in Your Memory. The system may need a restart to pick up the change.
+
+**What the Model API doesn't do:** it only carries the exchange between the Agent Loop and the model. It doesn't decide:
+
+- what goes into the request (the Gateway brings the conversation, the Agent Loop adds its instructions and tools, and the model reads anything else it needs)
+- which tools to use (the model decides)
+- where the reply is saved (the Gateway)
+
+**Models differ:** some can read images and some can't, and some can hold more of a conversation at once than others. When the chosen model can't do something a request needs, the system says so. It doesn't fake the result or quietly switch to a different model.
+
+**Why the model isn't a tool:** the model is what decides which tools to use, so it can't be one of them itself. Once it's running, though, it can hand a smaller job, such as a quick summary, to a second model, and that second model is used like a tool.
+
+The rest of this doc is the specification: what any implementation of model access must do.
 
 ---
 
-## The Model API
+## What counts as a model
 
-The Model API is one of the system's two APIs. It defines how the Agent Loop calls models:
+A model is external intelligence. The system calls it through the Model API; it doesn't contain one. Models are not one of the four components (Your Memory, Agent Loop, Gateway, Auth), and no component may depend on a particular model or provider. The case for keeping models outside, rather than making them a component or a tool, is in [memory-tool-completeness.md](./background/memory-tool-completeness.md) §2.
+
+A model is external wherever it runs:
+
+| Where the model runs | How the system reaches it |
+|---|---|
+| A cloud provider | Through the Model API, over the network |
+| Your own hardware (for example Ollama) | Through the Model API, at a local endpoint. The weights are a third party's, running locally. |
+| Future forms (on-device, embedded) | Through the Model API |
+
+**The primary model is not a tool.** The model chosen for a request is what decides which tools to use, so calling it cannot itself be a tool (D108). Once running, it may call a second model as a tool for a smaller job; that second model is reached like any other tool.
+
+## What the system guarantees about models
+
+| Guarantee | What it means |
+|---|---|
+| **One way in** | Every model is reached through the Model API, through an adapter. Provider-specific formats stay in the adapter, never in the Agent Loop or Gateway. |
+| **Switching models is a preference** | The model is an owner preference in Your Memory (a product default until the owner changes it). The Gateway reads it on every message and passes it with the request, so a change takes effect on the next message, with no restart and no code change. If no model has been chosen, by a product default or the owner, the system reports it rather than picking one. |
+| **Switching providers is configuration** | A provider swap changes only the adapter, its config, the startup config and the API key secret, never component code. A restart is allowed. (GAP-PAA-26 proposes making the provider a per-message preference too.) |
+| **Missing abilities are reported, not faked** | Models differ: one reads images and another doesn't, one supports tool calls and another doesn't, context windows differ. Switching models does not promise identical abilities. When the chosen model can't do something a request needs, or isn't available through the loaded adapter, that is reported to the Agent Loop and through it to the owner. The system must not silently drop content, pretend a tool was called, or quietly substitute another model. |
+| **The provider is the owner's choice** | The provider is only ever a product default or the owner's choice, kept where the owner can read it, and it is never changed without the owner. |
+
+## How the Agent Loop reaches a model
+
+The Model API is one of the system's two APIs. It carries one exchange:
 
 | Direction | What flows |
-|-----------|-----------|
-| **Agent Loop → Model** | Prompt (system instructions + conversation history + tool definitions + context) |
-| **Model → Agent Loop** | Streamed completion (text + tool calls) |
+|---|---|
+| **Agent Loop → model** | The model to use, system instructions, the conversation, and the tool definitions available for this turn |
+| **Model → Agent Loop** | A streamed completion: text, tool calls, or both |
 
-Prompts in, completions out. The pattern is the same regardless of which model, which provider, or what capabilities the model has. Provider-specific API formats are abstracted behind the adapter — a thin translation layer between the Agent Loop's internal interface and whatever format the provider expects. Switching models is a preference change that applies to the next message; switching providers is a config change plus an adapter swap. See [adapter-spec.md](../architecture/adapter-spec.md) §How Model Configuration Works in Practice for the concrete walkthrough.
+The exchange is the same whichever model or provider is behind it. An adapter translates it to and from the provider's own format. See [adapter-spec.md](./adapter-spec.md) §How Model Configuration Works in Practice for the walkthrough of model and provider changes.
 
-The Model API is a pass-through — it doesn't decide what goes into the prompt (Your Memory provides instructions and context), which tools to use (the model decides), or where responses are stored (Gateway manages conversations). It connects the Agent Loop to whatever model is configured.
+The Model API only carries the exchange. It doesn't decide what goes into the request (the Gateway brings the conversation, the Agent Loop adds its instructions and tool definitions, and the model reads anything else it needs through tools), which tools to use (the model), or where the reply is saved (the Gateway).
 
-### Switching models
+## What reaches the model provider
 
-The model travels with each request. The Gateway reads the owner's current model preference on every message and passes it to the Agent Loop, which names it in the Model API call. So when the owner's model preference changes, the next message uses the new model, with no restart and no code change.
+Each request sends the instructions, the conversation and the Memory content the model read to the model's provider. That is why the provider must be the owner's choice (above), and why a model on the owner's own hardware is the option for keeping that content on their machine. See [security-spec.md](./security-spec.md) §Model Provider Data Flow.
 
-### Capabilities a model lacks
+## Errors
 
-Models are not identical. One can read images and another cannot; one supports tool calls and another does not; context windows differ. Local and cloud models go through the same Model API, but switching models does not promise identical abilities. When a request needs something the chosen model cannot do, that is reported to the Agent Loop (and through it to the owner), not faked: the system must not silently drop an image, pretend a tool was called, or quietly substitute a different model.
+| Situation | What happens |
+|---|---|
+| The chosen model lacks an ability the request needs | Reported, not faked (above). GAP-PAA-27 proposes the `capability_unsupported` code. |
+| The chosen model isn't available through the loaded adapter, or none is chosen | Reported; no other model is substituted. GAP-PAA-27 proposes the `model_unavailable` code. |
+| The request is too large for the model's context window | Reported as `context_overflow`. Who keeps requests within the window is open (GAP-PAA-20). |
+| The provider is down or times out | Reported as `provider_error`. Whether anything falls back to another provider is open (GAP-PAA-19). |
 
----
+## How model access grows
 
-## Why Models Are Not a Component
+- **A model the loaded adapter already supports** needs nothing new: the owner picks it.
+- **A new provider in a format an existing adapter speaks** is adapter configuration.
+- **A new provider format** is a new adapter. Nothing else in the system changes.
+- **New model abilities** reach the system through the same exchange; abilities that act on the world arrive as tools.
 
-Every model-related concern maps to an existing component or configuration:
+## Checking an implementation
 
-| Concern | Where it lives | Why not a Models component |
-|---------|---------------|---------------------------|
-| Which model to call (including per-task selection) | The owner's model preference, passed with each request | A preference, not a component |
-| Provider routing (OpenRouter vs Anthropic vs Ollama) | Agent Loop implementation or SDK | How the Agent Loop calls models is an implementation detail |
-| Fallback if a provider is down | No automatic fallback; the Agent Loop reports the provider error and stops the current turn | A product may offer an explicit retry or provider change, but PAA does not silently switch providers |
-| Context window awareness | Agent Loop or Model API | The Agent Loop knows the limits of what it's calling |
+- [ ] Models are reached only through the Model API; no component depends on a specific model or provider
+- [ ] Provider-specific request formatting lives in the adapter, not the Agent Loop or Gateway
+- [ ] Changing the model preference takes effect on the next message, with no restart and no code change
+- [ ] With no model chosen, the system reports it rather than picking one
+- [ ] Swapping providers changes only the adapter, its config, the startup config and the API key secret
+- [ ] Local and cloud models go through the same Model API
+- [ ] A request needing an ability the chosen model lacks is reported: no content silently dropped, no tool call pretended, no model quietly substituted
+- [ ] *(security)* The provider is only a product default or the owner's choice, readable by the owner, and never changed without the owner
+- [ ] *(security)* API keys are supplied as secrets, never stored in Your Memory
 
-Nothing is left over. There is no gap that requires a dedicated component.
-
-This follows the same pattern as Tools (D51) and Client (D57). Tools dissolved into Memory + Agent Loop + Auth. Client dissolved into Gateway + external clients. Models dissolves into the Model API + Agent Loop implementation + configuration. No operational concern requires a dedicated component.
-
-But there's a harder question the architecture needs to answer.
-
----
-
-## Why Models Don't Dissolve Into Memory + Tools
-
-The memory/tool binary says everything the system processes is either data (memory) or an operation (tool). Three proposed components were tested against this during the architecture interviews. Tools dissolved into Memory + Agent Loop + Auth. Client dissolved into Gateway + external clients. Why don't models dissolve the same way?
-
-Conceptually, they do. Weights are the provider's memory — trained knowledge stored as parameters. Inference is a verb — the operation of generating a response. Noun and verb. The model decomposes.
-
-But the architecture elevates it to an external dependency with its own API anyway. Three reasons.
-
-### Swappable intelligence needs its own boundary
-
-If models dissolved into memory + tools, model access would flow through whatever internal mechanism the Agent Loop uses for tool execution — coupling it to Agent Loop implementation details. The Model API exists as a clean, swappable boundary separate from tool execution. That's what makes "swap your intelligence" a config change instead of a rebuild.
-
-### Storage is not computation
-
-Weights are data — store them wherever you want. But running inference isn't a storage operation. Memory's interface is read, write, search, version — data operations. Inference is fundamentally different: take a prompt, apply learned patterns across billions of parameters, generate a response token by token. Putting inference inside Memory would add an execution capability to a data substrate. Memory would need to know how to *run* a model, not just *store* one.
-
-Memory is inert. It sits there and waits to be read. The model is the opposite — it tells the Agent Loop what to do, decides which tools to call, what to read, what to write. It's an active participant in the execution loop, not a passive data store being accessed.
-
-### The sibling exception
-
-Auth is the other thing the binary doesn't fully dissolve. Auth's data (policies, tokens) is memory. Auth's operations (enforcement, validation) are tools. It decomposes cleanly — but exists as a component anyway, because security can't depend on swappable intelligence. Swap to a weaker model, and your security breaks.
-
-Both exceptions trace to the same root: making intelligence swappable. The Model needs its own API so you *can* swap it. Auth needs independence so swapping it doesn't *break* security. One cause, two consequences. See [memory-tool-completeness.md](./background/memory-tool-completeness.md) §2 for the full argument.
-
----
-
-## Why the Model API Is a Contract, Not a Tool
-
-The primary model can't be a tool — it *is* the intelligence making tool decisions. Tools are things the model decides to use. If "call the model" were itself a tool, you'd have a bootstrap problem: who decides to call it? You need intelligence to make tool decisions. You can't use a tool to call the thing that decides which tools to use.
-
-**The exception: sub-agents.** Once a primary model is running, it can call a secondary model as a tool — cheap classification, summarization, a specialized task. The primary intelligence delegates, the way your brain can delegate a task to someone else. But the primary intelligence itself is not a tool. It's the thing doing the delegating.
-
----
-
-## Decisions Made
+## Decisions
 
 | # | Decision | Rationale |
 |---|----------|-----------|
@@ -117,35 +129,15 @@ The primary model can't be a tool — it *is* the intelligence making tool decis
 | D108 | Model API must remain an API, not a tool | Intelligence is a requirement — the model decides which tools to use, so "call the model" can't itself be a tool (circular dependency). Sub-agents are the exception: the primary model can delegate to a secondary model as a tool. |
 | D135 | Memory/tool binary — if it's data, it's memory; if it's not data, it's a tool | Models conceptually decompose (weights = memory, inference = tool) but are elevated to an external dependency because swappable intelligence needs a clean boundary, and storage is not computation. |
 
----
-
-## Open Questions
-
-None. Models is the thinnest spec because models are the most external thing in the system. The Model API handles the connection. Configuration handles the choices. The Agent Loop handles the calling. There's nothing else to define.
-
----
-
-## Success Criteria
-
-- [ ] Models are accessed exclusively through the Model API — no component depends on a specific model
-- [ ] Switching models requires only a preference change — no code changes to Agent Loop, Your Memory, Auth, Gateway, or any client
-- [ ] When the model preference changes, the next message uses the new model with no restart
-- [ ] The system works with any model that accepts prompts and returns completions — cloud, local, future
-- [ ] Capabilities a model lacks are reported, not faked — switching models does not promise identical abilities
-- [ ] Local models (Ollama) and cloud models (OpenRouter) go through the same Model API
-
----
-
 ## Contract alignment
 
 The canonical contract tree under `contracts/` is authoritative for the model-facing
 payloads and the internal request handoff. The Agent Loop receives the selected model
 through `AgentLoopRequest.model`; Model API requests require `stream: true`, and every
-completion event carries an `_event_type` discriminator. Capability reporting remains
-an implementation and future contract-extension concern. Tool definitions supplied to
+completion event carries an `_event_type` discriminator. Capability reporting has no
+defined error codes yet (GAP-PAA-27). Tool definitions supplied to
 the Model API use canonical source provenance and visibility/authorization markers;
-the model must preserve source_id on emitted tool calls.
+the model must preserve source_id on emitted tool calls. Optional generation settings such as `max_tokens` and
+`temperature` use the provider's defaults unless a caller sets them; who sets them is an
+implementation choice.
 
----
-
-*Models are the most volatile part of AI and the most swappable part of this system. That's not a coincidence — it's the architecture working as designed. The thing that changes fastest in AI is the cheapest thing to change here. Your Memory persists. Models come and go. The brain reconstitutes every time.*
