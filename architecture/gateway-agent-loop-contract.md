@@ -261,7 +261,7 @@ Approval prompts remain a product choice; the architecture default is that the o
 - [ ] A changed model choice applies to the next request with no restart
 - [ ] Tool calls and tool results use the shared message shape and are saved in conversation history
 - [ ] Tool calls are visible in the stream — clients can display status, and products that add approval prompts can present them
-- [ ] Every request carries a correlation ID and a timestamp, and every error carries the correlation ID
+- [ ] Every request carries a correlation ID, and every error carries the correlation ID
 - [ ] All trigger types (message, webhook, schedule) produce the same request shape — the Agent Loop genuinely cannot tell the difference
 - [ ] Pre-stream errors return HTTP status codes; mid-stream errors return SSE error events — no ambiguity about which failure mode applies
 - [ ] The contract works as both an HTTP endpoint and a direct function call (V1 same-process) without changing the shape

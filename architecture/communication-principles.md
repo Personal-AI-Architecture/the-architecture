@@ -3,54 +3,54 @@ sidebar_label: Communication
 hide_table_of_contents: true
 ---
 
-# Communication Principles: Avoiding Lockin
+# Communication Principles
 
-This architecture says everything except Your Memory is swappable (Foundation Principle 2). Communication is no different.
+## What these principles are
 
-The communication layer is just another replaceable piece — like the Agent Loop, like the Gateway, like the contracts and their adapters.
+Communication is how the parts of your AI system talk to each other: how the Gateway hands a request to the Agent Loop, how the Agent Loop asks Auth for permission, and how it runs tools. These principles are the rules for those connections.
 
-Here's why:
+Most systems don't treat these connections as something to design. Each one is built however seemed right at the time, and over time they pick up extra jobs: remembering sessions, deciding where a request should go, checking who's allowed. That works until you try to change something. Then swapping one part means untangling all the work that crept into the wiring.
 
-Most systems don't think about the internal communication layer as a separate concern. Each interface does its own thing. Each one uses whatever conventions seemed right at the time.
+We think that's lock-in hiding in plain sight. It isn't lock-in to a vendor, but to an approach you can no longer walk away from. And when the wiring makes decisions, those decisions stay as good as the day they were written, while the model gets better every few months.
 
-That works until you try to change something.
+So in PAA, the connections between parts only carry messages. They don't remember anything, make judgment calls or check permissions. Your Memory holds state, the model makes decisions, and Auth controls access. Like your nervous system, the wiring carries signals; the brain does the thinking.
 
-Swap the transport layer and you're rewriting components. Replace the message format and half the system breaks. Add a new internal interface and you're inventing conventions from scratch — different field names, different error shapes, different tracing approaches.
+That means the wiring is swappable, like every other part. You can change how the parts talk to each other without rewriting them or moving any data, and every judgment call stays with the model, where it gets better for free.
 
-The communication layer becomes invisible lock-in. Not lock-in to a vendor — lock-in to an approach you can no longer walk away from.
+<p align="center">
+  <img src="../assets/readme-how-it-works.svg" alt="Interfaces connect through the Gateway API to the Gateway, which hands off to the Agent Loop. The Agent Loop calls models through the Model API and reaches Your Memory and other tools through tools. Auth checks every request." width="900" />
+</p>
 
-## What does it take to make communication actually swappable?
+## How it works
 
-That's what this document answers. Six principles, each one a property that keeps the communication layer thin, stateless, and dumb — and therefore swappable. Violate one and you've recoupled the system.
+This works because every job in the system already has an owner. If the connections between parts take on any of those jobs, they become one more thing you can't swap. So each of the six principles is the same rule applied a different way: the wiring doesn't do another part's job.
 
-The unifying idea behind all six: **responsibilities stay where they belong.** The architecture defines who does what:
+1. **Parts don't build in the wiring.** Each part talks to a simple interface. How messages actually travel can change without changing the part.
+2. **One message shape everywhere.** A message keeps the same shape from the client app through the Gateway and Agent Loop to the model, and every connection uses the same field names and error conventions. A conversation saved by the Gateway can be replayed to any Agent Loop or model without loss.
+3. **No memory in the wiring.** Messages pass through, and nothing is stored along the way. You could replace the wiring without moving any data.
+4. **No decisions in the wiring.** Working out what a request needs is the model's job. A connection only routes by structure ("this goes to the Agent Loop"), never by meaning.
+5. **Tracing travels with the message.** Every request carries an ID through every step and every log entry, so you can still see what happened after you swap the wiring.
+6. **Parts change on their own schedule.** New fields are added alongside old ones, and parts that don't know them ignore them. So one part can update without the others.
 
-* **The model** provides intelligence
-* **Memory** holds state
-* **Auth** controls access
-* **The Agent Loop** executes tools
-
-When a responsibility leaks from its owner into another part of the system, it recouples the system — swapping that part now means dealing with work that doesn't belong to it.
-
-If the communication layer starts holding state, you can't swap it without migrating data — that's Memory's job, not communication's. If it starts making semantic decisions, you can't swap it without replicating that intelligence — that's the model's job, not communication's.
-
-Every principle in this document is a specific case of the same rule: don't do another component's job, because the moment you do, swapping you means dealing with work that doesn't belong to you.
-
-Pain from your hand and pain from your foot travel the same pathways using the same signal structure — your brain doesn't need a different protocol for each organ. The nervous system is consistent, observable, and dumb — it carries signals, it doesn't interpret them. The brain does the thinking.
-
-This document covers communication **between internal components** — Gateway, Agent Loop, Auth, and the tools/services they interact with. It does not cover the Gateway API (client boundary — see [gateway-spec.md](./gateway-spec.md)), the Model API (external model boundary — see [models-spec.md](./models-spec.md)), or client-side communication. Those have their own specs.
-
-**Related documents:** [overview.md](../architecture/overview.md) (architecture overview, links to all component specs)
+The rest of this doc is the specification: what any implementation of internal communication must do.
 
 ---
 
-## Principles
+## What this covers
+
+These principles govern communication **between internal components**: the Gateway, the Agent Loop, Auth, and the tools and services they call. The Gateway API (the client boundary, see [gateway-spec.md](./gateway-spec.md)) and the Model API (the model boundary, see [models-spec.md](./models-spec.md)) have their own specs, though they share the message shape in P2.
+
+Decision D16 (use prevailing standards, never a custom protocol) applies wherever the system chooses a protocol, internal connections included: they use standard HTTP, streaming and the common `role` + `content` message format. What the architecture defines itself is the shared message shape built on those standards (D178), kept swappable by these principles and by adapters (D139).
+
+**The rule behind all six principles: responsibilities stay where they belong.** The model provides intelligence, Your Memory holds state, Auth controls access, and the Agent Loop executes tools. The communication layer carries messages between them. When it takes on any of those jobs, swapping it means dealing with work that doesn't belong to it. Each principle below is one case of that rule (Principle 3 in [principles.md](./principles.md), applied to communication).
+
+## The six principles
 
 ### P1. Components Don't Embed Communication
 
 Communication is a layer between components, not inside them. If the Gateway has serialization logic baked into its code, or the Agent Loop hard-codes a message envelope format, swapping the communication approach means rewriting the components. That's coupling, not swappability.
 
-Components speak to an interface. The communication layer implements that interface. Swap the implementation, components don't know the difference. This is Foundation Principle 3 (Keep Responsibilities Where They Belong) applied to communication. Communication's job is to carry signals, not interpret them. The moment it starts doing another component's job, you can't swap it cleanly.
+Components speak to an interface. The communication layer implements that interface. Swap the implementation, components don't know the difference. This is Principle 3 (Keep Responsibilities Where They Belong) applied to communication. Communication's job is to carry signals, not interpret them. The moment it starts doing another component's job, you can't swap it cleanly.
 
 Can you change how components communicate without changing the component code? If no, you've embedded communication and created lock-in.
 
@@ -62,7 +62,7 @@ The clearest case is the message itself. The Gateway API, the Gateway ↔ Agent 
 
 This applies to errors too. When every interface invents its own error shape, error handling becomes per-interface custom code. Errors are part of the contract, not an afterthought — machine-readable codes, correlation context, no leaked internals. Same structural conventions as normal messages.
 
-At minimum, every internal request carries: a correlation ID (P5), a timestamp, and enough context for the receiver to process it without ambient state. Events within a stream (like SSE events) inherit the request's correlation context — they don't each carry their own. The [gateway-agent-loop-contract.md](../architecture/gateway-agent-loop-contract.md) is one application of this — its `metadata` object and field conventions should be the starting point for other internal interfaces, not an island.
+At minimum, every internal request carries a correlation ID (P5) and enough context for the receiver to process it without ambient state. A request timestamp is not required: each component's log entries record timing alongside the correlation ID. Events within a stream (like SSE events) inherit the request's correlation context — they don't each carry their own. The [gateway-agent-loop-contract.md](../architecture/gateway-agent-loop-contract.md) is one application of this — its `metadata` object and field conventions should be the starting point for other internal interfaces, not an island.
 
 Consistency means one swap, not N. Can a developer reading any internal message recognize the structure without checking which interface produced it? If not, each interface is its own lock-in surface.
 
@@ -70,7 +70,7 @@ Consistency means one swap, not N. Can a developer reading any internal message 
 
 If the communication layer accumulates state — sessions, message history, routing tables — swapping it means migrating that state. That migration is complex, error-prone, and creates a dependency on the old approach that outlives the swap.
 
-The communication layer is a pipe, not a database. It carries messages; it doesn't store them. State lives where the architecture says it lives: Your Memory (the platform) and component-owned stores (like the Gateway's conversation store). Same principle as the nervous system — it transmits signals, it doesn't remember them. Memory does that.
+The communication layer is a pipe, not a database. It carries messages; it doesn't store them. State lives where the architecture says it lives: Your Memory (including conversations, which the Gateway reads and writes there through the conversation store tool) and Auth's own state (identities, permissions and the audit log). Same principle as the nervous system — it transmits signals, it doesn't remember them. Memory does that.
 
 If the communication conventions were stripped out entirely and replaced with direct calls between components, no data would be lost. The system would lose consistency and observability, but not state. That's the test: can you replace the communication layer without migrating any data? If swapping requires moving state, you're locked in.
 
@@ -98,13 +98,13 @@ After swapping the communication layer, can you still reconstruct exactly what h
 
 Components evolve at different speeds. The Gateway might update while the Agent Loop stays unchanged. A new tool might attach metadata that older components have never seen. If any of these changes break communication, every update becomes a coordinated deployment — and coordination is lock-in to a release schedule.
 
-New fields are additive — alongside existing fields, never replacing them. Unknown fields are ignored by receivers, not rejected. Optional metadata lives in a designated area of the message (a `metadata` or `extensions` object) separate from core operational fields. Removing or renaming a required field is a breaking change that requires coordinated updates — the exception, not the norm.
+New fields are additive — alongside existing fields, never replacing them. Unknown fields are ignored by receivers, not rejected. Optional metadata lives in a designated area of the message (a `metadata` or `extensions` object) separate from core operational fields. Removing or renaming a required field is a breaking change that requires coordinated updates — the exception, not the norm. The one deliberate exception is the authenticated identity context (`auth_context`), which is strict for security: unexpected fields are rejected, not ignored. Some contracts are stricter than this principle today (GAP-PAA-31).
 
 Can one component add new fields to its messages without breaking any other component? If not, component release schedules are coupled.
 
 ---
 
-## What This Document Does Not Define
+## What these principles do not define
 
 | Thing | Why not | Where it lives |
 |-------|---------|---------------|
@@ -115,25 +115,7 @@ Can one component add new fields to its messages without breaking any other comp
 | Authentication mechanism | Auth's responsibility | [auth-spec.md](./auth-spec.md) |
 | The Gateway ↔ Agent Loop contract details | Already defined | [gateway-agent-loop-contract.md](../architecture/gateway-agent-loop-contract.md) |
 
----
-
-## Decisions Made
-
-| # | Decision | Rationale |
-|---|----------|-----------|
-| D169 | Internal communication principles defined as a foundation document | The architecture defines components and contracts but not the principles governing how internal communication stays swappable. This gap left each new interface as a one-off design. Six principles close the gap without prescribing implementation. |
-
----
-
-## Open Questions
-
-- **OQ-1: ~~Does this spec warrant a new foundation decision number?~~** Resolved → D169.
-- **OQ-2: Should gateway-agent-loop-contract.md be updated to explicitly reference these principles?** The contract already follows them — the question is whether to make the relationship explicit.
-- **OQ-3: Should D16 be annotated to distinguish transport-level protocols (always use standards) from internal communication conventions (principles-based, implementation flexible)?** This would clarify the tension Dave J's work surfaced.
-
----
-
-## Success Criteria
+## Checking an implementation
 
 - [ ] Communication conventions can be swapped without changing component code (P1)
 - [ ] All internal interfaces follow a consistent message structure — one swap, not N (P2)
@@ -142,16 +124,11 @@ Can one component add new fields to its messages without breaking any other comp
 - [ ] Request tracing works after a communication layer swap — observability in messages, not transport (P5)
 - [ ] Components evolve independently — no coordinated deployments for additive changes (P6)
 
----
-
-## Summary
-
-The architecture requires a separation of responsibilities because swappability depends on it. Communication is the connective tissue between components — that makes it the most likely place for responsibilities to bleed across boundaries, because every component touches it. If the communication layer starts holding state, it's doing Memory's job. If it starts making semantic decisions, it's doing the model's job. If it starts enforcing access control, it's doing Auth's job. Each leak makes swapping harder.
-
-The six principles are Principle 3 (Keep Responsibilities Where They Belong) applied to the communication layer: keep it thin, keep it dumb, keep it stateless — because those jobs already have owners. A communication layer that carries signals without interpreting them is one you can swap without consequences. A communication layer that's accumulated other components' responsibilities is one you're stuck with.
-
-The communication layer's job is to communicate. The architecture works because nothing else is doing that job, and communication isn't doing anything else.
 
 ---
 
-*The architecture says everything except Your Memory is swappable. These principles are what make internal communication swappable too — the properties any communication approach must exhibit, not a prescription for which approach to use.*
+## Decisions
+
+| # | Decision | Rationale |
+|---|----------|-----------|
+| D169 | Internal communication principles defined as a foundation document | The architecture defines components and contracts but not the principles governing how internal communication stays swappable. This gap left each new interface as a one-off design. Six principles close the gap without prescribing implementation. |

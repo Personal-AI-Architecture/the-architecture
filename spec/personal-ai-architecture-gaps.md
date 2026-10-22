@@ -221,3 +221,10 @@ hide_table_of_contents: true
 - **Published:** `tool-definition.json` requires `source.kind` from a fixed list (`mcp`, `cli`, `native`, `manifest`, `builtin`). A tool source using any other protocol cannot produce a valid definition until the contract's list is changed.
 - **Proposed:** Let `source.kind` accept other values (keep the listed ones as known values), since it records provenance only.
 - **Evidence:** [tool-definition.json](../contracts/schemas/tool-definition.json) `source.kind`; [adapter-spec.md](../architecture/adapter-spec.md) "The three adapters"; [tools-spec.md](../architecture/tools-spec.md) "How tools are found".
+
+### GAP-PAA-31: Contracts reject unknown fields, but components must ignore them — Technical
+
+- **Expected:** Communication principle P6. New fields are additive, receivers ignore unknown fields rather than rejecting them, and optional metadata lives in a designated `metadata` or `extensions` object, so one component can add fields without a coordinated update.
+- **Published:** Seven schemas set `additionalProperties: false`, among them every message part in `message.json` (text, image, file, tool call, tool result), `tool-definition.json` and `auth-context.json`, and none of these offers a metadata or extensions object. A component that adds a field to a message part or tool definition produces something a validating receiver rejects.
+- **Proposed:** For message parts and tool definitions, either allow unknown fields or add an `extensions` object that receivers ignore. Keep `auth-context.json` strict as a deliberate security exception (auth-spec rejects caller-supplied context) and say so in communication-principles P6.
+- **Evidence:** [communication-principles.md](../architecture/communication-principles.md) P6; [message.json](../contracts/schemas/message.json); [tool-definition.json](../contracts/schemas/tool-definition.json); [auth-context.json](../contracts/schemas/auth-context.json); [auth-spec.md](../architecture/auth-spec.md) "Identity travels with the request".
