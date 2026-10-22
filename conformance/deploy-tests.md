@@ -106,27 +106,82 @@
 **Validates:** Security-spec, deployment contract guarantee 3
 
 **Setup:**
-1. System running with a local model and local tools only
-2. Network monitor capturing all traffic from the system's process(es)
+1. System running with a local model and local tools; record the owner's configured network destinations, including any remote backup
+2. Network monitor capturing all traffic from the system's process(es), with loopback identified separately
 
 **Procedure:**
 1. Start the system
 2. Wait 60 seconds (capture startup traffic)
 3. Have a conversation using only local tools
 4. Wait another 60 seconds (capture idle traffic)
-5. Analyze all captured network traffic
+5. If the owner configured a remote destination, trigger its scheduled or manual operation and capture the destination
+6. Compare each non-loopback connection with the owner's configuration
 
 **Pass criteria:**
-- [ ] Zero outbound network connections during startup (with local-only config)
-- [ ] Zero outbound connections during conversation (with local model + local tools)
-- [ ] Zero outbound connections during idle
-- [ ] No DNS lookups for external services
+- [ ] Zero unconfigured non-loopback outbound connections during startup, conversation, and idle
+- [ ] Local-only configuration makes no non-loopback outbound connection
+- [ ] Loopback traffic is allowed
+- [ ] A configured provider, external tool, or remote backup can reach only its configured destination, including during background operation
+- [ ] No DNS lookups for unconfigured external services
 - [ ] No "phone home" behavior — no update checks, no analytics, no license validation
-- [ ] When cloud provider IS configured: only explicit API calls to the configured provider endpoint
+- [ ] When a cloud provider is configured, calls go only to its configured endpoint
 
 **Failure indicators:**
-- Any network traffic not directly attributable to a user-initiated action
+- Any non-loopback connection to an unconfigured destination
 - DNS lookups for services the user hasn't configured
 - Connections to analytics or telemetry endpoints
-- Background network activity during idle
+- Background network activity to an unconfigured destination
 - Update check connections without user opt-in
+
+---
+
+## DEPLOY-5: No Unconfigured Outbound During Operation
+
+**Validates:** Deployment implementation checklist: outbound destinations are owner configured, including remote backups
+
+**Setup:** Record the effective owner configuration and monitor system DNS and network traffic. Prepare a local model and tool, then a separately configured remote backup destination.
+
+**Procedure:** Run a conversation, tool call, idle interval, and scheduled backup with the local-only configuration. Configure the remote backup and repeat. Compare observed non-loopback destinations with the configuration at each point.
+
+**Pass criteria:**
+- [ ] Local-only operation makes no non-loopback outbound calls
+- [ ] After configuration, the remote backup can run in the background to its configured destination
+- [ ] No call or DNS lookup reaches an unconfigured destination; loopback is allowed
+- [ ] Removing the destination from configuration stops subsequent calls to it
+
+**Failure indicators:** An unconfigured destination is contacted, or a valid configured remote backup is blocked solely because it runs in the background.
+
+---
+
+## DEPLOY-6: Genuine Release Verification
+
+**Validates:** Deployment implementation checklist: owner can verify the genuine, untampered release
+
+**Setup:** Obtain a published release and its verification material through the implementation's documented method. Prepare a copy altered by one byte.
+
+**Procedure:** Follow the owner-facing verification instructions for the original release and the altered copy. Record the release identity and the trust anchor used.
+
+**Pass criteria:**
+- [ ] An owner can follow documented steps to verify release identity and integrity before running it
+- [ ] The genuine release verifies against a trust anchor independent of the downloaded artifact
+- [ ] The altered copy fails verification and is not presented as genuine
+
+**Failure indicators:** Verification cannot be performed by the owner, trusts only metadata inside the downloaded artifact, or accepts the altered copy.
+
+---
+
+## DEPLOY-7: Broken Update Rollback With Data Intact
+
+**Validates:** Deployment implementation checklist: a broken update can be rolled back and owner data remains usable
+
+**Setup:** Install a working version. Save representative Memory, preferences, conversations, and auth data. Record content and access checks. Keep the previous version available.
+
+**Procedure:** Apply an update that fails a controlled startup or functional check. Follow the documented rollback procedure. Restart the previous version and repeat the content and access checks.
+
+**Pass criteria:**
+- [ ] The previous working version can be restored without reinstalling or recreating owner data
+- [ ] All recorded Memory, preference, conversation, and auth data remain intact and usable after rollback
+- [ ] The owner can still sign in and resume the saved conversation
+- [ ] The failed update is reported; rollback does not silently discard owner changes
+
+**Failure indicators:** Rollback is unavailable, the previous version cannot read its data, or any owner data is missing or corrupted.

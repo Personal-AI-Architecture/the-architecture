@@ -27,19 +27,20 @@ Define the exact internal request and stream contract so Gateway and Agent Loop 
 - `metadata.conversation_id`
 - `metadata.trigger`
 - `metadata.client_context`
+- `context_summary` when the Gateway deterministically extracts a summary from omitted older turns; it is a separate, ephemeral field with source, method, omitted-turn count, and text
 
 ### Messages Are Built From
 
-1. Conversation history from Memory via Gateway conversation-store access, including the tool calls and tool results it contains.
+1. Selected complete older turns from full conversation history in Memory via Gateway conversation-store access, including associated tool calls and tool results; full history remains available to clients.
 2. Current message from the client or trigger.
 
-The bootstrap prompt is not in the request. It is Agent Loop configuration, and the Agent Loop puts it first when it calls the model.
+The bootstrap prompt is not in the request. It is Agent Loop configuration, and the Agent Loop puts it first when it calls the model. When `context_summary` is present, the Agent Loop renders it as a Gateway-labelled, ephemeral user-role context message before selected history. It is never stored as an owner message or inserted as another system instruction.
 
 ### Message Shape
 
 - One message shape across the Gateway API, this contract, and the Model API.
 - Content is a list of parts: text first, with room for images and files.
-- Tool calls and tool results are ordinary parts of messages and are saved in conversation history, so a resumed conversation sends them back unchanged.
+- Tool calls and tool results are ordinary parts of messages and are saved in full history. Selected parts on resume reach the Agent Loop unchanged.
 
 ## What Must Not Be In The Request
 
@@ -68,6 +69,7 @@ context. Cancellation is cooperative and idempotent.
 
 - `provider_error` for provider or runtime failures.
 - `tool_error` for unrecoverable tool-execution failures at the stream-contract level.
+- `context_limit_unknown` when the selected provider/model pair has no safe limit; no model call is made.
 - `context_overflow` when the model/provider context window is exceeded.
 
 ## Error Rules

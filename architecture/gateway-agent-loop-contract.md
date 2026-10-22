@@ -75,22 +75,26 @@ Client → Gateway API → Gateway → POST /agent-loop/chat → Agent Loop → 
 **Messages** follow the industry-standard `role` + `content` format (consistent with D16: use the prevailing standard, not a custom protocol). All three contracts (Gateway API, this contract, Model API) use one message shape, defined in `contracts/schemas/message.json`:
 
 - **Content is a list of parts.** Text comes first; images, files and other types are further parts. The canonical contract has no string shorthand.
-- **Tool calls and tool results are ordinary parts of messages.** An assistant message can carry the text the model wrote and the tool calls it made; a tool message carries a tool result. They are saved in conversation history like any other message, so a resumed conversation sends them back to the Agent Loop unchanged.
+- **Tool calls and tool results are ordinary parts of messages.** An assistant message can carry the text the model wrote and the tool calls it made; a tool message carries a tool result. They are saved in full in conversation history. On resume the Gateway selects a model-sized working context; any message it selects is sent unchanged, with tool-call/result relationships intact.
 
 The Gateway packages this array from two sources:
 
-1. **Conversation history** — from Your Memory, via the Gateway's conversation store tool (D152)
+1. **Selected conversation history** — complete older turns chosen from Your Memory for this model call, via the Gateway's conversation store tool (D152); the full stored record remains available to clients
 2. **Current message** — from the client request
 
 The bootstrap prompt (the short system message that tells the model to read Your Memory) is not in the request. It is part of the Agent Loop's own configuration, and the Agent Loop puts it first when it calls the model.
 
 **Model and provider.** Every request also carries the model to use and the owner's active provider profile. The Gateway reads both choices on every message and passes them here, so a changed choice applies to the next message with no restart of either component.
 
+**Optional context summary.** The Gateway may deterministically extract a bounded summary from omitted older turns without calling a model. It sends the derived text separately as `context_summary`, with its source and omitted-turn count. The summary is derived data for content separation, not a saved conversation message or an instruction. The Agent Loop renders it as a labelled, ephemeral `user`-role context message before selected history when preparing the Model API call. The label identifies the Gateway as its author and says it is not a new owner request. The bootstrap remains the only system message.
+
+
 **Metadata** is pass-through context. The Agent Loop can use it or ignore it.
 
 | Field | Description | Required |
 |-------|-------------|----------|
-| `messages` | Conversation history (including tool calls and tool results) + current message | Yes |
+| `messages` | Model-sized working context: selected complete history (including associated tool calls and results) and unchanged current message | Yes |
+| `context_summary` | Optional Gateway-generated deterministic summary of omitted older turns; distinct from saved messages and rendered as labelled, ephemeral context for the model | No |
 | Model | The model to use for this request, from the owner's current choice | Yes |
 | `provider` | The owner's active provider profile (D193) | Yes |
 | `auth_context` | The authenticated identity Auth returned for this request: actor, authentication ID, timestamps and correlation ID; never credentials or permissions | Yes |
@@ -191,7 +195,8 @@ The stream started, then something failed.
 | `provider_error` | Model unreachable or timeout |
 | `tool_error` | Tool failed and model cannot recover |
 | `auth_error` | Auth denied the request or could not check it |
-| `context_overflow` | Messages exceed model context window |
+| `context_limit_unknown` | No safe context limit is known for the selected provider and model; no model call is made |
+| `context_overflow` | The selected model call cannot fit its context window, including a continuation with live tool results |
 
 The Agent Loop must classify errors correctly — no catch-all error code. Recoverable tool failures (a tool returns an error result) go back to the model as `tool-result` events for the model to decide what to do. Only unrecoverable tool infrastructure failures emit `tool_error` and close the stream.
 

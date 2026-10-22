@@ -73,6 +73,7 @@ Adapters are an implementation pattern at the system's edges. They add no compon
 - Translates inbound model responses from the provider's format into the internal interface
 - Handles provider-specific details (auth headers, streaming formats, tool call schemas)
 - Reports provider failures to the Agent Loop; it does not silently switch to another provider
+- Each provider profile supplies known or verified conservative context limits keyed by model ID (D193); the Gateway and Agent Loop read the same limit for the selected provider/model pair. The adapter does not truncate requests or choose which history to keep
 
 **Swap scenario:** Switch from OpenRouter to a direct Anthropic integration, or to a local Ollama instance. If the loaded adapter lists the provider as a profile, change the active provider preference; if it is in a new format, write (or select) an adapter for it. Agent Loop doesn't change. Gateway doesn't change. Your Memory doesn't change.
 

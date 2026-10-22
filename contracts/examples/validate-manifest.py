@@ -81,6 +81,17 @@ def validate_contract_example(file_path: str, payload: object, kind: str) -> Non
         return
 
     if name in {"gateway-engine-request.json", "invalid-gateway-engine-request.json", "invalid-gateway-engine-request-missing-provider.json"}:
+        summary = payload.get("context_summary") if isinstance(payload, dict) else None
+        summary_valid = isinstance(payload, dict) and ("context_summary" not in payload or (
+            isinstance(summary, dict)
+            and summary.get("source") == "gateway"
+            and summary.get("method") == "deterministic"
+            and isinstance(summary.get("omitted_turn_count"), int)
+            and not isinstance(summary.get("omitted_turn_count"), bool)
+            and summary["omitted_turn_count"] > 0
+            and isinstance(summary.get("text"), str)
+            and bool(summary["text"].strip())
+        ))
         valid = (
             isinstance(payload, dict)
             and isinstance(payload.get("messages"), list)
@@ -91,6 +102,7 @@ def validate_contract_example(file_path: str, payload: object, kind: str) -> Non
             and isinstance(payload.get("metadata"), dict)
             and isinstance(payload["metadata"].get("correlation_id"), str)
             and all(isinstance(message, dict) and isinstance(message.get("content"), list) for message in payload["messages"])
+            and summary_valid
             and not any(key in payload["metadata"] for key in ("provider", "api_key", "tool_sources"))
         )
         if valid:
@@ -142,12 +154,38 @@ def validate_contract_example(file_path: str, payload: object, kind: str) -> Non
             fail(f"{file_path} has kind={kind} but its approval shape is {'valid' if valid else 'invalid'}")
         return
 
+    if name in {"context-notice-event.json", "invalid-context-notice-event.json"}:
+        valid = (
+            isinstance(payload, dict)
+            and payload.get("_event_type") == "context_notice"
+            and payload.get("action") in {"omitted", "summarized"}
+            and isinstance(payload.get("omitted_turn_count"), int)
+            and not isinstance(payload.get("omitted_turn_count"), bool)
+            and payload["omitted_turn_count"] > 0
+            and isinstance(payload.get("message"), str)
+            and bool(payload["message"].strip())
+        )
+        if (kind == "valid") != valid:
+            fail(f"{file_path} has kind={kind} but its context notice shape is {'valid' if valid else 'invalid'}")
+        return
+
     if name in {"adapter-config.json", "invalid-adapter-config.json"}:
         profiles = payload.get("provider_profiles") if isinstance(payload, dict) else None
         valid = (
             isinstance(profiles, dict)
             and bool(profiles)
-            and all(isinstance(profile, dict) and isinstance(profile.get("base_url"), str) and not ({"model", "api_key"} & profile.keys()) for profile in profiles.values())
+            and all(
+                isinstance(profile, dict)
+                and isinstance(profile.get("base_url"), str)
+                and isinstance(profile.get("model_context_limits"), dict)
+                and all(
+                    isinstance(model, str) and bool(model.strip())
+                    and isinstance(limit, int) and not isinstance(limit, bool) and limit > 0
+                    for model, limit in profile["model_context_limits"].items()
+                )
+                and not ({"model", "api_key"} & profile.keys())
+                for profile in profiles.values()
+            )
             and payload.get("default_provider_profile") in profiles
             and not ({"memory_root", "approval_mode", "model"} & payload.keys())
         )

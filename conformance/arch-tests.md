@@ -152,6 +152,28 @@
 - [ ] No catch-all error code used for all failure types
 - [ ] Recoverable tool failures (tool returns an error result) go back to the model as `tool-result` events, not as stream-fatal `error` events
 
+**Context-window cases:** Resume a conversation long enough to exceed the safe
+budget for the selected provider and model. Verify the Gateway keeps full history,
+selects complete older turns, optionally builds a deterministic summary without
+a model call, and emits `context_notice` before model output whenever any turn
+was left out. The summary must
+be Gateway-labelled ephemeral user-role context, distinct from the owner message
+and the Agent Loop's sole bootstrap system message. Switch provider or model and
+verify the next budget changes from that profile's model limit without rewriting
+history. Select a pair with no safe limit and verify `context_limit_unknown`
+before dispatch. Send an oversized current message and verify a Gateway API
+`context_overflow` response rather than truncation. Finally, return a live tool
+result that makes a continuation too large: the Agent Loop must emit
+`context_overflow`, preserve the original result in history, and never send a
+silently shortened result to the model.
+
+**BrainDrive implementation gap:** The current BrainDrive Gateway cuts replayed
+tool-result text at 4,000 characters. Add a product case with a historical tool
+result longer than 4,000 characters. It must verify that the full result is saved
+and, when its turn is selected for replay, sent unchanged; the Gateway may omit
+the entire old turn with a `context_notice` instead. A partial replayed result
+fails this rule. The current behavior is an observed gap, not a PAA allowance.
+
 **Failure indicators:**
 - All errors emit the same code regardless of cause
 - Tool execution errors that the model could recover from terminate the stream

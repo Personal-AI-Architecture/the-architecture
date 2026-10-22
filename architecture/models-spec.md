@@ -97,7 +97,7 @@ Each request sends the instructions, the conversation and the Memory content the
 |---|---|
 | The chosen model lacks an ability the request needs | Reported, not faked (above). GAP-PAA-27 proposes the `capability_unsupported` code. |
 | The chosen model isn't available through the loaded adapter, or none is chosen | Reported; no other model is substituted. GAP-PAA-27 proposes the `model_unavailable` code. |
-| The request is too large for the model's context window | Reported as `context_overflow`. Who keeps requests within the window is open (GAP-PAA-20). |
+| The request is too large for the model's context window | Reported as `context_overflow`. The proposed GAP-PAA-20 rule has the Gateway select bounded saved history and the Agent Loop check each actual call, including live tool results. An unknown safe limit reports `context_limit_unknown`. |
 | The provider is down or times out | Reported as `provider_error`, and the current turn stops. No other provider or model is substituted; PAA defines no fallback model (D188). The owner can switch provider and try again. |
 
 ## How model access grows
@@ -121,13 +121,14 @@ Each request sends the instructions, the conversation and the Memory content the
 - [ ] A request needing an ability the chosen model lacks is reported: no content silently dropped, no tool call pretended, no model quietly substituted
 - [ ] *(security)* The provider is only a product default or the owner's choice, readable by the owner, and never changed without the owner
 - [ ] *(security)* API keys are supplied as secrets, never stored in Your Memory
+- [ ] The Gateway and Agent Loop use the same safe limit for the active provider profile and model; unknown limits and overflows are reported without silent truncation
 
 ## Decisions
 
 | # | Decision | Rationale |
 |---|----------|-----------|
 | D44 | Your Memory + Model = the brain — neither is complete alone | Your Memory is the persistent half (stored patterns, knowledge, skills). The model is the intelligence half. The brain reconstitutes every time — the model arrives fresh and reads Your Memory to become capable. |
-| D63 | Models are not a component — they are external intelligence accessed through the Model API | Every model-related concern maps to existing components or configuration: provider routing (Agent Loop implementation), API keys (configuration/Auth), model selection (configuration), provider failure reporting (Agent Loop), and context window awareness (Agent Loop/Model API). There is no gap. The system calls a model. It doesn't contain one. |
+| D63 | Models are not a component — they are external intelligence accessed through the Model API | Every model-related concern maps to existing components or configuration: provider routing (Agent Loop implementation), API keys (configuration/Auth), model selection (configuration), provider failure reporting (Agent Loop), and context window awareness (Gateway working-context selection plus Agent Loop call checks, with optional Model API limit metadata). No dedicated Models component is needed. The system calls a model. It doesn't contain one. |
 | D64 | The system has four components, two APIs, and three external dependencies | The six component interviews resolved the architecture. Four components (Your Memory, Agent Loop, Auth, Gateway), two APIs (Gateway API, Model API), three external dependencies (Clients, Models, Tools). What started as six components and three APIs simplified as each interview revealed concerns mapping to existing components. |
 | D108 | Model API must remain an API, not a tool | Intelligence is a requirement — the model decides which tools to use, so "call the model" can't itself be a tool (circular dependency). Sub-agents are the exception: the primary model can delegate to a secondary model as a tool. |
 | D135 | Memory/tool binary — if it's data, it's memory; if it's not data, it's a tool | Models conceptually decompose (weights = memory, inference = tool) but are elevated to an external dependency because swappable intelligence needs a clean boundary, and storage is not computation. |

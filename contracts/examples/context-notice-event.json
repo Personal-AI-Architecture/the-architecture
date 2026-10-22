@@ -1,0 +1,6 @@
+{
+  "_event_type": "context_notice",
+  "action": "summarized",
+  "omitted_turn_count": 7,
+  "message": "Seven earlier turns were summarized for this model. Full history remains available."
+}

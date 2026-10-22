@@ -48,13 +48,14 @@ paths:
       operationId: agentLoopChat
       summary: Send messages to the Agent Loop for processing
       description: |
-        Gateway POSTs a request containing the current model, provider, messages array (system prompt +
-        conversation history + current message), and metadata. Agent Loop returns an SSE stream.
+        Gateway POSTs a request containing the current model, provider, selected
+        conversation history and unchanged current message in messages, optional
+        context_summary, and metadata. Agent Loop returns an SSE stream.
 
-        The Gateway assembles the messages array from three sources:
-        1. System message — the Agent Loop's configured bootstrap prompt
-        2. Conversation history — from the Gateway's conversation store
-        3. Current message — from the client request
+        The Gateway assembles messages from selected complete conversation turns
+        in its conversation store and the current client message. The bootstrap
+        prompt is Agent Loop configuration, not part of the Gateway request;
+        the Agent Loop adds it when calling the model.
 
         The Gateway checks Auth before routing. The Agent Loop also checks Auth before every
         tool call; permissions live only in Auth.
@@ -202,10 +203,36 @@ components:
           items:
             $ref: '#/components/schemas/Message'
           description: |
-            System prompt + conversation history + current message. Follows the
-            industry-standard role + content format (D16: use the prevailing standard,
-            not a custom protocol).
+            Model-sized working context from selected complete conversation turns,
+            and the unchanged current message. An optional derived summary travels
+            separately in context_summary and is not saved as conversation history.
+            The Agent Loop adds its own bootstrap prompt. Full history stays in
+            Your Memory. Follows the industry-standard role + content format
+            (D16: use the prevailing standard, not a custom protocol).
           minItems: 1
+        context_summary:
+          type: object
+          description: |
+            Optional deterministic Gateway extraction from omitted older turns.
+            It is not an owner message or stored conversation history. The Agent
+            Loop renders it as an explicitly labelled, ephemeral user-role context
+            message before selected history in the Model API request, never as a
+            second system instruction. Its text is marked as derived data for
+            content separation, not as instructions from the owner or Gateway.
+          required: [source, method, omitted_turn_count, text]
+          properties:
+            source:
+              type: string
+              const: gateway
+            method:
+              type: string
+              const: deterministic
+            omitted_turn_count:
+              type: integer
+              minimum: 1
+            text:
+              type: string
+              minLength: 1
         model:
           type: string
           description: |
@@ -446,12 +473,14 @@ components:
             - provider_error
             - tool_error
             - auth_error
+            - context_limit_unknown
             - context_overflow
           description: |
             Error category:
             - provider_error: Model unreachable or timeout
             - tool_error: Tool failed and model cannot recover
             - auth_error: Auth denied the request or could not check it
+            - context_limit_unknown: No safe limit exists for the selected provider and model
             - context_overflow: Messages exceed model context window
         message:
           type: string

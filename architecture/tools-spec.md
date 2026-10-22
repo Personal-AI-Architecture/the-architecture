@@ -118,6 +118,8 @@ Whether tool services can also announce themselves through the Gateway API, as a
 
 Tool definitions are sent through the Model API with the system instructions and conversation. Every definition costs context space on every call, and models choose worse when shown dozens of irrelevant tools. So there are two sets:
 
+The Agent Loop includes selected tool definitions and live tool results in its context check before each model call. A tool result that cannot fit reports `context_overflow`; it is not silently cut to a fixed character count. See the GAP-PAA-20 proposal and the [Agent Loop specification](./agent-loop-spec.md). BrainDrive's current 4,000-character tool-result cut is recorded as an implementation gap in the [architecture tests](../conformance/arch-tests.md).
+
 | Set | What it is | How it works |
 |---|---|---|
 | **Always-send** | Tools the owner uses regularly | Definitions go with every prompt |

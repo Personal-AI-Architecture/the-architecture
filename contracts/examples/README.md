@@ -18,7 +18,9 @@ Provide copyable valid and invalid example files so implementers, reviewers, and
 - `invalid-approval-request-event.json` - drift example missing required approval context
 - `approval-result-event.json` - client-facing approval result event payload, for products that add approval prompts; its terminal decision shape is defined by `contracts/schemas/approval-decision.json`
 - `invalid-approval-result-event.json` - drift example missing required decision linkage
-- `gateway-engine-request.json` - canonical internal Gateway -> Agent Loop request with the per-request model and provider and structured message parts
+- `context-notice-event.json` - optional Gateway notice when older turns are omitted or summarized
+- `invalid-context-notice-event.json` - drift example missing the omitted-turn count
+- `gateway-engine-request.json` - canonical internal Gateway -> Agent Loop request with per-request model and provider, structured message parts, and an optional separate deterministic context summary
 - `invalid-gateway-engine-request.json` - drift example that leaks config and secrets into metadata
 - `invalid-gateway-engine-request-missing-provider.json` - otherwise-valid request missing only the required `provider`
 - `runtime-config.json` - canonical startup-ready runtime config

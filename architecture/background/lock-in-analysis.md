@@ -175,6 +175,8 @@ An Agent Loop swap is replacing one commodity agent loop with another while ever
 
 The provider interface abstraction works. Changing from Claude to GPT to Gemini is a config change. This is the spec's strongest swappability claim after memory.
 
+Context limits may differ after a model swap. The Gateway prepares a new bounded working context for the selected model while the complete conversation stays in Your Memory; the Agent Loop checks each actual model call. No adapter rewrites or truncates saved history to make a swap work (GAP-PAA-20 proposal).
+
 D135 elevated models to an external dependency with a clean swappable boundary: weights are memory, inference is a tool. This creates the same clean separation that Auth has — both exist as separate concerns because swappable intelligence can't break security (Auth) and the model's reasoning capability can't be locked into the system (Models). Both share the same architectural exception: they sit outside the core component model specifically to remain independently swappable.
 
 **Provider routing — zero architectural lock-in, but has a reliability consideration:**

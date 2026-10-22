@@ -96,12 +96,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        '503':
-          description: Agent Loop unavailable
+        '422':
+          description: The current message and required overhead exceed the selected model's context limit (`context_overflow`)
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                code: context_overflow
+                message: The message cannot fit the selected model's context window.
+        '503':
+          description: Agent Loop unavailable, or no safe limit is known for the selected provider and model (`context_limit_unknown`)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: context_limit_unknown
+                message: The selected model's context limit is unavailable.
 
   /conversations:
     get:
@@ -257,12 +269,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        '503':
-          description: Agent Loop unavailable
+        '422':
+          description: The current message and required overhead exceed the selected model's context limit (`context_overflow`)
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                code: context_overflow
+                message: The message cannot fit the selected model's context window.
+        '503':
+          description: Agent Loop unavailable, or no safe limit is known for the selected provider and model (`context_limit_unknown`)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                code: context_limit_unknown
+                message: The selected model's context limit is unavailable.
 
 components:
   securitySchemes:
@@ -424,14 +448,16 @@ components:
         Server-Sent Events stream delivered to the client. The Gateway forwards
         the Agent Loop's stream to the calling client, adding conversation context.
 
-        Events mirror the Agent Loop's SSE events (see gateway-engine.yaml) with the
-        same event types: text-delta, tool-call, tool-result, done, error.
+        Events mirror the Agent Loop's SSE events (see gateway-engine.yaml), with
+        an optional Gateway-owned context_notice before model output when older
+        history was omitted or summarized.
       oneOf:
         - $ref: '#/components/schemas/TextDeltaEvent'
         - $ref: '#/components/schemas/ToolCallEvent'
         - $ref: '#/components/schemas/ToolResultEvent'
         - $ref: '#/components/schemas/ApprovalRequestEvent'
         - $ref: '#/components/schemas/ApprovalResultEvent'
+        - $ref: '#/components/schemas/ContextNoticeEvent'
         - $ref: '#/components/schemas/DoneEvent'
         - $ref: '#/components/schemas/ErrorEvent'
       discriminator:
@@ -531,6 +557,29 @@ components:
         reason: { type: string }
         decided_at: { type: string, format: date-time }
         correlation_id: { type: string }
+
+    ContextNoticeEvent:
+      type: object
+      description: |
+        Gateway notice sent before model output whenever older complete turns
+        were omitted from the working context. This event is absent when no
+        history was left out. Clients can show it to the owner;
+        the full conversation remains available through the history API.
+      required: [_event_type, action, omitted_turn_count, message]
+      properties:
+        _event_type:
+          type: string
+          const: context_notice
+        action:
+          type: string
+          enum: [omitted, summarized]
+        omitted_turn_count:
+          type: integer
+          minimum: 1
+        message:
+          type: string
+          minLength: 1
+          description: Safe owner-readable notice, with no omitted content
 
     DoneEvent:
       type: object

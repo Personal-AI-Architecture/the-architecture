@@ -73,7 +73,7 @@ These are explicit boundaries. They exist to prevent product-specific logic from
 | Scope constraints | Tool configuration (which tools are available) + Auth (which tools this actor may call) | Agent Loop asks Auth before each tool call and honours the answer; it does not decide permissions itself |
 | Context loading | Model reads files through tools based on its instructions | Agent Loop does not decide what context to load |
 | Conversation persistence | The Gateway, which stores conversations in Your Memory through its conversation store tool (D152) | Agent Loop does not own conversation storage |
-| Context window management | Model/provider handles compaction, or instructions tell the model how to summarize | Agent Loop does not decide what to cut |
+| Older conversation selection | Gateway prepares a model-sized working context from the saved conversation | Agent Loop does not cut or summarize history |
 | Error recovery | Agent Loop reports provider failures; a product or caller may explicitly retry or change provider | Agent Loop does not silently fall back to another provider or recover the failed turn automatically |
 | Authentication | The Gateway calls Auth on every request before it reaches the Agent Loop | Agent Loop does not authenticate requests |
 | Product personality | Memory files the model reads | Agent Loop has no personality; its bootstrap prompt only says where to look |
@@ -82,18 +82,20 @@ These are explicit boundaries. They exist to prevent product-specific logic from
 
 ## What the Agent Loop guarantees
 
-- Messages sent to the Agent Loop reach the model
+- Messages sent to the Agent Loop reach the model when the call fits; otherwise the loop reports `context_overflow` without silently changing them
 - Permitted tool calls the model makes get executed
 - Responses stream back to the caller
 - The loop continues until the model signals completion. The Agent Loop MUST NOT impose a default iteration cap. Implementations MAY configure a safety bound as a deployment choice, but the Agent Loop itself never terminates the loop before the model signals done.
 - When the model emits text and tool calls in the same turn, the Agent Loop preserves the text in the assistant message for the next loop iteration. Streamed text is never silently discarded on tool continuation.
 - The model can dispatch multiple tool calls in parallel within a single loop — the Agent Loop executes independent calls concurrently, preserves stable call/result association, and keeps dependent calls ordered before returning all results
+- Before each model call, including a continuation after live tool results, the Agent Loop checks the actual request against the selected model's known or verified conservative context limit. It includes its bootstrap prompt, tool definitions and response headroom. If the call cannot fit, it reports `context_overflow` without shortening the live result or silently dropping parts.
+- It reads that limit from the selected provider profile and model (D193). If no safe limit exists, it reports `context_limit_unknown` and makes no model call.
 
 ---
 
 ## The Agent Loop contract
 
-The Agent Loop sits in the middle of the foundation's flow: clients connect through the Gateway, the Gateway routes to the Agent Loop, the Agent Loop calls models through the Model API and executes tools from the environment. Your Memory is the platform — the Agent Loop reads and writes to it through tools. The Gateway ↔ Agent Loop interface is defined in [gateway-agent-loop-contract.md](../architecture/gateway-agent-loop-contract.md) (D137). The Agent Loop receives a messages array (conversation history + current message), the model and provider to use for this request, and metadata via `POST /agent-loop/chat`, then returns an SSE stream of events (text-delta, tool-call, tool-result, optional approval-request/approval-result, done, error). The Agent Loop adds its own bootstrap prompt from its configuration. Messages use one shape across all three contracts: tool calls and tool results are ordinary parts of messages, so they travel in conversation history like everything else. The Gateway calls Auth on every request before anything reaches the Agent Loop, and the Agent Loop asks Auth before each tool call.
+The Agent Loop sits in the middle of the foundation's flow: clients connect through the Gateway, the Gateway routes to the Agent Loop, the Agent Loop calls models through the Model API and executes tools from the environment. Your Memory is the platform — the Agent Loop reads and writes to it through tools. The Gateway ↔ Agent Loop interface is defined in [gateway-agent-loop-contract.md](../architecture/gateway-agent-loop-contract.md) (D137). The Agent Loop receives a messages array (selected conversation history + unchanged current message), the model and provider to use for this request, and metadata via `POST /agent-loop/chat`, then returns an SSE stream of events (text-delta, tool-call, tool-result, optional approval-request/approval-result, done, error). The Agent Loop adds its own bootstrap prompt from its configuration. Messages use one shape across all three contracts: tool calls and tool results are ordinary parts of messages, so they travel in conversation history like everything else. The Gateway calls Auth on every request before anything reaches the Agent Loop, and the Agent Loop asks Auth before each tool call.
 The internal request also carries the canonical transport-neutral `auth_context`; it contains the authenticated actor and trace timestamps, never credentials or permissions. The receiving transport adapter verifies it before the Agent Loop uses the actor for per-tool Auth checks.
 
 ### Per-Request Input (via Gateway)
@@ -182,7 +184,8 @@ Items marked *(security)* are the per-component requirements from [security-spec
 - [ ] Swapping agent loops requires only changing the Agent Loop — Memory, Tools, Client, Auth, and Models are unaffected
 - [ ] The Agent Loop must never store credentials, API keys, or tokens in its own state *(security)*
 - [ ] The Agent Loop must not persist data between loops — each loop starts clean (the model reconstitutes from Memory) *(security)*
-- [ ] Tool call results must be passed to the model without modification — the Agent Loop must not inject, filter, or alter tool results *(security)*
+- [ ] Tool call results reach the model without modification or not at all, with `context_overflow` reported when the call cannot fit — the Agent Loop must not inject, filter, or alter tool results *(security)*
+- [ ] Every model call is checked against the selected model's safe context limit, including continuation after tool results; overflow reports `context_overflow` without changing results
 - [ ] The Agent Loop must report tool execution failures to the model, not silently retry or recover *(security)*
 - [ ] The Agent Loop must enforce configured timeouts on tool calls — a slow or hung tool cannot block the loop indefinitely *(security)*
 - [ ] When the Gateway sends cancellation for a revoked actor, the Agent Loop stops the active loop, cancels supported in-flight work, runs no further tool calls, and emits `auth_error`; the cancelled turn cannot be retried under the revoked context *(security)*
