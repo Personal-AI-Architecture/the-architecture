@@ -35,7 +35,7 @@ This works because no AI can yet be trusted to always do the right thing, and no
 3. **Trust is visible.** Every tool has a trust level you can see: shipped with the system, installed by you, or untrusted. A tool that didn't ship with the system runs walled off by default.
 4. **Every change can be undone.** Your Memory keeps a history of what changed, so a mistake can be rolled back, whether it came from you, the AI or a tricked tool. That's why the default can be "the owner can do everything" with no approval prompts, and you can turn approvals on for anything you choose.
 5. **You can see what happened.** An audit log records every sign-in, tool call, read and write.
-6. **Your data goes only where you send it.** Secrets never go in Your Memory. When you use a cloud model, what it needs to read goes to that provider. You choose the provider, and each saved reply records which one produced it. A local model keeps everything on your machine.
+6. **Your data goes only where you send it.** Secrets never go in Your Memory. When you use a cloud model, what it needs to read goes to that provider. You choose the provider, and each saved reply records which one produced it. A local model keeps what you send the model on your machine.
 
 The rest of this doc is the specification: what any implementation of security must do.
 
@@ -101,7 +101,7 @@ The system has six attack surfaces. Each is a way an adversary could compromise 
 
 **Current state of the art:** Prompt injection is an unsolved problem industry-wide. No system has a complete defense. The mitigations reduce risk but cannot eliminate it.
 
-**Primary mitigation — Content separation:** The system distinguishes between *instructions* (system prompt, skills, bootstrap files) and *data* (everything the model reads from Your Memory). Instructions tell the model what to do. Data is content to process — the model should never execute instructions found in data.
+**Primary mitigation — Content separation:** The system distinguishes between *instructions* (system prompt, skills, bootstrap files) and *data* (everything else the model reads: files in Your Memory, conversation history and tool results). Instructions tell the model what to do. Data is content to process — the model should never execute instructions found in data.
 
 This is analogous to how operating systems separate code execution from data (NX bit, DEP). It's not hardware-enforced in language models, but it significantly raises the bar for successful injection:
 
@@ -132,8 +132,8 @@ This is analogous to how operating systems separate code execution from data (NX
 | Trust Level | Description | Isolation | Example |
 |------------|-------------|-----------|---------|
 | **System-shipped** | Shipped with the system, code-reviewed | In-process, no isolation | Core memory tools, approval gate |
-| **Owner-installed** | The owner chose to install it | Isolated by default (container), owner can override | Third-party MCP servers, community tools |
-| **Untrusted** | Unknown provenance | Isolated by default (dedicated container, restricted network, resource limits). The owner decides what they trust | Marketplace tools, unverified packages |
+| **Owner-installed** | The owner chose to install it | Isolated by default (container, separate process or sandbox), owner can override | Third-party MCP servers, community tools |
+| **Untrusted** | Unknown provenance | Isolated by default (its own isolated boundary, restricted network, resource limits). The owner decides what they trust | Marketplace tools, unverified packages |
 
 **Architecture requirements:**
 - System-shipped tools: no additional verification needed
@@ -215,7 +215,7 @@ The architecture default is that the owner can do everything: nothing requires a
 
 **What can be gated:** Write operations to Your Memory — create, edit, delete — and any other tool call the owner's rules name.
 
-**What's not gated:** Read operations. The model reads freely within its scope. Reads are logged (see Audit Logging below) but not gated — gating reads would cripple the experience.
+**What's not gated by default:** Read operations. The model reads freely within its scope. Reads are logged (see Audit Logging below) but not gated by default — gating every read would cripple the experience. An owner rule can still require approval for a read.
 
 **The approval spectrum** (from auth-spec.md, formalized here):
 - **Ask nothing** — the architecture default; version history is the safety net
@@ -241,13 +241,13 @@ The same boundary rule applies to identity propagation: the Gateway-to-Agent Loo
 - Queryable history ("what did the model read in this conversation?") — a product feature
 - Both, or neither — the architecture doesn't prescribe
 
-**Configurable content detail levels:**
+**Configurable detail levels** (no level records credentials, secrets or raw private content; see the [audit record](../contracts/schemas/audit-record.json)):
 
 | Level | What's Logged |
 |-------|-------------|
 | **Minimal** | Action metadata only (actor, timestamp, action type, target) for all events — auth, tool calls, reads, writes |
 | **Standard** | Metadata + operation details (file paths, tool names, parameters) |
-| **Verbose** | Everything including content of reads/writes |
+| **Verbose** | Standard plus fuller non-sensitive operational detail (for example sizes, durations and result status) |
 
 **The audit log itself is sensitive data.** It receives the same protection as Your Memory — access-controlled, exportable, deletable by the owner. The audit log is part of the owner's data.
 
@@ -266,8 +266,8 @@ How the boundary is marked for a given model, and how its effectiveness is teste
 Detailed in [tools-spec.md](../architecture/tools-spec.md). Formalized here as security controls:
 
 - **System-shipped tools**: in-process, no isolation. Code-reviewed, shipped with the system.
-- **Owner-installed tools**: isolated by default (separate container), owner can override. Every tool's trust level is visible to the owner; how a product verifies a tool's origin, if it does, is its own choice.
-- **Untrusted tools** (future marketplace): isolated by default with a dedicated container, restricted network and resource limits. The owner decides what they trust.
+- **Owner-installed tools**: isolated by default (container, separate process or sandbox), owner can override. Every tool's trust level is visible to the owner; how a product verifies a tool's origin, if it does, is its own choice.
+- **Untrusted tools** (future marketplace): isolated by default in their own isolated boundary, with restricted network and resource limits. The owner decides what they trust.
 
 Container isolation protects against: unauthorized filesystem access, unauthorized network calls, inter-tool interference, resource exhaustion. See [tools-spec.md](../architecture/tools-spec.md) for the full isolation spectrum.
 
@@ -357,7 +357,7 @@ Where anomaly detection and output filtering plug in is decided when external ac
 - [ ] Sandbox is enforced by two independent layers (Auth + tool config)
 - [ ] Audit trail captures all model actions for accountability and investigation
 - [ ] Content separation is active — instructions vs data marked at the Model API level
-- [ ] Untrusted tools run in isolated containers
+- [ ] Untrusted tools run isolated (container, separate process or sandbox)
 - [ ] Secrets never live in Memory or tracked configuration — always in environment variables, an untracked config file, or a secret store
 - [ ] Approval gates enforce the owner's approval rules (none by default; configurable spectrum)
 - [ ] Version history and restore available for Your Memory — always on
@@ -404,8 +404,8 @@ These apply to each component. Each component spec repeats its items in its own 
 
 #### Tools
 
-- [ ] Untrusted tools must run in isolated containers by default — restricted filesystem, restricted network, resource limits
-- [ ] Tool isolation must be independent of Auth — even if Auth fails, the tool can't escape its container
+- [ ] Untrusted tools must run isolated by default (container, separate process or sandbox) — restricted filesystem, restricted network, resource limits
+- [ ] Tool isolation must be independent of Auth — even if Auth fails, the tool can't escape its isolation boundary
 - [ ] Every tool has a trust level the owner can see: shipped with the system, installed by the owner, or untrusted. Tools not shipped with the system run isolated by default unless the owner says otherwise
 - [ ] A failure of an isolated tool does not take down the Agent Loop — isolated tools fail independently
 
