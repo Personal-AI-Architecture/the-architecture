@@ -23,7 +23,7 @@ Provide copyable valid and invalid example files so implementers, reviewers, and
 - `invalid-gateway-engine-request-missing-provider.json` - otherwise-valid request missing only the required `provider`
 - `runtime-config.json` - canonical startup-ready runtime config
 - `invalid-runtime-config.json` - drift example with collapsed config, embedded secret values, a model fixed in runtime config, and an approval rule in config instead of Auth
-- `adapter-config.json` - canonical adapter config: provider profiles (endpoint and secret reference each) and a default profile, no pinned model
+- `adapter-config.json` - canonical adapter config: provider profiles (an endpoint each, plus a secret reference when the provider needs a key) and a default profile, no pinned model
 - `invalid-adapter-config.json` - drift example with product/runtime concerns (and an approval rule) mixed into adapter config
 - `memory-restore-tool.json` - canonical memory restore tool definition
 - `audit-record.json` - canonical portable audit record

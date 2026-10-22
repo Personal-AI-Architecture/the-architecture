@@ -104,7 +104,7 @@ Three pieces of config control this:
 { "provider_adapter": "openai-compatible" }
 ```
 
-**2. Adapter config** tells the adapter how to reach each provider profile it supports (an endpoint and a secret reference per profile; no model is pinned here):
+**2. Adapter config** tells the adapter how to reach each provider profile it supports (an endpoint per profile, plus a secret reference when the provider needs a key; no model is pinned here):
 ```json
 // adapters/openai-compatible.json
 {
@@ -137,7 +137,7 @@ At boot, the system loads the adapter. On every message, the Gateway reads your 
 
 **Different provider, same format** — if the adapter config lists the provider as a profile, change your active provider preference in Your Memory. Like a model change, the next message uses it, with no restart (D193).
 
-**Different provider, new format** — change `provider_adapter` in runtime config and provide the new adapter config. Two changes, still config-only, zero code. A restart is allowed.
+**Different provider, new format** — install the adapter for that format, change `provider_adapter` in runtime config, provide its adapter config, and set the provider's secret if it needs one. Still config-only, zero code. A restart is allowed.
 
 | Before | After | What changed |
 |--------|-------|-------------|
