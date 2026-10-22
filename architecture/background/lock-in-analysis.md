@@ -19,14 +19,14 @@ Every layer has zero lock-in by design. What keeps it that way is a discipline i
 | Layer | Why there's no lock-in | Discipline that keeps it that way | If the discipline slips |
 |---|---|---|---|
 | **Your Memory** | Depends on nothing; reached only through tools; open formats | No component reads storage directly; keep version history and restore behind the tools | Storage changes break other parts; your data needs migrating to leave |
-| **Agent Loop** | Generic: no product logic (D39); everything product-specific lives in Your Memory | Keep it generic | Swapping it takes weeks instead of days |
+| **Agent Loop** | Generic: no product logic (D39); everything product-specific lives in Your Memory | Keep it generic | Swapping it first means pulling the leaked product logic back out |
 | **Gateway** | Stores conversations in Your Memory through a tool; doesn't care which client connects | Keep conversations in Your Memory, not in the Gateway | Conversation history is locked in the Gateway |
 | **Auth** | Independent of the other components; open standards (OAuth 2.1, OpenID Connect); exportable state | Stay on open standards; keep the auth data format the architecture's, not the provider's | Moving auth providers means re-creating identities and rules |
 | **Gateway API** | A contract you own; clients talk to it, not to the Agent Loop | Design it from what clients need, not around one Agent Loop | The API becomes a wrapper for one Agent Loop |
-| **Model API** | Models sit behind an adapter; model and provider are owner preferences (D193) | Test against more than one model; report missing abilities, never fake them | One provider becomes a single point of failure |
+| **Model API** | Models sit behind an adapter; model and provider are owner preferences (D193) | Test against more than one model; report missing abilities, never fake them | The system comes to depend on one model's abilities, or quietly degrades when a model lacks one |
 | **Gateway–Agent Loop contract** | One written-down internal handoff (D137) | Keep it explicit; change it only by adding fields | The two components can't be swapped separately |
 | **Tools** | They describe themselves; tool sources are translated by an adapter; preferences live in Your Memory (D145, D146) | Keep tool preferences out of deployment config | Tool choices are tied to one machine |
-| **Clients** | Outside the system; they connect through the Gateway API | Keep clients thin: no saved state, no product logic | A client becomes hard to replace or to run alongside another |
+| **Clients** | Outside the system; they connect through the Gateway API | Keep conversation state in Your Memory, and talk only through the Gateway API | A client becomes hard to replace or to run alongside another |
 | **Configuration** | Runtime config is four facts about this machine (D144) | Keep it to four fields; preferences stay in Your Memory | The system gets tied to one environment |
 | **Deployment** | A local, offline path always exists (D148) | Never require a remote service | Hosting becomes a dependency |
 | **Customization** | Products use four mechanisms and never change component code | No code-level changes to the components | Every product becomes a fork |
@@ -37,7 +37,7 @@ Context limits may differ after a model swap. The Gateway prepares a new working
 
 ## Where lock-in actually comes from: drift
 
-The architecture closes every door, so the only way lock-in gets in is through how a system is built over time:
+Apart from limits of the industry itself, like a weaker local model, the only way lock-in gets in is through how a system is built over time:
 
 - **Product logic leaking into the Agent Loop.** Its swap cost grows with every product-specific rule it learns.
 - **State building up in a client or the Gateway.** Whatever isn't in Your Memory doesn't travel.
