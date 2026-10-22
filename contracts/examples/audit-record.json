@@ -1,0 +1,11 @@
+{
+  "id": "audit_123",
+  "occurred_at": "2026-10-21T15:00:00Z",
+  "event": "tool.executed",
+  "actor_id": "agent_system_001",
+  "action": "execute",
+  "resource": "tool:read_file",
+  "result": "completed",
+  "correlation_id": "req_xyz789",
+  "details": { "tool_name": "read_file" }
+}

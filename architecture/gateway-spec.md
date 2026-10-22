@@ -56,7 +56,7 @@ The Gateway sits between clients and the Agent Loop. Their relationship:
 | Manage conversations (create, list, resume, store) | Process individual interactions (message → model → tools → response) |
 | Package conversation history, with the owner's current model choice, and pass it to the Agent Loop | Accept message + history + model as input, return streamed response |
 | Store the Agent Loop's response in the conversation | Stream the response back, then it's done |
-| Handle multiple clients connecting simultaneously | Handle the agent loop for each interaction |
+| Handle multiple clients connecting simultaneously; serialize messages within each conversation and queue later messages in arrival order | Handle the agent loop for each interaction; different conversations may run concurrently |
 
 The Gateway knows about conversations. The Agent Loop doesn't. The Agent Loop knows about models and tools. The Gateway doesn't. Clean separation.
 
@@ -139,6 +139,12 @@ The Gateway uses its conversation store tool for conversations (D152), and reads
 
 The Gateway doesn't go through the agent loop's tool loop (that would be circular — the Gateway needs conversation history to assemble the request it's about to send to the Agent Loop). It calls the conversation store tool directly. Same tool interface, different caller — one key to the mailbox, not a copy of every key to every room.
 
+### Concurrent messages in one conversation
+
+The Gateway permits different conversations to run concurrently, but it allows only one active Agent Loop turn per conversation. If another message arrives while that turn is active, the Gateway queues it in arrival order and starts it after the current turn reaches `done` or `error`. It never starts two loops that can append to the same conversation at once. Queueing state is implementation-defined; a request that cannot be queued is reported as an error rather than accepted silently.
+
+This ordering rule protects the conversation history while preserving the ability for any client to resume the conversation.
+
 This follows the zero-outward-dependencies principle. The dependency points the right way: the Gateway depends on Your Memory (it reads and writes conversation data there through the tool), but Your Memory doesn't depend on the Gateway. Remove the Gateway, and Your Memory still sits there — conversations intact, readable with a text editor. Replace the Gateway with a different one, and it uses the same conversation store tool to pick up the same conversations. Your Memory never knew the Gateway existed.
 
 ### Input
@@ -172,7 +178,8 @@ This follows the zero-outward-dependencies principle. The dependency points the 
 |-----------|-----------------|
 | Agent Loop unreachable | Report failure to caller |
 | Conversation not found | Report to caller |
-| Storage failure | Report to caller — message may not have been persisted |
+| Storage failure | Report to caller; if the initial message cannot be persisted, do not dispatch it |
+| Agent Loop fails after the stream starts | Preserve the incoming message, observed partial response and tool events with an explicit error outcome; never report the turn as complete |
 | Invalid input | Reject with error |
 
 ---

@@ -181,7 +181,7 @@ D135 elevated models to an external dependency with a clean swappable boundary: 
 
 | Concern | Detail | Reality |
 |---------|--------|---------|
-| **Provider availability** | If the configured provider goes down, model access stops until fallback is activated | Operational concern, not lock-in. Add a fallback path. |
+| **Provider availability** | If the configured provider goes down, the current turn stops with a provider error; a product may offer an explicit retry or provider change | Operational concern, not lock-in. Do not silently switch providers. |
 | **Provider pricing** | Routing layers may add margin on top of provider prices | Business concern, not lock-in. Can route direct at any time. |
 | **Switching providers** | Handle provider-specific auth, streaming, errors | Config change via adapter pattern — not code changes |
 
@@ -218,7 +218,7 @@ This is ongoing maintenance, not lock-in. Every AI system has this characteristi
 
 #### Disciplines Required
 
-1. **Add a provider fallback path.** Config-level ability to route to at least one alternate provider. Test before production.  This is reliability, not lock-in mitigation.
+1. **Provide an explicit retry or provider-change path where the product needs it.** PAA does not require an automatic fallback during a failed turn. Test the chosen operational behavior before production.
 2. **Test skills against two models before launch.** Validates the "config change" claim for your specific prompts.
 3. **Pin dependency versions in a manifest.** AI SDK, provider APIs. Monitor for breaking changes.
 
@@ -401,7 +401,7 @@ The probability of needing to replace MCP is near zero. MCP is the default but n
 |-----------|-----------|
 | **Lock-in** | Zero. Each link independently swappable. Model API adapter translates between the Agent Loop's internal interface and whichever provider format is current — this is the most frequently swapped adapter (D139). |
 | **Concrete swap costs** | Same provider, different model: change one preference in Your Memory — the next message uses it, no restart, zero code changes. Different provider: change `provider_adapter` in runtime config (1 field) + provide new adapter config file (1 file) + update the secret reference if needed — still zero code changes. |
-| **Discipline** | Have a config-level fallback to at least one alternate provider. Test it before production. |
+| **Discipline** | If the product offers alternate providers, make the retry or provider change explicit and test it before production. |
 
 ### Gateway ↔ Agent Loop Internal Contract (D137)
 
@@ -531,7 +531,7 @@ The Agent Loop's language becomes a team working language. The Agent Loop is Typ
 | **Your Memory** | Zero | Define abstract version history contract before evolving the mechanism | Version history migration gets messy |
 | **Agent Loop** | Zero | Keep generic (D39) — zero product-specific logic | Swap cost grows from days to weeks |
 | **Interface** | Zero | Maintain thin client — no cached state or business logic | Interface becomes harder to replace or multiply |
-| **Intelligence** | Zero | Fallback path, test against 2+ models, pin versions | Single point of failure if provider goes down |
+| **Intelligence** | Zero | Explicit retry/provider-change path where needed, test against 2+ models, pin versions | Single point of failure if provider goes down |
 | **Tools** | Zero | Track tool protocol versions, keep preferences in Memory (D145) | Tool config couples to deployment |
 | **Auth** | Zero | Maintain open-standard adherence (OAuth 2.1, OIDC) | Auth drifts to proprietary protocols |
 | **Security** | Zero | No proprietary security mechanisms | Security becomes a lock-in vector |
@@ -557,7 +557,7 @@ The Agent Loop's language becomes a team working language. The Agent Loop is Typ
 |---|-----------|-----------------|-----------|
 | 1 | **Design the Gateway API independently of the Agent Loop** | Ensures the contract survives any Agent Loop swap | Gateway API |
 | 2 | **Keep the Agent Loop generic (D39)** | Zero product-specific logic — keeps swap cost at days | Agent Loop |
-| 3 | **Add a provider fallback path** | Reliability — config-level routing to at least one alternate provider | Intelligence |
+| 3 | **Provide an explicit provider retry/change path where needed** | Reliability without silent provider substitution | Intelligence |
 | 4 | **Maintain open-standard adherence in Auth** | OAuth 2.1/OIDC compliance — prevents proprietary protocol drift | Auth |
 | 5 | **Test skills against two models before launch** | Validates that model swapping actually works for your specific prompts | Intelligence |
 | 6 | **Pin all external dependency versions** | Dependency manifest — AI SDK, MCP spec, provider APIs | Cross-cutting |

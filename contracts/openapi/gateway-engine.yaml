@@ -14,6 +14,35 @@ info:
 
     Source: gateway-engine-contract.md (D137)
 paths:
+  /agent-loop/cancel:
+    post:
+      operationId: cancelAgentLoop
+      summary: Cancel an active Agent Loop turn
+      description: |
+        Internal Gateway-to-Agent Loop cancellation operation. The Gateway sends
+        this after Auth revokes the actor for an active request. The Agent Loop
+        cancels supported in-flight work, runs no further tool calls, and closes
+        the matching stream with an auth_error event. The internal transport must
+        authenticate this operation; the correlation ID is the stable target.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AgentLoopCancelRequest'
+      responses:
+        '202':
+          description: Cancellation accepted or already applied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AgentLoopCancelResponse'
+        '400':
+          description: Invalid cancellation request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
   /agent-loop/chat:
     post:
       operationId: agentLoopChat
@@ -132,6 +161,32 @@ paths:
 
 components:
   schemas:
+    AgentLoopCancelRequest:
+      type: object
+      additionalProperties: false
+      required: [correlation_id, reason]
+      properties:
+        correlation_id:
+          type: string
+          minLength: 1
+          description: Correlation ID of the active request to cancel.
+        reason:
+          type: string
+          enum: [auth_revoked, client_cancelled, system_shutdown]
+          description: Why the active turn is being cancelled.
+
+    AgentLoopCancelResponse:
+      type: object
+      additionalProperties: false
+      required: [correlation_id, status]
+      properties:
+        correlation_id:
+          type: string
+        status:
+          type: string
+          enum: [accepted, already_finished, not_found]
+          description: Result of applying the cancellation request.
+
     AgentLoopRequest:
       type: object
       required:

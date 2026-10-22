@@ -61,6 +61,10 @@ def validate_contract_example(file_path: str, payload: object, kind: str) -> Non
             fail(f"{file_path} must define memory_restore")
         return
 
+    if name == "audit-record.json":
+        validate_schema(payload, "audit-record.json", file_path)
+        return
+
     if name in {"client-message-request.json", "invalid-client-message-request.json"}:
         valid = (
             isinstance(payload, dict)

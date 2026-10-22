@@ -168,6 +168,14 @@ The stream started, then something failed.
 
 The Agent Loop must classify errors correctly — no catch-all error code. Recoverable tool failures (a tool returns an error result) go back to the model as `tool-result` events for the model to decide what to do. Only unrecoverable tool infrastructure failures emit `tool_error` and close the stream.
 
+**Conversation ordering and persistence:** The Gateway permits only one active Agent
+Loop turn for a conversation. Later messages queue in arrival order; different
+conversations may run concurrently. The Gateway persists the incoming message
+before dispatch when possible. If the stream later fails, it retains all observed
+assistant text, tool calls, tool results, and the terminal error as an incomplete
+turn. It does not report a successful completion. If initial persistence fails,
+the Gateway does not dispatch the turn.
+
 **Error message safety:** The `message` field in error events must be safe for client display. Never forward raw `Error.message`, stack traces, or file paths. Map each error code to a fixed safe message. Log raw diagnostic detail to structured stdout only. See Security Requirements below.
 
 Every error, whether an HTTP response or an SSE error event, carries the request's correlation ID, so a failure can be traced to the request that caused it ([communication-principles.md](./communication-principles.md) P2, P5).
@@ -227,6 +235,16 @@ Gateway and Agent Loop may run in the same process. The endpoint can be implemen
 Most AI SDKs produce streaming events that map directly to this contract's SSE event types (`text-delta`, `tool-call`, `tool-result`, `done`, `error`). The Agent Loop is a thin wrapper — it receives the request, calls the SDK's streaming function with the messages + its configured tools + provider, and forwards the stream events.
 
 ---
+
+## Cancellation
+
+`POST /agent-loop/cancel` targets an active turn by `correlation_id`. The Gateway
+sends `reason=auth_revoked` when Auth revokes the actor. The Agent Loop cancels
+supported in-flight work, starts no further model or tool work, and closes the
+matching stream with `auth_error`. Cancellation is cooperative at the internal
+boundary; tool implementations must not commit writes after cancellation is
+observed. Repeating cancellation is idempotent and returns `accepted`,
+`already_finished`, or `not_found`.
 
 ## Approval interaction
 

@@ -50,6 +50,9 @@ Run the model-tool loop for an interaction without owning product behavior, conv
 - Execute independent tool calls in the same loop turn concurrently; keep dependent calls ordered.
 - Pass tool results back into model context.
 - Emit tool calls and tool results in the shared message shape so the Gateway can save them in history.
+- Preserve the authenticated actor identity from `auth_context` for every tool check and audit record.
+- Report provider failures and stop the current turn; do not silently fall back to another provider.
+- Accept cancellation targeted by correlation ID; after cancellation, stop the turn, run no further model or tool work, and emit `auth_error` for revocation.
 - Stay separate from conversation ownership.
 - Consume Auth context without becoming Auth.
 
@@ -63,6 +66,7 @@ Run the model-tool loop for an interaction without owning product behavior, conv
 - Deciding permissions itself instead of asking Auth.
 - Running a tool call without an Auth check.
 - Requiring a restart to pick up a new model.
+- Silently switching providers after a provider failure.
 
 ## Lifecycle Rules
 

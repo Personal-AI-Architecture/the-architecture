@@ -287,3 +287,57 @@
 **Failure indicators:**
 - Default install listens on all interfaces
 - Docker configuration maps the port to the host by default
+
+---
+
+## ARCH-10: Revocation Cancellation
+
+**Validates:** [auth-spec.md](../architecture/auth-spec.md) §Access revoked during an operation and `POST /agent-loop/cancel`
+
+**Setup:**
+1. Start a turn for a non-owner actor that will make model and tool calls
+2. Keep the turn active while the owner revokes that actor
+
+**Procedure:**
+1. Revoke the actor in Auth
+2. Send `POST /agent-loop/cancel` with the active request's `correlation_id` and `reason=auth_revoked`
+3. Observe the stream and tool runtime
+
+**Pass criteria:**
+- [ ] Cancellation targets only the matching correlation ID
+- [ ] The active loop stops and emits `auth_error`
+- [ ] No model or tool work starts after cancellation is observed
+- [ ] Supported in-flight work is cancelled and writes not yet committed are discarded
+- [ ] Repeating cancellation is idempotent and does not restart work
+- [ ] The revocation, cancellation, and stopped operation are present in the audit log
+
+**Failure indicators:**
+- The revoked actor can continue making tool calls
+- Cancellation affects another request or conversation
+- The system silently retries under the revoked identity
+
+---
+
+## ARCH-11: Portable Audit Records
+
+**Validates:** [audit-record.json](../contracts/schemas/audit-record.json), US-10 AC-10.4
+
+**Setup:**
+1. Produce an allowed action, a denied action, a tool call, and an identity or permission change
+
+**Procedure:**
+1. Export or query the audit log
+2. Validate each record against `contracts/schemas/audit-record.json`
+3. Inspect records without implementation-specific decoding
+
+**Pass criteria:**
+- [ ] Every action has the required portable audit fields
+- [ ] `actor_id` is the authenticated actor of the originating request
+- [ ] Correlation IDs connect records to the originating request or operation
+- [ ] Records contain no credentials, secrets, or raw private content
+- [ ] The owner can query and export the records in an open format
+
+**Failure indicators:**
+- Auth, tool, Memory, or revocation actions are missing from the log
+- Audit records require a provider-specific schema to interpret
+- Secrets or raw private content are stored in records

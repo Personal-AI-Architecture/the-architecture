@@ -51,6 +51,8 @@ Authenticate requests, carry actor identity, and enforce permissions without col
 - After export and import, keep policies for unknown identities dormant; a re-created identity gets no access until the owner turns it back on.
 - Support extensible permissions as data rather than brittle hardcoded categories.
 - Keep auth state inspectable and exportable by the owner.
+- When an actor is revoked, trigger cancellation of its active Agent Loop turn and record the revocation and stopped operation in the portable audit format.
+- Emit portable audit records for auth, tool, Memory, identity, permission, and cancellation events without credentials or raw private content.
 
 ## Permission Areas
 

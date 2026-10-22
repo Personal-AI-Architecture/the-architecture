@@ -43,6 +43,8 @@ Accept external requests, manage conversation lifecycle, call Auth on every requ
 - Read the owner's current model choice on every message and pass it to the Agent Loop, so a change applies to the next message with no restart.
 - Forward only bounded interaction data to the Agent Loop. The bootstrap prompt is Agent Loop configuration, not something the Gateway adds.
 - Stream or proxy Agent Loop results back to clients.
+- Permit only one active Agent Loop turn per conversation; queue later messages in arrival order while allowing different conversations to run concurrently.
+- Persist the incoming message before dispatch when possible. Retain observed partial output and the terminal error as an incomplete turn; do not dispatch if initial persistence fails.
 - Stay content-agnostic at the architectural level.
 
 ## Forbidden Behaviors
@@ -77,6 +79,7 @@ Accept external requests, manage conversation lifecycle, call Auth on every requ
 - Content interpretation beyond transport normalization.
 - Auth omitted or bypassed in runtime wiring.
 - Approval, where a product adds it, handled as client-specific behavior instead of contract interaction.
+- Concurrent active turns for the same conversation, or treating a partial failed stream as a successful completion.
 
 ## Review Links
 

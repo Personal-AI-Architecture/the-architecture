@@ -198,7 +198,7 @@ The same boundary rule applies to identity propagation: the Gateway-to-Agent Loo
 
 ### 3. Audit Logging
 
-**The Architecture provides the mechanism.** The Foundation logs all actions — auth events, tool calls, Memory reads and writes — in a structured, queryable format. Action metadata (what happened, who, when, which tool) is always recorded regardless of logging level. Configurable levels control content detail, not whether actions are recorded.
+**The Architecture provides the mechanism.** The Foundation logs all actions — auth events, tool calls, Memory reads and writes — using the portable [audit record](../contracts/schemas/audit-record.json) in a structured, queryable format. Action metadata (what happened, who, when, which tool) is always recorded regardless of logging level. Configurable levels control content detail, not whether actions are recorded.
 
 **Implementations decide the display.** How the audit trail is presented to the owner is a client/product decision:
 - Real-time visibility ("reading finances/budget.md...") — a client feature
@@ -357,7 +357,7 @@ These requirements apply to each component. Cross-referenced into component spec
 
 | Scenario | Expected Behavior |
 |----------|-------------------|
-| Auth provider crashes | System fails closed — unauthenticated requests denied. Active sessions with valid tokens may continue. |
+| Auth provider crashes | System fails closed — requests and tool calls whose Auth checks cannot complete are denied, including requests from sessions that previously had valid tokens. No new work continues without a successful current Auth check. |
 | Containerized tool becomes unresponsive | Agent Loop detects timeout, reports to model. Model informs owner. Tool can be restarted independently. |
 | In-process tool crashes | Agent Loop may crash. This is why only trusted, code-reviewed tools run in-process. Agent Loop restarts clean. |
 | Disk full on write | Tool reports failure to Agent Loop, Agent Loop reports to model. Model informs owner. No partial writes. |

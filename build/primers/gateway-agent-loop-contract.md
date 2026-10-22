@@ -8,7 +8,7 @@ Define the exact internal request and stream contract so Gateway and Agent Loop 
 
 ## Contract Shape
 
-- One internal endpoint: `POST /agent-loop/chat`
+- Two internal operations: `POST /agent-loop/chat` and `POST /agent-loop/cancel`
 - Request body: `messages`, the model to use, and `metadata`
 - Response: SSE stream
 - The Gateway calls Auth on every request before it POSTs; the Agent Loop asks Auth before each tool call
@@ -54,6 +54,14 @@ The bootstrap prompt is not in the request. It is Agent Loop configuration, and 
 - `tool-result`
 - `done`
 - `error`
+
+## Cancellation
+
+The Gateway cancels an active turn by sending its `correlation_id` to
+`POST /agent-loop/cancel` with `reason=auth_revoked` after Auth revokes the
+actor. The Agent Loop cancels supported in-flight work, starts no further model
+or tool calls, emits `auth_error`, and does not permit retry under the revoked
+context. Cancellation is cooperative and idempotent.
 
 ## Error Taxonomy
 

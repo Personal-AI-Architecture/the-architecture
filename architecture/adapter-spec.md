@@ -65,6 +65,7 @@ WITH ADAPTERS:
 - Translates outbound Agent Loop requests from the internal interface into the provider's format
 - Translates inbound model responses from the provider's format into the internal interface
 - Handles provider-specific details (auth headers, streaming formats, tool call schemas)
+- Reports provider failures to the Agent Loop; it does not silently switch to another provider
 
 **Swap scenario:** Switch from OpenRouter to a direct Anthropic integration, or to a local Ollama instance. Write (or select) an adapter for the new provider. Agent Loop doesn't change. Gateway doesn't change. Your Memory doesn't change.
 

@@ -336,6 +336,8 @@ calls, and the Model API stream uses explicit event discriminators. The generic
 tool-definition contract includes a canonical `memory_restore` example with an opaque
 `version` identifier. Approval lifecycle, parallel execution, and “exists but not
 permitted” behavior remain architectural requirements that implementations must enforce.
+When a running actor is revoked, the Gateway cancellation operation prevents new
+tool calls and the Agent Loop emits the canonical authorization error.
 
 ---
 
