@@ -208,3 +208,9 @@ hide_table_of_contents: true
 - **Published:** The current provider is set in startup and adapter config, which the owner can read, so the owner can find out the current one. But the Gateway API has no way to read the current model or provider, and saved conversation messages carry no model or provider, so after a switch there is no record of where earlier replies were processed. BrainDrive shows the provider on its own settings routes, outside the architecture's APIs.
 - **Proposed:** Each saved assistant reply records the model and provider that produced it. Whether to record it is a values call, so it is a decision before it is a contract change.
 - **Evidence:** [security-spec.md](../architecture/security-spec.md) "Model Provider Data Flow"; `contracts/openapi/gateway-api.yaml`; [conversation-detail-response.json](../contracts/examples/conversation-detail-response.json).
+
+### GAP-PAA-29: How tools that run as separate services are found — Decision needed
+
+- **Expected:** One way for the Agent Loop to learn about tools that run as separate services.
+- **Published:** The working default is that the Agent Loop connects to the tool sources in config (`tool_sources`) and asks what they offer, which matches how MCP works. The alternative is for tool services to announce themselves through the Gateway API, as any other caller does: it applies the parity principle to tool registration but adds work to the Gateway. Either way, the model, Auth and Your Memory are unaffected. Formerly OQ-1 in the tools spec.
+- **Evidence:** [tools-spec.md](../architecture/tools-spec.md) "How tools are found" and "Programs that call the system"; [configuration.json](../contracts/schemas/configuration.json) `tool_sources`.
