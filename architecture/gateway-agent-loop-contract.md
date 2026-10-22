@@ -3,27 +3,48 @@ sidebar_label: Gateway ↔ Agent Loop contract
 hide_table_of_contents: true
 ---
 
-# Gateway ↔ Agent Loop API Contract
+# The Gateway–Agent Loop Contract
 
 **Serves stories:** US-5, US-6, US-7 in the [PAA spec](../spec/personal-ai-architecture-spec.md).
 
-## How we define this contract
+## What this contract is
 
-Every system with more than one component has to answer a basic question: how do they talk to each other? In this architecture, the two external boundaries — the Gateway API (how clients connect) and the Model API (how the Agent Loop connects to models) — were defined from the start. But there was one internal handoff left undefined: how does the Gateway pass a request to the Agent Loop, and how does the Agent Loop send results back?
+This contract is the agreement between your system's front door and its hand. It covers how the Gateway passes a request to the Agent Loop, and how the Agent Loop sends the results back.
 
-A protocol evaluation (D136) looked at every communication gap in the architecture — 29+ potential interfaces — and found that all of them resolve through things that already exist (contracts, tools, configuration). All except this one. The Gateway needs to hand off a conversation to the Agent Loop. The Agent Loop needs to stream results back. Auth must check every request before it reaches the Agent Loop. That's the entire scope.
+In most AI products, the part that receives your messages and the part that runs the AI are written together, by the same team, as one piece of code. They share data structures and assumptions nobody wrote down. That works until you want to replace one of them, and then you find the other depends on all of it.
 
-This is **not** a third API. The Gateway API and Model API are the swappability boundaries — external things plug into them. This is an internal contract between two components we control, inside the same deployment. It just needs to be well-defined so the components stay decoupled — you should be able to swap the Agent Loop without touching the Gateway, and vice versa (FS-5, FS-7).
+We think the handoff between them should be written down, even though both parts live inside your system. Otherwise you can't swap one without the other, and the Agent Loop, the part that will keep improving, stays stuck to the Gateway.
 
-The design principle: **the simplest contract that fills the one gap.** One endpoint. One stream format. An Auth check before every request. No protocol envelope, no routing, no node registration, no versioning scheme. Two components in the same deployment don't need the ceremony of an external API — they need a clear agreement about the shape of the data and what to expect back.
+So PAA defines this one handoff as a small, plain contract. The Gateway sends the conversation, the model to use and who is asking, and the Agent Loop streams back the reply, the tools it used, and when it's done. It isn't a third API. The two APIs are where outside things plug in: client apps and models. This is an internal agreement between two parts of your own system, kept as simple as it can be.
 
-**Related documents:** [overview.md](../architecture/overview.md) (architecture overview, links to all component specs)
+That means you can replace the Agent Loop without touching the Gateway, or the Gateway without touching the Agent Loop. Each only has to honor the same small agreement.
+
+<p align="center">
+  <img src="../assets/gateway-agent-loop-contract.svg" alt="The architecture diagram with the Gateway and Agent Loop highlighted. Between them is the Gateway–Agent Loop contract: the conversation, model and authenticated identity go in to the Agent Loop, and a live stream comes back to the Gateway. Interfaces, models, Your Memory, tools and Auth are shown faded." width="900" />
+</p>
+
+## How it works
+
+This works because the handoff only needs to carry a few things. A review of every possible connection in the system found that all the others already go through something that exists, such as a tool, an API, configuration or Auth's own interface. This was the only one left to define (D136).
+
+- **What goes in:** the conversation so far plus the new message, the model to use, who is asking (the identity Auth confirmed), and a little context, such as an ID for tracing the request. Anything that doesn't change between messages, like the starting instructions, the tools and the provider, is set up in the Agent Loop once rather than sent every time.
+- **What comes back:** a live stream: text as the model writes it, each tool call and its result, and a final "done." Client apps can show what's happening as it happens.
+- **Auth at both ends:** the Gateway checks every request with Auth before handing it over, and the Agent Loop checks with Auth before every tool call.
+- **Same for every trigger:** a message from you, a webhook from another service and a scheduled job all arrive in the same shape. A label says which it was, but the Agent Loop doesn't need to treat them differently.
+- **Errors:** if something fails before work starts, the Gateway gets a plain error straight away. If it fails partway, the stream says so and closes.
+- **No adapter needed:** both sides are parts of your own system and speak the same internal language, so there's nothing to translate. A replacement Agent Loop just has to honor this contract. If one you want to use doesn't, a small translator in front of it, the same idea as an adapter, can make it fit, and the Gateway still doesn't change.
+
+**What it deliberately leaves out:** routing, version numbers and message wrappers. It can run over the network or as a plain function call inside one program, without changing its shape.
+
+The rest of this doc is the specification: what any implementation of the Gateway–Agent Loop handoff must do.
 
 ---
 
-## The Contract
+## What the contract covers
 
-One HTTP endpoint. Gateway POSTs a request, Agent Loop returns an SSE stream. The Gateway calls Auth on every request before it POSTs, and the Agent Loop asks Auth before each tool call.
+One internal handoff: the Gateway passes a request to the Agent Loop, and the Agent Loop streams results back (D137). It is not a third API. The Gateway API and Model API are the boundaries external things plug into; this is an internal contract between two components inside one deployment. It exists so either one can be swapped without the other (FS-5, FS-7).
+
+The design rule is **the simplest contract that fills the one gap** (D136): one endpoint, one stream format, an Auth check before every request. The canonical internal path is `POST /agent-loop/chat`. The Gateway POSTs a request; the Agent Loop returns a Server-Sent Events stream. The Gateway calls Auth on every request before it POSTs, and the Agent Loop asks Auth before each tool call.
 
 ```
 Client → Gateway API → Gateway → POST /agent-loop/chat → Agent Loop → Model API → Model
@@ -31,9 +52,7 @@ Client → Gateway API → Gateway → POST /agent-loop/chat → Agent Loop → 
                    Auth (every request)          Auth (each tool call) → Tools
 ```
 
-The canonical internal path is `/agent-loop/chat`.
-
-### Request: `POST /agent-loop/chat`
+## The request
 
 ```json
 {
@@ -72,6 +91,7 @@ The bootstrap prompt (the short system message that tells the model to read Your
 |-------|-------------|----------|
 | `messages` | Conversation history (including tool calls and tool results) + current message | Yes |
 | Model | The model to use for this request, from the owner's current choice | Yes |
+| `auth_context` | The authenticated identity Auth returned for this request: actor, authentication ID, timestamps and correlation ID; never credentials or permissions | Yes |
 | `metadata.conversation_id` | Which conversation this belongs to | No (Agent Loop doesn't need it — Gateway tracks this) |
 | `metadata.correlation_id` | Request trace ID, generated by Gateway | Yes |
 | `metadata.trigger` | `"message"` \| `"webhook"` \| `"schedule"` | No (default: `"message"`) |
@@ -86,9 +106,9 @@ The bootstrap prompt (the short system message that tells the model to read Your
 
 These are Agent Loop startup configuration, not per-request data. They don't change between requests. The model is not in this list: it travels with each request.
 
-### Trigger Types
+### Trigger types
 
-The Agent Loop gets the same `messages` array regardless of trigger source. It genuinely doesn't know the difference.
+Every trigger produces the same request shape and the same `messages` array. `metadata.trigger` records which it was, but the Agent Loop does not need to branch on it.
 
 | Trigger | How it enters | Example message |
 |---------|--------------|-----------------|
@@ -100,36 +120,40 @@ All triggers flow through the Gateway. Even scheduled triggers create conversati
 
 ---
 
-## Response: SSE Stream
+## The response stream
 
 The response is a Server-Sent Events stream. Always streaming — no non-streaming mode. Callers who want the complete response collect the stream.
 
 ```
 event: text-delta
-data: {"content":"Hello, I'll help with budgeting."}
+data: {"_event_type":"text-delta","content":"Hello, I'll help with budgeting."}
 
 event: tool-call
-data: {"id":"tc_1","name":"read_file","arguments":{"path":"/finances/AGENT.md"}}
+data: {"_event_type":"tool-call","id":"tc_1","source_id":"mcp:filesystem","name":"read_file","arguments":{"path":"/finances/AGENT.md"}}
 
 event: tool-result
-data: {"id":"tc_1","output":"# Finances\nBudget goal: ..."}
+data: {"_event_type":"tool-result","id":"tc_1","output":"# Finances\nBudget goal: ..."}
 
 event: text-delta
-data: {"content":"Based on your finance page..."}
+data: {"_event_type":"text-delta","content":"Based on your finance page..."}
 
 event: done
-data: {"finish_reason":"stop","usage":{"prompt_tokens":150,"completion_tokens":75}}
+data: {"_event_type":"done","finish_reason":"stop","usage":{"prompt_tokens":150,"completion_tokens":75}}
 ```
 
 ### Events
 
 | Event | When | Data |
 |-------|------|------|
-| `text-delta` | Model generates text | `{ content: string }` |
-| `tool-call` | Model initiates a tool call | `{ id: string, name: string, arguments: object }` |
-| `tool-result` | Tool execution completes, or Auth refused the call | `{ id: string, output: string }` or `{ id: string, error: string }` |
-| `done` | Agent loop complete | `{ finish_reason: string, usage: { prompt_tokens, completion_tokens } }` |
-| `error` | Unrecoverable failure mid-stream | `{ code: string, message: string }` |
+| `text-delta` | Model generates text | `{ content }` |
+| `tool-call` | Model initiates a tool call | `{ id, source_id, name, arguments }` |
+| `tool-result` | Tool execution completes, or the call did not run | `{ id, output }` on success; `{ id, error, error_code? }` on failure, where the optional `error_code` is `not_permitted`, `tool_error` or `auth_unavailable` |
+| `approval-request` | A product approval rule covers a tool call (optional) | `{ request_id, tool_name, summary, status: pending, created_at, expires_at }` |
+| `approval-result` | The approval was decided (optional) | `{ request_id, decision, decided_at }`, where `decision` is `approved`, `denied`, `cancelled` or `expired` |
+| `done` | Agent loop complete | `{ finish_reason, usage? }`, where the optional `usage` has `prompt_tokens` and `completion_tokens` |
+| `error` | Unrecoverable failure mid-stream | `{ code, message }` |
+
+Every event's data also carries an `_event_type` field naming the event. `contracts/openapi/gateway-engine.yaml` has the full shapes, including optional fields.
 
 Tool calls are visible in the stream because:
 - Clients use them for status display ("Reading file...", "Searching library...")
@@ -142,7 +166,7 @@ The Agent Loop may call the model multiple times in one stream (model calls tool
 
 ---
 
-## Error Handling
+## Errors
 
 ### Pre-Stream Errors (HTTP Status Codes)
 
@@ -151,7 +175,7 @@ The request never started processing. No SSE stream opened.
 | Code | When |
 |------|------|
 | 400 | Invalid request — missing messages, bad format |
-| 401 | Auth rejected the request |
+| 401 | The identity context (`auth_context`) is missing, malformed, expired or caller-supplied |
 | 503 | Agent Loop unavailable |
 
 Response body: `{ "code": "...", "message": "..." }`, plus the request's correlation ID.
@@ -164,6 +188,7 @@ The stream started, then something failed.
 |------|------|
 | `provider_error` | Model unreachable or timeout |
 | `tool_error` | Tool failed and model cannot recover |
+| `auth_error` | Auth denied the request or could not check it |
 | `context_overflow` | Messages exceed model context window |
 
 The Agent Loop must classify errors correctly — no catch-all error code. Recoverable tool failures (a tool returns an error result) go back to the model as `tool-result` events for the model to decide what to do. Only unrecoverable tool infrastructure failures emit `tool_error` and close the stream.
@@ -184,7 +209,7 @@ After an `error` event, the stream closes. The Gateway decides how to communicat
 
 ---
 
-## Auth Middleware
+## Auth at both ends
 
 Auth is a separate component, not part of the Gateway or the Agent Loop (D60). Permissions live only in Auth. It is called at two points:
 
@@ -192,6 +217,40 @@ Auth is a separate component, not part of the Gateway or the Agent Loop (D60). P
 2. **Each tool call.** Before running a tool call, the Agent Loop asks Auth whether this actor may make it. A refused call is not run; the model is told it was not permitted. If Auth can't be reached, the call is not run either: the system fails closed (see [auth-spec.md](./auth-spec.md) "Auth unavailable").
 
 The Agent Loop receives a pre-authenticated `auth_context` through the internal transport adapter. The adapter verifies the Gateway-to-Agent-Loop boundary and rejects a missing, malformed, expired, or caller-supplied context. The Agent Loop never authenticates credentials itself and never decides permissions: it asks Auth and honours the answer.
+
+---
+
+## Cancellation
+
+`POST /agent-loop/cancel` targets an active turn by `correlation_id`. The Gateway
+sends `reason=auth_revoked` when Auth revokes the actor. The Agent Loop cancels
+supported in-flight work, starts no further model or tool work, and closes the
+matching stream with `auth_error`. Cancellation is cooperative at the internal
+boundary; tool implementations must not commit writes after cancellation is
+observed. Repeating cancellation is idempotent and returns `accepted`,
+`already_finished`, or `not_found`.
+
+---
+
+## Approvals
+
+Approval prompts remain a product choice; the architecture default is that the owner can do everything. When a product enables an approval rule, the Agent Loop emits the canonical `approval-request` event and does not execute the covered call while it is pending. The client submits the canonical decision through the normal Gateway API; the Agent Loop may continue in a new stream. `approved`, `denied`, `cancelled`, and `expired` are terminal outcomes keyed by `request_id`; duplicate decisions are idempotent and cannot replay execution. Auth must authorize the decision maker.
+
+---
+
+## What the contract leaves out
+
+These were considered in the protocol evaluation and found unnecessary for this interface:
+
+| Excluded | Why |
+|----------|-----|
+| Routing / capability matching | One Agent Loop. No discovery needed. |
+| Node registration | Components are fixed, not dynamic. |
+| Intent-based routing | The Agent Loop (with the model) decides what to do. |
+| Operating modes | The Agent Loop handles complexity internally. |
+| Workflow orchestration | The Agent Loop orchestrates via tools. |
+| Protocol versioning | Not needed: the contract changes additively ([communication-principles.md](./communication-principles.md) P6). New fields are added alongside existing ones and ignored by components that don't know them, so the Gateway and Agent Loop can update on their own schedules. Until GAP-PAA-31 is resolved, some schemas still reject unknown fields, so this is the intended model rather than a current guarantee. A breaking change is the rare exception, and needs both sides updated. |
+| Envelope format (CloudEvents, BDP) | Marginal value for a single internal endpoint. The request body IS the contract. |
 
 ---
 
@@ -206,53 +265,21 @@ Agreed formats that are not contractually required — adoptable incrementally. 
 
 ---
 
-## What This Contract Explicitly Excludes
+## Implementation notes
 
-Per the protocol evaluation — these capabilities were considered and determined unnecessary for this interface:
+> These are implementation notes, not requirements. They show one way to implement the contract.
 
-| Excluded | Why |
-|----------|-----|
-| Routing / capability matching | One Agent Loop. No discovery needed. |
-| Node registration | Components are fixed, not dynamic. |
-| Intent-based routing | The Agent Loop (with the model) decides what to do. |
-| Operating modes | The Agent Loop handles complexity internally. |
-| Workflow orchestration | The Agent Loop orchestrates via tools. |
-| Protocol versioning | Internal contract between two components we control. Versioning adds overhead with no benefit — we update both sides together. |
-| Envelope format (CloudEvents, BDP) | Marginal value for a single internal endpoint. The request body IS the contract. |
-
----
-
-## Implementation Notes (Implementation Reference)
-
-> These are implementation notes, not architecture requirements. The contract above is the foundation. These notes show one way to implement it.
-
-### Same-Process Option
+### Running in one process
 
 Gateway and Agent Loop may run in the same process. The endpoint can be implemented as a direct function call that follows the contract shape — the Gateway calls an Agent Loop function with the same inputs, receiving a stream back. Defining it as HTTP means the components can be separated later without changing the contract.
 
-### SSE Event Mapping
+### Mapping SDK stream events
 
 Most AI SDKs produce streaming events that map directly to this contract's SSE event types (`text-delta`, `tool-call`, `tool-result`, `done`, `error`). The Agent Loop is a thin wrapper — it receives the request, calls the SDK's streaming function with the messages + its configured tools + provider, and forwards the stream events.
 
 ---
 
-## Cancellation
-
-`POST /agent-loop/cancel` targets an active turn by `correlation_id`. The Gateway
-sends `reason=auth_revoked` when Auth revokes the actor. The Agent Loop cancels
-supported in-flight work, starts no further model or tool work, and closes the
-matching stream with `auth_error`. Cancellation is cooperative at the internal
-boundary; tool implementations must not commit writes after cancellation is
-observed. Repeating cancellation is idempotent and returns `accepted`,
-`already_finished`, or `not_found`.
-
-## Approval interaction
-
-Approval prompts remain a product choice; the architecture default is that the owner can do everything. When a product enables an approval rule, the Agent Loop emits the canonical `approval-request` event and does not execute the covered call while it is pending. The client submits the canonical decision through the normal Gateway API; the Agent Loop may continue in a new stream. `approved`, `denied`, `cancelled`, and `expired` are terminal outcomes keyed by `request_id`; duplicate decisions are idempotent and cannot replay execution. Auth must authorize the decision maker.
-
----
-
-## Success Criteria
+## Checking an implementation
 
 - [ ] The Gateway can send a request to the Agent Loop and receive a streamed response
 - [ ] Swapping the Agent Loop does not require Gateway changes — the contract shape is the only dependency
@@ -262,22 +289,26 @@ Approval prompts remain a product choice; the architecture default is that the o
 - [ ] Tool calls and tool results use the shared message shape and are saved in conversation history
 - [ ] Tool calls are visible in the stream — clients can display status, and products that add approval prompts can present them
 - [ ] Every request carries a correlation ID, and every error carries the correlation ID
-- [ ] All trigger types (message, webhook, schedule) produce the same request shape — the Agent Loop genuinely cannot tell the difference
+- [ ] All trigger types (message, webhook, schedule) produce the same request shape; the Agent Loop does not need to branch on the trigger
 - [ ] Pre-stream errors return HTTP status codes; mid-stream errors return SSE error events — no ambiguity about which failure mode applies
-- [ ] The contract works as both an HTTP endpoint and a direct function call (V1 same-process) without changing the shape
+- [ ] The contract works as both an HTTP endpoint and a direct function call in one process without changing the shape
+- [ ] *(security)* Every request must pass an Auth check, called by the Gateway, before reaching the Agent Loop — no bypass path
+- [ ] *(security)* Every tool call must pass an Auth check, asked by the Agent Loop, before it runs
+- [ ] *(security)* Credentials (tokens, API keys, session IDs) must never appear in the request body or `auth_context` — Auth validates them and the Gateway carries only the authenticated identity context
+- [ ] *(security)* The internal transport adapter must preserve and integrity-protect `auth_context` across HTTP, messaging, or direct-call transports; the Agent Loop must not modify, forge, or strip it
+- [ ] *(security)* Correlation IDs must flow end-to-end (Gateway → Auth → Agent Loop → tools → logs) for full request traceability
+- [ ] *(security)* The SSE stream must not leak internal system paths, stack traces, or credentials in error events — error messages must be safe for client display
+
+The security requirements come from [security-spec.md](./security-spec.md), which owns the why (D131).
 
 ---
 
-## Security Requirements
+## Decisions
 
-Per-component requirements from [security-spec.md](./security-spec.md). Security-spec owns the "why" (D131); this section owns the "what" for the Gateway ↔ Agent Loop interface.
-
-- [ ] Every request must pass an Auth check, called by the Gateway, before reaching the Agent Loop — no bypass path
-- [ ] Every tool call must pass an Auth check, asked by the Agent Loop, before it runs
-- [ ] Credentials (tokens, API keys, session IDs) must never appear in the request body or `auth_context` — Auth validates them and the Gateway carries only the authenticated identity context
-- [ ] The internal transport adapter must preserve and integrity-protect `auth_context` across HTTP, messaging, or direct-call transports; the Agent Loop must not modify, forge, or strip it
-- [ ] Correlation IDs must flow end-to-end (Gateway → Auth → Agent Loop → tools → logs) for full request traceability
-- [ ] The SSE stream must not leak internal system paths, stack traces, or credentials in error events — error messages must be safe for client display
+| # | Decision | Rationale |
+|---|----------|-----------|
+| D136 | Protocol evaluation — 29+ communication gaps collapsed to one interface | Systematic review identified that all inter-component communication concerns resolve through existing architecture (contracts, tools, configuration). Only one gap remained: how the Gateway passes requests to the Agent Loop. |
+| D137 | Gateway ↔ Agent Loop is a plain HTTP API contract | Not a third API — an internal interface between two components we control. One endpoint, SSE streaming, an Auth check before every request. No protocol envelope, no routing, no node registration. Fills the one gap identified by D136. |
 
 ---
 
@@ -290,17 +321,3 @@ API is streaming-only and identifies each completion event with `_event_type`; t
 Agent Loop executes independent tool calls concurrently and preserves dependency order. S8
 (tool-definition shape/visibility) is canonical: source.id + name identifies a tool,
 visibility separates owner mode from Auth authorization, and tool calls carry source_id.
-follow-up questions.
-
----
-
-## Decisions Made
-
-| # | Decision | Rationale |
-|---|----------|-----------|
-| D136 | Protocol evaluation — 29+ communication gaps collapsed to one interface | Systematic review identified that all inter-component communication concerns resolve through existing architecture (contracts, tools, configuration). Only one gap remained: how the Gateway passes requests to the Agent Loop. |
-| D137 | Gateway ↔ Agent Loop is a plain HTTP API contract | Not a third API — an internal interface between two components we control. One endpoint, SSE streaming, an Auth check before every request. No protocol envelope, no routing, no node registration. Fills the one gap identified by D136. |
-
----
-
-*One endpoint. One stream. Auth checks every request and every tool call. This is the simplest contract that fills the one gap between the Gateway and the Agent Loop that the protocol evaluation identified.*
