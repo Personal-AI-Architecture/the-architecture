@@ -74,7 +74,7 @@ These properties must always hold.
 - Memory export always works — the owner can get their data out regardless of system state
 - A failure of an isolated tool does not crash the Agent Loop — isolation prevents cascade failure
 - Every request passes an Auth check called by the Gateway, and every tool call passes an Auth check asked by the Agent Loop
-- Content separation is active by default — Memory content is treated as data, not instructions
+- Content separation is active by default — Memory content is treated as data, not instructions, except the instructions the owner has set up there (skills and bootstrap files)
 
 ## Threat Model
 
@@ -101,7 +101,7 @@ The system has six attack surfaces. Each is a way an adversary could compromise 
 
 **Current state of the art:** Prompt injection is an unsolved problem industry-wide. No system has a complete defense. The mitigations reduce risk but cannot eliminate it.
 
-**Primary mitigation — Content separation:** The system distinguishes between *instructions* (system prompt, skills, bootstrap files) and *data* (everything else the model reads: files in Your Memory, conversation history and tool results). Instructions tell the model what to do. Data is content to process — the model should never execute instructions found in data.
+**Primary mitigation — Content separation:** The system distinguishes between *instructions* (system prompt, skills, bootstrap files) and *data* (everything else the model reads: other files in Your Memory, conversation history and tool results). Instructions tell the model what to do. Data is content to process — the model should never execute instructions found in data.
 
 This is analogous to how operating systems separate code execution from data (NX bit, DEP). It's not hardware-enforced in language models, but it significantly raises the bar for successful injection:
 
@@ -112,7 +112,7 @@ This is analogous to how operating systems separate code execution from data (NX
 
 **Architecture:** The architecture provides the content separation mechanism — the ability to mark content as instructions vs data in prompts sent through the Model API.
 
-**Implementation:** The product configures content separation as a default. The system prompt instructs the model to treat Your Memory content as data. Configurable by implementation builders who may need different behavior.
+**Implementation:** The product configures content separation as a default. The system prompt instructs the model to treat Your Memory content as data, apart from the skills and bootstrap files the owner has set up as instructions. Configurable by implementation builders who may need different behavior.
 
 **Additional mitigations (defense in depth):**
 - Scope enforcement limits what damage an injection can cause (see Enforcement Mechanisms below)
@@ -163,7 +163,7 @@ This is analogous to how operating systems separate code execution from data (NX
 **This is not a bug — it's how cloud models work.** The model needs context to function. Restricting what goes in the prompt cripples the system. The mitigation is transparency and choice, not restriction.
 
 **Requirements:**
-- **Document the risk clearly.** Owners must understand: when you use a cloud model provider, your data goes to that provider. The provider is only ever a product default or the owner's choice, kept where the owner can read it, and never changed without the owner.
+- **Document the risk clearly.** Owners must understand: when you use a cloud model provider, your data goes to that provider. The owner must be able to find this out before their data is sent; how a product tells them is its own choice. The provider is only ever a product default or the owner's choice, kept where the owner can read it, and never changed without the owner.
 - **Make the provider choice visible.** The owner should always know which provider is processing their data, and afterwards which provider produced each reply: every saved assistant reply records its model and provider (D194).
 - **Local models are the sovereign option.** Support for local model providers means owners who want zero data leaving their machine have that choice. Both go through the same Model API. Abilities can differ between models, and a missing ability is reported, never faked.
 - **Future (configurable in implementations):** If feasible, allow implementation builders to configure what Memory content can be included in prompts.
@@ -257,7 +257,7 @@ The system distinguishes between instructions and data at the prompt level. See 
 
 **Architecture:** The architecture provides the mechanism to mark content as instructions vs data in prompts sent through the Model API.
 
-**Implementation:** The product configures content separation as a default. The system prompt instructs the model to treat Memory content as data. Configurable by implementation builders.
+**Implementation:** The product configures content separation as a default. The system prompt instructs the model to treat Memory content as data, apart from the skills and bootstrap files the owner has set up as instructions. Configurable by implementation builders.
 
 How the boundary is marked for a given model, and how its effectiveness is tested, is the implementation's choice.
 
@@ -362,6 +362,7 @@ Where anomaly detection and output filtering plug in is decided when external ac
 - [ ] Approval gates enforce the owner's approval rules (none by default; configurable spectrum)
 - [ ] Version history and restore available for Your Memory — always on
 - [ ] TLS for all external communication
+- [ ] The owner can find out which cloud provider will receive their data before anything is sent to it
 - [ ] Every tool's trust level is visible to the owner, and tools not shipped with the system run isolated by default
 
 ### Per-component requirements
@@ -424,7 +425,7 @@ These apply to each component. Each component spec repeats its items in its own 
 | # | Decision | Rationale |
 |---|----------|-----------|
 | D22 | Auth on both local and managed hosting | Filesystem access is not the same as authenticated system access. Prevents accidental exposure if the system is network-accessible. |
-| D29 | Zero lock-in by design — risks are implementation discipline, not architectural | Security controls must not create lock-in. The auth provider is swappable. Tool isolation uses standard containers. No proprietary security mechanisms. |
+| D29 | Zero lock-in by design — risks are implementation discipline, not architectural | Security controls must not create lock-in. The auth provider is swappable. Tool isolation uses standard mechanisms (a container, separate process or sandbox). No proprietary security mechanisms. |
 | D55 | Scope = available tools + Auth permissions | The expanding sphere is driven by which tools exist and what Auth allows. No scope enforcer, no boundary manager. Scope enforcement uses existing components. |
 
 ## Contract alignment
