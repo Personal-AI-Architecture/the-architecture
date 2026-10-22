@@ -81,7 +81,7 @@ Tools are also not an API (D53). Tool calls are expressed in the Model API, in t
 
 ### Skills are not tools
 
-A skill is instructions in Your Memory that tell the model what to do, step by step. A tool is a capability in the environment. A skill refers to tools but is data: the model reads it and follows it with the tools available. Skills may include scripts and templates; these are still data, run through whatever tools exist.
+A skill is instructions in Your Memory that tell the model what to do, step by step. A tool is a capability in the environment. A skill refers to tools but lives in Your Memory, not in the environment: the model reads it and follows it with the tools available. Skills may include scripts and templates; these also live in Your Memory and run through whatever tools exist.
 
 Every skill is a Markdown file, so skills don't each need a tool. **One generic skill tool loads any skill** into the model's context. Skills and tools change independently: editing or adding a skill needs no tool change, and adding a tool needs no skill change.
 

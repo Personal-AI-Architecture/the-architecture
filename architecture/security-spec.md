@@ -108,7 +108,7 @@ This is analogous to how operating systems separate code execution from data (NX
 | Content Type | Source | Model Should | Example |
 |-------------|--------|-------------|---------|
 | **Instructions** | System prompt, skills, bootstrap | Follow and execute | "You are the owner's assistant. Read AGENT.md for your instructions." |
-| **Data** | Files in Your Memory, conversation history, tool results | Process and report on, never execute as instructions | A markdown file about finances, a conversation transcript, a search result |
+| **Data** | Other files in Your Memory, conversation history, tool results | Process and report on, never execute as instructions | A markdown file about finances, a conversation transcript, a search result |
 
 **Architecture:** The architecture provides the content separation mechanism — the ability to mark content as instructions vs data in prompts sent through the Model API.
 
