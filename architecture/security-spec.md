@@ -126,7 +126,7 @@ This is analogous to how operating systems separate code execution from data (NX
 
 **Requirements:**
 - **Document the risk clearly.** Owners must understand: when you use a cloud model provider, your data goes to that provider. The owner must be able to find this out before their data is sent.
-- **Make the provider choice visible.** The owner should always know which provider is processing their data.
+- **Make the provider choice visible.** The owner should always know which provider is processing their data, and afterwards which provider produced each reply: every saved assistant reply records its model and provider (D194).
 - **Local models are the sovereign option.** Support for local model providers means owners who want zero data leaving their machine have that choice. The system works identically with local or cloud models.
 - **Future (configurable in implementations):** If feasible, allow implementation builders to configure what Memory content can be included in prompts.
 

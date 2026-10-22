@@ -16,7 +16,7 @@
     },
     "provider_adapter": {
       "type": "string",
-      "description": "Which adapter connects the Agent Loop to AI models. Points to an adapter config file that contains provider-specific settings (base URL, supported models, API key reference). Swapping a provider = swapping this value and providing a new adapter config file. Nothing else in the system changes.",
+      "description": "Which adapter connects the Agent Loop to AI models. Points to an adapter config file that lists the provider profiles this adapter reaches (base URL and API key reference for each). Switching between listed profiles is an owner preference and does not touch this value (D193). Only a provider in a new format means changing this value and providing a new adapter config file. Nothing else in the system changes.",
       "examples": [
         "openrouter",
         "anthropic",

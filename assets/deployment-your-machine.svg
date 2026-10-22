@@ -1,0 +1,25 @@
+<svg viewBox="0 0 860 380" xmlns="http://www.w3.org/2000/svg" font-family="Inter, Helvetica, Arial, sans-serif">
+<rect x="0" y="0" width="100%" height="100%" rx="16" fill="#141920"/>
+<defs><marker id="a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#94A3B8"/></marker></defs>
+<rect x="40" y="40" width="520" height="250" rx="12" fill="none" stroke="#FFFFFF" stroke-width="2.5"/>
+<g fill="#94A3B8" font-size="12" letter-spacing="1.5"><text x="62" y="70">YOUR MACHINE</text><text x="612" y="40">ONLY IF YOU CHOOSE</text></g>
+<g fill="none" stroke="#FFFFFF" stroke-width="2">
+<rect x="62" y="90" width="148" height="50" rx="8"/><rect x="226" y="90" width="148" height="50" rx="8"/><rect x="390" y="90" width="148" height="50" rx="8"/>
+<rect x="310" y="160" width="228" height="50" rx="8"/>
+</g>
+<rect x="62" y="160" width="228" height="50" rx="8" fill="none" stroke="#FFFFFF" stroke-width="3"/>
+<g fill="none" stroke="#94A3B8" stroke-width="1.5" stroke-dasharray="5 4">
+<rect x="612" y="56" width="208" height="44" rx="8"/><rect x="612" y="116" width="208" height="44" rx="8"/><rect x="612" y="176" width="208" height="44" rx="8"/><rect x="612" y="236" width="208" height="44" rx="8"/>
+<line x1="560" y1="78" x2="612" y2="78"/><line x1="560" y1="138" x2="612" y2="138"/><line x1="560" y1="198" x2="612" y2="198"/><line x1="560" y1="258" x2="612" y2="258"/>
+</g>
+<g fill="#FFFFFF" text-anchor="middle" font-weight="600" font-size="15">
+<text x="136" y="120">Gateway</text><text x="300" y="120">Agent Loop</text><text x="464" y="120">Auth</text>
+<text x="176" y="190">Your Memory</text><text x="424" y="190">Local model</text>
+</g>
+<g fill="#CBD5E1" text-anchor="middle" font-size="14">
+<text x="716" y="83">Cloud models</text><text x="716" y="143">Outside tools</text><text x="716" y="203">Remote access</text><text x="716" y="263">Remote backup</text>
+</g>
+<text x="300" y="258" fill="#94A3B8" text-anchor="middle" font-size="13">Runs with the network unplugged</text>
+<text x="430" y="340" fill="#FFFFFF" text-anchor="middle" font-size="13">Everything the system needs fits on one computer you own.</text>
+<text x="430" y="362" fill="#94A3B8" text-anchor="middle" font-size="13">Anything outside is something you added, so it's something you can take away.</text>
+</svg>

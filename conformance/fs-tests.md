@@ -69,7 +69,7 @@
 **Add a model provider:**
 1. Create a new adapter config file
 2. Change `provider_adapter` in runtime config
-3. Restart and verify
+3. Restart and verify (a restart is allowed because this is a new adapter format; a provider already listed as a profile is a preference change, see FS-4)
 
 **Pass criteria (all capability types):**
 - [ ] Your Memory gains no outward dependencies from the addition
@@ -107,7 +107,8 @@
 **Equivalent to:** SWAP-1
 
 **Pass criteria:**
-- [ ] Change provider config → after a restart (allowed for a provider swap), messages use the new provider → no code changes
+- [ ] Change the active provider preference to another profile in the loaded adapter → the next message uses it with no restart, no code changes (D193)
+- [ ] Install a provider in a new format (new adapter, `provider_adapter`, secret) → after a restart (allowed), messages use the new provider → no code changes
 - [ ] Change only the model preference → the next message uses the new model with no restart (see SWAP-2)
 
 ---

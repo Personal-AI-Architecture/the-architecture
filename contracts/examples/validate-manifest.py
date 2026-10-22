@@ -80,12 +80,13 @@ def validate_contract_example(file_path: str, payload: object, kind: str) -> Non
             fail(f"{file_path} has kind={kind} but its client request shape is {'valid' if valid else 'invalid'}")
         return
 
-    if name in {"gateway-engine-request.json", "invalid-gateway-engine-request.json"}:
+    if name in {"gateway-engine-request.json", "invalid-gateway-engine-request.json", "invalid-gateway-engine-request-missing-provider.json"}:
         valid = (
             isinstance(payload, dict)
             and isinstance(payload.get("messages"), list)
             and bool(payload.get("messages"))
             and isinstance(payload.get("model"), str)
+            and isinstance(payload.get("provider"), str)
             and isinstance(payload.get("auth_context"), dict)
             and isinstance(payload.get("metadata"), dict)
             and isinstance(payload["metadata"].get("correlation_id"), str)
@@ -112,7 +113,7 @@ def validate_contract_example(file_path: str, payload: object, kind: str) -> Non
             fail(f"{file_path} has kind={kind} but its conversation-list shape is {'valid' if valid else 'invalid'}")
         return
 
-    if name in {"conversation-detail-response.json", "invalid-conversation-detail-response.json"}:
+    if name in {"conversation-detail-response.json", "invalid-conversation-detail-response.json", "invalid-conversation-detail-assistant-missing-model.json", "invalid-conversation-detail-assistant-missing-provider.json"}:
         valid = (
             isinstance(payload, dict)
             and isinstance(payload.get("id"), str)
@@ -123,6 +124,9 @@ def validate_contract_example(file_path: str, payload: object, kind: str) -> Non
         if valid:
             for message in payload["messages"]:
                 if not isinstance(message, dict) or not {"id", "created_at"} <= message.keys():
+                    valid = False
+                    break
+                if message.get("role") == "assistant" and not (isinstance(message.get("model"), str) and isinstance(message.get("provider"), str)):
                     valid = False
                     break
                 validate_schema(message, "message.json", file_path)
@@ -139,7 +143,14 @@ def validate_contract_example(file_path: str, payload: object, kind: str) -> Non
         return
 
     if name in {"adapter-config.json", "invalid-adapter-config.json"}:
-        valid = isinstance(payload, dict) and {"base_url", "model", "api_key_env"} <= payload.keys() and "memory_root" not in payload and "approval_mode" not in payload
+        profiles = payload.get("provider_profiles") if isinstance(payload, dict) else None
+        valid = (
+            isinstance(profiles, dict)
+            and bool(profiles)
+            and all(isinstance(profile, dict) and isinstance(profile.get("base_url"), str) and not ({"model", "api_key"} & profile.keys()) for profile in profiles.values())
+            and payload.get("default_provider_profile") in profiles
+            and not ({"memory_root", "approval_mode", "model"} & payload.keys())
+        )
         if (kind == "valid") != valid:
             fail(f"{file_path} has kind={kind} but its adapter-config shape is {'valid' if valid else 'invalid'}")
         return

@@ -21,7 +21,7 @@ Define the boundary between runtime config, adapter config, preferences, and req
 
 ## Config Categories
 
-- Preferences: what the owner wants, including the model choice; live in Memory.
+- Preferences: what the owner wants, including the model choice and the active provider profile; live in Memory.
 - Runtime config: what exists in this environment; thin bootstrap (four fields).
 - Tool self-description: what tools can do; lives with the tools.
 - Adapter config: provider-specific settings; lives with adapters.
@@ -35,8 +35,8 @@ Not configuration:
 ## Required Behaviors
 
 - Keep runtime config, adapter config, and preferences distinct.
-- Keep request payloads free of hidden reconfiguration data. The one per-request choice is the model: the Gateway reads the owner's current model choice on every message and passes it with the request.
-- A model change applies to the next message with no restart. Provider, adapter and tool changes may need a restart or hot-reload; they are still config-only.
+- Keep request payloads free of hidden reconfiguration data. The per-request choices are the model and the active provider profile: the Gateway reads the owner's current model and provider choice on every message and passes both with the request.
+- A model change or a switch to another provider profile applies to the next message with no restart. A provider in a new adapter format, and tool changes, may need a restart or hot-reload; they are still config-only.
 - Preserve provider/model/tool swaps through config and preference changes where defined.
 - Follow the boot sequence in a deterministic order.
 - Keep secrets out of Memory and tracked config.
@@ -61,7 +61,7 @@ Not configuration:
 5. Read preferences.
 6. Become ready.
 
-On every message, the Gateway reads the owner's current model choice through the Memory tools and passes it to the Agent Loop.
+On every message, the Gateway reads the owner's current model and active provider profile through the Memory tools and passes both to the Agent Loop.
 
 ## Valid Example
 
@@ -83,9 +83,14 @@ Adapter config example:
 
 ```json
 {
-  "base_url": "http://127.0.0.1:11434/v1",
-  "model": "llama3.1",
-  "api_key_env": "BRAINDRIVE_API_KEY"
+  "provider_profiles": {
+    "openrouter": {
+      "base_url": "https://openrouter.ai/api/v1",
+      "api_key_env": "OPENROUTER_API_KEY"
+    },
+    "local": { "base_url": "http://127.0.0.1:11434/v1" }
+  },
+  "default_provider_profile": "openrouter"
 }
 ```
 
@@ -93,7 +98,8 @@ Preference example:
 
 ```json
 {
-  "default_model": "llama3.1"
+  "default_model": "llama3.1",
+  "active_provider_profile": "local"
 }
 ```
 
@@ -128,8 +134,8 @@ Why this is drift:
 ## Audit Questions
 
 - Where does each kind of configuration live?
-- Is anything being re-derived per request that should be ready at boot or refresh time? (The model choice is the exception: it is read on every message.)
-- Does a model change apply to the next message without a restart?
+- Is anything being re-derived per request that should be ready at boot or refresh time? (The model and provider choices are the exception: they are read on every message.)
+- Does a model or provider-profile change apply to the next message without a restart?
 - Are preferences stored in Memory rather than code/runtime config?
 - Are permissions kept out of configuration?
 - Is request payload data being abused as configuration?

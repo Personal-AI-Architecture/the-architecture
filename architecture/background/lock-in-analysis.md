@@ -209,7 +209,7 @@ This is ongoing maintenance, not lock-in. Every AI system has this characteristi
 #### Exit Cost
 
 - **Switching models (same provider):** Change one preference in Your Memory. Zero code changes.
-- **Switching providers:** Change `provider_adapter` in runtime config + new adapter config file. Still zero code changes.
+- **Switching providers:** Switch the active provider profile (an owner preference, next message, no restart; D193), or for a provider in a new format change `provider_adapter` in runtime config + new adapter config file. Still zero code changes.
 - **Switching provider abstraction entirely:** Only happens via an Agent Loop swap.
 
 #### Verdict
@@ -400,7 +400,7 @@ The probability of needing to replace MCP is near zero. MCP is the default but n
 | Dimension | Assessment |
 |-----------|-----------|
 | **Lock-in** | Zero. Each link independently swappable. Model API adapter translates between the Agent Loop's internal interface and whichever provider format is current — this is the most frequently swapped adapter (D139). |
-| **Concrete swap costs** | Same provider, different model: change one preference in Your Memory — the next message uses it, no restart, zero code changes. Different provider: change `provider_adapter` in runtime config (1 field) + provide new adapter config file (1 file) + update the secret reference if needed — still zero code changes. |
+| **Concrete swap costs** | Same provider, different model: change one preference in Your Memory — the next message uses it, no restart, zero code changes. Different provider listed in the adapter config: change the active provider preference — next message, no restart (D193). Provider in a new format: change `provider_adapter` in runtime config (1 field) + provide new adapter config file (1 file) + update the secret reference if needed — still zero code changes. |
 | **Discipline** | If the product offers alternate providers, make the retry or provider change explicit and test it before production. |
 
 ### Gateway ↔ Agent Loop Internal Contract (D137)
@@ -537,7 +537,7 @@ The Agent Loop's language becomes a team working language. The Agent Loop is Typ
 | **Security** | Zero | No proprietary security mechanisms | Security becomes a lock-in vector |
 | **Gateway** | Zero | Keep conversations in Memory via tools (D152) | Conversation data locked in Gateway |
 | **Gateway API** | Zero (we own it) | Design independently of current Agent Loop | API becomes Agent Loop-specific wrapper |
-| **Model API** | Zero (adapter) | Concrete swap costs: same-provider = 1 change, cross-provider = 2 changes | Provider coupling |
+| **Model API** | Zero (adapter) | Concrete swap costs: model swap or listed provider profile = 1 preference change, no restart (D193); new provider format = adapter + runtime config + secret, restart allowed | Provider coupling |
 | **Gateway ↔ Agent Loop** | Zero (internal) | Keep contract explicit and versioned | Components couple internally |
 | **Configuration** | Zero | Keep runtime config to 4 fields (D144) | Environment coupling |
 | **Deployment** | Zero | Local path always exists | Managed hosting becomes a dependency |
@@ -584,7 +584,7 @@ The foundation architecture is designed for zero lock-in at every layer. This an
 
 - **Your Memory** is fully portable — zero outward dependencies, accessed through tools, exportable in open formats. The contract is the tools, not the storage. Storage evolves without anything else changing.
 - **Tools** are capabilities in the environment — the tool protocol is internal to the Agent Loop, not an architectural boundary. Swap the protocol without changing anything else. Tool preferences stay in Memory (D145), not the deployment.
-- **Intelligence** is a config change — models, routers, and providers are all swappable via adapters. Same-provider swap = 1 change. Cross-provider swap = 2 changes.
+- **Intelligence** is a config change — models, routers, and providers are all swappable via adapters. A model swap or a switch to a listed provider profile = 1 preference change, no restart (D193). A provider in a new format = new adapter + `provider_adapter` + secret, and a restart is allowed.
 - **Interface** talks to a contract, not an implementation. Replace or multiply freely.
 - **Agent Loop** is a generic commodity component. Swap the whole thing.
 - **Auth** is a cross-cutting layer with open standards (OAuth 2.1, OIDC), exportable state, and an implementation-agnostic contract.

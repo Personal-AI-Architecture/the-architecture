@@ -1,0 +1,33 @@
+<svg viewBox="0 0 860 400" xmlns="http://www.w3.org/2000/svg" font-family="Inter, Helvetica, Arial, sans-serif">
+<rect x="0" y="0" width="100%" height="100%" rx="16" fill="#141920"/>
+<defs><marker id="a" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#94A3B8"/></marker></defs>
+<g fill="#94A3B8" font-size="12" letter-spacing="1.5"><text x="40" y="40">THE SETTING IS ABOUT…</text><text x="470" y="40">SO IT LIVES IN…</text></g>
+<g fill="none" stroke="#94A3B8" stroke-width="1.5" stroke-dasharray="5 4">
+<rect x="40" y="56" width="370" height="70" rx="8"/><rect x="40" y="146" width="370" height="70" rx="8"/><rect x="40" y="236" width="370" height="70" rx="8"/>
+</g>
+<rect x="470" y="56" width="190" height="70" rx="8" fill="none" stroke="#FFFFFF" stroke-width="2.5"/>
+<rect x="470" y="146" width="190" height="70" rx="8" fill="none" stroke="#FFFFFF" stroke-width="2"/>
+<rect x="470" y="236" width="190" height="70" rx="8" fill="none" stroke="#FFFFFF" stroke-width="1.5" stroke-dasharray="5 4"/>
+<g stroke="#94A3B8" stroke-width="1.5" fill="none">
+<line x1="410" y1="91" x2="466" y2="91" marker-end="url(#a)"/><line x1="410" y1="181" x2="466" y2="181" marker-end="url(#a)"/><line x1="410" y1="271" x2="466" y2="271" marker-end="url(#a)"/>
+</g>
+<g fill="#FFFFFF" font-weight="600" font-size="15">
+<text x="60" y="85">You</text><text x="60" y="175">This machine</text><text x="60" y="265">A tool</text>
+</g>
+<g fill="#94A3B8" font-size="12">
+<text x="60" y="107">the model you like, tools to load, how you want answers</text>
+<text x="60" y="197">where Your Memory is, model adapter, sign-in, tools</text>
+<text x="60" y="287">what it does and what it needs</text>
+</g>
+<g fill="#FFFFFF" text-anchor="middle" font-weight="600" font-size="15">
+<text x="565" y="96">Your Memory</text><text x="565" y="186">Startup file</text><text x="565" y="276">The tool itself</text>
+</g>
+<g fill="#94A3B8" font-size="13">
+<text x="680" y="96">travels with you</text><text x="680" y="186">stays with the machine</text><text x="680" y="276">describes itself</text>
+</g>
+<line x1="40" y1="330" x2="820" y2="330" stroke="#2A3340" stroke-width="1"/>
+<g fill="#94A3B8" text-anchor="middle" font-size="12">
+<text x="430" y="356">Not configuration: permissions live only in Auth. Secrets stay outside Your Memory, never tracked.</text>
+</g>
+<text x="430" y="382" fill="#FFFFFF" text-anchor="middle" font-size="13">Move to a new machine and you bring Your Memory. Installing the system there sets up its own startup file and tools.</text>
+</svg>

@@ -11,7 +11,7 @@ Define the external request, response, conversation, and approval interaction sh
 - Client sends HTTP requests to the Gateway API.
 - Gateway owns conversation lifecycle.
 - Gateway calls Auth on every request, including conversation list and history reads.
-- Gateway normalizes client input into the internal `messages + model + metadata` handoff, adding the owner's current model choice.
+- Gateway normalizes client input into the internal `messages + model + provider + metadata` handoff, adding the owner's current model and provider choice.
 - Streaming responses use SSE.
 - One message shape across all three contracts: content is a list of parts, and tool calls and tool results are ordinary message parts.
 

@@ -48,7 +48,7 @@ paths:
       operationId: agentLoopChat
       summary: Send messages to the Agent Loop for processing
       description: |
-        Gateway POSTs a request containing the current model, messages array (system prompt +
+        Gateway POSTs a request containing the current model, provider, messages array (system prompt +
         conversation history + current message), and metadata. Agent Loop returns an SSE stream.
 
         The Gateway assembles the messages array from three sources:
@@ -59,8 +59,9 @@ paths:
         The Gateway checks Auth before routing. The Agent Loop also checks Auth before every
         tool call; permissions live only in Auth.
 
-        The Agent Loop is pre-configured with tool definitions and provider configuration at
-        startup. These are not per-request data.
+        The Agent Loop is pre-configured with tool definitions and the adapter and its
+        provider profiles at startup. The model and the active provider profile are
+        owner preferences and arrive with each request (D193).
       requestBody:
         required: true
         content:
@@ -72,6 +73,7 @@ paths:
                 summary: A budgeting conversation with history
                 value:
                   model: 'local/llama-3.1-8b'
+                  provider: 'local'
                   auth_context:
                     actor:
                       id: 'owner_abc123'
@@ -192,6 +194,7 @@ components:
       required:
         - messages
         - model
+        - provider
         - auth_context
       properties:
         messages:
@@ -208,6 +211,11 @@ components:
           description: |
             The owner's current model choice. The Gateway reads this for every
             request and passes it through; the Agent Loop must not pin it at startup.
+        provider:
+          type: string
+          description: |
+            The owner's active provider profile. The Gateway reads it with the model for
+            every request; the Agent Loop uses it and must not substitute another.
         auth_context:
           $ref: '../schemas/auth-context.json'
           description: |
@@ -245,7 +253,7 @@ components:
           default: message
           description: |
             How this request was triggered. The Agent Loop gets the same messages array
-            regardless of trigger source — it genuinely does not know the difference.
+            regardless of trigger source and need not branch on this label.
             - message: Client sent a message through the Gateway API
             - webhook: External service triggered via Gateway API
             - schedule: Cron tool triggered via Gateway

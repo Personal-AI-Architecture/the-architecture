@@ -11,7 +11,8 @@ Use this when reviewing Gateway code paths, routes, conversation handling, or cl
 - [ ] Gateway owns conversation lifecycle rather than delegating it to Agent Loop.
 - [ ] Conversation operations use the approved Memory boundary.
 - [ ] No private in-process conversation store exists as source of truth.
-- [ ] Gateway does not choose models or own provider selection; it reads the owner's current model choice on every message and passes it on.
+- [ ] Gateway does not choose models or own provider selection; it reads the owner's current model and provider choice on every message and passes both on.
+- [ ] Gateway stores the model and provider profile that produced each assistant reply on the saved message (D194).
 - [ ] Gateway calls Auth on every request, including conversation list and history reads.
 - [ ] Conversation history keeps tool calls, tool results and every content part.
 - [ ] `POST /conversations/messages` uses the canonical client request body `{ content, metadata? }`, with `content` as a non-empty list of structured content parts, rather than the internal `messages + metadata` shape.

@@ -362,6 +362,66 @@
         "audit log",
         "portable contract"
       ]
+    },
+    {
+      "file": "contracts/examples/invalid-gateway-engine-request-missing-provider.json",
+      "kind": "invalid",
+      "owning_docs": [
+        "build/primers/gateway-agent-loop-contract.md",
+        "build/primers/configuration.md",
+        "build/primers/security.md"
+      ],
+      "matrix_ids": [
+        "GC-01",
+        "GC-03",
+        "GC-05",
+        "C-02",
+        "S-01"
+      ],
+      "related_checklists": [
+        "conformance/review-checklists/agent-loop-review.md",
+        "conformance/review-checklists/configuration-review.md",
+        "conformance/review-checklists/security-review.md"
+      ],
+      "glossary_terms": [
+        "internal contract",
+        "contract-visible",
+        "drift"
+      ]
+    },
+    {
+      "file": "contracts/examples/invalid-conversation-detail-assistant-missing-model.json",
+      "kind": "invalid",
+      "owning_docs": [
+        "build/primers/client-gateway-contract.md"
+      ],
+      "matrix_ids": [
+        "G-06"
+      ],
+      "related_checklists": [
+        "conformance/review-checklists/gateway-review.md"
+      ],
+      "glossary_terms": [
+        "client contract",
+        "drift"
+      ]
+    },
+    {
+      "file": "contracts/examples/invalid-conversation-detail-assistant-missing-provider.json",
+      "kind": "invalid",
+      "owning_docs": [
+        "build/primers/client-gateway-contract.md"
+      ],
+      "matrix_ids": [
+        "G-06"
+      ],
+      "related_checklists": [
+        "conformance/review-checklists/gateway-review.md"
+      ],
+      "glossary_terms": [
+        "client contract",
+        "drift"
+      ]
     }
   ]
 }

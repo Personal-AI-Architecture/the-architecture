@@ -8,6 +8,7 @@
     }
   ],
   "model": "local/llama-3.1-8b",
+  "provider": "local",
   "auth_context": {
     "actor": {
       "id": "owner_abc123",

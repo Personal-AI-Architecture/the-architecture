@@ -8,8 +8,9 @@ info:
 
     This is an internal interface (what the Agent Loop speaks), not a specific provider's
     API. An adapter translates between this generic internal interface and
-    provider-specific formats (OpenRouter, Anthropic, Ollama, etc.). Swapping a
-    provider means swapping an adapter — no Agent Loop changes.
+    provider-specific formats (OpenRouter, Anthropic, Ollama, etc.). Switching
+    to another provider profile the adapter lists is an owner preference (D193); a provider
+    in a new format means swapping an adapter. Neither changes the Agent Loop.
 
     Direction:
     - Agent Loop → Model: Prompt (system instructions + conversation + tool definitions + context)
@@ -52,6 +53,7 @@ paths:
                 summary: Prompt with tool definitions
                 value:
                   model: 'local/llama-3.1-8b'
+                  provider: 'local'
                   messages:
                     - role: system
                       content:
@@ -143,6 +145,7 @@ components:
       required:
         - messages
         - model
+        - provider
         - stream
       properties:
         messages:
@@ -177,6 +180,11 @@ components:
           description: |
             Model identifier. The Gateway/Agent Loop supplies the owner's current
             choice for every request; the adapter resolves it to the provider's native ID.
+        provider:
+          type: string
+          description: |
+            The provider profile to call, from the request's active provider (D193). The
+            adapter uses it to pick the endpoint and secret; it must not substitute another.
         max_tokens:
           type: integer
           description: Maximum number of tokens in the completion

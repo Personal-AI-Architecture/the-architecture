@@ -161,7 +161,7 @@
 
 ## ARCH-6: Error Message Sanitization
 
-**Validates:** gateway-agent-loop-contract.md §Security Requirements, security-spec.md
+**Validates:** gateway-agent-loop-contract.md §Checking an implementation, security-spec.md
 
 **Setup:**
 1. System running with various failure conditions triggerable
