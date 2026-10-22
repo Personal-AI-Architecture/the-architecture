@@ -4,9 +4,6 @@ hide_table_of_contents: true
 
 # Memory as the Platform
 
-Tool definitions and their source/visibility metadata are portable descriptions; the
-adapter configuration that reaches external memory remains outside owner Memory.
-
 # Part 1: Memory Is the Platform
 
 This is a personal AI system — one you own, one you control, and one that grows with you. Memory is what makes it personal. Not the model, not the interface, not the infrastructure. Memory — the structured knowledge of who you are, what you've decided, what you're working toward, and how you think. It took your actual life to build. It can't be downloaded, replicated, or bought.
@@ -15,23 +12,9 @@ That's why this system is built around memory as the platform.
 
 ## Memory is the platform
 
-```
-                              ┌───────────────────────────────────────────────┐
-                              │                  YOUR MEMORY                  │
-                              │                 (the platform)                │
-                              └───────────────────────▲───────────────────────┘
-                                                      │
-                                             tools (read/write)
-                                                      │
-      Clients  ──→  Gateway API  ──→  Gateway  ──→  Agent Loop  ──→  Model API  ──→  Models
-    (external)        (API)       (component)   (component)        (API)          (external)
-                                                      │
-                        ─── Auth ───                  └──→ Tools (verbs)  ──→  External Memory (nouns)
-                        (separate component:               ├── MCP servers      ├── Salesforce data
-                         Gateway calls it on               ├── CLI tools        ├── Weather services
-                         every request; Agent              └── Native functions └── The internet
-                         Loop before each tool call)
-```
+<p align="center">
+  <img src="../../assets/memory-is-the-platform.svg" alt="Today's AI apps: Your Memory is locked inside the app with its models, interfaces and tools, so leaving the app means losing your memory. With PAA: Your Memory is the platform, in files you own, and models, interfaces and tools plug into it, so you can swap anything and your memory stays." width="860" />
+</p>
 
 Every other component — the client, the agent loop, the models, the tools — depends on memory to be useful. Memory depends on none of them to exist. Everything else is infrastructure built on top of it.
 
@@ -143,68 +126,11 @@ This creates a non-obvious consequence: for anyone building on this model, **ope
 
 The value isn't in controlling the infrastructure. The value is in building the best infrastructure for memory that people own.
 
-## The Stakes Are Rising
-
-Today, owning your AI memory means owning your conversations and documents. The stakes are meaningful but relatively low.
-
-Tomorrow, AI agents will negotiate contracts, make purchases, manage investments, and act on your behalf in the real world. Your agents will act from your memory. The owner of that memory is the owner of the value those agents create.
-
-Build the foundation now, while the stakes are still low enough to get it right.
-
----
-
-# Part 3: How BrainDrive Implements It
-
-BrainDrive is an implementation of the memory-as-platform model. Here's how the principles above manifest in specific architectural and product choices.
-
-## Plain Files as Memory
-
-BrainDrive stores memory as plain markdown files on disk. Specs, plans, goals, decisions, the owner's profile, conversation summaries — all human-readable text files in folders.
-
-This is a deliberate choice:
-- **AI agents already understand files natively.** No translation layer needed.
-- **Markdown is the most portable structured format in existence.** Open it in any text editor, browse it in any file manager, copy it to a USB drive.
-- **The owner never needs BrainDrive's permission to access their own memory.** Or anyone's permission.
-
-The structure emerges through conversation. The AI interviews you, produces a structured spec, builds a plan, and works with you to execute. Over time, your library grows into a rich, structured memory. Every interview, every spec, every plan, every conversation adds to it.
-
-## Tools as the Abstraction Boundary
-
-Memory is accessed exclusively through tools — read, write, edit, delete, search, list. No component accesses memory storage directly. Tools are the contract.
-
-This enforces memory independence at the architecture level. The Agent Loop never touches memory's internals — it calls tools. If memory moves from files to a database to cloud storage, only the tool implementations change. Everything else stays the same.
-
-BrainDrive uses MCP (Model Context Protocol) as the tool standard. But the architecture isn't locked to MCP itself — it depends on the pattern (tool discovery + tool execution), not the specific protocol.
-
-## Four Components Serving Your Memory
-
-BrainDrive has four components, two APIs, and three external dependencies (D64), each defined by its role relative to the owner's memory:
-
-| Component | BrainDrive Implementation |
-|-----------|--------------------------|
-| **Your Memory** | Markdown files on disk, git for version history |
-| **Agent Loop** | Generic agent loop (conversation loop, tool execution) |
-| **Auth** | Owner-controlled access (cross-cutting layer) |
-| **Gateway** | Conversation management, routes interactions to the Agent Loop |
-
-| API | What It Connects |
-|-----------|-----------------|
-| **Gateway API** | Clients ↔ Gateway (any client speaks this) |
-| **Model API** | Agent Loop ↔ Models (any model connects through this) |
-
-| External | BrainDrive Implementation |
-|----------|--------------------------|
-| **Clients** | Thin web app (speaks the Gateway API) |
-| **Models** | SOTA cloud models via OpenRouter (single-model path for V1) |
-| **Tools** | Built-in MCP servers for filesystem operations |
-
-All non-memory parts are swappable. The foundation spec defines contracts between each pair — as long as both sides honor the contract, either side can change independently.
-
 ## The Robot Test
 
-If people interact with AI via robots in the future, a BrainDrive owner should bring their context to that robot without rebuilding. Their memory works with any future device, any future client, any future AI — because it's independent of all of them.
+If people interact with AI through robots in the future, an owner should be able to bring their memory to that robot without rebuilding. Their memory works with any future device, any future client, any future AI — because it's independent of all of them.
 
-This is BrainDrive's litmus test for memory independence. Every architectural decision is measured against it. If a choice would make memory harder to move, it fails the test.
+This is the litmus test for memory independence. Every architectural decision is measured against it. If a choice would make memory harder to move, it fails the test.
 
 ## Memory Evolution Without Breaking Anything
 
@@ -220,25 +146,13 @@ The architecture is designed so memory's storage can evolve without disrupting a
 
 Each stage is additive. Existing tools keep working. New tools add capabilities. The Agent Loop doesn't know what's behind the tools. Adoption of the next memory paradigm is a tool change — not a rewrite.
 
-## Openness as BrainDrive's Moat
-
-BrainDrive inverts the Big Tech model. Instead of the platform owning the moat, the owner owns the moat.
-
-The code is MIT-licensed. Every component is swappable. If someone builds something better, you take your memory there. BrainDrive's bet is that it won't need to lock you in — that a product designed around your owned memory will be the product you choose to stay with.
-
-You can't be undercut by a more open alternative if you're already maximally open.
-
 ---
 
 ## Related Documents
-
-The canonical message contract preserves tool calls and results as ordinary history
-parts; role validation and Model API stream details remain contract concerns rather
-than storage-format requirements.
 
 [overview.md](../overview.md) (architecture overview, links to all component specs)
 
 ---
 
-*Part 1 makes the case that memory is the platform — an argument that holds regardless of what product you're building. Part 2 draws the architectural and strategic consequences for anyone thinking this way. Part 3 shows how BrainDrive implements these principles. The source documents above contain the detailed architecture, product specs, and strategic principles.*
+*Part 1 makes the case that memory is the platform — an argument that holds regardless of what product you're building. Part 2 draws the architectural and strategic consequences for anyone thinking this way.*
 
