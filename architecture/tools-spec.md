@@ -174,7 +174,7 @@ When enabled, the check emits the canonical pending `approval-request` with a st
 | **CLI execution** | Spawn a process, pass arguments, read output | Git, system utilities |
 | **Native function call** | Direct call inside the Agent Loop process | Built-in functions such as the skill tool |
 
-MCP is a common default, but the architecture doesn't require it. Any mechanism that takes input and returns output works.
+MCP is a common default, but the architecture doesn't require it. Any mechanism that takes input and returns output works. Each mechanism is a tool-source adapter: it turns its tools into canonical definitions, calls and results, so the Agent Loop never sees the protocol (see [adapter-spec.md](./adapter-spec.md) §The three adapters).
 
 ### Isolation
 

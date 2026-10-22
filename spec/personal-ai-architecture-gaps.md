@@ -214,3 +214,10 @@ hide_table_of_contents: true
 - **Expected:** One way for the Agent Loop to learn about tools that run as separate services.
 - **Published:** The working default is that the Agent Loop connects to the tool sources in config (`tool_sources`) and asks what they offer, which matches how MCP works. The alternative is for tool services to announce themselves through the Gateway API, as any other caller does: it applies the parity principle to tool registration but adds work to the Gateway. Either way, the model, Auth and Your Memory are unaffected. Formerly OQ-1 in the tools spec.
 - **Evidence:** [tools-spec.md](../architecture/tools-spec.md) "How tools are found" and "Programs that call the system"; [configuration.json](../contracts/schemas/configuration.json) `tool_sources`.
+
+### GAP-PAA-30: A new tool protocol needs a contract change to be labelled — Technical
+
+- **Expected:** A new tool protocol is one more tool-source adapter, with no change to the Agent Loop or the contracts (adapter-spec, "Tool-source adapter").
+- **Published:** `tool-definition.json` requires `source.kind` from a fixed list (`mcp`, `cli`, `native`, `manifest`, `builtin`). A tool source using any other protocol cannot produce a valid definition until the contract's list is changed.
+- **Proposed:** Let `source.kind` accept other values (keep the listed ones as known values), since it records provenance only.
+- **Evidence:** [tool-definition.json](../contracts/schemas/tool-definition.json) `source.kind`; [adapter-spec.md](../architecture/adapter-spec.md) "The three adapters"; [tools-spec.md](../architecture/tools-spec.md) "How tools are found".
