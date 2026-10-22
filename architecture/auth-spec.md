@@ -333,7 +333,7 @@ The pattern: **add identity types and rules, don't change the contract.**
 
 ## Checking an implementation
 
-Items marked *(security)* are the per-component requirements from [security-spec.md](./security-spec.md), which owns the "why".
+Items marked *(security)* are the per-component requirements from [security-spec.md](./security-spec.md#per-component-requirements), which owns the "why".
 
 - [ ] Every Gateway request is authenticated and authorized by Auth before it reaches the Agent Loop; requests without a valid identity are refused (D22) *(security)*
 - [ ] Every tool call is authorized by Auth before it runs

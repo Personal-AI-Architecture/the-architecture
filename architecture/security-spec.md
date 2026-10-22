@@ -400,7 +400,7 @@ These apply to each component. Each component spec repeats its items in its own 
 - [ ] Unauthenticated requests must be rejected — fail closed
 - [ ] Auth state must be exportable — the owner's identity and policy data belongs to them
 - [ ] Auth must be swappable independently of the Gateway — neither depends on how the other is built (D60)
-- [ ] Auth data format must be product-owned, not provider-specific — enabling migration between auth providers
+- [ ] The auth data format belongs to the architecture, not the provider — enabling migration between auth providers
 
 #### Tools
 
