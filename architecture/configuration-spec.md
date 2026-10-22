@@ -272,6 +272,9 @@ This is a CI test, not a guideline. Run it on every release.
 | # | Decision | Rationale |
 |---|----------|-----------|
 | D143 | Configuration is a cross-cutting concern — not owned by any single component, defined in its own spec | Every component has configuration, and it is where lock-in hides. Three categories: preferences (Your Memory), runtime config (thin bootstrap), tool self-description. |
+| D144 | Runtime config is exactly four fields | Every field describes this machine and can't travel with you. Four is enough to start; everything else is a preference or discovered. |
+| D145 | Preferences live in Your Memory | "Is this about you, or about this desk?" Preferences are personal data, so they travel with you. Permissions are not preferences; they live only in Auth. |
+| D146 | Tools describe themselves | Definitions come from the tools, not from config, so they never drift. Config only says where to find tools. |
 | D147 | Anti-lock-in test: three normal swaps (provider, model, tool) must succeed with config-only changes | Provider swap = change the provider preference (D193), or for a new format change adapter + secret. Model swap = change preference. Tool swap = install/uninstall + update preferences. If any requires code changes, lock-in has been introduced. CI-testable on every release. |
 
 ---
