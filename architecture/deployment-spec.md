@@ -3,23 +3,58 @@ sidebar_label: Deployment
 hide_table_of_contents: true
 ---
 
-# Deployment Spec: Where the System Lives
+# Deployment
 
 **Serves stories:** US-1, US-9, US-11 in the [PAA spec](../spec/personal-ai-architecture-spec.md).
 
-Every AI system runs somewhere — a cloud server, a laptop, a container, a managed platform. Most AI systems choose for you. Your data lives on their servers, your AI runs on their infrastructure, your options are limited to what they offer. Want to run it yourself? Too bad — the architecture assumes their cloud, their database, their network. Moving means rebuilding.
+## What deployment is
 
-Here, the system **can always run on hardware you physically control.** Your laptop, your desktop, your home server. The architecture assumes nothing about what's beyond your machine — no cloud services required, no third-party accounts needed, no internet connection assumed. Everything the system needs to function can exist on a single computer you own. You might choose managed hosting, cloud models, or remote access — but those are choices, not requirements. The local path always exists, and that's what makes every other choice a real choice. You can leave anytime because the system runs without them.
+Deployment is where your AI system runs: which computer it lives on, what it needs to start, and what it reaches beyond that computer.
 
-Why this matters: in a biological system, your brain lives in your skull — you control the hardware by definition. For a digital brain, that's not automatic. Most AI systems put your brain on their servers — your memory, your conversations, your intelligence, all on hardware you'll never touch. This architecture says: your digital brain lives on your hardware. The promises elsewhere — own your Memory, swap your components, no lock-in — are theoretical if the system can only run on someone else's infrastructure. Deployment is where ownership becomes concrete. You can verify it by unplugging the ethernet cable.
+Most AI systems decide that for you. Your memory, your conversations and the AI itself live on the company's servers, on hardware you'll never touch. If you want to run it yourself, you can't, because it assumes their cloud, their database and their network. Leaving means starting over.
 
-This spec defines the **deployment contract** — the guarantees the architecture makes about where and how the system can run. Not how to deploy (implementation) or managed hosting options (Implementation).
+We think a system you can only run on someone else's computer isn't really yours. Owning your memory and swapping any part are promises on paper until you can run the whole thing on a machine you control.
 
-> **Architecture:** Local deployment on hardware the owner controls. Managed hosting, VPS/cloud deployment, and remote access are implementation concerns — opinions layered on top of this contract.
+So PAA guarantees the system can always run on hardware you physically control, such as your laptop, desktop or home server, and keep working with the internet unplugged. Cloud models, outside tools, hosting and remote access are all allowed, but they're choices you make, not things the system needs. Nothing leaves your machine unless you set it up to.
 
-**Related documents:** [overview.md](../architecture/overview.md) (architecture overview, links to all component specs)
+That makes every other choice a real one. You can use the best cloud model today and switch to a local one tomorrow, and if a company you depend on disappears, the system keeps running. You can check it yourself by unplugging the network cable.
+
+<p align="center">
+  <img src="../assets/deployment-your-machine.svg" alt="Your machine holds the Gateway, Agent Loop, Auth, Your Memory and a local model, and runs with the network unplugged. Cloud models, outside tools, remote access and remote backup sit outside it, only if you choose them." width="900" />
+</p>
+
+## How it works
+
+This works because the architecture assumes nothing exists beyond your machine. Anything outside it is something you added, so it's something you can take away.
+
+1. **One machine, one install.** The four components and two APIs install and start together on an ordinary computer (8 GB of RAM; Linux, macOS or Windows). You can spread them across machines, but you never have to.
+2. **Works offline.** With no internet, the whole loop still runs: your message goes to a local model, tools run, and the reply comes back. The model may be less capable, but the system works.
+3. **Nothing leaves unless you say so.** Your Memory, conversations, sign-in data and settings stay on your machine. By default the system only answers requests from that same machine; reaching it from anywhere else is something you set up.
+4. **Every dependency has a way out.** The system still depends on outside things, like a model provider or the way it's packaged. For each one, the spec names the way out: changing provider is a settings change, and containers are optional packaging around ordinary programs.
+5. **You can check and keep what you run.** You can verify the software is the genuine release. Updates never put your data at risk and can always be rolled back, and you can read Your Memory with ordinary tools even when the system isn't running.
+
+The rest of this doc is the specification: what any implementation of deployment must do.
 
 ---
+
+## What this covers
+
+The architecture defines one deployment: the whole system on hardware the owner physically controls (D148). Every other way to run it is an implementation choice layered on top, and none of them may remove the local path.
+
+### What it does not cover
+
+These are out of scope for the architecture. Implementations address them.
+
+| Topic | Why it's not Architecture |
+|-------|---------------------|
+| **Managed hosting** | A product decision — "we run it for you" is an opinion on deployment, not a deployment contract (D148) |
+| **VPS / cloud self-hosting** | Deployment on hardware you don't physically control is an implementation concern |
+| **Remote access** | Accessing the system from outside your local network requires network exposure, which is a product/security decision |
+| **Update mechanics** | How updates are delivered and applied is implementation-specific |
+| **Backup and restore** | A product feature, not a deployment contract |
+| **Multi-instance** | Running multiple instances on one machine is a product pattern |
+| **System lifecycle** | Startup sequences, crash recovery, auto-restart are operational details |
+| **Data boundaries** | What data is allowed to leave the machine is a security concern (see [security-spec.md](./security-spec.md)) |
 
 ## The Deployment Contract
 
@@ -66,7 +101,27 @@ All four components (Your Memory, Agent Loop, Auth, Gateway) and both APIs (Gate
 
 Splitting components across machines is allowed but not required — the single-unit deployment is the default. Split patterns are an implementation concern.
 
----
+## Network Posture
+
+The system listens on **the loopback interface only** by default: `127.0.0.1` and/or
+`::1` are valid localhost bindings. No wildcard or network address is exposed unless
+the owner explicitly configures it. No particular IP address family is required.
+
+This means:
+
+- The Gateway API listens on `localhost:PORT` — accessible only from the same machine
+- No UPnP, no automatic port forwarding, no discovery broadcasts
+- External access (LAN, internet) requires the owner to explicitly configure port binding, reverse proxy, or tunnel
+
+This is a security default, not a limitation.
+
+## Storage Contract
+
+Everything the system stores (Your Memory, conversations, auth data and configuration) lives on the local machine and survives a restart and an update. Which storage technology holds it is an implementation choice: a filesystem for Your Memory, a database such as SQLite for conversations, and Git for version history are one way to do it.
+
+What Your Memory itself must support (read, write, search, and version history with restore) is defined in [memory-spec.md](./memory-spec.md). This contract does not repeat or extend it.
+
+One additional constraint: **Your Memory must be inspectable without the system running.** The owner must be able to read their own data using standard tools (text editor, file browser, database viewer) — not just through the system's APIs. This prevents storage implementations from making data opaque or proprietary. A future implementation could use a different storage backend (encrypted filesystem, structured database) as long as the owner retains the ability to inspect and extract their data independently of the system.
 
 ## External Dependencies
 
@@ -104,42 +159,7 @@ These affect capability but not function.
 |-----------|-----------------|------------|
 | **Internet connectivity** | Access to cloud model providers, external tool APIs, package updates | System runs fully offline with local models and local tools |
 | **MCP protocol** | Default tool communication standard | Tools can use manifest files or native function interfaces. MCP is default, not required (D32). |
-| **Specific programming runtime** (Node.js) | Current implementation language | The architecture is language-agnostic. A Rust or Python implementation would honor the same contracts. Implementation language is not a contract concern. |
-
----
-
-## What the Deployment Contract Does NOT Cover
-
-These are explicitly out of scope for the Architecture. Implementations address these.
-
-| Topic | Why it's not Architecture |
-|-------|---------------------|
-| **Managed hosting** | A product decision — "we run it for you" is an opinion on deployment, not a deployment contract (D111) |
-| **VPS / cloud self-hosting** | Deployment on hardware you don't physically control is an implementation concern |
-| **Remote access** | Accessing the system from outside your local network requires network exposure, which is a product/security decision |
-| **Update mechanics** | How updates are delivered and applied is implementation-specific |
-| **Backup and restore** | A product feature, not a deployment contract |
-| **Multi-instance** | Running multiple instances on one machine is a product pattern |
-| **System lifecycle** | Startup sequences, crash recovery, auto-restart are operational details |
-| **Data boundaries** | What data is allowed to leave the machine is a security concern (see [security-spec.md](./security-spec.md)) |
-
----
-
-## Network Posture
-
-The system listens on **the loopback interface only** by default: `127.0.0.1` and/or
-`::1` are valid localhost bindings. No wildcard or network address is exposed unless
-the owner explicitly configures it. No particular IP address family is required.
-
-This means:
-
-- The Gateway API listens on `localhost:PORT` — accessible only from the same machine
-- No UPnP, no automatic port forwarding, no discovery broadcasts
-- External access (LAN, internet) requires the owner to explicitly configure port binding, reverse proxy, or tunnel
-
-This is a security default, not a limitation.
-
----
+| **A programming language runtime** | Whatever language an implementation is written in | The architecture is language-agnostic. Implementations in any language honor the same contracts. |
 
 ## Software Trust
 
@@ -152,8 +172,6 @@ Possible mechanisms (implementation decisions, not contract requirements):
 
 If you can't verify what you're running, you can't trust what you're running. Open source (the code is readable) is necessary but not sufficient — you also need to know that what you're running matches what you read.
 
----
-
 ## Update Principles
 
 Updates must never compromise the owner's data or control. Two principles — mechanics are implementation-specific.
@@ -162,67 +180,25 @@ Updates must never compromise the owner's data or control. Two principles — me
 
 2. **Always reversible.** If an update breaks the system, the owner must be able to return to the previous working state. The previous version must remain available and the owner's data must be compatible with it.
 
----
-
-## Storage Contract
-
-The system requires persistent storage for Your Memory, conversations, auth data, and configuration. The deployment contract defines what storage must support — not how it's implemented.
-
-| Capability | What it means |
-|-----------|--------------|
-| **Read** | Retrieve stored data by path or identifier |
-| **Write** | Create or update stored data |
-| **Search** | Find data by content or metadata |
-| **Version** | Keep the history of what changed (not only that something changed), and restore an earlier state |
-
-An implementation might use the local filesystem for Your Memory, a database such as SQLite for conversations, and Git for version history. These are implementation choices that satisfy the abstract contract. The contract does not require a specific storage technology — it requires the four capabilities above.
-
-One additional constraint: **Your Memory must be inspectable without the system running.** The owner must be able to read their own data using standard tools (text editor, file browser, database viewer) — not just through the system's APIs. This prevents storage implementations from making data opaque or proprietary. A future implementation could use a different storage backend (encrypted filesystem, structured database) as long as the owner retains the ability to inspect and extract their data independently of the system.
-
----
-
-## Acceptance Criteria
-
-These verify that an implementation honors the deployment contract.
+## Checking an implementation
 
 - [ ] The system starts and completes a full agent loop (message → model → tool → response) on a machine with no internet connectivity, using a local model
 - [ ] The system runs on Linux, macOS, and Windows on modern consumer hardware (8GB RAM, x86_64 or ARM64)
 - [ ] No outbound network calls (beyond localhost/loopback) occur during startup unless the owner has configured a network-dependent component (e.g., cloud model provider)
-- [ ] The Gateway API is not reachable from other machines on the network in the default configuration
+- [ ] *(security)* The Gateway API is not reachable from other machines on the network in the default configuration
 - [ ] Your Memory is stored on the local machine and is inspectable without the system running using standard tools (text editor, file browser, database viewer)
 - [ ] Swapping from a cloud model provider to a local model provider requires only configuration changes — no code changes (per D147)
 - [ ] The system runs as a single deployable unit with a single start command
 - [ ] An update to the system does not modify, delete, or corrupt any existing Memory, preference, or conversation data
+- [ ] No outbound network calls occur during operation except to destinations the owner has configured (e.g., a cloud model provider, an external tool, a remote backup)
+- [ ] *(security)* The owner can verify that the software they are running is the genuine, untampered release (the mechanism is the implementation's choice)
+- [ ] If an update breaks the system, the owner can return to the previous working version, and their data still works with it
 
----
-
-## Decisions Made
+## Decisions
 
 | # | Decision | Rationale |
 |---|----------|-----------|
-| D14 | Docker packaging (an implementation packaging choice, not an architecture rule) | Recorded because one implementation packages the system with Docker for isolation, reproducibility, and cross-platform support. The architecture names no packaging default; containers are one supported option (D173). |
-| D22 | Auth on both local and managed hosting | Auth is a memory concern (who can access your system), not a hosting concern. Even local deployments need auth for remote access scenarios and future multi-actor support. Under D148, managed hosting specifics are defined by an implementation. |
-| D23 | Managed hosting is stricter, not just easier (superseded by D148 and D171: hosting is outside the architecture) | Same code, different configuration. Managed hosting restricts tool access and enforces policies through configuration, not code forks. |
-| D29 | Zero lock-in by design | Risks are implementation discipline, not architectural. The deployment contract enforces this at the infrastructure level. |
-| D111 | Managed hosting is a deployment option, not a level | The same stack runs locally or hosted. Managed hosting is a product decision — a convenience offered on top of the architecture. |
-| D148 | The architecture defines local deployment only — managed hosting is for implementations | The foundation defines how the system runs on hardware the owner controls. Managed hosting, VPS, and cloud hosting are product offerings. |
-
----
-
-## Open Questions
-
-### ~~OQ-1: Docker Desktop licensing on macOS/Windows~~ — RESOLVED
-
-**Resolution:** Owner's concern. The spec already establishes OCI as an open standard with multiple runtimes (Docker, Podman, containerd). The foundation doesn't prescribe Docker Desktop — it prescribes OCI containers. Licensing for a specific runtime is the owner's responsibility, same as any other software on their machine.
-
-### ~~OQ-2: Local model minimum viability~~ — RESOLVED
-
-**Resolution:** The loop must complete. Quality is the owner's concern — they choose the model. The deployment contract guarantees capability (the system functions offline with a local model), not quality. Defining a quality bar would be an opinion on model selection, which contradicts the architecture's model-agnostic stance.
-
-### ~~OQ-3: Port assignment convention~~ — RESOLVED
-
-**Resolution:** Implementation choice. The foundation defines that the Gateway listens on localhost (Network Posture section) but does not prescribe a port number. Each product built on the foundation chooses its own default. Port assignment is configuration, not architecture.
-
----
-
-*The deployment contract is where ownership becomes concrete. The architecture promises zero lock-in, swappable components, and portable Memory — but those promises only matter if you can run the system on your own machine, fully offline, without asking anyone's permission. This spec makes that guarantee explicit: the system runs on hardware you control, functions without internet, and never reaches beyond your machine unless you tell it to.*
+| D22 | Auth on both local and managed hosting | Auth is a memory concern (who can access your system), not a hosting concern. Even local deployments need auth for remote access and more than one actor. |
+| D29 | Zero lock-in by design | No part of the architecture requires a dependency the owner can't escape; any remaining lock-in risk comes from how an implementation is built. The deployment contract enforces this at the infrastructure level. |
+| D148 | The architecture defines local deployment only | The architecture defines how the system runs on hardware the owner controls. Managed hosting, VPS and cloud hosting are product offerings. |
+| D173 | Containers are one supported way to run the system, not the default | Packaging is an implementation choice. The architecture must run with no licence activation. |
