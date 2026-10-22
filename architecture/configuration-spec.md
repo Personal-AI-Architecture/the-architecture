@@ -198,12 +198,12 @@ Configuration is read at two different times. **Environment facts are read once,
 
 ### At startup
 
-The system reads environment configuration in a strict sequence. Each phase depends only on the previous phase — no circular dependencies.
+The system reads environment configuration in a strict sequence. Each phase depends only on earlier phases; nothing loops back.
 
 1. **Load runtime config** — find the config file (well-known path or env var), read the four fields. Now the system knows: where's Your Memory, which adapter, what auth mode, where are tools.
 2. **Load adapter config** — load the adapter file specified by `provider_adapter`. Now the system knows how to connect to models.
 3. **Discover tools** — scan `tool_sources` paths. For each tool found: MCP servers announce their tools via protocol, manifest files are read, built-in tools are loaded from code. Now the system knows what tools are available, including the Memory tools.
-4. **Mount Your Memory** — use `memory_root` to locate Your Memory. Components reach it only through the Memory tools, like every other read and write. No component reads Memory files directly.
+4. **Connect the Memory tools to Your Memory** — the Memory tools use `memory_root` to find it. Every component reaches Your Memory only through those tools; none reads Memory files directly.
 5. **Ready** — the Gateway starts accepting connections (see [gateway-agent-loop-contract.md](../architecture/gateway-agent-loop-contract.md) for request flow).
 
 Changing runtime config, adapter config, or installed tools changes the environment. A system may need a restart (or a hot-reload, if it supports one) to pick these up. That is still a config-only change.
