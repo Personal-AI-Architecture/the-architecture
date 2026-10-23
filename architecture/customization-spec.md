@@ -227,4 +227,3 @@ Each coaching client receives their own system. It behaves as a personal coachin
 ---
 
 *The Architecture is a set of contracts. You don't fork it — you build a product that follows them. Your Memory is your content. Tools are your capabilities. Config is your settings. The client is your interface. Everything else stays generic, stays swappable, stays out of your way.*
-

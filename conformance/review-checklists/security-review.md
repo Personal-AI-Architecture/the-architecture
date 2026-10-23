@@ -9,6 +9,7 @@ Use this when reviewing audit logging, error handling, approval enforcement, sec
 ## Checklist
 
 - [ ] Sensitive actions are captured in a structured audit log.
+- [ ] A security-relevant action is not started until its audit record is durably accepted; when audit storage is unavailable, the action is blocked, the owner is alerted, and a no-action conversation can continue.
 - [ ] Client-visible and stream-visible errors are safe and sanitized.
 - [ ] Approval rules the owner sets are enforced in code at the Agent Loop's pre-tool-call Auth check, not only in policy prose or prompts. None are required by default.
 - [ ] Where a product adds approvals, they also appear as contract-visible interaction.

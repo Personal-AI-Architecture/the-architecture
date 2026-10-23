@@ -234,7 +234,7 @@ The same boundary rule applies to identity propagation: the Gateway-to-Agent Loo
 
 ### 3. Audit Logging
 
-**The Architecture provides the mechanism.** The architecture logs all actions — auth events, tool calls, Memory reads and writes — using the portable [audit record](../contracts/schemas/audit-record.json) in a structured, queryable format. Action metadata (what happened, who, when, which tool) is always recorded regardless of logging level. Configurable levels control content detail, not whether actions are recorded. A tool call that can't be recorded doesn't run (see Failure modes).
+**The Architecture provides the mechanism.** The architecture logs all actions — auth events, tool calls, Memory reads and writes — using the portable [audit record](../contracts/schemas/audit-record.json) in a structured, queryable format. Action metadata (what happened, who, when, which tool) is always recorded regardless of logging level. Configurable levels control content detail, not whether actions are recorded. An action that requires an audit record does not begin until that record is durably accepted; if it cannot be recorded, the action does not run (see Failure modes). A conversation turn that requires no such action may continue without an audit write.
 
 **Implementations decide the display.** How the audit trail is presented to the owner is a client/product decision:
 - Real-time visibility ("reading finances/budget.md...") — a client feature
@@ -324,7 +324,7 @@ Memory export must be protectable. The architecture requires:
 | Containerized tool becomes unresponsive | Agent Loop detects timeout, reports to model. Model informs owner. Tool can be restarted independently. |
 | In-process tool crashes | Agent Loop may crash. This is why only trusted, code-reviewed tools run in-process. Agent Loop restarts clean. |
 | Disk full on write | Tool reports failure to Agent Loop, Agent Loop reports to model. Model informs owner. No partial writes. |
-| Audit log storage full or unavailable | Tool calls that can't be recorded don't run — the audit promise holds. The Agent Loop reports the failure to the model, and the owner is alerted. Conversation without tool calls continues. The failure itself is logged wherever logging is still possible. |
+| Audit log storage full or unavailable | Any security-relevant action that can't be recorded doesn't run — the audit promise holds. This includes tool calls and Memory reads or writes. The Agent Loop reports the failure to the model, and the owner is alerted. Conversation work that requires no such action continues. The failure itself is logged wherever logging is still possible. |
 | Model produces response containing injected sensitive data | Logged in audit trail for after-the-fact detection. Future: output filtering (Implementation) can inspect and block. |
 
 ## How security grows

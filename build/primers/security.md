@@ -33,6 +33,7 @@ Hosting provider access is a hosting concern, outside the architecture.
 
 - Secrets live outside Memory, somewhere git never tracks: environment variables, an untracked config file, or a secret store.
 - Audit records must exist where the architecture requires them.
+- Security-relevant actions do not begin until their audit record is durably accepted; if audit storage is unavailable, the action is blocked and the owner is alerted. Conversation that requires no such action may continue.
 - Error and output surfaces must be safe for display or exposure.
 - Trust boundaries must remain explicit rather than accidental.
 - The Gateway calls Auth on every request and the Agent Loop asks Auth before each tool call.
