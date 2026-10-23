@@ -431,3 +431,8 @@ conditions, deny-over-allow precedence, and fail-closed handling for unsupported
 references. Security enforcement must not reinterpret exported policy data. Tool
 definitions are provenance-only and cannot carry credentials, endpoints, or permission
 rules; Auth's not-permitted marker must remain visible to the model.
+Optional message and tool-definition `extensions` are inert metadata, not a
+permission, secret store or way to override source identity (D199). Auth context,
+policy and approval payloads reject unexpected fields. A Model API adapter must
+normalize missing-model and unsupported-ability failures to the canonical codes
+without exposing raw provider error text to the owner (D197).

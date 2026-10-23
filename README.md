@@ -22,7 +22,7 @@ Not an app, and not a framework you install. A blueprint, plus a starter kit to 
 - **The architecture** ([`overview.md`](architecture/overview.md)): how the system works, its principles, decisions, component specifications, and explanatory background.
 - **Contracts** ([`contracts/`](contracts/)): the exact OpenAPI and JSON Schema shapes code must match, plus canonical examples.
 - **Conformance** ([`conformance/`](conformance/)): language-neutral checks and review guidance that prove a system conforms.
-- **Language templates:** starting points in TypeScript, Python, Go, Rust and Java, pinned to the current PAA contracts and tested for their declared starter paths. See [template readiness](maintainers/template-readiness-2026-10-23-followup.md) for the checks and limits.
+- **Language templates:** starting points in TypeScript, Python, Go, Rust and Java. Their recorded validation was against the earlier PAA contract pin `28e9a27`; the D197–D199 contract update needs a new pin and rerun before claiming current-main alignment. See [template readiness](maintainers/template-readiness-2026-10-23-followup.md) for the checks and limits.
 
 ### Language templates
 
@@ -34,7 +34,7 @@ Not an app, and not a framework you install. A blueprint, plus a starter kit to 
 | Rust | [rust-architecture-template](https://github.com/Personal-AI-Architecture/rust-architecture-template) |
 | Java | [java-architecture-template](https://github.com/Personal-AI-Architecture/java-architecture-template) |
 
-These are implementation starters, not qualified products. Each repository names the paths its tests exercise and the work needed for a complete deployment. Recheck its pin against PAA main when starting a new build.
+These are implementation starters, not qualified products. Each repository names the paths its tests exercise and the work needed for a complete deployment. Check its pin against PAA main before starting a new build.
 
 ## How it works
 

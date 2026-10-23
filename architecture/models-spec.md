@@ -90,8 +90,8 @@ Each request sends the instructions, the conversation and the Memory content the
 
 | Situation | What happens |
 |---|---|
-| The chosen model lacks an ability the request needs | Reported, not faked (above). GAP-PAA-27 proposes the `capability_unsupported` code. |
-| The chosen model isn't available through the loaded adapter, or none is chosen | Reported; no other model is substituted. GAP-PAA-27 proposes the `model_unavailable` code. |
+| The chosen model lacks an ability the request needs | Report `capability_unsupported` and name the missing ability in `capability`; do not fake the result or substitute a model (D197). |
+| The chosen model isn't available through the selected provider profile, or none is chosen | Report `model_unavailable`; do not substitute another model or provider (D197). |
 | The request is too large for the model's context window | Reported as `context_overflow`. The proposed GAP-PAA-20 rule has the Gateway select bounded saved history and the Agent Loop check each actual call, including live tool results. An unknown safe limit reports `context_limit_unknown`. |
 | The provider is down or times out | The Agent Loop may make one recorded retry on the same selected model and provider profile. If the failure remains, it reports `provider_error` and stops the turn. No other model or provider is substituted (D188); the owner can explicitly switch and try again. |
 
@@ -113,7 +113,8 @@ Each request sends the instructions, the conversation and the Memory content the
 - [ ] After any one recorded retry on the selected model and provider profile, an unresolved provider failure reports `provider_error` and stops the turn; no other model or provider is substituted
 - [ ] *(security)* Every saved assistant reply records the model and provider that produced it
 - [ ] Local and cloud models go through the same Model API
-- [ ] A request needing an ability the chosen model lacks is reported: no content silently dropped, no tool call pretended, no model quietly substituted
+- [ ] A request needing an ability the chosen model lacks reports `capability_unsupported` with the missing `capability`: no content silently dropped, no tool call pretended, no model quietly substituted
+- [ ] A chosen model unavailable through the selected provider profile reports `model_unavailable`, not `provider_error` or a substituted selection
 - [ ] *(security)* The provider is only a product default or the owner's choice, readable by the owner, and never changed without the owner
 - [ ] *(security)* API keys are supplied as secrets, never stored in Your Memory
 - [ ] The Gateway and Agent Loop use the same safe limit for the active provider profile and model; unknown limits and overflows are reported without silent truncation
@@ -133,8 +134,9 @@ Each request sends the instructions, the conversation and the Memory content the
 The canonical contract tree under `contracts/` is authoritative for the model-facing
 payloads and the internal request handoff. The Agent Loop receives the selected model
 through `AgentLoopRequest.model`; Model API requests require `stream: true`, and every
-completion event carries an `_event_type` discriminator. Capability reporting has no
-defined error codes yet (GAP-PAA-27). Tool definitions supplied to
+completion event carries an `_event_type` discriminator. Model unavailability
+and unsupported ability use canonical codes on the Model API and Agent Loop
+stream (D197). Tool definitions supplied to
 the Model API use canonical source provenance and visibility/authorization markers;
 the model must preserve source_id on emitted tool calls. Optional generation settings such as `max_tokens` and
 `temperature` use the provider's defaults unless a caller sets them; who sets them is an

@@ -245,7 +245,9 @@ Items marked *(security)* are the per-component requirements from [security-spec
 
 The canonical message schema under `contracts/` defines structured content parts and
 preserves tool calls and tool results in conversation history, with role-specific
-validation preventing tool results from appearing in non-tool messages. The generic
+validation preventing tool results from appearing in non-tool messages. Message
+parts may also contain inert `extensions` for additive metadata (D199); those
+fields do not change role, content or Auth semantics. The generic
 tool-definition contract now includes the canonical `memory_restore` operation shape
 (`path` plus an opaque `version` identifier); concrete history storage and result
 transport remain implementation-defined. Semantic search remains optional because

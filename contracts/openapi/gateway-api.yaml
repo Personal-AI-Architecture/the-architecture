@@ -611,7 +611,8 @@ components:
       type: object
       description: |
         Failure during processing. The Gateway translates Agent Loop errors into
-        client-appropriate messages.
+        client-appropriate messages while preserving the canonical
+        `model_unavailable` and `capability_unsupported` codes (D197).
       required:
         - _event_type
         - code
@@ -622,10 +623,20 @@ components:
           const: error
         code:
           type: string
-          description: Error category
+          description: Error category. Model selection and ability failures retain their canonical codes; other errors may use additional codes.
         message:
           type: string
           description: Human-readable error description
+        capability:
+          type: string
+          minLength: 1
+          description: Machine-readable missing ability; required when code is `capability_unsupported`.
+      if:
+        properties:
+          code:
+            const: capability_unsupported
+      then:
+        required: [capability]
 
     Error:
       type: object
@@ -636,7 +647,17 @@ components:
       properties:
         code:
           type: string
-          description: Machine-readable error code
+          description: Machine-readable error code, preserving `model_unavailable` and `capability_unsupported` for those conditions (D197).
         message:
           type: string
           description: Human-readable error description
+        capability:
+          type: string
+          minLength: 1
+          description: Required when code is `capability_unsupported`.
+      if:
+        properties:
+          code:
+            const: capability_unsupported
+      then:
+        required: [capability]

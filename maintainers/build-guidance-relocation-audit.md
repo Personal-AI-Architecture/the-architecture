@@ -67,6 +67,10 @@ obsolete maintainer guides have been deleted; the documentation guide,
 conformance checklists, example manifest and registry now point to current
 sources.
 
+The later D197–D199 model-error, tool-kind and extension clarifications live
+in those same specs, contracts and conformance checks. They do not recreate
+derived build guidance.
+
 ## Fresh-agent verification
 
 A fresh agent, without the parent conversation, received a clean clone of PAA

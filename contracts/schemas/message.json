@@ -55,6 +55,11 @@
       "minItems": 1,
       "items": { "$ref": "#/$defs/ContentPart" },
       "description": "Ordered content parts. Text is the first supported part; images, files, tool calls, and tool results are represented without changing the message shape."
+    },
+    "extensions": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Optional inert additive metadata about this message. Receivers ignore keys they do not understand; extensions cannot override role, content or Auth decisions (D199)."
     }
   },
   "$defs": {
@@ -72,7 +77,8 @@
       "required": ["type", "text"],
       "properties": {
         "type": { "const": "text" },
-        "text": { "type": "string" }
+        "text": { "type": "string" },
+        "extensions": { "$ref": "#/$defs/Extensions" }
       },
       "additionalProperties": false
     },
@@ -82,7 +88,8 @@
       "properties": {
         "type": { "const": "image" },
         "url": { "type": "string", "format": "uri" },
-        "mime_type": { "type": "string" }
+        "mime_type": { "type": "string" },
+        "extensions": { "$ref": "#/$defs/Extensions" }
       },
       "additionalProperties": false
     },
@@ -93,7 +100,8 @@
         "type": { "const": "file" },
         "url": { "type": "string", "format": "uri" },
         "name": { "type": "string" },
-        "mime_type": { "type": "string" }
+        "mime_type": { "type": "string" },
+        "extensions": { "$ref": "#/$defs/Extensions" }
       },
       "additionalProperties": false
     },
@@ -105,7 +113,8 @@
         "id": { "type": "string" },
         "source_id": { "type": "string", "minLength": 1, "description": "Stable source identity from the tool definition; source_id plus name identifies the tool." },
         "name": { "type": "string" },
-        "arguments": { "type": "object", "additionalProperties": true }
+        "arguments": { "type": "object", "additionalProperties": true },
+        "extensions": { "$ref": "#/$defs/Extensions" }
       },
       "additionalProperties": false
     },
@@ -116,9 +125,15 @@
         "type": { "const": "tool_result" },
         "tool_call_id": { "type": "string" },
         "result": {},
-        "is_error": { "type": "boolean", "default": false }
+        "is_error": { "type": "boolean", "default": false },
+        "extensions": { "$ref": "#/$defs/Extensions" }
       },
       "additionalProperties": false
+    },
+    "Extensions": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Optional inert additive metadata. Receivers ignore unknown keys; this object cannot override core fields, Auth decisions or carry secrets (D199)."
     }
   },
   "examples": [

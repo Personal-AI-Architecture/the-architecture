@@ -23,6 +23,7 @@
 3. Import the exported Memory into System B's `memory_root`
 4. Start System B
 5. Verify Memory contents and system behavior
+6. Include one non-text content type that both systems declare supported and one type System B does not support; compare the transferred supported content and inspect the reported gap for the unsupported type (AC-3.4)
 
 **Pass criteria:**
 - [ ] All documents, skills, and files are present and intact
@@ -32,6 +33,7 @@
 - [ ] Preferences referencing unavailable tools/models are reported as gaps (not errors)
 - [ ] The system tells the user about any gaps: "Web scraper is preferred but not available"
 - [ ] Nothing was lost in the transfer — complete export/import roundtrip
+- [ ] Declared supported non-text content is unchanged; unsupported content is reported rather than silently treated as supported (AC-3.4)
 
 **Failure indicators:**
 - Files are in a format that only System A can read
