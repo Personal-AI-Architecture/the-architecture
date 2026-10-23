@@ -1,6 +1,16 @@
 # Template readiness follow-up — 2026-10-23
 
-**Current status after D197–D199:** All five templates are repinned to PAA main `aa0ff01757306b2b3aa1015bb4366a5a578d5102`. The shared validator passed with `--source-ref origin/main` for each, including its declared type, unit, integration, conformance and acceptance commands. Native repository checks and pull-request CI also passed. This establishes current contract snapshots and the existing starter test paths; it does not establish full v1 runtime conformance. See the [v1 acceptance proof audit](v1-acceptance-proof-audit-2026-10-23.md).
+**Current status after D197–D199:** All five templates remain pinned to the PAA contract files at `aa0ff01757306b2b3aa1015bb4366a5a578d5102`. Focused runtime fixtures for the new decisions now pass in each template. The shared validator passed with `--source-ref origin/main` for each, including its declared type, unit, integration, conformance and acceptance commands. Native repository checks and pull-request CI passed. This establishes the tested starter paths; it does not establish full v1 runtime conformance. See the [v1 acceptance proof audit](v1-acceptance-proof-audit-2026-10-23.md).
+
+| Template | D197–D199 runtime proof | Merged revision | Shared validator and CI |
+| --- | --- | --- | --- |
+| TypeScript | [PR #6](https://github.com/Personal-AI-Architecture/ts-architecture-template/pull/6) | `be71dd40503d801aa5fee82bd71e4a0b0f7b9924` | PASS |
+| Python | [PR #4](https://github.com/Personal-AI-Architecture/python-architecture-template/pull/4) | `63395732ddcc55f1cf669c4820d4a549470c44af` | PASS |
+| Go | [PR #4](https://github.com/Personal-AI-Architecture/go-architecture-template/pull/4) | `b563ac287cffd1abf20c9cc60449a33894f74e99` | PASS |
+| Rust | [PR #4](https://github.com/Personal-AI-Architecture/rust-architecture-template/pull/4) | `25ac0cd2b6e91711cbdfe9f852a06b8da42f4f00` | PASS |
+| Java | [PR #4](https://github.com/Personal-AI-Architecture/java-architecture-template/pull/4) | `560d8127ec590ed1ac43ec62ccec3ddf4dc33804` | PASS |
+
+The focused fixtures verify D197 model-error categories and safe text through each starter's adapter, Agent Loop and Gateway without selecting another model or provider. They verify D198 acceptance of a new non-empty source kind while retaining source identity; they do not execute a separate-service tool. They verify D199 acceptance of inert message-part extensions, rejection of unknown core part fields, and rejection of unexpected top-level auth-context fields. These are bounded starter checks, not a claim that every deployed Auth, tool discovery, policy, approval, or security path conforms. The TypeScript pin check now compares remote contract hashes when PAA main advances through documentation-only commits, while still failing on contract drift.
 
 | Template | Current contract repin | Merged revision | Shared validator and native checks |
 | --- | --- | --- | --- |
@@ -10,7 +20,7 @@
 | Rust | [PR #3](https://github.com/Personal-AI-Architecture/rust-architecture-template/pull/3) | `1ead2c64fc3510d2ddd90ac9aaac681826da871d` | PASS |
 | Java | [PR #3](https://github.com/Personal-AI-Architecture/java-architecture-template/pull/3) | `2da2434defe7448988e0e57367ab85762f5f02f1` | PASS |
 
-**Runtime proof still needed:** The existing template tests do not exercise D197's `model_unavailable` and `capability_unsupported` error propagation through an adapter, Agent Loop and Gateway. Source inspection found generic `provider_error` handling on the failure path in each starter. D198's new tool-protocol labels and D199's extension handling also have repository-level schema checks but no cross-template runtime acceptance result. Add focused runtime checks and implement any failing paths before claiming those behaviors or full v1 readiness. The PAA executable baseline verifies the published contract shapes, not these template journeys.
+**Remaining broader proof:** A product implementation still needs complete SWAP-3 separate-service tool execution and independent Auth enforcement, plus its full runtime conformance suite. The PAA executable baseline verifies published contract shapes; the template fixtures above prove the named starter boundaries only.
 
 The [initial audit](template-readiness-2026-10-23.md) found that all five published language templates had older contract pins and lacked required runtime behavior. The following table preserves the prior `28e9a27` validation history. The templates are suitable to list in the README as **implementation starters for the tested paths**, not as fully qualified PAA products.
 
