@@ -42,7 +42,7 @@ Separate acceptable MVP scope cuts from forbidden architectural shortcuts so fut
 - A product limitation is allowed only if component ownership and contract rules still hold.
 - A UX simplification is not allowed if it removes a required boundary.
 - A deferred feature is not allowed if it forces side storage outside Memory, bypasses Auth, or changes contract ownership.
-- If a limitation conflicts with `build/compliance-matrix.md`, it is not an accepted MVP limit.
+- If a limitation conflicts with `architecture/`, `contracts/`, or a required `conformance/` criterion, it is not an accepted MVP limit.
 
 ## Common Misreads To Avoid
 
@@ -61,11 +61,10 @@ Separate acceptable MVP scope cuts from forbidden architectural shortcuts so fut
 
 ## Source Docs
 
-- `build/primers/foundation.md`
-- `build/primers/gateway.md`
-- `build/primers/memory.md`
-- `build/primers/auth.md`
-- `build/primers/security.md`
-- `build/primers/deployment.md`
-- `build/compliance-matrix.md`
-- `spec/mvp-build-primer.md`
+- `architecture/overview.md`
+- `architecture/gateway-spec.md`
+- `architecture/memory-spec.md`
+- `architecture/auth-spec.md`
+- `architecture/security-spec.md`
+- `architecture/deployment-spec.md`
+- `conformance/README.md`

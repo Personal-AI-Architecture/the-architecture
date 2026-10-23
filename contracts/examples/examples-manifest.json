@@ -1,15 +1,11 @@
 {
-  "version": "1.0",
-  "traceability_source": "maintainers/traceability-map.md",
+  "version": "2.0",
   "examples": [
     {
       "file": "contracts/examples/client-message-request.json",
       "kind": "valid",
       "owning_docs": [
-        "build/primers/client-gateway-contract.md"
-      ],
-      "matrix_ids": [
-        "G-05"
+        "architecture/gateway-spec.md"
       ],
       "related_checklists": [
         "conformance/review-checklists/gateway-review.md"
@@ -17,16 +13,16 @@
       "glossary_terms": [
         "client contract",
         "internal contract"
+      ],
+      "conformance_ids": [
+        "ARCH-4"
       ]
     },
     {
       "file": "contracts/examples/invalid-client-message-request.json",
       "kind": "invalid",
       "owning_docs": [
-        "build/primers/client-gateway-contract.md"
-      ],
-      "matrix_ids": [
-        "G-05"
+        "architecture/gateway-spec.md"
       ],
       "related_checklists": [
         "conformance/review-checklists/gateway-review.md"
@@ -35,17 +31,16 @@
         "client contract",
         "internal contract",
         "drift"
+      ],
+      "conformance_ids": [
+        "ARCH-4"
       ]
     },
     {
       "file": "contracts/examples/conversation-list-response.json",
       "kind": "valid",
       "owning_docs": [
-        "build/primers/client-gateway-contract.md"
-      ],
-      "matrix_ids": [
-        "G-06",
-        "G-07"
+        "architecture/gateway-spec.md"
       ],
       "related_checklists": [
         "conformance/review-checklists/gateway-review.md"
@@ -53,16 +48,16 @@
       "glossary_terms": [
         "client contract",
         "contract-visible"
+      ],
+      "conformance_ids": [
+        "ARCH-4"
       ]
     },
     {
       "file": "contracts/examples/invalid-conversation-list-response.json",
       "kind": "invalid",
       "owning_docs": [
-        "build/primers/client-gateway-contract.md"
-      ],
-      "matrix_ids": [
-        "G-06"
+        "architecture/gateway-spec.md"
       ],
       "related_checklists": [
         "conformance/review-checklists/gateway-review.md"
@@ -70,17 +65,16 @@
       "glossary_terms": [
         "client contract",
         "drift"
+      ],
+      "conformance_ids": [
+        "ARCH-4"
       ]
     },
     {
       "file": "contracts/examples/conversation-detail-response.json",
       "kind": "valid",
       "owning_docs": [
-        "build/primers/client-gateway-contract.md"
-      ],
-      "matrix_ids": [
-        "G-06",
-        "G-07"
+        "architecture/gateway-spec.md"
       ],
       "related_checklists": [
         "conformance/review-checklists/gateway-review.md"
@@ -88,16 +82,16 @@
       "glossary_terms": [
         "client contract",
         "contract-visible"
+      ],
+      "conformance_ids": [
+        "ARCH-4"
       ]
     },
     {
       "file": "contracts/examples/invalid-conversation-detail-response.json",
       "kind": "invalid",
       "owning_docs": [
-        "build/primers/client-gateway-contract.md"
-      ],
-      "matrix_ids": [
-        "G-06"
+        "architecture/gateway-spec.md"
       ],
       "related_checklists": [
         "conformance/review-checklists/gateway-review.md"
@@ -105,18 +99,17 @@
       "glossary_terms": [
         "client contract",
         "drift"
+      ],
+      "conformance_ids": [
+        "ARCH-4"
       ]
     },
     {
       "file": "contracts/examples/approval-request-event.json",
       "kind": "valid",
       "owning_docs": [
-        "build/primers/client-gateway-contract.md",
-        "build/primers/gateway-agent-loop-contract.md"
-      ],
-      "matrix_ids": [
-        "S-05",
-        "GC-06"
+        "architecture/gateway-spec.md",
+        "architecture/gateway-agent-loop-contract.md"
       ],
       "related_checklists": [
         "conformance/review-checklists/gateway-review.md",
@@ -126,18 +119,18 @@
       "glossary_terms": [
         "contract-visible",
         "client contract"
+      ],
+      "conformance_ids": [
+        "ARCH-4",
+        "ARCH-17"
       ]
     },
     {
       "file": "contracts/examples/invalid-approval-request-event.json",
       "kind": "invalid",
       "owning_docs": [
-        "build/primers/client-gateway-contract.md",
-        "build/primers/gateway-agent-loop-contract.md"
-      ],
-      "matrix_ids": [
-        "S-05",
-        "GC-06"
+        "architecture/gateway-spec.md",
+        "architecture/gateway-agent-loop-contract.md"
       ],
       "related_checklists": [
         "conformance/review-checklists/gateway-review.md",
@@ -148,18 +141,18 @@
         "contract-visible",
         "client contract",
         "drift"
+      ],
+      "conformance_ids": [
+        "ARCH-4",
+        "ARCH-17"
       ]
     },
     {
       "file": "contracts/examples/approval-result-event.json",
       "kind": "valid",
       "owning_docs": [
-        "build/primers/client-gateway-contract.md",
-        "build/primers/gateway-agent-loop-contract.md"
-      ],
-      "matrix_ids": [
-        "S-05",
-        "GC-06"
+        "architecture/gateway-spec.md",
+        "architecture/gateway-agent-loop-contract.md"
       ],
       "related_checklists": [
         "conformance/review-checklists/gateway-review.md",
@@ -169,18 +162,18 @@
       "glossary_terms": [
         "contract-visible",
         "client contract"
+      ],
+      "conformance_ids": [
+        "ARCH-4",
+        "ARCH-17"
       ]
     },
     {
       "file": "contracts/examples/invalid-approval-result-event.json",
       "kind": "invalid",
       "owning_docs": [
-        "build/primers/client-gateway-contract.md",
-        "build/primers/gateway-agent-loop-contract.md"
-      ],
-      "matrix_ids": [
-        "S-05",
-        "GC-06"
+        "architecture/gateway-spec.md",
+        "architecture/gateway-agent-loop-contract.md"
       ],
       "related_checklists": [
         "conformance/review-checklists/gateway-review.md",
@@ -191,45 +184,54 @@
         "contract-visible",
         "client contract",
         "drift"
+      ],
+      "conformance_ids": [
+        "ARCH-4",
+        "ARCH-17"
       ]
     },
     {
       "file": "contracts/examples/context-notice-event.json",
       "kind": "valid",
       "owning_docs": [
-        "build/primers/client-gateway-contract.md",
-        "build/primers/gateway.md"
+        "architecture/gateway-spec.md"
       ],
-      "matrix_ids": ["G-06", "GC-01"],
       "related_checklists": [
         "conformance/review-checklists/gateway-review.md"
       ],
-      "glossary_terms": ["client contract", "contract-visible"]
+      "glossary_terms": [
+        "client contract",
+        "contract-visible"
+      ],
+      "conformance_ids": [
+        "ARCH-4",
+        "ARCH-5"
+      ]
     },
     {
       "file": "contracts/examples/invalid-context-notice-event.json",
       "kind": "invalid",
       "owning_docs": [
-        "build/primers/client-gateway-contract.md",
-        "build/primers/gateway.md"
+        "architecture/gateway-spec.md"
       ],
-      "matrix_ids": ["G-06", "GC-01"],
       "related_checklists": [
         "conformance/review-checklists/gateway-review.md"
       ],
-      "glossary_terms": ["client contract", "drift"]
+      "glossary_terms": [
+        "client contract",
+        "drift"
+      ],
+      "conformance_ids": [
+        "ARCH-4",
+        "ARCH-5"
+      ]
     },
     {
       "file": "contracts/examples/gateway-engine-request.json",
       "kind": "valid",
       "owning_docs": [
-        "build/primers/gateway-agent-loop-contract.md",
-        "build/primers/configuration.md"
-      ],
-      "matrix_ids": [
-        "GC-01",
-        "GC-02",
-        "C-02"
+        "architecture/gateway-agent-loop-contract.md",
+        "architecture/configuration-spec.md"
       ],
       "related_checklists": [
         "conformance/review-checklists/agent-loop-review.md",
@@ -238,22 +240,18 @@
       "glossary_terms": [
         "internal contract",
         "contract-visible"
+      ],
+      "conformance_ids": [
+        "ARCH-4"
       ]
     },
     {
       "file": "contracts/examples/invalid-gateway-engine-request.json",
       "kind": "invalid",
       "owning_docs": [
-        "build/primers/gateway-agent-loop-contract.md",
-        "build/primers/configuration.md",
-        "build/primers/security.md"
-      ],
-      "matrix_ids": [
-        "GC-01",
-        "GC-03",
-        "GC-05",
-        "C-02",
-        "S-01"
+        "architecture/gateway-agent-loop-contract.md",
+        "architecture/configuration-spec.md",
+        "architecture/security-spec.md"
       ],
       "related_checklists": [
         "conformance/review-checklists/agent-loop-review.md",
@@ -264,20 +262,17 @@
         "internal contract",
         "contract-visible",
         "drift"
+      ],
+      "conformance_ids": [
+        "ARCH-4"
       ]
     },
     {
       "file": "contracts/examples/runtime-config.json",
       "kind": "valid",
       "owning_docs": [
-        "build/primers/configuration.md",
-        "build/primers/models.md"
-      ],
-      "matrix_ids": [
-        "C-01",
-        "C-02",
-        "C-03",
-        "MO-02"
+        "architecture/configuration-spec.md",
+        "architecture/models-spec.md"
       ],
       "related_checklists": [
         "conformance/review-checklists/configuration-review.md"
@@ -285,19 +280,18 @@
       "glossary_terms": [
         "startup readiness",
         "product-owned state"
+      ],
+      "conformance_ids": [
+        "ARCH-4",
+        "ARCH-12"
       ]
     },
     {
       "file": "contracts/examples/invalid-runtime-config.json",
       "kind": "invalid",
       "owning_docs": [
-        "build/primers/configuration.md",
-        "build/primers/security.md"
-      ],
-      "matrix_ids": [
-        "C-01",
-        "C-02",
-        "C-03"
+        "architecture/configuration-spec.md",
+        "architecture/security-spec.md"
       ],
       "related_checklists": [
         "conformance/review-checklists/configuration-review.md",
@@ -307,19 +301,18 @@
         "startup readiness",
         "product-owned state",
         "drift"
+      ],
+      "conformance_ids": [
+        "ARCH-4",
+        "ARCH-12"
       ]
     },
     {
       "file": "contracts/examples/adapter-config.json",
       "kind": "valid",
       "owning_docs": [
-        "build/primers/configuration.md",
-        "build/primers/models.md"
-      ],
-      "matrix_ids": [
-        "C-01",
-        "C-03",
-        "MO-02"
+        "architecture/configuration-spec.md",
+        "architecture/models-spec.md"
       ],
       "related_checklists": [
         "conformance/review-checklists/configuration-review.md"
@@ -327,18 +320,18 @@
       "glossary_terms": [
         "startup readiness",
         "product-owned state"
+      ],
+      "conformance_ids": [
+        "ARCH-4",
+        "ARCH-12"
       ]
     },
     {
       "file": "contracts/examples/invalid-adapter-config.json",
       "kind": "invalid",
       "owning_docs": [
-        "build/primers/configuration.md",
-        "build/primers/security.md"
-      ],
-      "matrix_ids": [
-        "C-01",
-        "C-03"
+        "architecture/configuration-spec.md",
+        "architecture/security-spec.md"
       ],
       "related_checklists": [
         "conformance/review-checklists/configuration-review.md",
@@ -348,17 +341,17 @@
         "startup readiness",
         "product-owned state",
         "drift"
+      ],
+      "conformance_ids": [
+        "ARCH-4",
+        "ARCH-12"
       ]
     },
     {
       "file": "contracts/examples/memory-restore-tool.json",
       "kind": "valid",
       "owning_docs": [
-        "build/primers/memory.md"
-      ],
-      "matrix_ids": [
-        "M-04",
-        "D-07"
+        "architecture/memory-spec.md"
       ],
       "related_checklists": [
         "conformance/review-checklists/memory-review.md",
@@ -367,18 +360,17 @@
       "glossary_terms": [
         "version history",
         "restore"
+      ],
+      "conformance_ids": [
+        "ARCH-9"
       ]
     },
     {
       "file": "contracts/examples/audit-record.json",
       "kind": "valid",
       "owning_docs": [
-        "build/primers/auth.md",
-        "build/primers/security.md"
-      ],
-      "matrix_ids": [
-        "S-02",
-        "A-10"
+        "architecture/auth-spec.md",
+        "architecture/security-spec.md"
       ],
       "related_checklists": [
         "conformance/review-checklists/auth-review.md",
@@ -387,22 +379,18 @@
       "glossary_terms": [
         "audit log",
         "portable contract"
+      ],
+      "conformance_ids": [
+        "ARCH-11"
       ]
     },
     {
       "file": "contracts/examples/invalid-gateway-engine-request-missing-provider.json",
       "kind": "invalid",
       "owning_docs": [
-        "build/primers/gateway-agent-loop-contract.md",
-        "build/primers/configuration.md",
-        "build/primers/security.md"
-      ],
-      "matrix_ids": [
-        "GC-01",
-        "GC-03",
-        "GC-05",
-        "C-02",
-        "S-01"
+        "architecture/gateway-agent-loop-contract.md",
+        "architecture/configuration-spec.md",
+        "architecture/security-spec.md"
       ],
       "related_checklists": [
         "conformance/review-checklists/agent-loop-review.md",
@@ -413,16 +401,16 @@
         "internal contract",
         "contract-visible",
         "drift"
+      ],
+      "conformance_ids": [
+        "ARCH-4"
       ]
     },
     {
       "file": "contracts/examples/invalid-conversation-detail-assistant-missing-model.json",
       "kind": "invalid",
       "owning_docs": [
-        "build/primers/client-gateway-contract.md"
-      ],
-      "matrix_ids": [
-        "G-06"
+        "architecture/gateway-spec.md"
       ],
       "related_checklists": [
         "conformance/review-checklists/gateway-review.md"
@@ -430,16 +418,16 @@
       "glossary_terms": [
         "client contract",
         "drift"
+      ],
+      "conformance_ids": [
+        "ARCH-4"
       ]
     },
     {
       "file": "contracts/examples/invalid-conversation-detail-assistant-missing-provider.json",
       "kind": "invalid",
       "owning_docs": [
-        "build/primers/client-gateway-contract.md"
-      ],
-      "matrix_ids": [
-        "G-06"
+        "architecture/gateway-spec.md"
       ],
       "related_checklists": [
         "conformance/review-checklists/gateway-review.md"
@@ -447,6 +435,9 @@
       "glossary_terms": [
         "client contract",
         "drift"
+      ],
+      "conformance_ids": [
+        "ARCH-4"
       ]
     }
   ]

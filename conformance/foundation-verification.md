@@ -295,7 +295,7 @@ Memory is the platform. It gets its own section because so much of the architect
 
 ## 6. Responsibility Matrix Verification
 
-Each row in the [responsibility matrix](../build/implementers-reference.md#responsibility-matrix) is a verifiable claim about who does what — and who doesn't.
+Each row in the responsibility matrix below is a verifiable claim about who does what — and who doesn't.
 
 ### R-1. Responsibility ownership
 

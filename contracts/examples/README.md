@@ -1,6 +1,6 @@
 # Examples
 
-> Standalone canonical payload and config examples for the AI primer layer.
+> Standalone canonical payload and config examples for the published contracts.
 
 ## Purpose
 
@@ -32,32 +32,31 @@ Provide copyable valid and invalid example files so implementers, reviewers, and
 
 ## Authority Mapping
 
-- Client-facing payloads -> `build/primers/client-gateway-contract.md`
-- Internal Agent Loop handoff -> `build/primers/gateway-agent-loop-contract.md`
-- Startup/runtime config -> `build/primers/configuration.md`
-- Pass/fail enforcement -> `build/compliance-matrix.md`
-- Cross-reference map -> `maintainers/traceability-map.md`
+- Client-facing payloads -> `contracts/openapi/gateway-api.yaml`
+- Internal Agent Loop handoff -> `contracts/openapi/gateway-engine.yaml`
+- Startup/runtime config -> `contracts/schemas/configuration.json`
+- Pass/fail enforcement -> `conformance/arch-tests.md`
+- Example-to-source and test mapping -> `contracts/examples/examples-manifest.json`
 - Memory restore tool -> `architecture/memory-spec.md`
 
 ## Usage Rules
 
-- Use valid examples as canonical defaults unless a primer explicitly defines a different allowed shape.
+- Use valid examples only when they validate against the canonical contract; the contract is authoritative.
 - Use invalid examples as drift references, not alternative implementations.
 - If a contract or config rule changes, update both the valid and invalid example pair in the same change.
 
 ## Source Docs
 
-- `build/primers/client-gateway-contract.md`
-- `build/primers/gateway-agent-loop-contract.md`
-- `build/primers/configuration.md`
-- `build/compliance-matrix.md`
-- `maintainers/traceability-map.md`
-- `maintainers/primer-change-policy.md`
+- `contracts/openapi/gateway-api.yaml`
+- `contracts/openapi/gateway-engine.yaml`
+- `contracts/schemas/configuration.json`
+- `conformance/arch-tests.md`
+- `contracts/examples/examples-manifest.json`
 
 ## Contract Alignment
 
 The examples follow the current canonical contract files:
 
-- `gateway-engine-request.json` includes the per-request model. Correlation and conversation metadata remain in the request metadata object.
+- `gateway-engine-request.json` includes the per-request model and active provider profile. Correlation and conversation metadata remain in the request metadata object.
 - Message content is a list of parts. Tool calls and tool results use the same message-part shape and remain in conversation history.
 - `memory-restore-tool.json` defines the canonical restore operation inputs: a path or scope and an opaque version identifier.

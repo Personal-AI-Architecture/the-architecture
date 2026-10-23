@@ -29,7 +29,7 @@
 | **Your Memory** | Persist, retrieve, search, version data. The platform -- zero outward dependencies. Accessed through tools. |
 | **Agent Loop** | Generic agent loop: message -> model -> tool calls -> stream response -> repeat. No product-specific logic. |
 | **Auth** | Identity and access control. The Gateway calls it on every request; the Agent Loop asks it before each tool call. Permissions live only in Auth. Independently swappable. |
-| **Gateway** | Manage conversations (including tool calls and results) and route to Agent Loop with the owner's current model choice. Content-agnostic, interface-agnostic. |
+| **Gateway** | Manage conversations (including tool calls and results) and route to Agent Loop with the owner's current model and provider choice. Content-agnostic, interface-agnostic. |
 
 ### APIs (2)
 
@@ -48,7 +48,7 @@
 
 ## Key Contracts
 
-- **Gateway <-> Agent Loop:** `POST /agent-loop/chat` with messages array + model + metadata -> SSE stream. See `contracts/openapi/gateway-engine.yaml`.
+- **Gateway <-> Agent Loop:** `POST /agent-loop/chat` with selected messages, the owner's model and provider profile, canonical `auth_context`, and bounded metadata; optional `context_summary` is derived data, not a saved message. The Agent Loop returns an SSE stream. See `contracts/openapi/gateway-engine.yaml`.
 - **One message shape** across all three contracts: content is a list of parts, and tool calls and tool results are ordinary message parts saved in conversation history.
 - **Gateway API:** See `contracts/openapi/gateway-api.yaml`.
 - **Model API:** See `contracts/openapi/model-api.yaml`.
@@ -73,7 +73,7 @@ Full gate: `conformance/lockin-gate.md` (PR checks). Full audit: `conformance/lo
 
 Runtime config is 4 fields: `memory_root`, `provider_adapter`, `auth_mode`, `tool_sources`.
 
-Preferences (such as model choice and the always-send tool set) live in Your Memory. The Gateway reads the model choice on every message, so a change applies to the next message with no restart.
+Preferences (such as model choice, active provider profile and the always-send tool set) live in Your Memory. The Gateway reads the model and provider choice on every message, so a change to either applies to the next message with no restart when the provider profile is already loaded.
 Permissions live only in Auth, not in configuration or preferences. The default policy is that the owner can do everything.
 Tool definitions are self-describing (from tools themselves).
 Secrets live outside Your Memory and are never tracked by git: environment variables, an untracked config file, or a secret store.
@@ -88,7 +88,9 @@ An implementation is valid if it passes these tests:
 - **ARCH-3:** New client connects through Gateway API identically
 - **ARCH-4:** All payloads validate against canonical schemas in `contracts/`
 
-See `conformance/` for the full test suite. See `build/implementers-reference.md` for the complete implementation contract.
+See `conformance/` for the full test suite, `architecture/` for binding rules,
+and `contracts/` for exact shapes. Start implementation from a language
+template; see the [documentation guide](maintainers/documentation-guide.md).
 
 ## File Map
 
@@ -100,7 +102,6 @@ See `conformance/` for the full test suite. See `build/implementers-reference.md
 │   ├── schemas/                          <- JSON Schema shared types
 │   └── openapi/                          <- canonical OpenAPI specs
 ├── conformance/                          <- language-neutral proof and review checks
-├── build/                                <- derived primers, blueprints, prompts, and build help
 ├── maintainers/                          <- repository health, registries, and maintenance guidance
 ├── assets/                               <- README and documentation images
 └── README.md                             <- repository orientation and implementation-template route

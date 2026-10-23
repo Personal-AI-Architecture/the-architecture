@@ -20,18 +20,11 @@ Use this when reviewing bootstrap code, config loaders, adapter wiring, secret h
 - [ ] Export and persistent conversation support are available from day one of MVP operation.
 - [ ] Local-model offline path is still possible within the configured runtime.
 
-## Matrix IDs
+## Related Conformance Tests
 
-- `C-01`
-- `C-02`
-- `C-03`
-- `C-04`
-- `C-05`
-- `MO-02`
-- `MO-03`
-- `D-02`
-- `D-06`
-- `D-07`
+- `ARCH-12`
+- `SWAP-1`
+- `SWAP-2`
 
 ## Common Failure Patterns
 
@@ -45,10 +38,9 @@ Use this when reviewing bootstrap code, config loaders, adapter wiring, secret h
 
 ## Read Next
 
-- `build/primers/configuration.md`
-- `build/primers/models.md`
-- `build/build-sequence.md`
-- `build/compliance-matrix.md`
+- `architecture/configuration-spec.md`
+- `architecture/adapter-spec.md`
+- `architecture/models-spec.md`
 
 ## Example Files
 
@@ -58,11 +50,3 @@ Use this when reviewing bootstrap code, config loaders, adapter wiring, secret h
 - `contracts/examples/invalid-adapter-config.json`
 - `contracts/examples/gateway-engine-request.json`
 - `contracts/examples/invalid-gateway-engine-request.json`
-
-## Source Docs
-
-- `maintainers/primer-audit-playbook.md`
-- `build/primers/configuration.md`
-- `build/primers/models.md`
-- `build/build-sequence.md`
-- `build/compliance-matrix.md`

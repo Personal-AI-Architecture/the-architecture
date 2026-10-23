@@ -363,3 +363,207 @@ fails this rule. The current behavior is an observed gap, not a PAA allowance.
 - Auth, tool, Memory, or revocation actions are missing from the log
 - Audit records require a provider-specific schema to interpret
 - Secrets or raw private content are stored in records
+
+---
+
+## ARCH-12: Unsupported Adapter Cannot Start Silently
+
+**Validates:** [configuration-spec.md](../architecture/configuration-spec.md) §At startup, [adapter-spec.md](../architecture/adapter-spec.md) §Swapping providers
+
+**Setup:** A working local installation with a known adapter and a valid runtime configuration. No provider network access is needed.
+
+**Procedure:**
+1. Change only `provider_adapter` to the name of an adapter that is not installed and start the system.
+2. Restore the known adapter name, give it invalid local adapter configuration, and start the system again.
+3. Restore valid configuration, then make its remote provider unreachable and start the system.
+
+**Pass criteria:**
+- [ ] In steps 1 and 2, startup identifies the configuration error and never reports the system ready.
+- [ ] No other adapter or provider is selected silently in steps 1 and 2.
+- [ ] In step 3, remote unavailability does not prevent local startup; the unavailable provider is reported when its use is attempted.
+
+**Failure indicators:** An unknown adapter silently maps to a default, invalid local configuration is accepted as ready, or mere lack of network access blocks local startup.
+
+---
+
+## ARCH-13: Audit Sink Failure Stops Audited Actions
+
+**Validates:** [security-spec.md](../architecture/security-spec.md) §Audit Logging and §Failure Modes
+
+**Setup:** A running system whose audit sink can be made unavailable or full without interrupting the rest of the runtime.
+
+**Procedure:**
+1. Confirm a tool call and Memory read or write each produce a durable portable audit record.
+2. Make the audit sink unable to accept a record.
+3. Attempt a tool call and a Memory read or write, then send a conversation turn that needs no such action.
+4. Restore the sink and inspect the resulting records and owner alert.
+
+**Pass criteria:**
+- [ ] Each security-relevant action is blocked before it begins when its record cannot be durably accepted.
+- [ ] The Agent Loop reports the failure to the model, and the owner is alerted.
+- [ ] The conversation turn requiring no audited action can continue.
+- [ ] The outage is recorded once the sink recovers; no action performed during the outage is falsely reported as audited.
+
+**Failure indicators:** A tool or Memory operation runs without its required record, all conversation work stops solely because the audit sink is full, or the owner is given no indication of the failure.
+
+---
+
+## ARCH-14: Assistant Text Survives Tool Continuation
+
+**Validates:** [agent-loop-spec.md](../architecture/agent-loop-spec.md) §Checking an implementation, [gateway-agent-loop-contract.md](../architecture/gateway-agent-loop-contract.md) §The request
+
+**Setup:** A controlled model response that emits assistant text and a tool call in the same turn, followed by a second model response after the tool result.
+
+**Procedure:**
+1. Send a message that triggers the controlled response.
+2. Capture the streamed text and tool events, the message sent on continuation, and the saved conversation.
+3. Resume the conversation and inspect the history selected for the next turn.
+
+**Pass criteria:**
+- [ ] The assistant text appears in the stream before the tool continuation finishes.
+- [ ] The next model call retains that text with the associated tool call and result in the shared message shape.
+- [ ] Saved history retains the assistant text, call and result; any selected complete turn keeps their relationship on resume.
+
+**Failure indicators:** Text vanishes when a tool call appears, a continuation fabricates a text-only assistant message, or resume loses the call/result relationship.
+
+---
+
+## ARCH-15: Conversations Survive Gateway Restart
+
+**Validates:** [gateway-spec.md](../architecture/gateway-spec.md) §Conversation management, [memory-spec.md](../architecture/memory-spec.md) §Export and §Operations
+
+**Setup:** A running Gateway with durable Memory and a conversation that includes assistant text, a tool call and its result.
+
+**Procedure:**
+1. Read the conversation through the Gateway API and record its ID and full content parts.
+2. Stop and restart only the Gateway; keep the same Memory.
+3. List and retrieve the conversation, then resume it with a new owner message.
+
+**Pass criteria:**
+- [ ] The conversation remains in the list under the same ID after restart.
+- [ ] Detail and resume preserve all saved content parts, including the tool call and result.
+- [ ] The next turn is appended to the same durable conversation through the Memory boundary.
+
+**Failure indicators:** The conversation exists only in Gateway process state, disappears after restart, or resumes with text while dropping tool activity.
+
+---
+
+## ARCH-16: Tool Isolation Follows Owner Trust
+
+**Validates:** [tools-spec.md](../architecture/tools-spec.md) §Where tools run, [security-spec.md](../architecture/security-spec.md) §Tool Isolation
+
+**Setup:** Install a tool the owner has not marked trusted. Give it a narrow filesystem and network scope, and arrange an attempted access outside that scope.
+
+**Procedure:**
+1. Make the tool available to an actor who is allowed by Auth to call it.
+2. Invoke it and attempt the out-of-scope access.
+3. Cause the isolated tool process to fail; observe the Agent Loop and other tools.
+4. Inspect the trust level visible to the owner and any explicit owner override.
+
+**Pass criteria:**
+- [ ] Auth permission alone does not remove the tool's isolation boundary.
+- [ ] Out-of-scope access is denied; the tool cannot read the owner's unrelated data or another tool's data.
+- [ ] The isolated tool's failure is reported and does not bring down the Agent Loop or unrelated tools.
+- [ ] The owner can see and change the tool's trust posture on their own hardware.
+
+**Failure indicators:** An untrusted tool runs with unrestricted filesystem or network access by default, or a tool crash terminates the Agent Loop.
+
+---
+
+## ARCH-17: Approval Decision Is Authorized And Replay Safe
+
+**Validates:** [auth-spec.md](../architecture/auth-spec.md) §Permissions, [security-spec.md](../architecture/security-spec.md) §Approval lifecycle, [approval-decision.json](../contracts/schemas/approval-decision.json)
+
+**Setup:** In a product that enables approvals, configure an Auth rule requiring approval for one tool call. Record the tool's actual execution count.
+
+**Procedure:**
+1. Request the tool call and capture the pending request ID and expiry.
+2. Attempt a decision from an identity without approval authority.
+3. Submit an authorized approval, repeat the same decision, then submit a conflicting decision for the same request ID.
+4. Repeat with a cancelled or expired request.
+
+**Pass criteria:**
+- [ ] The tool does not run while approval is pending or after an unauthorized decision.
+- [ ] One authorized approval resolves the request and runs the tool at most once.
+- [ ] Replaying the same terminal decision returns the same outcome; a conflicting decision is rejected.
+- [ ] Cancellation and expiry are terminal and never execute the tool.
+- [ ] Request and result are visible through the canonical interaction contract.
+
+**Failure indicators:** A client presentation alone grants approval, replay runs the tool twice, or a terminal request can be approved later.
+
+---
+
+## ARCH-18: Imported Policy Does Not Revive Unknown Identity
+
+**Validates:** [auth-spec.md](../architecture/auth-spec.md) §Stale permissions after export/import and §Data portability
+
+**Setup:** A system with a collaborator and an owner-granted policy for that collaborator; a fresh system with a separate Auth identity store.
+
+**Procedure:**
+1. Export the first system's Auth state and import it into the fresh system without creating the collaborator identity there.
+2. Attempt access using the imported policy's identity reference.
+3. Create a new identity with the same visible name or identifier and attempt access again.
+4. Have the owner explicitly restore the dormant grant, then retry.
+
+**Pass criteria:**
+- [ ] The imported unknown identity's policy remains dormant and grants no access.
+- [ ] Recreating an identity does not automatically reactivate the old grant.
+- [ ] Access changes only after the owner deliberately restores the grant.
+- [ ] Export and import contain no credentials or secrets.
+
+**Failure indicators:** Import or identity recreation silently grants the old permission.
+
+---
+
+## ARCH-19: Unsupported Model Ability Is Reported
+
+**Validates:** [models-spec.md](../architecture/models-spec.md) §What the system guarantees about models, [gateway-agent-loop-contract.md](../architecture/gateway-agent-loop-contract.md) §Errors
+
+**Setup:** Select a model that lacks a needed capability, such as image input, and prepare a request containing that kind of content.
+
+**Procedure:**
+1. Submit the request through the Gateway API.
+2. Capture what the Gateway, Agent Loop and Model API adapter actually send and return.
+3. Inspect the saved conversation and client-visible outcome.
+
+**Pass criteria:**
+- [ ] The limitation is reported to the owner; content is not silently omitted or converted into a false success.
+- [ ] No other model or provider is substituted without an explicit owner choice.
+- [ ] The original request remains accurately represented in conversation history.
+
+**Failure indicators:** An image part disappears, a tool call is falsely claimed, or a fallback model is used without the owner's choice.
+
+---
+
+## ARCH-20: Independent Tool Calls Overlap Without Losing Identity
+
+**Validates:** [agent-loop-spec.md](../architecture/agent-loop-spec.md) §Concurrency, [tools-spec.md](../architecture/tools-spec.md) §How a tool call runs
+
+**Setup:** A controlled model response requests two independent slow tools and then one tool that depends on one of their results. Record start, end, call ID, source ID and result ID for each.
+
+**Procedure:** Run the turn, capture the tool schedule and emitted results, then inspect the continuation sent to the model.
+
+**Pass criteria:**
+- [ ] The independent calls overlap in time.
+- [ ] The dependent call starts only after its required result is available.
+- [ ] Every result remains associated with the correct call and source through streaming, saved history and model continuation.
+- [ ] A write conflict is reported rather than silently resolved.
+
+**Failure indicators:** Independent calls are serialized, a dependent call races its input, or call/result IDs cross.
+
+---
+
+## ARCH-21: Same-Named Tools Retain Source Identity
+
+**Validates:** [tools-spec.md](../architecture/tools-spec.md) §How tools are found and §What the model sees, [tool-definition.json](../contracts/schemas/tool-definition.json), [message.json](../contracts/schemas/message.json)
+
+**Setup:** Register two tools named `search` from distinct sources with distinct results, both available to the actor.
+
+**Procedure:** Discover both tools, call each through the Agent Loop, then inspect the emitted events, saved messages and model continuation.
+
+**Pass criteria:**
+- [ ] Both tools are discoverable without one overwriting the other.
+- [ ] Each call carries the intended `source_id` and reaches only the matching tool.
+- [ ] Results retain the correct call and source association in the stream and saved history.
+
+**Failure indicators:** Name-only dispatch chooses the wrong tool, one definition disappears, or the source identity is lost on replay.

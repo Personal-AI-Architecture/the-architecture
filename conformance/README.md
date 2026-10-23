@@ -15,7 +15,7 @@ Each test has an ID, description, pass/fail criteria, and maps to a specific arc
 | Category | Tests | What it validates |
 |----------|-------|-------------------|
 | [Swap Tests](swap-tests.md) | SWAP-1 to SWAP-3 | Config-only swappability (D147) |
-| [Architectural Invariant Tests](arch-tests.md) | ARCH-1 to ARCH-11, DEPLOY-5 | Component boundaries and independence, error handling, memory export, Auth tools, version history, revocation cancellation, portable audit records, and the loopback-only default bind address (DEPLOY-5 is defined in this file) |
+| [Architectural Invariant Tests](arch-tests.md) | ARCH-1 to ARCH-21, DEPLOY-5 | Component boundaries and independence, error handling, memory export, Auth tools, version history, revocation cancellation, audit failure handling, adapter readiness, turn continuity, durable conversations, tool isolation, approval replay, dormant imported policy, model capability reporting, tool concurrency and source identity, and the loopback-only default bind address (DEPLOY-5 is defined in this file) |
 | [Deployment Invariant Tests](deploy-tests.md) | DEPLOY-1 to DEPLOY-4 | Local-first deployment contract |
 | [Foundation User Story Tests](fs-tests.md) | FS-1 to FS-8 | End-to-end architecture promises |
 
@@ -27,10 +27,10 @@ Tests are defined as language-neutral specifications (pass criteria, setup, veri
 python conformance/runner.py
 ```
 
-The runner is intentionally contract-first. It proves the repository baseline: canonical examples, four-field runtime configuration, extensible identity, tool source/visibility semantics, source-preserving tool calls, transport-neutral `auth_context`, portable policy conditions, and the loopback-only default. A future target adapter can add runtime checks for an implementation while retaining these same language-neutral checks.
+The runner is intentionally contract-first. It proves the repository baseline: canonical examples, four-field runtime configuration, extensible identity, tool source/visibility semantics, source-preserving tool calls, transport-neutral `auth_context`, portable policy conditions, and the loopback-only default. The runtime scenarios in `arch-tests.md`, including ARCH-12 through ARCH-21, are test specifications; `runner.py` does not execute them against a target implementation. A future target adapter can add runtime checks while retaining the same language-neutral criteria.
 
 ## Related Documents
 
-- `../build/implementers-reference.md` — what each component must do
+- `../architecture/` — what each component must do
 - `../contracts/openapi/` and `../contracts/schemas/` — canonical schemas that payloads must validate against
 - `../architecture/overview.md` — architectural principles these tests enforce

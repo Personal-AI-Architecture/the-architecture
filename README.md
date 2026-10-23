@@ -22,7 +22,6 @@ Not an app, and not a framework you install. A blueprint, plus a starter kit to 
 - **The architecture** ([`overview.md`](architecture/overview.md)): how the system works, its principles, decisions, component specifications, and explanatory background.
 - **Contracts** ([`contracts/`](contracts/)): the exact OpenAPI and JSON Schema shapes code must match, plus canonical examples.
 - **Conformance** ([`conformance/`](conformance/)): language-neutral checks and review guidance that prove a system conforms.
-- **Build guidance** ([`implementers-reference.md`](build/implementers-reference.md)): primers, blueprints, implementation prompts, and derived implementation references.
 - **The starter kit** ([ts-architecture-template](https://github.com/Personal-AI-Architecture/ts-architecture-template)): a working TypeScript starting point with all four components built in.
 
 ## How it works
@@ -48,8 +47,8 @@ Four components and two APIs:
 |--------------|------------|
 | Understand the architecture | [Architecture overview](architecture/overview.md) |
 | Build a system | [TypeScript template](https://github.com/Personal-AI-Architecture/ts-architecture-template) |
-| Build with an AI coding agent | [AGENT.md](AGENT.md) and the [architecture primers](build/primers/) |
-| Build one component | [Blueprints](build/blueprints/) |
+| Build with an AI coding agent | [AGENT.md](AGENT.md), the [architecture](architecture/) and a [language template](https://github.com/Personal-AI-Architecture) |
+| Build one component | Its [architecture spec](architecture/), [contracts](contracts/) and [conformance checks](conformance/) |
 | See what every system must promise | [Product spec](spec/personal-ai-architecture-spec.md) |
 | Check my system conforms | [Conformance guide](conformance/) |
 | Check for lock-in | [Lock-in gate](conformance/lockin-gate.md) |

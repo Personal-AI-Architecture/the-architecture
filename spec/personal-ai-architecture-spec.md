@@ -39,14 +39,14 @@ V1 does not include runnable code inside the architecture repository, a hosted o
 
 ### Experience
 
-A developer lands on the repository README. In a few minutes they learn the idea (Your Memory is the platform, everything else is swappable) and the five principles. From there they follow one of three routes: the in-depth specs for people, the condensed primers to hand to an AI coding agent, or the per-component blueprints with contracts, tests, drift guards and build prompts. The formal contracts in `contracts/` are the final word on shapes and endpoints.
+A developer lands on the repository README. In a few minutes they learn the idea (Your Memory is the platform, everything else is swappable) and the five principles. From there they follow the architecture specs for rules, the contracts for exact shapes, the conformance checks for proof, and a runnable language template for a starting implementation. The same sources serve people and AI coding agents; the formal contracts in `contracts/` are the final word on shapes and endpoints.
 
 When the developer has built something, they check it against the conformance tests and the lock-in gate. When they want to change the architecture itself, they open a pull request; the specs change first, and everything derived from them follows.
 
 ### Primary flow
 
 1. **Learn:** README, principles, then the Architecture overview.
-2. **Build:** implementer's reference and `contracts/` contracts, by hand, with an AI agent, or starting from the TypeScript template.
+2. **Build:** the relevant architecture specs and `contracts/` definitions, by hand, with an AI agent, or starting from a language template.
 3. **Check:** conformance tests and the lock-in gate.
 4. **Extend or change:** add tools, clients and content without touching the core; propose architecture changes by pull request.
 
@@ -225,9 +225,9 @@ As a developer, I want to understand what the architecture is and why it exists 
 <details>
 <summary>Acceptance criteria</summary>
 
-- **AC-12.1** — Given the repository README, when a developer reads it, then they find what the architecture is, its licence (MIT), and links to the Architecture overview, the contracts, the blueprints, the AI primers, the conformance tests and the TypeScript template. _(evidence: `README.md`)_
-- **AC-12.2** — Given the docs guide, then it offers a short "just browsing" route (README, principles, about) and a "ready to build" route (Architecture overview, implementer's reference, internal contract). _(evidence: [maintainers/documentation-guide.md](../README.md))_
-- **AC-12.3** — Given the Architecture overview, then it names the four components, the two APIs and the three outside parties, says that Your Memory depends on nothing, and links to the responsibility table saying who does what and who does not. _(evidence: [overview.md](../architecture/overview.md) "The parts" and "Where to go next"; [implementers-reference.md](../build/implementers-reference.md#responsibility-matrix) "Responsibility Matrix")_
+- **AC-12.1** — Given the repository README, when a developer reads it, then they find what the architecture is, its licence (MIT), and links to the Architecture overview, the contracts, the conformance tests and a runnable language template. _(evidence: `README.md`)_
+- **AC-12.2** — Given the docs guide, then it offers a short "just browsing" route (README, principles, about) and a "ready to build" route (Architecture overview, relevant component specs, contracts, conformance and a template). _(evidence: [documentation-guide.md](../maintainers/documentation-guide.md))_
+- **AC-12.3** — Given the Architecture overview, then it names the four components, the two APIs and the three outside parties, says that Your Memory depends on nothing, and links to the responsibility verification describing who does what and who does not. _(evidence: [overview.md](../architecture/overview.md) "The parts" and "Where to go next"; [foundation-verification.md](../conformance/foundation-verification.md) "Responsibility Matrix Verification")_
 - **AC-12.4** — Every link on these routes opens the document it names. Broken links are gaps.
 
 </details>
@@ -239,9 +239,9 @@ As a developer, I want one authoritative definition of every component, endpoint
 <details>
 <summary>Acceptance criteria</summary>
 
-- **AC-13.1** — Given the implementer's reference, then it states what each of the four components and both APIs must do, the internal Gateway-to-Agent-Loop contract, and the IDs of the tests that check them. _(evidence: [implementers-reference.md](../build/implementers-reference.md))_
+- **AC-13.1** — Given the Architecture overview and component specs, then a developer can identify what each of the four components and both APIs must do, find the internal Gateway-to-Agent-Loop contract, and find the corresponding conformance checks. _(evidence: [overview.md](../architecture/overview.md), [gateway-agent-loop-contract.md](../architecture/gateway-agent-loop-contract.md), [conformance/](../conformance/README.md))_
 - **AC-13.2** — Given the `contracts/` folder, then it holds machine-readable definitions of the Gateway API, the internal contract, the Model API and the shared data types (configuration, identity, message, policy, tool definition). _(evidence: `contracts/openapi/`, `contracts/schemas/`)_
-- **AC-13.3** — Given any other document (blueprint, primer, example, prose spec) that shows a shape, then it matches `contracts/`. Where they differ, `contracts/` wins and the difference is a gap to fix. _(evidence: `AGENT.md` "Key Contracts"; [arch-tests.md ARCH-4](../conformance/arch-tests.md))_
+- **AC-13.3** — Given any example, prose spec or template that shows a shape, then it matches `contracts/`. Where they differ, `contracts/` wins and the difference is a gap to fix. _(evidence: `AGENT.md` "Key Contracts"; [arch-tests.md ARCH-4](../conformance/arch-tests.md))_
 - **AC-13.4** — Given a published example marked valid, then it passes the contract it illustrates; given one marked invalid, then it fails it. _(evidence: [contracts/examples/](../contracts/examples/README.md))_
 
 </details>
@@ -253,9 +253,9 @@ As a developer, I want material I can hand straight to an AI coding agent, so th
 <details>
 <summary>Acceptance criteria</summary>
 
-- **AC-14.1** — Given the AI primers, then there is a condensed overview, one primer per component, a build order, a pass/fail compliance matrix, review checklists and common drift patterns. _(evidence: [build/primers/README.md](../build/primers/README.md), [foundation.md](../build/primers/foundation.md), [build-sequence.md](../build/build-sequence.md), [compliance-matrix.md](../build/compliance-matrix.md), `conformance/review-checklists/`, [failure-patterns.md](../build/failure-patterns.md))_
-- **AC-14.2** — Given the blueprints, then each component has a blueprint, a contract pack, a test definition, a drift guard and a build prompt. _(evidence: [build/blueprints/README.md](../build/blueprints/README.md) and its per-component packages)_
-- **AC-14.3** — Given a primer or blueprint, then it says where the authoritative source is and does not override `contracts/`. _(evidence: [build/primers/README.md](../build/primers/README.md))_
+- **AC-14.1** — Given only this repository's current spec, architecture, contracts and conformance material, plus one published language template, an AI coding agent can locate the rules and exact shapes needed to implement a bounded capability without a separate primer or blueprint. _(evidence: [AGENT.md](../AGENT.md), [documentation-guide.md](../maintainers/documentation-guide.md), a recorded fresh-agent build and validation)_
+- **AC-14.2** — Given a component change, the agent uses the relevant architecture spec and contract, implements it in the template, and runs the template's checks and applicable conformance tests. Missing proof is reported rather than treated as a pass. _(evidence: [conformance/README.md](../conformance/README.md), template validation output)_
+- **AC-14.3** — The repository's agent entry point and documentation guide route to the authoritative sources. No derived guide overrides `contracts/` or introduces a separate set of architecture requirements. _(evidence: [AGENT.md](../AGENT.md), [documentation-guide.md](../maintainers/documentation-guide.md))_
 
 </details>
 
@@ -311,7 +311,7 @@ As a contributor, I want a clear way to change the architecture, so that the spe
 <summary>Acceptance criteria</summary>
 
 - **AC-18.1** — Given a contributor, then CONTRIBUTING.md explains how to propose documentation, contract and specification changes by pull request. _(evidence: `CONTRIBUTING.md`)_
-- **AC-18.2** — Given an architecture change, then it starts in the specs; contracts follow shape changes, derived guides and primers are updated, and new rules get conformance test IDs. _(evidence: [guides-spec.md "Update Rules"](../maintainers/guides-spec.md#update-rules))_
+- **AC-18.2** — Given an architecture change, then it starts in the specs; contracts follow shape changes, conformance checks and affected templates are updated, and new rules get conformance test IDs. _(evidence: [documentation-guide.md](../maintainers/documentation-guide.md), [doc-maintenance-spec.md](../maintainers/doc-maintenance-spec.md))_
 - **AC-18.3** — Given code that has drifted from the specs, then the code is fixed or a spec change is proposed and reviewed. Specs are never rewritten just to match code. _(basis: maintainers' decision)_
 - **AC-18.4** — Given every governed document, then it is in the document registry with its dependencies, and a stale document is flagged. _(evidence: [doc-maintenance-spec.md](../maintainers/doc-maintenance-spec.md); [doc-registry.json](../maintainers/doc-registry.json))_
 

@@ -1,8 +1,0 @@
-{
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "contract-pack://paa/deployment",
-  "title": "Deployment Boundary Contract Pack (derived)",
-  "description": "Derived source manifest. No dedicated machine-readable deployment schema is published yet; deployment requirements remain in architecture/deployment-spec.md.",
-  "x-canonical_sources": ["contracts/schemas/configuration.json"],
-  "x-status": "prose-backed-gap"
-}

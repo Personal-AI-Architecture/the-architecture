@@ -20,19 +20,12 @@ Use this when reviewing Memory tools, export/history behavior, persistent conver
 - [ ] Memory data remains inspectable without the system running.
 - [ ] Secrets are excluded from Memory entirely.
 
-## Matrix IDs
+## Related Conformance Tests
 
-- `F-04`
-- `M-01`
-- `M-02`
-- `M-03`
-- `M-04`
-- `M-05`
-- `M-06`
-- `M-07`
-- `S-06`
-- `D-05`
-- `D-07`
+- `ARCH-1`
+- `ARCH-7`
+- `ARCH-9`
+- `ARCH-15`
 
 ## Common Failure Patterns
 
@@ -50,12 +43,5 @@ Use this when reviewing Memory tools, export/history behavior, persistent conver
 
 ## Read Next
 
-- `build/primers/memory.md`
-- `maintainers/accepted-mvp-limits.md`
-- `build/compliance-matrix.md`
-
-## Source Docs
-
-- `maintainers/primer-audit-playbook.md`
-- `build/primers/memory.md`
-- `build/compliance-matrix.md`
+- `architecture/memory-spec.md`
+- `architecture/security-spec.md`

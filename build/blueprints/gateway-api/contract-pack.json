@@ -1,8 +1,0 @@
-{
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "contract-pack://paa/gateway-api",
-  "title": "Gateway API Boundary Contract Pack (derived)",
-  "description": "Derived source manifest. Client-facing API shapes are authoritative only in contracts/.",
-  "x-canonical_sources": ["contracts/openapi/gateway-api.yaml", "contracts/schemas/message.json", "contracts/examples/client-message-request.json", "contracts/examples/conversation-list-response.json", "contracts/examples/conversation-detail-response.json"],
-  "x-status": "derived"
-}

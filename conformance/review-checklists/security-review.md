@@ -20,19 +20,12 @@ Use this when reviewing audit logging, error handling, approval enforcement, sec
 - [ ] Product-owned auth state is exportable without leaking credentials.
 - [ ] Security controls are present from day one rather than treated as post-MVP hardening.
 
-## Matrix IDs
+## Related Conformance Tests
 
-- `A-04`
-- `A-05`
-- `S-01`
-- `S-02`
-- `S-03`
-- `S-04`
-- `S-05`
-- `S-06`
-- `A-07`
-- `GC-03`
-- `GC-06`
+- `ARCH-6`
+- `ARCH-11`
+- `ARCH-13`
+- `ARCH-16`
 
 ## Common Failure Patterns
 
@@ -45,11 +38,8 @@ Use this when reviewing audit logging, error handling, approval enforcement, sec
 
 ## Read Next
 
-- `build/primers/security.md`
-- `build/primers/auth.md`
-- `build/primers/client-gateway-contract.md`
-- `build/primers/gateway-agent-loop-contract.md`
-- `build/compliance-matrix.md`
+- `architecture/security-spec.md`
+- `architecture/tools-spec.md`
 
 ## Example Files
 
@@ -58,12 +48,3 @@ Use this when reviewing audit logging, error handling, approval enforcement, sec
 - `contracts/examples/invalid-approval-request-event.json`
 - `contracts/examples/invalid-approval-result-event.json`
 - `contracts/examples/invalid-gateway-engine-request.json`
-
-## Source Docs
-
-- `maintainers/primer-audit-playbook.md`
-- `build/primers/security.md`
-- `build/primers/auth.md`
-- `build/primers/client-gateway-contract.md`
-- `build/primers/gateway-agent-loop-contract.md`
-- `build/compliance-matrix.md`
