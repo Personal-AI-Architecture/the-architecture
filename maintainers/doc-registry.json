@@ -5,7 +5,22 @@
       "covers": [],
       "tier": 1,
       "update_trigger": "manual",
-      "depends_on": []
+      "depends_on": [
+        "architecture/principles.md",
+        "architecture/gateway-agent-loop-contract.md",
+        "architecture/agent-loop-spec.md",
+        "architecture/memory-spec.md",
+        "architecture/gateway-spec.md",
+        "architecture/auth-spec.md",
+        "architecture/tools-spec.md",
+        "architecture/models-spec.md",
+        "architecture/security-spec.md",
+        "architecture/adapter-spec.md",
+        "architecture/configuration-spec.md",
+        "architecture/communication-principles.md",
+        "architecture/deployment-spec.md",
+        "architecture/customization-spec.md"
+      ]
     },
     {
       "path": "spec/personal-ai-architecture-spec.md",
@@ -26,7 +41,7 @@
       "covers": ["contracts/openapi/gateway-engine.yaml"],
       "tier": 1,
       "update_trigger": "code",
-      "depends_on": ["architecture/overview.md", "architecture/gateway-spec.md", "architecture/agent-loop-spec.md"]
+      "depends_on": ["architecture/gateway-spec.md", "architecture/agent-loop-spec.md"]
     },
 
     {
@@ -34,84 +49,84 @@
       "covers": ["contracts/openapi/gateway-engine.yaml", "contracts/openapi/model-api.yaml"],
       "tier": 2,
       "update_trigger": "code",
-      "depends_on": ["architecture/overview.md"]
+      "depends_on": []
     },
     {
       "path": "architecture/memory-spec.md",
       "covers": ["contracts/schemas/message.json"],
       "tier": 2,
       "update_trigger": "code",
-      "depends_on": ["architecture/overview.md"]
+      "depends_on": []
     },
     {
       "path": "architecture/gateway-spec.md",
       "covers": ["contracts/openapi/gateway-api.yaml"],
       "tier": 2,
       "update_trigger": "code",
-      "depends_on": ["architecture/overview.md"]
+      "depends_on": []
     },
     {
       "path": "architecture/auth-spec.md",
       "covers": ["contracts/schemas/identity.json", "contracts/schemas/policy.json"],
       "tier": 2,
       "update_trigger": "code",
-      "depends_on": ["architecture/overview.md", "architecture/security-spec.md"]
+      "depends_on": ["architecture/security-spec.md"]
     },
     {
       "path": "architecture/tools-spec.md",
       "covers": ["contracts/openapi/gateway-engine.yaml", "contracts/openapi/model-api.yaml", "contracts/schemas/tool-definition.json", "contracts/schemas/message.json"],
       "tier": 2,
       "update_trigger": "code",
-      "depends_on": ["architecture/overview.md"]
+      "depends_on": []
     },
     {
       "path": "architecture/models-spec.md",
       "covers": ["contracts/openapi/model-api.yaml"],
       "tier": 2,
       "update_trigger": "code",
-      "depends_on": ["architecture/overview.md"]
+      "depends_on": []
     },
     {
       "path": "architecture/security-spec.md",
       "covers": ["contracts/schemas/identity.json", "contracts/schemas/policy.json", "contracts/openapi/gateway-engine.yaml"],
       "tier": 2,
       "update_trigger": "code",
-      "depends_on": ["architecture/overview.md"]
+      "depends_on": []
     },
     {
       "path": "architecture/adapter-spec.md",
       "covers": ["contracts/openapi/model-api.yaml"],
       "tier": 2,
       "update_trigger": "code",
-      "depends_on": ["architecture/overview.md", "architecture/models-spec.md"]
+      "depends_on": ["architecture/models-spec.md"]
     },
     {
       "path": "architecture/configuration-spec.md",
       "covers": ["contracts/schemas/configuration.json"],
       "tier": 2,
       "update_trigger": "code",
-      "depends_on": ["architecture/overview.md"]
+      "depends_on": []
     },
     {
       "path": "architecture/communication-principles.md",
       "covers": [],
       "tier": 2,
       "update_trigger": "spec",
-      "depends_on": ["architecture/overview.md"]
+      "depends_on": []
     },
     {
       "path": "architecture/deployment-spec.md",
       "covers": [],
       "tier": 2,
       "update_trigger": "spec",
-      "depends_on": ["architecture/overview.md"]
+      "depends_on": []
     },
     {
       "path": "architecture/customization-spec.md",
       "covers": [],
       "tier": 2,
       "update_trigger": "spec",
-      "depends_on": ["architecture/overview.md"]
+      "depends_on": []
     },
 
     {
@@ -203,7 +218,7 @@
       "covers": [],
       "tier": 2,
       "update_trigger": "spec",
-      "depends_on": ["architecture/overview.md"]
+      "depends_on": []
     },
     {
       "path": "CONTRIBUTING.md",
@@ -238,7 +253,7 @@
       "covers": [],
       "tier": 3,
       "update_trigger": "spec",
-      "depends_on": ["architecture/overview.md"]
+      "depends_on": []
     },
     {"path": "architecture/background/about.md", "covers": [], "tier": 3, "update_trigger": "manual", "depends_on": []},
     {"path": "architecture/decisions.md", "covers": [], "tier": 2, "update_trigger": "spec", "depends_on": []},
