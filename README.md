@@ -18,11 +18,11 @@ We will soon rely on personal AI systems in every area of our lives. We should o
 
 Not an app, and not a framework you install. A blueprint, plus a starter kit to build from.
 
-- **The specification** ([`spec/`](spec/)): what every PAA system must promise, including product stories and known gaps.
-- **The architecture** ([`architecture/`](architecture/)): how the system works, its principles, decisions, component specifications, and explanatory background.
+- **The specification** ([`personal-ai-architecture-spec.md`](spec/personal-ai-architecture-spec.md)): what every PAA system must promise, including product stories, with [known gaps](spec/personal-ai-architecture-gaps.md) tracked separately.
+- **The architecture** ([`overview.md`](architecture/overview.md)): how the system works, its principles, decisions, component specifications, and explanatory background.
 - **Contracts** ([`contracts/`](contracts/)): the exact OpenAPI and JSON Schema shapes code must match, plus canonical examples.
 - **Conformance** ([`conformance/`](conformance/)): language-neutral checks and review guidance that prove a system conforms.
-- **Build guidance** ([`build/`](build/)): primers, blueprints, implementation prompts, and derived implementation references.
+- **Build guidance** ([`implementers-reference.md`](build/implementers-reference.md)): primers, blueprints, implementation prompts, and derived implementation references.
 - **The starter kit** ([ts-architecture-template](https://github.com/Personal-AI-Architecture/ts-architecture-template)): a working TypeScript starting point with all four components built in.
 
 ## How it works
