@@ -11,7 +11,7 @@ This file defines language-agnostic pass/fail vectors for cross-cutting Security
 - `SEC-MUST-001`: Secrets must not be stored in Memory or in any file git tracks.
 - `SEC-MUST-002`: Exposed error/event surfaces must use safe sanitized messages.
 - `SEC-MUST-003`: Mid-stream error taxonomy must remain classified (`provider_error`, `tool_error`, `context_overflow`).
-- `SEC-MUST-004`: Sensitive actions must be captured in structured audit logs.
+- `SEC-MUST-004`: Security-relevant actions must be captured in structured audit logs before they begin; if the audit record cannot be durably accepted, the action must not run, while conversation that requires no such action may continue.
 - `SEC-MUST-005`: Where approval rules exist, enforcement must be coded control, not prompt-only guidance.
 - `SEC-MUST-006`: Where a product adds approvals, approval interaction must remain contract-visible.
 - `SEC-MUST-007`: The Gateway calls Auth on every protected request and the Agent Loop asks Auth before each tool call; both fail closed.
@@ -36,8 +36,8 @@ This file defines language-agnostic pass/fail vectors for cross-cutting Security
 | SEC-T002N | SEC-MUST-002 | Negative | Forward raw exception string to stream/client | Conformance fails | Raw message accepted | Error sanitization drift |
 | SEC-T003P | SEC-MUST-003 | Positive | Inject provider timeout/tool infra/context overflow failures | Error codes map to taxonomy | Code outside taxonomy | Taxonomy drift |
 | SEC-T003N | SEC-MUST-003 | Negative | Collapse all failures to one generic code | Conformance fails | Collapsed taxonomy accepted | Error collapse drift |
-| SEC-T004P | SEC-MUST-004 | Positive | Execute auth decision + tool read/write + startup phases | Structured audit events emitted | Missing audit entries | Audit coverage drift |
-| SEC-T004N | SEC-MUST-004 | Negative | Disable audit sink for sensitive actions | Conformance fails | Missing audit accepted | Silent action drift |
+| SEC-T004P | SEC-MUST-004 | Positive | Execute an auth decision, tool call, Memory read, and Memory write with a durable audit sink | The audit record is durably accepted before each action begins; the action completes and its record is queryable | Action runs before its audit record is accepted, or the record is missing | Audit ordering/coverage drift |
+| SEC-T004N | SEC-MUST-004 | Negative | Make audit storage full or unavailable, then attempt a tool call, Memory read, and Memory write; also send a conversation turn that requires no action | Each security-relevant action is blocked, the owner is alerted, and the model receives a classified failure; the no-action conversation continues | An action runs without a durable audit record, or no-action conversation is blocked | Audit fail-closed drift |
 | SEC-T005P | SEC-MUST-005 | Positive | Set an approval rule in Auth covering a write, then attempt that write | Runtime blocks write until coded approval decision | Write executes without approval control | Prompt-only approval drift |
 | SEC-T005N | SEC-MUST-005 | Negative | Remove approval interception logic, keep prompt text only | Conformance fails | Prompt-only behavior accepted | Enforcement bypass |
 | SEC-T006P | SEC-MUST-006 | Positive | Where a product adds approvals, approval-required interaction through Gateway/Agent Loop contracts | `approval-request` + `approval-result` are contract-visible | Approval hidden in local UI path only | Contract invisibility |
@@ -71,4 +71,4 @@ This file defines language-agnostic pass/fail vectors for cross-cutting Security
 - Positive tests: 17
 - Negative tests: 17
 - Total vectors: 34
-- Critical drift categories covered: secret leakage, unsafe output surfaces, taxonomy collapse, audit gaps, approval bypass, auth bypass, config side-channel, isolation collapse, export leakage, day-one control deferral, traceability gaps, recovery-net erosion, swap-induced security regressions, approval-default drift, rules above the owner, unisolated untrusted tools.
+- Critical drift categories covered: secret leakage, unsafe output surfaces, taxonomy collapse, audit gaps, audit fail-closed behavior, approval bypass, auth bypass, config side-channel, isolation collapse, export leakage, day-one control deferral, traceability gaps, recovery-net erosion, swap-induced security regressions, approval-default drift, rules above the owner, unisolated untrusted tools.

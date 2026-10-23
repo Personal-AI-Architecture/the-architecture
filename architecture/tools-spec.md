@@ -81,7 +81,7 @@ Tools are also not an API (D53). Tool calls are expressed in the Model API, in t
 
 ### Skills are not tools
 
-A skill is instructions in Your Memory that tell the model what to do, step by step. A tool is a capability in the environment. A skill refers to tools but is data: the model reads it and follows it with the tools available. Skills may include scripts and templates; these are still data, run through whatever tools exist.
+A skill is instructions in Your Memory that tell the model what to do, step by step. A tool is a capability in the environment. A skill refers to tools but lives in Your Memory, not in the environment: the model reads it and follows it with the tools available. Skills may include scripts and templates; these also live in Your Memory and run through whatever tools exist.
 
 Every skill is a Markdown file, so skills don't each need a tool. **One generic skill tool loads any skill** into the model's context. Skills and tools change independently: editing or adding a skill needs no tool change, and adding a tool needs no skill change.
 
@@ -118,7 +118,7 @@ Whether tool services can also announce themselves through the Gateway API, as a
 
 Tool definitions are sent through the Model API with the system instructions and conversation. Every definition costs context space on every call, and models choose worse when shown dozens of irrelevant tools. So there are two sets:
 
-The Agent Loop includes selected tool definitions and live tool results in its context check before each model call. A tool result that cannot fit reports `context_overflow`; it is not silently cut to a fixed character count. See the GAP-PAA-20 proposal and the [Agent Loop specification](./agent-loop-spec.md). BrainDrive's current 4,000-character tool-result cut is recorded as an implementation gap in the [architecture tests](../conformance/arch-tests.md).
+The Agent Loop includes selected tool definitions and live tool results in its context check before each model call. A tool result that cannot fit reports `context_overflow`; it is not silently cut to a fixed character count. See GAP-PAA-20 and the [Agent Loop specification](./agent-loop-spec.md). BrainDrive's current 4,000-character tool-result cut is recorded as an implementation gap in the [architecture tests](../conformance/arch-tests.md).
 
 | Set | What it is | How it works |
 |---|---|---|
