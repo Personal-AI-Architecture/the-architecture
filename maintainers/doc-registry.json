@@ -143,13 +143,6 @@
       "depends_on": ["conformance/lockin-gate.md", "conformance/lockin-audit.md", "conformance/foundation-verification.md"]
     },
     {
-      "path": "architecture/background/memory-as-platform.md",
-      "covers": [],
-      "tier": 3,
-      "update_trigger": "manual",
-      "depends_on": ["architecture/overview.md", "architecture/memory-spec.md"]
-    },
-    {
       "path": "maintainers/doc-maintenance-spec.md",
       "covers": [],
       "tier": 3,

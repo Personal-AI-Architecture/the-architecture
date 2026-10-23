@@ -441,7 +441,7 @@ Why invalid:
 ## 11. Validation Against Human Documentation (`/the-architecture/docs`)
 
 ### Confirmed Alignments
-- Memory is the platform substrate and persists independently (`memory-spec.md`, `memory-as-platform.md`).
+- Memory is the platform substrate and persists independently (`memory-spec.md`, `overview.md` step 1).
 - Memory remains unopinionated about content meaning; interpretation belongs outside Memory.
 - Core storage evolution is additive and backend-agnostic behind interfaces.
 - Exportability and inspectability are architectural requirements.

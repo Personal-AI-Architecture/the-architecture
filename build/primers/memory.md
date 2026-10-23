@@ -108,7 +108,6 @@ These are MVP requirements, not V1 enhancements.
 ## Source Docs
 
 - `architecture/memory-spec.md`
-- `architecture/background/memory-as-platform.md`
 - `architecture/overview.md`
 - `conformance/foundation-verification.md`
 - `architecture/security-spec.md`
