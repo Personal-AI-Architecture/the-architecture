@@ -1,6 +1,18 @@
 # Template readiness follow-up — 2026-10-23
 
-**Current status after D197–D199:** All five templates remain pinned to the PAA contract files at `aa0ff01757306b2b3aa1015bb4366a5a578d5102`. Focused runtime fixtures for the new decisions now pass in each template. The shared validator passed with `--source-ref origin/main` for each, including its declared type, unit, integration, conformance and acceptance commands. Native repository checks and pull-request CI passed. This establishes the tested starter paths; it does not establish full v1 runtime conformance. See the [v1 acceptance proof audit](v1-acceptance-proof-audit-2026-10-23.md).
+**Current status after D196:** All five templates are pinned to PAA main `cfeb96df743feee91afc80ac81f0c4fd9a62c123`, which merged the source-driven discovery decision in [PR #21](https://github.com/Personal-AI-Architecture/the-architecture/pull/21). Only the configuration schema description changed in the contract set. The shared validator passed with `--source-ref origin/main` for each template, including its declared type, unit, integration, conformance and acceptance commands. Native repository checks and pull-request CI passed. The D197–D199 focused runtime fixtures still pass. This establishes the tested starter paths; it does not establish full v1 runtime conformance. See the [v1 acceptance proof audit](v1-acceptance-proof-audit-2026-10-23.md).
+
+| Template | D196 repin | Merged revision | Shared validator, native checks, CI |
+| --- | --- | --- | --- |
+| TypeScript | [PR #7](https://github.com/Personal-AI-Architecture/ts-architecture-template/pull/7) | `63b06a5a649e99d57a20279a52bda0cd3ddec87f` | PASS |
+| Python | [PR #5](https://github.com/Personal-AI-Architecture/python-architecture-template/pull/5) | `601a7cced4b129e404853858406f1e15915f3d85` | PASS |
+| Go | [PR #5](https://github.com/Personal-AI-Architecture/go-architecture-template/pull/5) | `9de1d76a84a57610e22847c0dd07f428f5816e97` | PASS |
+| Rust | [PR #5](https://github.com/Personal-AI-Architecture/rust-architecture-template/pull/5) | `2a45e7724f1d36e874d9459b71fc3b382c2ca6c1` | PASS |
+| Java | [PR #5](https://github.com/Personal-AI-Architecture/java-architecture-template/pull/5) | `a0f18a3cd4a305325587a10482b27e208b8f2360` | PASS |
+
+The first TypeScript validation attempt ran before dependencies were installed in the fresh worktree and could not start its compiler or tests. After `npm ci`, the same shared validator and native checks passed; hosted CI passed too. The other four languages passed on the first validation attempt.
+
+The following tables retain the earlier D197–D199 evidence.
 
 | Template | D197–D199 runtime proof | Merged revision | Shared validator and CI |
 | --- | --- | --- | --- |
@@ -12,7 +24,7 @@
 
 The focused fixtures verify D197 model-error categories and safe text through each starter's adapter, Agent Loop and Gateway without selecting another model or provider. They verify D198 acceptance of a new non-empty source kind while retaining source identity; they do not execute a separate-service tool. They verify D199 acceptance of inert message-part extensions, rejection of unknown core part fields, and rejection of unexpected top-level auth-context fields. These are bounded starter checks, not a claim that every deployed Auth, tool discovery, policy, approval, or security path conforms. The TypeScript pin check now compares remote contract hashes when PAA main advances through documentation-only commits, while still failing on contract drift.
 
-| Template | Current contract repin | Merged revision | Shared validator and native checks |
+| Template | Previous D197–D199 contract repin | Merged revision | Shared validator and native checks |
 | --- | --- | --- | --- |
 | TypeScript | [PR #5](https://github.com/Personal-AI-Architecture/ts-architecture-template/pull/5) | `3c56fa39df84667700a262abf19463f19fceaed2` | PASS |
 | Python | [PR #3](https://github.com/Personal-AI-Architecture/python-architecture-template/pull/3) | `d1d40546828abe0c20e707136ead60741d772fb9` | PASS |
