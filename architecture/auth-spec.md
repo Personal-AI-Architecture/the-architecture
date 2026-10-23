@@ -221,9 +221,9 @@ Identity records hold an ID, type, display name, creation time and status. Polic
 
 ### Audit log
 
-Every action is recorded as the portable [audit record](../contracts/schemas/audit-record.json): who did what, when, to which resource, with what result, and under which correlation ID. This includes requests Auth denied, tool calls, cancellation/revocation events, and changes to identities and permissions. Audit logging is required from the start, including on a system with only the owner. Implementations may add non-sensitive detail, but must not put credentials, secrets, or raw private content in the record.
+Actions are recorded as the portable [audit record](../contracts/schemas/audit-record.json): who did what, when, to which resource, with what result, and under which correlation ID. This includes requests Auth denied, tool calls, cancellation/revocation events, and changes to identities and permissions. Audit logging is required from the start, including on a system with only the owner. Implementations may add non-sensitive detail, but must not put credentials, secrets, or raw private content in the record.
 
-If the audit log cannot be written, work continues and the owner is alerted. The audit log is the owner's data: protected like Your Memory, exportable and deletable by the owner.
+If the audit log cannot be written, no tool call runs until it can, so every tool call that runs is recorded. Conversation without tool calls continues, but its other events, such as sign-ins and denied requests, go unrecorded until the log is back. The owner is alerted, and the outage itself is recorded once the log is back. The audit log is the owner's data: protected like Your Memory, exportable and deletable by the owner.
 
 ### Auth tools
 
@@ -273,7 +273,7 @@ A conforming system needs at least `auth_whoami`, `auth_check` and `auth_export`
 
 **Scenario:** The audit log's storage is full or unavailable.
 
-**Required behavior:** Work continues and the owner is alerted. The failure itself is logged wherever logging is still possible.
+**Required behavior:** Tool calls that can't be recorded don't run, so every tool call that does run is in the audit log. The owner is alerted, and conversation without tool calls continues. The failure itself is logged wherever logging is still possible. See [security-spec.md](security-spec.md#failure-modes).
 
 ### Stale permissions after export/import
 
@@ -328,7 +328,7 @@ The pattern: **add identity types and rules, don't change the contract.**
 
 ## Checking an implementation
 
-Items marked *(security)* are the per-component requirements from [security-spec.md](./security-spec.md), which owns the "why".
+Items marked *(security)* are the per-component requirements from [security-spec.md](./security-spec.md#per-component-requirements), which owns the "why".
 
 - [ ] Every Gateway request is authenticated and authorized by Auth before it reaches the Agent Loop; requests without a valid identity are refused (D22) *(security)*
 - [ ] Every tool call is authorized by Auth before it runs
@@ -338,7 +338,7 @@ Items marked *(security)* are the per-component requirements from [security-spec
 - [ ] By default the owner can do everything; no approval prompt is required by the architecture
 - [ ] Approval rules the owner sets are enforced
 - [ ] A new identity, of any type, has no permissions until the owner grants them
-- [ ] Every action is recorded in the audit log; if the log can't be written, work continues and the owner is alerted
+- [ ] Every executed tool call is recorded in the audit log, and other actions are recorded whenever the log can be written; if it can't, tool calls don't run, the owner is alerted, conversation without tool calls continues, and the outage is recorded once the log is back
 - [ ] Auth state is exportable: identities, policies, configuration and audit log; it belongs to the owner *(security)*
 - [ ] After import, re-created identities have no access until the owner turns it back on; unsupported rules are reported and grant nothing
 - [ ] Swapping the auth provider changes only the Auth component
