@@ -6,7 +6,7 @@
 <text x="155" y="94" text-anchor="middle" fill="#FFFFFF" font-size="18" font-weight="700">Your Memory</text>
 <text x="155" y="122" text-anchor="middle" fill="#FFFFFF" font-size="12">conversations, preferences,</text>
 <text x="155" y="140" text-anchor="middle" fill="#FFFFFF" font-size="12">skills, agent instructions</text>
-<text x="155" y="158" text-anchor="middle" fill="#FFFFFF" font-size="12">and tool connections.</text>
+<text x="155" y="158" text-anchor="middle" fill="#FFFFFF" font-size="12">and tool preferences.</text>
 <text x="155" y="184" text-anchor="middle" fill="#FFFFFF" font-size="12" font-weight="600">All your data in files you own.</text>
 <line x1="280" y1="130" x2="400" y2="130" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#k)" marker-start="url(#k)"/>
 <g fill="none" stroke="#94A3B8" stroke-dasharray="5 4" stroke-width="1.5">

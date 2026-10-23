@@ -20,7 +20,7 @@ So in PAA, the model isn't part of the system. The system doesn't contain a mode
 That gives you a choice for every situation. Use the most powerful cloud model when you want the best results. Use a model on your own hardware when you want what you ask to stay on your own machine. Use different models for different tasks. When you switch, Your Memory, your conversations and your tools come with you. The fastest-changing part of AI becomes the cheapest thing to change.
 
 <p align="center">
-  <img src="../assets/readme-hero.svg" alt="Your Memory (conversations, preferences, skills, agent instructions and tool connections, in files you own) stays under your control, while models, interfaces and tools can be swapped freely." width="680" />
+  <img src="../assets/readme-hero.svg" alt="Your Memory (conversations, preferences, skills, agent instructions and tool preferences, in files you own) stays under your control, while models, interfaces and tools can be swapped freely." width="680" />
 </p>
 
 ## How it works

@@ -6,7 +6,7 @@ hide_table_of_contents: true
 # Architecture Overview
 
 <p align="center">
-  <img src="../assets/readme-hero.svg" alt="Your Memory (conversations, preferences, skills, agent instructions and tool connections, in files you own) stays under your control, while models, interfaces and tools can be swapped freely." width="680" />
+  <img src="../assets/readme-hero.svg" alt="Your Memory (conversations, preferences, skills, agent instructions and tool preferences, in files you own) stays under your control, while models, interfaces and tools can be swapped freely." width="680" />
 </p>
 
 We will soon rely on personal AI systems to help us in all areas of our lives.
@@ -38,7 +38,7 @@ Get started building today with our free [TypeScript template](https://github.co
 
 ### 1. Make Your Memory the platform
 
-Your Memory is more than your conversation history. It's also your files, preferences, skills, agent instructions and tool connections. It's what makes a personal AI system personal, so if you want to own your AI, you must own Your Memory.
+Your Memory is more than your conversation history. It's also your files, preferences, skills, agent instructions and tool preferences. It's what makes a personal AI system personal, so if you want to own your AI, you must own Your Memory.
 
 In traditional software, your data can't be separated from the code that powers it. With AI, it can. So instead of Your Memory living inside a Big Tech platform, Your Memory becomes the platform.
 
