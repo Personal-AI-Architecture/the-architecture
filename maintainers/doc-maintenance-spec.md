@@ -158,11 +158,18 @@ branch; for pushes it uses the previous commit. It then runs:
 
 ```bash
 python3 scripts/check-docs.py --base "$PAA_CHECK_BASE"
+python3 scripts/check-links.py
+python3 scripts/check-contracts.py
 python3 contracts/examples/validate-manifest.py
 python3 conformance/runner.py
 git diff --check "$PAA_CHECK_BASE" HEAD
 ```
 
+The link checker validates local file paths and Markdown anchors, including
+reference-style links and HTML images; it does not depend on external sites
+being reachable. The contract checker validates every JSON Schema against the
+Draft 2020-12 metaschema, resolves repository-local references, validates all
+OpenAPI documents, and checks the example manifest against its schema.
 The example validator checks published valid and invalid examples against their
 supported contract shapes. The executable conformance runner checks the
 repository's contract baseline. The language-neutral runtime scenarios in
