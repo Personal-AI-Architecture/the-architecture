@@ -255,6 +255,8 @@
     {"path": "maintainers/build-guidance-relocation-audit.md", "covers": [], "tier": 3, "update_trigger": "manual", "depends_on": ["architecture/configuration-spec.md", "conformance/arch-tests.md"]},
     {"path": "maintainers/change-log.md", "covers": [], "tier": 3, "update_trigger": "manual", "depends_on": []},
     {"path": "maintainers/decision-glossary.md", "covers": [], "tier": 3, "update_trigger": "manual", "depends_on": []},
-    {"path": "maintainers/documentation-guide.md", "covers": [], "tier": 3, "update_trigger": "manual", "depends_on": []}
+    {"path": "maintainers/documentation-guide.md", "covers": [], "tier": 3, "update_trigger": "manual", "depends_on": []},
+    {"path": "maintainers/template-readiness-2026-10-23.md", "covers": [], "tier": 3, "update_trigger": "manual", "depends_on": []},
+    {"path": "maintainers/template-readiness-2026-10-23-followup.md", "covers": [], "tier": 3, "update_trigger": "manual", "depends_on": []}
   ]
 }

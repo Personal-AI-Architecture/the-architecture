@@ -45,6 +45,12 @@ jobs:
       - name: Check documentation registry and freshness
         run: python3 scripts/check-docs.py --base "$PAA_CHECK_BASE"
 
+      - name: Check local documentation links and anchors
+        run: python3 scripts/check-links.py
+
+      - name: Validate all JSON Schemas and OpenAPI contracts
+        run: python3 scripts/check-contracts.py
+
       - name: Validate contract example manifest and shapes
         run: python3 contracts/examples/validate-manifest.py
 
