@@ -185,6 +185,7 @@ This follows the zero-outward-dependencies principle. The dependency points the 
 | Conversation not found | Report to caller |
 | Storage failure | Report to caller; if the initial message cannot be persisted, do not dispatch it |
 | Agent Loop fails after the stream starts | Preserve the incoming message, observed partial response and tool events with an explicit error outcome; never report the turn as complete |
+| Agent Loop reports `model_unavailable` or `capability_unsupported` | Preserve the canonical code and missing `capability` when present, while showing an owner-safe message (D197) |
 | Invalid input | Reject with error |
 
 ---

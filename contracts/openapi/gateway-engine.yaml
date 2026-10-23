@@ -471,6 +471,8 @@ components:
           type: string
           enum:
             - provider_error
+            - model_unavailable
+            - capability_unsupported
             - tool_error
             - auth_error
             - context_limit_unknown
@@ -478,6 +480,8 @@ components:
           description: |
             Error category:
             - provider_error: Model unreachable or timeout
+            - model_unavailable: The selected model is unavailable through the selected provider profile
+            - capability_unsupported: The selected model cannot provide the requested ability; `capability` names it
             - tool_error: Tool failed and model cannot recover
             - auth_error: Auth denied the request or could not check it
             - context_limit_unknown: No safe limit exists for the selected provider and model
@@ -485,6 +489,16 @@ components:
         message:
           type: string
           description: Human-readable error description
+        capability:
+          type: string
+          minLength: 1
+          description: Machine-readable name of the missing ability; required for `capability_unsupported`.
+      if:
+        properties:
+          code:
+            const: capability_unsupported
+      then:
+        required: [capability]
 
     Error:
       type: object
@@ -497,7 +511,17 @@ components:
       properties:
         code:
           type: string
-          description: Machine-readable error code
+          description: Machine-readable error code, including `model_unavailable` and `capability_unsupported` for those conditions (D197).
         message:
           type: string
           description: Human-readable error description
+        capability:
+          type: string
+          minLength: 1
+          description: Required when code is `capability_unsupported`.
+      if:
+        properties:
+          code:
+            const: capability_unsupported
+      then:
+        required: [capability]

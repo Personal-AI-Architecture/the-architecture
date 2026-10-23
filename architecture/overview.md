@@ -130,6 +130,8 @@ Four components, two APIs, and three things outside the system.
 
 **Adapters.** Three thin translation layers you own sit at the edges: one between clients and the Gateway, one between the Agent Loop and models, and one for each kind of tool source, such as MCP. When an outside standard changes, you swap the adapter, not the system. An unknown or invalid selected adapter is reported at startup; the system does not silently choose another. See [adapter-spec.md](./adapter-spec.md) and [configuration-spec.md](./configuration-spec.md).
 
+A model that is unavailable or lacks a requested ability is reported in a recognizable way across those boundaries. A new tool protocol gets a new adapter and a provenance label without changing the core contract. Optional message and tool metadata travels in designated extension fields; Auth decisions remain separate and strict. See [models-spec.md](./models-spec.md), [tools-spec.md](./tools-spec.md) and [communication-principles.md](./communication-principles.md).
+
 ---
 
 ## What the architecture must prove

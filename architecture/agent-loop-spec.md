@@ -135,6 +135,8 @@ See [configuration-spec.md](./configuration-spec.md) for the full boot sequence 
 | Condition | Agent Loop behavior |
 |-----------|----------------|
 | Model unreachable | Report failure to caller |
+| Selected model unavailable through the selected provider profile | Report `model_unavailable`; do not switch model or provider (D197) |
+| Selected model lacks a requested ability | Report `capability_unsupported` with the missing `capability`; do not fake the result (D197) |
 | Tool execution fails | Report failure to model (model decides next step) |
 | Tool call not permitted by Auth | Report to the model that the call was not permitted (model decides next step) |
 | Context too large for the model | Report `context_overflow` to the caller |

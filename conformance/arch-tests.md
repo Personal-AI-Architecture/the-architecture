@@ -119,7 +119,7 @@
 - [ ] Every SSE event validates against the event schemas in `gateway-engine.yaml`
 - [ ] Every Model API request validates against `model-api.yaml`
 - [ ] Every Model API response validates against `model-api.yaml`
-- [ ] No payload contains fields not defined in the schemas (no undocumented extensions)
+- [ ] Additive payload data uses the schema-defined `extensions` or `metadata` area; strict core fields and security envelopes remain valid without undocumented fields (D199)
 
 **Failure indicators:**
 - Custom fields added outside the schema
@@ -142,10 +142,13 @@
 2. Trigger an unrecoverable tool execution failure (e.g., tool executor crash)
 3. Trigger an Auth failure (e.g., Auth unavailable or a request denied by Auth)
 4. Trigger a context overflow (e.g., send messages exceeding model context window)
-5. Capture the SSE error events emitted in each case
+5. Select an unavailable model, then a model that lacks a requested ability such as image input
+6. Capture the Model API, Agent Loop and Gateway API errors emitted in each case
 
 **Pass criteria:**
 - [ ] Provider/network failure emits `provider_error`
+- [ ] An unavailable selected model emits `model_unavailable` through Model API, Agent Loop and Gateway API; no other model or provider is selected (D197)
+- [ ] An unsupported ability emits `capability_unsupported` with a machine-readable `capability` through all three boundaries; no content is silently dropped (D197)
 - [ ] If the Agent Loop retries a provider call, it records no more than one retry on the same selected model and provider profile; a failure that remains emits `provider_error` without silently switching either selection (D188)
 - [ ] Unrecoverable tool failure emits `tool_error`
 - [ ] Auth failure emits `auth_error`
@@ -177,6 +180,7 @@ fails this rule. The current behavior is an observed gap, not a PAA allowance.
 
 **Failure indicators:**
 - All errors emit the same code regardless of cause
+- An unavailable model or unsupported ability is collapsed into a generic `provider_error`, or the missing ability is not named
 - Tool execution errors that the model could recover from terminate the stream
 - Context overflow is reported as `provider_error`
 
@@ -529,6 +533,7 @@ fails this rule. The current behavior is an observed gap, not a PAA allowance.
 
 **Pass criteria:**
 - [ ] The limitation is reported to the owner; content is not silently omitted or converted into a false success.
+- [ ] Model API, Agent Loop and Gateway API errors carry `capability_unsupported` and name the same missing `capability` (D197).
 - [ ] No other model or provider is substituted without an explicit owner choice.
 - [ ] The original request remains accurately represented in conversation history.
 
@@ -568,3 +573,20 @@ fails this rule. The current behavior is an observed gap, not a PAA allowance.
 - [ ] Results retain the correct call and source association in the stream and saved history.
 
 **Failure indicators:** Name-only dispatch chooses the wrong tool, one definition disappears, or the source identity is lost on replay.
+
+---
+
+## ARCH-22: Additive Extensions Do Not Break Older Receivers
+
+**Validates:** [communication-principles.md](../architecture/communication-principles.md) P6, [message.json](../contracts/schemas/message.json), [tool-definition.json](../contracts/schemas/tool-definition.json), [auth-context.json](../contracts/schemas/auth-context.json)
+
+**Setup:** Use two adjacent component versions. The newer sender adds an unknown key under `extensions` on a text part, tool-call part, and tool definition. Prepare an `auth_context` with an unexpected field as a negative control.
+
+**Procedure:** Send the extended message and tool definition through the older receiver. Repeat with the unexpected `auth_context` field and with an unknown core field outside `extensions` on a strict part.
+
+**Pass criteria:**
+- [ ] The older receiver accepts the schema-defined extension maps, ignores their unknown keys, and still processes the known message/tool fields correctly.
+- [ ] Extension data cannot change tool identity, visibility, or Auth's decision.
+- [ ] The malformed `auth_context` is rejected, and an unknown core field on a strict part is rejected rather than treated as an extension.
+
+**Failure indicators:** An unknown extension key breaks an older receiver, changes core behavior, or grants access; an unexpected identity field is accepted.

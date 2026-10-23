@@ -109,6 +109,8 @@ For v1, a separate tool service becomes available when the owner installs or con
 
 **Tools are identified by source and name.** The canonical identity is `source.id` plus tool `name`, and a tool call carries `source_id`; two tools named `search` from different sources stay distinct without a central naming authority. `source.kind` records provenance only. Endpoints, credentials and adapter settings are runtime configuration, not tool-definition fields.
 
+`source.kind` is an open, non-empty label. `mcp`, `cli`, `native`, `manifest` and `builtin` are known examples, not an exhaustive protocol list. Adding a new tool-source adapter needs no change to the tool definition contract (D198). Optional `extensions` on a definition carry inert additive metadata; they never change identity, visibility or Auth's decision (D199).
+
 ## What the model sees
 
 Tool definitions are sent through the Model API with the system instructions and conversation. Every definition costs context space on every call, and models choose worse when shown dozens of irrelevant tools. So there are two sets:

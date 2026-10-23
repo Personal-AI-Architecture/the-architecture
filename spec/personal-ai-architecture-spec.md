@@ -96,7 +96,7 @@ As a developer, I want export and import to carry everything that matters, so th
 - **AC-3.1** — Given a conforming system, then the owner can export everything in open formats: all files, conversations, version history and structured data. Indexes and other derived data are optional because they can be rebuilt. _(evidence: [memory-spec.md "Export"](../architecture/memory-spec.md#export); ARCH-7)_
 - **AC-3.2** — Given the export is imported into a different conforming implementation, then nothing is lost: conversations can be resumed, personal context is used, supported preferences and skills work, and anything the new system cannot support is reported to the owner, never dropped silently. _(evidence: [overview.md FS-1](../architecture/overview.md#what-the-architecture-must-prove); [configuration-spec.md](../architecture/configuration-spec.md); [fs-tests.md FS-1](../conformance/fs-tests.md))_
 - **AC-3.3** — Given permission rules move with the owner, then rules the new system supports are kept and enforced the same way once the owner turns the identities they apply to back on; rules it does not support are reported and never grant access silently. _(evidence: [auth-spec.md "Data portability"](../architecture/auth-spec.md#data-portability))_
-- **AC-3.4** — Given supported content (text and the content types a system declares), then it moves without loss. The architecture does not promise that every media type works everywhere. _(basis: maintainers' decision)_
+- **AC-3.4** — Given supported content (text and the content types a system declares), then it moves without loss. The architecture does not promise that every media type works everywhere. _(decision: accepted v1 portability scope in the `paa-spec/2026-10-20` tag; proof route: [FS-1](../conformance/fs-tests.md) checks supported-content transfer and reports unsupported types)_
 - **AC-3.5** — Given passwords, sessions and API keys, then they are not part of the portable memory; credentials are set up again on the new system. Identities re-created by an import have no access until the owner turns it back on; nothing is re-granted automatically. How the owner turns access back on is the product's choice. _(evidence: [auth-spec.md "Stale permissions after export/import"](../architecture/auth-spec.md#stale-permissions-after-exportimport); [configuration-spec.md "Secrets"](../architecture/configuration-spec.md#secrets))_
 
 </details>
@@ -124,7 +124,7 @@ As a developer, I want the owner to switch AI model or provider by configuration
 
 - **AC-5.1** — Given a model preference changes, then the next message uses the new model with no restart and no code change. _(evidence: [overview.md FS-4](../architecture/overview.md#what-the-architecture-must-prove); [configuration-spec.md "How the System Boots"](../architecture/configuration-spec.md#how-the-system-boots); [swap-tests.md SWAP-2](../conformance/swap-tests.md))_
 - **AC-5.2** — Given an adapter for another provider is available, then switching provider changes only configuration, the adapter file and environment settings. No component code changes. _(evidence: [adapter-spec.md](../architecture/adapter-spec.md); [swap-tests.md SWAP-1](../conformance/swap-tests.md))_
-- **AC-5.3** — Given local and cloud models, then both go through the same Model API, and capabilities a model lacks are reported, not faked. Switching models does not promise identical abilities. _(evidence: [models-spec.md](../architecture/models-spec.md))_
+- **AC-5.3** — Given local and cloud models, then both go through the same Model API, and capabilities a model lacks are reported, not faked. Switching models does not promise identical abilities. _(evidence: [models-spec.md](../architecture/models-spec.md); [ARCH-19](../conformance/arch-tests.md#arch-19-unsupported-model-ability-is-reported); D197)_
 
 </details>
 
@@ -197,7 +197,7 @@ As a developer, I want every request and every AI action checked against the own
 - **AC-10.1** — Given a request with no valid identity, then it is refused. Given an identity, then it can act only within the permissions it was given. _(evidence: [auth-spec.md "Permissions"](../architecture/auth-spec.md#permissions))_
 - **AC-10.2** — Given the owner's permission and approval rules, then the system enforces them. How strict the defaults are and how approvals look are the product's choice. Where a product enables approvals, the canonical request/decision lifecycle is pending → approved, denied, cancelled, or expired; decisions require Auth authority and are replay-safe by request ID. _(evidence: [auth-spec.md](../architecture/auth-spec.md); [security-spec.md](../architecture/security-spec.md); `contracts/schemas/approval-request.json`; `contracts/schemas/approval-decision.json`)_
 - **AC-10.3** — Given a new kind of actor (another person, an AI agent acting for the owner), then it can be added, and it gets no permissions until the owner grants them. The same holds for an identity re-created by an import: it has no access until the owner turns it back on (AC-3.5). _(evidence: [auth-spec.md](../architecture/auth-spec.md))_
-- **AC-10.4** — Given an action, then it is recorded in an audit log; if the log cannot be written, work continues and the owner is alerted. _(evidence: [auth-spec.md "Failure modes"](../architecture/auth-spec.md#failure-modes); [security-spec.md](../architecture/security-spec.md))_
+- **AC-10.4** — Given a security-relevant action, then it is recorded in an audit log. If the log cannot be written, tool calls and Memory actions that cannot be recorded do not run; the owner is alerted, while conversation requiring no such action continues. _(evidence: [auth-spec.md "Audit log can't be written"](../architecture/auth-spec.md#audit-log-cant-be-written); [security-spec.md "Failure modes"](../architecture/security-spec.md#failure-modes); [ARCH-13](../conformance/arch-tests.md#arch-13-audit-sink-failure-stops-audited-actions))_
 - **AC-10.5** — Given secrets (API keys, passwords), then they live outside Your Memory, somewhere git never tracks: environment variables, an untracked configuration file or a secret store. They are never in memory or tracked configuration files. _(evidence: [configuration-spec.md "Secrets"](../architecture/configuration-spec.md#secrets); [security-spec.md "Secrets Management"](../architecture/security-spec.md#secrets-management); `AGENT.md` lock-in check 5)_
 
 </details>
@@ -228,7 +228,7 @@ As a developer, I want to understand what the architecture is and why it exists 
 - **AC-12.1** — Given the repository README, when a developer reads it, then they find what the architecture is, its licence (MIT), and links to the Architecture overview, the contracts, the conformance tests and a runnable language template. _(evidence: `README.md`)_
 - **AC-12.2** — Given the docs guide, then it offers a short "just browsing" route (README, principles, about) and a "ready to build" route (Architecture overview, relevant component specs, contracts, conformance and a template). _(evidence: [documentation-guide.md](../maintainers/documentation-guide.md))_
 - **AC-12.3** — Given the Architecture overview, then it names the four components, the two APIs and the three outside parties, says that Your Memory depends on nothing, and links to the responsibility verification describing who does what and who does not. _(evidence: [overview.md](../architecture/overview.md) "The parts" and "Where to go next"; [foundation-verification.md](../conformance/foundation-verification.md) "Responsibility Matrix Verification")_
-- **AC-12.4** — Every link on these routes opens the document it names. Broken links are gaps.
+- **AC-12.4** — Every link on these routes opens the document it names. Broken links are gaps. _(evidence: [local link checker](../scripts/check-links.py), run by the [repository CI gate](../.github/workflows/repository-checks.yml))_
 
 </details>
 
@@ -279,7 +279,7 @@ As a developer, I want published pass/fail tests, so that I can show my implemen
 <details>
 <summary>Acceptance criteria</summary>
 
-- **AC-16.1** — Given the conformance suite, then every test has an ID, set-up steps and pass/fail criteria, grouped as swap tests (SWAP-1 to SWAP-3), architecture tests (ARCH-1 to ARCH-9), deployment tests (DEPLOY-1 to DEPLOY-5) and Foundation story tests (FS-1 to FS-8). _(evidence: [conformance/](../conformance/README.md))_
+- **AC-16.1** — Given the conformance suite, then every test has an ID, set-up steps and pass/fail criteria, grouped as swap tests (SWAP-1 to SWAP-3), architecture tests (ARCH-1 to ARCH-22), deployment tests (DEPLOY-1 to DEPLOY-5) and Foundation story tests (FS-1 to FS-8). _(evidence: [conformance/](../conformance/README.md))_
 - **AC-16.2** — Given the suite index, then it lists every test that exists and links only to things that exist. _(evidence: [conformance/README.md](../conformance/README.md))_
 - **AC-16.3** — Given the lock-in gate and lock-in audit, then a developer can work through each check for a pull request or a release. _(evidence: [lockin-gate.md](../conformance/lockin-gate.md), [lockin-audit.md](../conformance/lockin-audit.md))_
 - **AC-16.4** — An implementation that passes every test is conformant; passing some is not conformance. _(evidence: [conformance/README.md "How to Use"](../conformance/README.md#how-to-use))_
@@ -312,7 +312,7 @@ As a contributor, I want a clear way to change the architecture, so that the spe
 
 - **AC-18.1** — Given a contributor, then CONTRIBUTING.md explains how to propose documentation, contract and specification changes by pull request. _(evidence: `CONTRIBUTING.md`)_
 - **AC-18.2** — Given an architecture change, then it starts in the specs; contracts follow shape changes, conformance checks and affected templates are updated, and new rules get conformance test IDs. _(evidence: [documentation-guide.md](../maintainers/documentation-guide.md), [doc-maintenance-spec.md](../maintainers/doc-maintenance-spec.md))_
-- **AC-18.3** — Given code that has drifted from the specs, then the code is fixed or a spec change is proposed and reviewed. Specs are never rewritten just to match code. _(basis: maintainers' decision)_
+- **AC-18.3** — Given code that has drifted from the specs, then the code is fixed or a spec change is proposed and reviewed. Specs are never rewritten just to match code. _(decision: accepted maintainer rule in the `paa-spec/2026-10-20` tag; evidence: [contribution process](../CONTRIBUTING.md), [documentation maintenance](../maintainers/doc-maintenance-spec.md))_
 - **AC-18.4** — Given every governed document, then it is in the document registry with its dependencies, and a stale document is flagged. _(evidence: [doc-maintenance-spec.md](../maintainers/doc-maintenance-spec.md); [doc-registry.json](../maintainers/doc-registry.json))_
 
 </details>
@@ -356,7 +356,7 @@ As a contributor, I want a clear way to change the architecture, so that the spe
 | A write fails or conflicts | Reported; no corruption (AC-2.4). |
 | A move hits something the new system cannot support | Reported to the owner; never dropped silently; never grants access (AC-3.2, AC-3.3). |
 | An update breaks the system | The previous version is available and works with the owner's data (AC-11.2). |
-| The audit log cannot be written | Work continues and the owner is alerted (AC-10.4). |
+| The audit log cannot be written | Unaudited tool calls and Memory actions do not run; the owner is alerted. Conversation requiring no such action continues (AC-10.4). |
 | An unknown or re-created actor appears | It has no permissions until the owner grants them (AC-3.5, AC-10.3). |
 
 ### Non-negotiable trust boundaries
@@ -375,6 +375,7 @@ As a contributor, I want a clear way to change the architecture, so that the spe
 - **Implementations:** every implementation, BrainDrive included, inherits these promises.
 - **Gaps:** [personal-ai-architecture-gaps.md](./personal-ai-architecture-gaps.md).
 - **Evaluation plan:** the PAA conformance validator (US-16).
+- **V1 proof status:** [acceptance proof audit](../maintainers/v1-acceptance-proof-audit-2026-10-23.md), which distinguishes published methods from observed runtime results.
 
 ## Approval
 
@@ -384,7 +385,7 @@ Accepted by pull request in this repository, then tagged. Tag: `paa-spec/2026-10
 
 The canonical contract tree under `contracts/` is authoritative for exact payloads,
 routes, shared message parts, and stream events. Identity status and extensible actor
-types, the per-request model, and structured message content are now represented in
-the published contracts. Remaining open contract questions are tracked in the gaps
-file, including tool-definition semantics (S8) and the still-to-be-finalized
-correlation/streaming details.
+types, the per-request model and provider, structured message content, portable
+model errors (D197), open tool-source kinds (D198), and additive extension slots
+(D199) are represented in the published contracts. GAP-PAA-29's separate-service
+discovery decision remains open in [PR #21](https://github.com/Personal-AI-Architecture/the-architecture/pull/21).

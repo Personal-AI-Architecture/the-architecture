@@ -228,6 +228,8 @@ The stream started, then something failed.
 | Code | When |
 |------|------|
 | `provider_error` | Model unreachable or timeout after any allowed same-selection retry (D188) |
+| `model_unavailable` | The selected model is unavailable through the selected provider profile; no substitute is selected (D197) |
+| `capability_unsupported` | The selected model lacks a requested ability; the error names it in `capability` (D197) |
 | `tool_error` | Tool failed and model cannot recover |
 | `auth_error` | Auth denied the request or could not check it |
 | `context_limit_unknown` | No safe context limit is known for the selected provider and model; no model call is made |
