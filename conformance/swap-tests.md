@@ -114,9 +114,12 @@ separate owner/product action (D188).
 1. Install the tool in a `tool_sources` path
 2. Restart the Agent Loop (or trigger hot-reload if supported)
 3. Send a message that would benefit from the new tool
+4. For a separate service, change its advertised tool set, reconnect or use its supported change signal, and verify the Agent Loop re-queries it without a restart
+5. Start another service that the owner has not installed or configured; verify that merely calling the Gateway API as a client does not add its tools
 
 **Pass criteria:**
 - [ ] Agent Loop discovers the new tool at startup via self-description
+- [ ] For a separate service, the Agent Loop retrieves current definitions through its configured source and refreshes them after a source change; an unconfigured service cannot add itself by calling the Gateway API (D196)
 - [ ] Model can see and use the new tool
 - [ ] Zero code changes to Agent Loop, Gateway, Auth, or Your Memory
 - [ ] Only environment changes (tool installed) and optionally preferences updated (always-send set)

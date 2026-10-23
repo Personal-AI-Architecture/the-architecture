@@ -105,7 +105,7 @@ Environment config says where to look (`tool_sources`). The tools then describe 
 
 The definitions end up in the prompt (if always-send) or the catalog (if discoverable).
 
-Whether tool services can also announce themselves through the Gateway API, as any other caller does, is open (GAP-PAA-29).
+For v1, a separate tool service becomes available when the owner installs or configures its source under `tool_sources`. The Agent Loop connects through the tool-source adapter and asks what tools it offers; it can refresh that description when the connected source changes. A service does not register itself through the Gateway API. A product may manage installation or process lifecycle internally, but that does not add a PAA registration route or let an unsolicited service enter the catalog (D196). This leaves the Gateway API for programs that call the system, as described below.
 
 **Tools are identified by source and name.** The canonical identity is `source.id` plus tool `name`, and a tool call carries `source_id`; two tools named `search` from different sources stay distinct without a central naming authority. `source.kind` records provenance only. Endpoints, credentials and adapter settings are runtime configuration, not tool-definition fields.
 
@@ -214,6 +214,7 @@ A working deployment needs very few tools: filesystem operations (read, write, e
 - [ ] Adding or removing a tool means adding or removing data (configuration, files). No code changes to the Agent Loop, Your Memory, the Gateway, Auth or clients
 - [ ] Tools are not treated as a component or a separate API
 - [ ] Each tool describes itself, and the Agent Loop discovers it through the configured tool sources
+- [ ] A separate service's tools enter the catalog through an owner-configured source and self-description, without a Gateway API registration route or unsolicited self-registration (D196)
 - [ ] The Agent Loop runs tool calls without knowing what the tools do
 - [ ] The Agent Loop asks Auth before every tool call. Permissions live only in Auth
 - [ ] By default the owner can use every tool, with no approval step. Any other actor starts with no permissions until the owner grants them

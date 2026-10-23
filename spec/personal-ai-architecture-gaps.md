@@ -4,7 +4,7 @@
 >
 > Each gap is something the spec expects that the published architecture does not deliver today. Classification is a suggestion for triage: **Defect** (published material is broken or contradicts itself), **Decision needed** (the maintainers must choose), **Technical** (contract and technical work), **Spec-only** (wording fix in the architecture docs). A gap marked **Decided, spec update in progress** has a settled answer that is still being written into the specs and contracts.
 
-**Scoreboard:** The contract-source alignment batch, example-shape validation, documentation freshness tooling, configuration alignment, required parallel tool execution, portable policy semantics, approval lifecycle contracts, transport-neutral identity propagation, tool-definition visibility/source semantics, local-address decision, first executable language-neutral conformance baseline, template-link cleanup, the visitor-1 decisions on GAP-PAA-18, 19 and 23, the v1 identity rule for GAP-PAA-24 (agent identities deferred to the agents step), the Auth-down fail-closed correction, multi-actor wording, revocation cancellation, portable audit records, and the provider decisions on GAP-PAA-26 and 28, and model-aware context handling for GAP-PAA-20 are complete. Still open: from the visitor-1 read-through of the Models, Tools, Adapter and Communication docs GAP-PAA-27, 29, 30 and 31.
+**Scoreboard:** The contract-source alignment batch, example-shape validation, documentation freshness tooling, configuration alignment, required parallel tool execution, portable policy semantics, approval lifecycle contracts, transport-neutral identity propagation, tool-definition visibility/source semantics, local-address decision, first executable language-neutral conformance baseline, template-link cleanup, the visitor-1 decisions on GAP-PAA-18, 19 and 23, the v1 identity rule for GAP-PAA-24 (agent identities deferred to the agents step), the Auth-down fail-closed correction, multi-actor wording, revocation cancellation, portable audit records, the provider decisions on GAP-PAA-26 and 28, model-aware context handling for GAP-PAA-20, and source-driven tool discovery for GAP-PAA-29 are complete. Still open: from the visitor-1 read-through of the Models, Adapter and Communication docs GAP-PAA-27, 30 and 31.
 
 ## Routes a developer follows
 
@@ -206,11 +206,12 @@
 - **Evidence:** [security-spec.md](../architecture/security-spec.md) "Model Provider Data Flow"; `contracts/openapi/gateway-api.yaml`; [conversation-detail-response.json](../contracts/examples/conversation-detail-response.json).
 - **Decided (2026-10-22 dev call):** Adopted (D194). Assistant messages in the Gateway API carry `model` and `provider`; the Models, Security and Gateway specs say so, and the conversation example shows it.
 
-### GAP-PAA-29: How tools that run as separate services are found — Decision needed
+### GAP-PAA-29: How tools that run as separate services are found — Resolved
 
 - **Expected:** One way for the Agent Loop to learn about tools that run as separate services.
 - **Published:** The working default is that the Agent Loop connects to the tool sources in config (`tool_sources`) and asks what they offer, which matches how MCP works. The alternative is for tool services to announce themselves through the Gateway API, as any other caller does: it applies the parity principle to tool registration but adds work to the Gateway. Either way, the model, Auth and Your Memory are unaffected. Formerly OQ-1 in the tools spec.
 - **Evidence:** [tools-spec.md](../architecture/tools-spec.md) "How tools are found" and "Programs that call the system"; [configuration.json](../contracts/schemas/configuration.json) `tool_sources`.
+- **Decided for v1 (D196):** Use the configured, source-driven path. The owner installs or configures a source under `tool_sources`; the Agent Loop asks the source for tool definitions and refreshes them when it changes. A separate service does not register through the Gateway API. Product-specific installation or runtime supervision can feed an owner-configured source without changing the PAA Gateway API. A future Gateway registration extension needs a separate decision and contract.
 
 ### GAP-PAA-30: A new tool protocol needs a contract change to be labelled — Technical
 
