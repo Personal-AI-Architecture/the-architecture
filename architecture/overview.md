@@ -75,6 +75,8 @@ With intelligence and hands, Your Memory becomes endlessly extensible through to
 
 New capabilities do not require adding code to a software platform. In fact, they require no software platform at all. They simply require a hand to hold them. Add a tool, and the system can do something new. The architecture doesn't change.
 
+For tools that run as separate services, the owner configures where to find them and the Agent Loop asks those sources what they offer. The Gateway API remains the way clients send requests to the system; it does not register tools (D196).
+
 <p align="center">
   <img src="../assets/simple-core-any-tool.svg" alt="The brain (Your Memory and the AI model) directs the Agent Loop, the hand. The hand can hold any tool: files, web search, email, calendar, browser, code, APIs, and any tool you add. A simple system that can do anything a tool exists for." width="860" />
 </p>

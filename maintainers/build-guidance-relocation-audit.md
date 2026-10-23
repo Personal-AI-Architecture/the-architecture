@@ -67,6 +67,10 @@ obsolete maintainer guides have been deleted; the documentation guide,
 conformance checklists, example manifest and registry now point to current
 sources.
 
+The later D196 tool-discovery decision keeps separate services behind
+owner-configured sources and the Agent Loop's source adapters; it adds no
+Gateway API registration route or replacement build guidance.
+
 ## Fresh-agent verification
 
 A fresh agent, without the parent conversation, received a clean clone of PAA
