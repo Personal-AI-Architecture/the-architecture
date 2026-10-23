@@ -38,7 +38,7 @@ Get started building today with our free [TypeScript template](https://github.co
 
 ### 1. Make Your Memory the platform
 
-Your Memory is more than your conversation history. It's also your files, preferences, skills, agent instructions and tool preferences. It's what makes a personal AI system personal, so if you want to own your AI, you must own Your Memory.
+Your Memory is more than your conversation history. It's also your files, settings, skills, agent instructions and tool preferences. It's what makes a personal AI system personal, so if you want to own your AI, you must own Your Memory.
 
 In traditional software, your data can't be separated from the code that powers it. With AI, it can. So instead of Your Memory living inside a Big Tech platform, Your Memory becomes the platform.
 
