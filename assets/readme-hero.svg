@@ -4,7 +4,7 @@
 
 <rect x="40" y="40" width="230" height="180" rx="12" fill="none" stroke="#FFFFFF" stroke-width="2.5"/>
 <text x="155" y="94" text-anchor="middle" fill="#FFFFFF" font-size="18" font-weight="700">Your Memory</text>
-<text x="155" y="122" text-anchor="middle" fill="#FFFFFF" font-size="12">conversations, preferences,</text>
+<text x="155" y="122" text-anchor="middle" fill="#FFFFFF" font-size="12">conversations, settings,</text>
 <text x="155" y="140" text-anchor="middle" fill="#FFFFFF" font-size="12">skills, agent instructions</text>
 <text x="155" y="158" text-anchor="middle" fill="#FFFFFF" font-size="12">and tool preferences.</text>
 <text x="155" y="184" text-anchor="middle" fill="#FFFFFF" font-size="12" font-weight="600">All your data in files you own.</text>
