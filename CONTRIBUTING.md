@@ -27,6 +27,21 @@ checks; a separate `build/` guide is not required.
 
 For larger architectural changes, open an issue first so we can align on intent and scope.
 
+Run the same repository checks as CI before opening a PR:
+
+```bash
+python3 -m pip install -r requirements-ci.txt
+python3 scripts/check-docs.py --base origin/main
+python3 scripts/check-links.py
+python3 scripts/check-contracts.py
+python3 contracts/examples/validate-manifest.py
+python3 conformance/runner.py
+```
+
+The link check verifies repository-local files and anchors without relying on
+external websites. The contract check validates every published JSON Schema and
+OpenAPI document, including local references.
+
 ## Discussion and Feedback
 
 - **Issues** — [GitHub Issues](https://github.com/Personal-AI-Architecture/the-architecture/issues)
