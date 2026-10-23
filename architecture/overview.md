@@ -38,19 +38,15 @@ Get started building today with our free [TypeScript template](https://github.co
 
 ### 1. Make Your Memory the platform
 
-Your Memory is more than your conversation history. It's also your files, preferences, skills, agent instructions and tool connections. In other words, Your Memory is what makes a personal AI system personal.
+Your Memory is more than your conversation history. It's also your files, preferences, skills, agent instructions and tool connections. It's what makes a personal AI system personal, so if you want to own your AI, you must own Your Memory.
 
-If you want to own your AI system, you must own Your Memory. That means Your Memory is never locked into a company or a technology choice. You should be able to use Your Memory in any AI system, change between them, and take Your Memory with you when you do.
-
-In traditional software, Your Memory cannot be separated from the code that powers it. With AI, this is no longer the case. We can now separate Your Memory from the intelligence and tools that power it.
-
-We can get rid of the Big Tech platforms, and make Your Memory the platform instead.
+In traditional software, your data can't be separated from the code that powers it. With AI, it can. So instead of Your Memory living inside a Big Tech platform, Your Memory becomes the platform.
 
 <p align="center">
   <img src="../assets/memory-is-the-platform.svg" alt="Today's AI apps: Your Memory is locked inside the app with its models, interfaces and tools, so leaving the app means losing your memory. With PAA: Your Memory is the platform, in files you own, and models, interfaces and tools plug into it, so you can swap anything and your memory stays." width="860" />
 </p>
 
-Once Your Memory is the platform, you can own it. All other components of your AI system can plug into it, and become swappable components. Your Memory persists when everything else is swapped, upgraded, or removed, and stays readable with standard tools (a text editor, a file browser, a database viewer) even when the system isn't running.
+Everything else plugs into it, and can be swapped, upgraded or removed. Your Memory stays: in files you can read with standard tools, even when the system isn't running, and that you can take to any other system.
 
 See [memory-spec.md](./memory-spec.md).
 
