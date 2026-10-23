@@ -38,7 +38,7 @@ Get started building today with our free [TypeScript template](https://github.co
 
 ### 1. Make Your Memory the platform
 
-Your Memory is more than your conversation history. It's also your files, preferences, skills, and connections to tools and agents. In other words, Your Memory is what makes a personal AI system personal.
+Your Memory is more than your conversation history. It's also your files, preferences, skills, agent instructions and tool connections. In other words, Your Memory is what makes a personal AI system personal.
 
 If you want to own your AI system, you must own Your Memory. That means Your Memory is never locked into a company or a technology choice. You should be able to use Your Memory in any AI system, change between them, and take Your Memory with you when you do.
 
@@ -56,9 +56,9 @@ See [memory-spec.md](./memory-spec.md).
 
 ### 2. Add the intelligence (the AI model)
 
-In a physical brain, memory and intelligence cannot be separated. You can't swap in better reasoning. A digital brain doesn't have that constraint. Your Memory persists, and intelligence arrives through the Model API, from any provider or your own hardware, swapped with a config change.
+In a physical brain, memory and intelligence cannot be separated. You can't swap in better reasoning. A digital brain doesn't have that constraint. Your Memory persists, and intelligence arrives through the Model API, from any provider or your own hardware. Switching is just a choice you make, and your next message uses the new model.
 
-When you want state of the art performance, use the most powerful cloud models. When you want complete privacy, switch to local models running on your own hardware. Use different models for different tasks.
+When you want state of the art performance, use the most powerful cloud models. When you want what you send the model to stay on your machine, switch to local models running on your own hardware. Use different models for different tasks.
 
 The architecture makes the fastest-changing part of AI, model capability, the cheapest thing to change.
 
@@ -81,6 +81,10 @@ See [agent-loop-spec.md](./agent-loop-spec.md).
 With intelligence and hands, Your Memory becomes endlessly extensible through tools: read a file, call an API, search a library, control a browser.
 
 New capabilities do not require adding code to a software platform. In fact, they require no software platform at all. They simply require a hand to hold them. Add a tool, and the system can do something new. The architecture doesn't change.
+
+<p align="center">
+  <img src="../assets/simple-core-any-tool.svg" alt="The brain (Your Memory and the AI model) directs the Agent Loop, the hand. The hand can hold any tool: files, web search, email, calendar, browser, code, APIs, and any tool you add. A simple system that can do anything a tool exists for." width="860" />
+</p>
 
 This works because everything the system handles is one of two things. If it's data, it's memory. If it's not data, it's a tool. Even the system's own components reach Your Memory only through tools, so storage can evolve without anything else changing.
 
@@ -129,7 +133,7 @@ Four components, two APIs, and three things outside the system.
 
 **Auth.** Auth protects Your Memory. It sits on every request, independent of the Gateway and the Agent Loop, so either can be swapped without touching it. Today the actor is usually you, but it is built for more: other people and AI agents acting on your behalf, each with exactly the permissions you grant.
 
-**Adapters.** Between each API and the outside world sits an adapter, a thin translation layer you own. When an outside standard changes, you swap the adapter, not the system. See [adapter-spec.md](./adapter-spec.md).
+**Adapters.** Three thin translation layers you own sit at the edges: one between clients and the Gateway, one between the Agent Loop and models, and one for each kind of tool source, such as MCP. When an outside standard changes, you swap the adapter, not the system. See [adapter-spec.md](./adapter-spec.md).
 
 ---
 
