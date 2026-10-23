@@ -13,7 +13,9 @@ We will soon rely on personal AI systems to help us in all areas of our lives.
 
 We should own those systems, so we can always ensure they are working with our best interests in mind, and so the immense wealth created by the AI revolution can flow far and wide, instead of being concentrated in a few Big Tech platforms.
 
-**Own your AI.** The Personal AI Architecture is a blueprint for building personal AI systems you own and control.
+**Own your AI.** 
+
+The Personal AI Architecture is a blueprint for building personal AI systems you own and control.
 
 It's not a product you use. It defines the architecture for building personal AI systems that are user-owned and have no lock-in. Systems built on it have:
 
