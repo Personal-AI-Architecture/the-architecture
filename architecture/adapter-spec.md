@@ -81,7 +81,7 @@ Provider errors are translated too, into the error categories of the Model API a
 **Internal interface:** the canonical tool definition (`contracts/schemas/tool-definition.json`) and the tool call and tool result shapes of the shared message contract. The Agent Loop sees only these. It doesn't know which protocol a tool speaks.
 
 **What the adapter does:**
-- Turns a tool source's self-descriptions into canonical tool definitions, recording the source in `source.id` and `source.kind`
+- Turns a tool source's self-descriptions into canonical tool definitions, recording the configured source's identity in `source.id` and its protocol in `source.kind`; an external service cannot choose another source's identity (D196)
 - Runs a tool call through the source's own protocol and returns a canonical tool result
 - Keeps the source's endpoints, credentials and protocol settings in runtime configuration, never in tool definitions
 

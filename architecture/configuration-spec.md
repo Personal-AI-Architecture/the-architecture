@@ -179,7 +179,7 @@ The system reads environment configuration in a strict sequence. Each phase depe
 
 1. **Load runtime config** — find the config file (well-known path or env var), read the four fields. Now the system knows: where's Your Memory, which adapter, what auth mode, where are tools.
 2. **Load adapter config** — load the adapter file specified by `provider_adapter`. Now the system knows how to connect to models.
-3. **Discover tools** — scan `tool_sources` paths. Read manifests and built-in definitions; ask reachable configured services what tools they offer through their tool-source adapter. An unavailable remote source does not block local startup and can be queried when it returns. Now the system knows the available tools, including the Memory tools (D196).
+3. **Discover tools** — scan `tool_sources` paths. Read manifests and built-in definitions; ask reachable configured services what tools they offer through their tool-source adapter. Report an unavailable remote source without blocking local startup, then query it when it returns. Now the system knows the available tools, including the Memory tools (D196).
 4. **Connect the Memory tools to Your Memory** — the Memory tools use `memory_root` to find it. Every component reaches Your Memory only through those tools; none reads Memory files directly.
 5. **Ready** — the Gateway starts accepting connections (see [gateway-agent-loop-contract.md](../architecture/gateway-agent-loop-contract.md) for request flow).
 

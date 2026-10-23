@@ -116,10 +116,14 @@ separate owner/product action (D188).
 3. Send a message that would benefit from the new tool
 4. For a separate service, change its advertised tool set, reconnect or use its supported change signal, and verify the Agent Loop re-queries it without a restart
 5. Start another service that the owner has not installed or configured; verify that merely calling the Gateway API as a client does not add its tools
+6. Have a configured service advertise a tool definition claiming another configured source's `source.id`; check the canonical definition's source identity
+7. Make the remote service unavailable at startup; check that local startup completes and the unavailable source is reported
 
 **Pass criteria:**
 - [ ] Agent Loop discovers the new tool at startup via self-description
 - [ ] For a separate service, the Agent Loop retrieves current definitions through its configured source and refreshes them after a source change; an unconfigured service cannot add itself by calling the Gateway API (D196)
+- [ ] The adapter binds the tool to the configured source's identity; the service's claim cannot impersonate another source
+- [ ] A remote source outage is reported but does not prevent local startup; discovery itself grants no tool-call permission
 - [ ] Model can see and use the new tool
 - [ ] Zero code changes to Agent Loop, Gateway, Auth, or Your Memory
 - [ ] Only environment changes (tool installed) and optionally preferences updated (always-send set)
