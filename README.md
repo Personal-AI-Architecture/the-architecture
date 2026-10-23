@@ -11,7 +11,7 @@ We will soon rely on personal AI systems in every area of our lives. We should o
 </p>
 
 <p align="center">
-  <a href="https://personalaiarchitecture.org">Website</a> · <a href="https://github.com/Personal-AI-Architecture/ts-architecture-template">TypeScript template</a> · <a href="https://community.braindrive.ai/c/personal-ai-architecture/39">Forum</a>
+  <a href="https://personalaiarchitecture.org">Website</a> · <a href="#language-templates">Language templates</a> · <a href="https://community.braindrive.ai/c/personal-ai-architecture/39">Forum</a>
 </p>
 
 ## What this is
@@ -22,9 +22,19 @@ Not an app, and not a framework you install. A blueprint, plus a starter kit to 
 - **The architecture** ([`overview.md`](architecture/overview.md)): how the system works, its principles, decisions, component specifications, and explanatory background.
 - **Contracts** ([`contracts/`](contracts/)): the exact OpenAPI and JSON Schema shapes code must match, plus canonical examples.
 - **Conformance** ([`conformance/`](conformance/)): language-neutral checks and review guidance that prove a system conforms.
-- **The starter kit** ([ts-architecture-template](https://github.com/Personal-AI-Architecture/ts-architecture-template)): a TypeScript starting point with all four components built in. It is pinned to an earlier PAA revision; see the [template readiness audit](maintainers/template-readiness-2026-10-23.md) before using it with current contracts.
+- **Language templates:** starting points in TypeScript, Python, Go, Rust and Java, pinned to the current PAA contracts and tested for their declared starter paths. See [template readiness](maintainers/template-readiness-2026-10-23-followup.md) for the checks and limits.
 
-The Python, Go, Rust and Java templates are not yet listed here as current-PAA starters. All five published templates need a contract update and runtime proof before that claim is accurate.
+### Language templates
+
+| Language | Starter |
+| --- | --- |
+| TypeScript | [ts-architecture-template](https://github.com/Personal-AI-Architecture/ts-architecture-template) |
+| Python | [python-architecture-template](https://github.com/Personal-AI-Architecture/python-architecture-template) |
+| Go | [go-architecture-template](https://github.com/Personal-AI-Architecture/go-architecture-template) |
+| Rust | [rust-architecture-template](https://github.com/Personal-AI-Architecture/rust-architecture-template) |
+| Java | [java-architecture-template](https://github.com/Personal-AI-Architecture/java-architecture-template) |
+
+These are implementation starters, not qualified products. Each repository names the paths its tests exercise and the work needed for a complete deployment. Recheck its pin against PAA main when starting a new build.
 
 ## How it works
 
@@ -48,7 +58,7 @@ Four components and two APIs:
 | I want to... | Start here |
 |--------------|------------|
 | Understand the architecture | [Architecture overview](architecture/overview.md) |
-| Build from an earlier pinned starter | [TypeScript template](https://github.com/Personal-AI-Architecture/ts-architecture-template) ([current-main status](maintainers/template-readiness-2026-10-23.md)) |
+| Build from a tested starter | [Choose a language template](#language-templates) ([current-main status](maintainers/template-readiness-2026-10-23-followup.md)) |
 | Build with an AI coding agent | [AGENT.md](AGENT.md), the [architecture](architecture/) and a [language template](https://github.com/Personal-AI-Architecture) |
 | Build one component | Its [architecture spec](architecture/), [contracts](contracts/) and [conformance checks](conformance/) |
 | See what every system must promise | [Product spec](spec/personal-ai-architecture-spec.md) |
