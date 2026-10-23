@@ -52,7 +52,7 @@ See [memory-spec.md](./memory-spec.md).
 
 ### 2. Add the intelligence (the AI model)
 
-Your Memory stays, and intelligence arrives through the Model API, from any provider or your own hardware. Switching is just a choice you make, and your next message uses the new model.
+Your Memory stays, and intelligence arrives through the Model API, from any provider or your own hardware.
 
 When you want state of the art performance, use the most powerful cloud models. When you want what you send the model to stay on your machine, switch to local models running on your own hardware. Use different models for different tasks.
 
