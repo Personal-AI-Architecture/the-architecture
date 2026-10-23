@@ -31,6 +31,10 @@ Security adds no separate layer: its mechanisms (scope enforcement, isolation, a
 
 Context limits may differ after a model swap. The Gateway prepares a new working context sized for the selected model while the complete conversation stays in Your Memory, and the Agent Loop checks each actual model call. Nothing rewrites or truncates saved history to make a swap work.
 
+Provider failure must not become an unchosen model or provider switch. The
+Agent Loop may retry once on the owner's same selection and record that attempt;
+failure that remains is reported (D188).
+
 A configured adapter that is missing or invalid fails startup clearly. Quietly
 switching to another adapter would move the owner's request to a provider they
 did not select; see the [configuration spec](../configuration-spec.md) and

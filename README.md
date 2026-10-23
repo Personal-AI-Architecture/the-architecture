@@ -39,7 +39,7 @@ Four components and two APIs:
 | [Gateway](architecture/gateway-spec.md) | One front door for every interface. Start on the web, pick up on your phone. |
 | [Auth](architecture/auth-spec.md) | Controls who and what gets in. It checks every request and every tool call. |
 | [Gateway API](contracts/openapi/gateway-api.yaml) | How interfaces connect. Anything that speaks it plugs in. |
-| [Model API](contracts/openapi/model-api.yaml) | How models connect. Which model and provider to use is your preference. |
+| [Model API](contracts/openapi/model-api.yaml) | How models connect. Which model and provider to use is your preference; a failure never quietly switches either choice. |
 
 ## Start here
 

@@ -225,7 +225,7 @@ These four owner outcomes are values, not code — but they produce observable p
 
 **Claim:** Adapters translate between the contract and the specific protocol/provider. They contain no policy or business logic.
 
-**Verification:** Inspect adapter code. It should contain only format translation (field mapping, serialization, protocol differences). No retry logic, no caching, no routing decisions, no business rules.
+**Verification:** Inspect adapter code. It should contain only format translation (field mapping, serialization, protocol differences). No retry logic, no caching, no routing decisions, no business rules. If a product makes the optional same-selection retry in D188, that decision and its record belong to the Agent Loop.
 
 **Fail condition:** An adapter contains business logic, caching, routing, or policy decisions. Adapters that grow fat are becoming components.
 

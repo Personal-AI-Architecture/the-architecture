@@ -93,7 +93,7 @@ Each request sends the instructions, the conversation and the Memory content the
 | The chosen model lacks an ability the request needs | Reported, not faked (above). GAP-PAA-27 proposes the `capability_unsupported` code. |
 | The chosen model isn't available through the loaded adapter, or none is chosen | Reported; no other model is substituted. GAP-PAA-27 proposes the `model_unavailable` code. |
 | The request is too large for the model's context window | Reported as `context_overflow`. The proposed GAP-PAA-20 rule has the Gateway select bounded saved history and the Agent Loop check each actual call, including live tool results. An unknown safe limit reports `context_limit_unknown`. |
-| The provider is down or times out | Reported as `provider_error`, and the current turn stops. No other provider or model is substituted; PAA defines no fallback model (D188). The owner can switch provider and try again. |
+| The provider is down or times out | The Agent Loop may make one recorded retry on the same selected model and provider profile. If the failure remains, it reports `provider_error` and stops the turn. No other model or provider is substituted (D188); the owner can explicitly switch and try again. |
 
 ## How model access grows
 
@@ -110,7 +110,7 @@ Each request sends the instructions, the conversation and the Memory content the
 - [ ] With no model chosen, the system reports it rather than picking one
 - [ ] Switching to another provider profile in the loaded adapter takes effect on the next message, with no restart and no code change
 - [ ] Adding a provider in a new format changes only the adapter, its config, the startup config and the API key secret
-- [ ] A provider failure is reported and stops the turn; no other provider or model is substituted
+- [ ] After any one recorded retry on the selected model and provider profile, an unresolved provider failure reports `provider_error` and stops the turn; no other model or provider is substituted
 - [ ] *(security)* Every saved assistant reply records the model and provider that produced it
 - [ ] Local and cloud models go through the same Model API
 - [ ] A request needing an ability the chosen model lacks is reported: no content silently dropped, no tool call pretended, no model quietly substituted

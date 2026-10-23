@@ -65,6 +65,8 @@ Your Memory and the models you use with it are the brain. The Agent Loop is the 
 
 The Agent Loop is deliberately generic. Everything that makes a product unique (methodology, personality, skills, folder structure) lives in Your Memory, not in the loop. So the Agent Loop isn't part of a platform you're locked into. It's another swappable component.
 
+If a model call fails, the loop may make one recorded retry on the same model and provider the owner selected. It reports a failure that remains; it never quietly chooses a different model or provider (D188).
+
 See [agent-loop-spec.md](./agent-loop-spec.md).
 
 ### 4. Add the tools

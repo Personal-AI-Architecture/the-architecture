@@ -14,6 +14,7 @@ Use this when reviewing Agent Loop behavior, stream semantics, provider integrat
 - [ ] The loop continues until the model signals completion through the defined finish behavior.
 - [ ] Stream events use the canonical `_event_type` discriminator and payload fields for `text-delta`, `tool-call`, `tool-result`, `done`, and `error`.
 - [ ] Mid-stream errors use the explicit taxonomy: `provider_error`, `tool_error`, `auth_error`, `context_overflow`.
+- [ ] Any automatic provider-call retry occurs at most once in the Agent Loop, stays on the owner's selected model and provider profile, and is recorded; an unresolved failure reports `provider_error` (D188).
 - [ ] Error messages are safe for client display.
 - [ ] Assistant text is preserved correctly across tool-continuation turns.
 - [ ] The loop uses the model named in each request; a model change applies to the next message with no restart.
