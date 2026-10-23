@@ -4,6 +4,8 @@
 
 **Own your AI.** An open blueprint for building personal AI systems you own. Keep your memory, swap everything else.
 
+We will soon rely on personal AI systems in every area of our lives. We should own them, so they always work in our interest, and the wealth AI creates flows far and wide instead of to a few Big Tech platforms.
+
 <p align="center">
   <img src="assets/readme-hero.svg" alt="Your Memory (conversations, settings, skills, agent instructions and tool preferences, in files you own) stays under your control, while models, interfaces and tools can be swapped freely." width="680">
 </p>
@@ -36,9 +38,9 @@ Four components and two APIs:
 | [Your Memory](architecture/memory-spec.md) | All your data, in files you own. Everything else depends on it; it depends on nothing. |
 | [Agent Loop](architecture/agent-loop-spec.md) | Calls the model, runs the tools it asks for, and repeats until the job is done. |
 | [Gateway](architecture/gateway-spec.md) | One front door for every interface. Start on the web, pick up on your phone. |
-| [Auth](architecture/auth-spec.md) | Controls who and what gets in. Swapping other parts never changes it. |
+| [Auth](architecture/auth-spec.md) | Controls who and what gets in. It checks every request and every tool call. |
 | [Gateway API](contracts/openapi/gateway-api.yaml) | How interfaces connect. Anything that speaks it plugs in. |
-| [Model API](contracts/openapi/model-api.yaml) | How models connect. Switch providers with a config change. |
+| [Model API](contracts/openapi/model-api.yaml) | How models connect. Which model and provider to use is your preference. |
 
 ## Start here
 
