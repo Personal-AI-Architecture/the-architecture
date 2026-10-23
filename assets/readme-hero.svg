@@ -3,10 +3,11 @@
 <defs><marker id="k" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#94A3B8"/></marker></defs>
 
 <rect x="40" y="40" width="230" height="180" rx="12" fill="none" stroke="#FFFFFF" stroke-width="2.5"/>
-<text x="155" y="108" text-anchor="middle" fill="#FFFFFF" font-size="18" font-weight="700">Your Memory</text>
-<text x="155" y="136" text-anchor="middle" fill="#FFFFFF" font-size="12">conversations, preferences,</text>
-<text x="155" y="154" text-anchor="middle" fill="#FFFFFF" font-size="12">skills, documents and more.</text>
-<text x="155" y="176" text-anchor="middle" fill="#FFFFFF" font-size="12" font-weight="600">All your data in files you own.</text>
+<text x="155" y="94" text-anchor="middle" fill="#FFFFFF" font-size="18" font-weight="700">Your Memory</text>
+<text x="155" y="122" text-anchor="middle" fill="#FFFFFF" font-size="12">conversations, settings,</text>
+<text x="155" y="140" text-anchor="middle" fill="#FFFFFF" font-size="12">skills, agent instructions</text>
+<text x="155" y="158" text-anchor="middle" fill="#FFFFFF" font-size="12">and tool preferences.</text>
+<text x="155" y="184" text-anchor="middle" fill="#FFFFFF" font-size="12" font-weight="600">All your data in files you own.</text>
 <line x1="280" y1="130" x2="400" y2="130" stroke="#94A3B8" stroke-width="1.5" marker-end="url(#k)" marker-start="url(#k)"/>
 <g fill="none" stroke="#94A3B8" stroke-dasharray="5 4" stroke-width="1.5">
 <rect x="410" y="40" width="230" height="52" rx="8"/><rect x="410" y="104" width="230" height="52" rx="8"/><rect x="410" y="168" width="230" height="52" rx="8"/></g>

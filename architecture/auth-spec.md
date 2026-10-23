@@ -1,8 +1,3 @@
----
-sidebar_label: Auth
-hide_table_of_contents: true
----
-
 # Auth
 
 ## What Auth is

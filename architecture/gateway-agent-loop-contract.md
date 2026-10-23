@@ -1,8 +1,3 @@
----
-sidebar_label: Gateway ↔ Agent Loop contract
-hide_table_of_contents: true
----
-
 # The Gateway–Agent Loop Contract
 
 **Serves stories:** US-5, US-6, US-7 in the [PAA spec](../spec/personal-ai-architecture-spec.md).
@@ -35,6 +30,46 @@ This works because the handoff only needs to carry a few things. A review of eve
 - **No adapter needed:** both sides are parts of your own system and speak the same internal language, so there's nothing to translate. A replacement Agent Loop just has to honor this contract. If one you want to use doesn't, a small translator in front of it, the same idea as an adapter, can make it fit, and the Gateway still doesn't change.
 
 **What it deliberately leaves out:** routing, version numbers and message wrappers. It can run over the network or as a plain function call inside one program, without changing its shape.
+
+Here is one request from start to finish, with the handoff in the middle:
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Gateway
+    participant Auth
+    participant Memory as Your Memory
+    participant AL as Agent Loop
+    participant Model as Model (via Model API)
+    participant Tools
+
+    Client->>Gateway: Message + conversation ID + metadata (Gateway API)
+    Gateway->>Auth: Who is this, and are they allowed?
+    Auth-->>Gateway: Allowed, with actor context
+    Gateway->>Memory: Save the incoming message, load the conversation (conversation tool)
+    Memory-->>Gateway: Conversation history
+    Gateway->>AL: Messages + model and provider + auth context + metadata
+
+    loop Until the job is done
+        AL->>Model: Messages + tool definitions
+        Model-->>AL: Text and/or tool calls
+        AL-->>Gateway: Stream text and tool calls as they happen
+        Gateway-->>Client: Stream them on
+        opt Model asked for tools
+            AL->>Auth: May this actor make this tool call?
+            Auth-->>AL: Allowed or not permitted
+            AL->>Tools: Run permitted tool calls
+            Tools->>Memory: Memory tools (read, write, search...)
+            Tools-->>AL: Results
+            AL-->>Gateway: Stream the results
+            Gateway-->>Client: Stream them on
+        end
+    end
+
+    AL-->>Gateway: Done (or an error)
+    Gateway->>Memory: Save the reply, or what arrived with the error (conversation tool)
+    Gateway-->>Client: Done + conversation ID
+```
 
 The rest of this doc is the specification: what any implementation of the Gateway–Agent Loop handoff must do.
 

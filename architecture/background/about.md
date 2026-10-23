@@ -1,9 +1,4 @@
----
-title: About Us
-description: Who we are and why we're building this
-displayed_sidebar: null
-hide_table_of_contents: true
----
+# About Us
 
 We're on a mission to build a superior user-owned alternative to Big Tech AI systems so the power of AI belongs not to a small number of Big Tech companies, but to the people.
 
@@ -13,13 +8,13 @@ The Personal AI Architecture is the open-source foundation for that mission — 
 
 We believe accomplishing this mission will require more than any one company can do alone.
 
-For this reason we are open sourcing the Personal AI Architecture, the foundation we are building the BrainDrive Personal AI system on top of.
+For this reason we are open sourcing the Personal AI Architecture, the architecture BrainDrive is built on.
 
 **The Architecture is designed to create a future where there are no AI system users, only owners.**
 
 If this vision succeeds there will be more than enough opportunity for BrainDrive and any other company that wants to offer services to AI system owners.
 
-We'll be sharing our learnings as we move towards implementing BrainDrive on top of this foundation, and hope others will do the same.
+BrainDrive is built on this architecture. We share what we learn as we go, and hope others will do the same.
 
 ## Get Involved
 
@@ -33,5 +28,4 @@ This architecture shouldn't be finished by one team.
 
 ## License
 
-- **Code:** MIT License
-- **Documentation:** [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)
+MIT, for everything in this repository. See [LICENSE](https://github.com/Personal-AI-Architecture/the-architecture/blob/main/LICENSE).

@@ -1,8 +1,3 @@
----
-sidebar_label: Customization
-hide_table_of_contents: true
----
-
 # Customization
 
 **Serves stories:** US-11, US-17 in the [PAA spec](../spec/personal-ai-architecture-spec.md).

@@ -1,7 +1,3 @@
----
-hide_table_of_contents: true
----
-
 # Developer Guides Spec
 
 ## Problem
@@ -55,7 +51,7 @@ A single document (~300 lines) containing *only* what you need to build against:
 - The 4 components, what each must do (not why)
 - The 2 API contracts (referencing the canonical schemas)
 - The Gateway-Agent Loop contract
-- The responsibility matrix (distilled from architecture overview)
+- The responsibility matrix (from the implementer's reference)
 - Conformance criteria (test IDs, pass/fail)
 
 No decisions, no rationale, no history. Just the implementation contract. Think API docs for the architecture.

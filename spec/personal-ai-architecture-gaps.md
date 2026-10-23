@@ -1,15 +1,10 @@
----
-sidebar_label: PAA spec gaps
-hide_table_of_contents: true
----
-
 # Gaps: Personal AI Architecture
 
 > Companion to [personal-ai-architecture-spec.md](./personal-ai-architecture-spec.md). Paths are in this repository (paths outside ` ` are relative to the repository root); `template:` means [ts-architecture-template](https://github.com/Personal-AI-Architecture/ts-architecture-template). This status was refreshed after the canonical-contract, builder, primer, and conformance alignment batches.
 >
 > Each gap is something the spec expects that the published architecture does not deliver today. Classification is a suggestion for triage: **Defect** (published material is broken or contradicts itself), **Decision needed** (the maintainers must choose), **Technical** (contract and technical work), **Spec-only** (wording fix in the architecture docs). A gap marked **Decided, spec update in progress** has a settled answer that is still being written into the specs and contracts.
 
-**Scoreboard:** The contract-source alignment batch, example-shape validation, documentation freshness tooling, configuration alignment, required parallel tool execution, portable policy semantics, approval lifecycle contracts, transport-neutral identity propagation, tool-definition visibility/source semantics, local-address decision, first executable language-neutral conformance baseline, template-link cleanup, the visitor-1 decisions on GAP-PAA-18, 19 and 23, the v1 identity rule for GAP-PAA-24 (agent identities deferred to the agents step), the Auth-down fail-closed correction, multi-actor wording, revocation cancellation, portable audit records, and the provider decisions on GAP-PAA-26 and 28 are complete. Still open: GAP-PAA-20 (with Dave J), and from the visitor-1 read-through of the Models, Tools, Adapter and Communication docs GAP-PAA-27, 29, 30 and 31.
+**Scoreboard:** The contract-source alignment batch, example-shape validation, documentation freshness tooling, configuration alignment, required parallel tool execution, portable policy semantics, approval lifecycle contracts, transport-neutral identity propagation, tool-definition visibility/source semantics, local-address decision, first executable language-neutral conformance baseline, template-link cleanup, the visitor-1 decisions on GAP-PAA-18, 19 and 23, the v1 identity rule for GAP-PAA-24 (agent identities deferred to the agents step), the Auth-down fail-closed correction, multi-actor wording, revocation cancellation, portable audit records, and the provider decisions on GAP-PAA-26 and 28, and model-aware context handling for GAP-PAA-20 are complete. Still open: from the visitor-1 read-through of the Models, Tools, Adapter and Communication docs GAP-PAA-27, 29, 30 and 31.
 
 ## Routes a developer follows
 

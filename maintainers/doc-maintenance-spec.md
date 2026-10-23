@@ -1,7 +1,3 @@
----
-hide_table_of_contents: true
----
-
 # Documentation Maintenance Spec
 
 ## Why this spec exists

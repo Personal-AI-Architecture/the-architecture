@@ -1,8 +1,3 @@
----
-sidebar_label: Configuration
-hide_table_of_contents: true
----
-
 # Configuration
 
 **Serves stories:** US-5, US-10, US-11 in the [PAA spec](../spec/personal-ai-architecture-spec.md).

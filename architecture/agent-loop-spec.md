@@ -1,8 +1,3 @@
----
-sidebar_label: Agent Loop
-hide_table_of_contents: true
----
-
 # Agent Loop
 
 ## What the Agent Loop is

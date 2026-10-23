@@ -124,7 +124,6 @@ Deeper thinking behind the design decisions.
 
 | Document | What it covers |
 |----------|---------------|
-| [Memory as Platform](../architecture/background/memory-as-platform.md) | Why memory-as-platform is the foundation of personal ownership |
 | [Lock-In Analysis](../architecture/background/lock-in-analysis.md) | How each component avoids lock-in |
 | [Memory-Tool Completeness](../architecture/background/memory-tool-completeness.md) | Proof that memory + tools covers all system needs |
 | [Communication Principles](../architecture/communication-principles.md) | Communication as a replaceable component |

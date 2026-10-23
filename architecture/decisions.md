@@ -1,7 +1,3 @@
----
-hide_table_of_contents: true
----
-
 # Foundation Decisions
 
 The decisions that define the architecture, and why they were made. For how the architecture works today, start with the [Architecture Overview](../architecture/overview.md).

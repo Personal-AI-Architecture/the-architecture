@@ -1,8 +1,3 @@
----
-sidebar_label: Your Memory
-hide_table_of_contents: true
----
-
 # Your Memory
 
 ## What Your Memory is

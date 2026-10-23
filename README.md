@@ -4,8 +4,10 @@
 
 **Own your AI.** An open blueprint for building personal AI systems you own. Keep your memory, swap everything else.
 
+We will soon rely on personal AI systems in every area of our lives. We should own them, so they always work in our interest, and the wealth AI creates flows far and wide instead of to a few Big Tech platforms.
+
 <p align="center">
-  <img src="assets/readme-hero.svg" alt="Your Memory (conversations, preferences, skills, documents and more, in files you own) stays under your control, while models, interfaces and tools can be swapped freely." width="680">
+  <img src="assets/readme-hero.svg" alt="Your Memory (conversations, settings, skills, agent instructions and tool preferences, in files you own) stays under your control, while models, interfaces and tools can be swapped freely." width="680">
 </p>
 
 <p align="center">
@@ -16,11 +18,11 @@
 
 Not an app, and not a framework you install. A blueprint, plus a starter kit to build from.
 
-- **The specification** ([`spec/`](spec/)): what every PAA system must promise, including product stories and known gaps.
-- **The architecture** ([`architecture/`](architecture/)): how the system works, its principles, decisions, component specifications, and explanatory background.
+- **The specification** ([`personal-ai-architecture-spec.md`](spec/personal-ai-architecture-spec.md)): what every PAA system must promise, including product stories, with [known gaps](spec/personal-ai-architecture-gaps.md) tracked separately.
+- **The architecture** ([`overview.md`](architecture/overview.md)): how the system works, its principles, decisions, component specifications, and explanatory background.
 - **Contracts** ([`contracts/`](contracts/)): the exact OpenAPI and JSON Schema shapes code must match, plus canonical examples.
 - **Conformance** ([`conformance/`](conformance/)): language-neutral checks and review guidance that prove a system conforms.
-- **Build guidance** ([`build/`](build/)): primers, blueprints, implementation prompts, and derived implementation references.
+- **Build guidance** ([`implementers-reference.md`](build/implementers-reference.md)): primers, blueprints, implementation prompts, and derived implementation references.
 - **The starter kit** ([ts-architecture-template](https://github.com/Personal-AI-Architecture/ts-architecture-template)): a working TypeScript starting point with all four components built in.
 
 ## How it works
@@ -36,9 +38,9 @@ Four components and two APIs:
 | [Your Memory](architecture/memory-spec.md) | All your data, in files you own. Everything else depends on it; it depends on nothing. |
 | [Agent Loop](architecture/agent-loop-spec.md) | Calls the model, runs the tools it asks for, and repeats until the job is done. |
 | [Gateway](architecture/gateway-spec.md) | One front door for every interface. Start on the web, pick up on your phone. |
-| [Auth](architecture/auth-spec.md) | Controls who and what gets in. Swapping other parts never changes it. |
+| [Auth](architecture/auth-spec.md) | Controls who and what gets in. It checks every request and every tool call. |
 | [Gateway API](contracts/openapi/gateway-api.yaml) | How interfaces connect. Anything that speaks it plugs in. |
-| [Model API](contracts/openapi/model-api.yaml) | How models connect. Switch providers with a config change. |
+| [Model API](contracts/openapi/model-api.yaml) | How models connect. Which model and provider to use is your preference. |
 
 ## Start here
 

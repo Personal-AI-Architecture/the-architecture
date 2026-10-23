@@ -30,7 +30,6 @@ Implement the **Memory** component in **{{TARGET_LANGUAGE}}** so it is architect
 ## Human Architecture Inputs (Authoritative for ownership boundaries)
 
 - `architecture/memory-spec.md`
-- `architecture/background/memory-as-platform.md`
 - `architecture/overview.md`
 - `architecture/security-spec.md`
 - `architecture/gateway-spec.md`

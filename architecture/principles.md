@@ -1,15 +1,42 @@
----
-displayed_sidebar: null
-hide_table_of_contents: true
----
-
 # Architecture Principles
+
+## What the principles are
+
+The principles are the five rules that keep PAA free of lock-in. Every part, contract and decision in the architecture follows from them.
+
+Most systems don't write their rules down. Choices get made one at a time, each sensible on its own, and lock-in builds up quietly: a shortcut here, a dependency there, until leaving would mean starting over.
+
+We think lock-in is rarely one big decision. It's many small ones nobody noticed. So the rules that prevent it need to be written down, short, and easy to check a design against.
+
+So PAA has five principles. Each one protects something specific, and each names the lock-in you take on if you break it. No software enforces them, and you can break any of them and the system still runs. But every break is lock-in you've chosen.
+
+That means anyone building or changing a PAA system can ask one question of any design: which principle does this bend, and what will it cost later?
+
+<p align="center">
+  <img src="../assets/memory-is-the-platform.svg" alt="Today's AI apps: Your Memory is locked inside the app with its models, interfaces and tools, so leaving the app means losing your memory. With PAA: Your Memory is the platform, in files you own, and models, interfaces and tools plug into it, so you can swap anything and your memory stays." width="860" />
+</p>
+
+## How it works
+
+The first principle protects the center, and the other four protect everything around it.
+
+| Principle | What it protects | If you break it |
+|---|---|---|
+| 1. Your Memory depends on nothing | Your Memory outlives every other part | Your Memory is tied to whatever it depends on |
+| 2. Keep everything else swappable | Any part can be replaced with a settings change or one swap | Replacing one part means rebuilding others |
+| 3. Keep responsibilities where they belong | Swapping one part never requires changing another | Work that leaked has to be untangled before you can swap |
+| 4. Keep it simple | One developer with AI coding agents can understand and maintain it all | You depend on a team, or on one person |
+| 5. Start constrained, expand deliberately | Every ability is one you chose and can explain | You maintain and secure abilities without knowing why they're there |
+
+The rest of this doc states each principle in full.
+
+---
 
 ## 1. Your Memory Should Have No Outbound Dependencies
 
-Your Memory depends on nothing. Everything else depends on it. That's what makes it the platform.
+Your Memory depends on nothing, and everything else depends on it.
 
-Every component accesses Your Memory exclusively through tools. That's what keeps it the platform. Storage can change without anything else knowing. If a component bypasses tools and talks to storage directly, or if Your Memory starts depending on another component, it stops being the platform.
+Every component reaches Your Memory only through tools, so how it's stored can change without anything else knowing. If a component goes around the tools to the storage directly, or Your Memory starts depending on another component, the two are tied together, and you can no longer swap one without the other.
 
 
 ## 2. Keep Everything Else Swappable
@@ -23,7 +50,7 @@ Memory is accessed via tools — change the storage, the tools still work. Compo
 
 Leaks create lock-in.
 
-The [Responsibility Matrix](./overview.md#responsibility-matrix) defines which component is responsible for what. Follow it. If swapping a component requires changes to a different component — not because the contract changed, but because work leaked across the boundary — this principle is broken.
+The [Responsibility Matrix](../build/implementers-reference.md#responsibility-matrix) defines which component is responsible for what. Follow it. If swapping a component requires changes to a different component — not because the contract changed, but because work leaked across the boundary — this principle is broken.
 
 Reality sometimes requires exceptions. When a component must temporarily do work that belongs to another, contain it inside a swappable component so it is removable when no longer needed. Compensating for weaker models is the primary example.
 
@@ -41,6 +68,4 @@ The entire system must be understandable and maintainable by one developer + AI 
 
 Each expansion — broader scope, more tools, external integrations — is a deliberate step.
 
-Add tools, don't change architecture. Scope is a tool configuration decision, not an architecture decision. Every capability you grant is a capability you have to maintain, secure, and support. If you can't explain why a capability is active, it shouldn't be.
-
-Nothing enforces these principles. You can violate any of them and the system still works. But every violation is lock-in you've chosen to accept.
+Add tools, don't change architecture. Scope is set by which tools exist and what Auth allows (D55), not by changing the architecture. Every capability you grant is a capability you have to maintain, secure, and support. If you can't explain why a capability is active, it shouldn't be.
