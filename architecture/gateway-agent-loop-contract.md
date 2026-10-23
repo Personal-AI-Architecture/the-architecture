@@ -51,25 +51,29 @@ sequenceDiagram
     Client->>Gateway: Message + conversation ID + metadata (Gateway API)
     Gateway->>Auth: Who is this, and are they allowed?
     Auth-->>Gateway: Allowed, with actor context
-    Gateway->>Memory: Load the conversation (conversation tool)
+    Gateway->>Memory: Save the incoming message, load the conversation (conversation tool)
     Memory-->>Gateway: Conversation history
-    Gateway->>AL: Messages + metadata
+    Gateway->>AL: Messages + model and provider + auth context + metadata
 
     loop Until the job is done
         AL->>Model: Messages + tool definitions
         Model-->>AL: Text and/or tool calls
+        AL-->>Gateway: Stream text and tool calls as they happen
+        Gateway-->>Client: Stream them on
         opt Model asked for tools
             AL->>Auth: May this actor make this tool call?
             Auth-->>AL: Allowed or not permitted
             AL->>Tools: Run permitted tool calls
             Tools->>Memory: Memory tools (read, write, search...)
             Tools-->>AL: Results
+            AL-->>Gateway: Stream the results
+            Gateway-->>Client: Stream them on
         end
     end
 
-    AL-->>Gateway: Streamed text, tool calls, results, done
-    Gateway->>Memory: Save the reply (conversation tool)
-    Gateway-->>Client: Streamed response + conversation ID
+    AL-->>Gateway: Done (or an error)
+    Gateway->>Memory: Save the reply, or what arrived with the error (conversation tool)
+    Gateway-->>Client: Done + conversation ID
 ```
 
 The rest of this doc is the specification: what any implementation of the Gateway–Agent Loop handoff must do.
