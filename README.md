@@ -5,7 +5,7 @@
 **Own your AI.** An open blueprint for building personal AI systems you own. Keep your memory, swap everything else.
 
 <p align="center">
-  <img src="assets/readme-hero.svg" alt="Your Memory (conversations, preferences, skills, documents and more, in files you own) stays under your control, while models, interfaces and tools can be swapped freely." width="680">
+  <img src="assets/readme-hero.svg" alt="Your Memory (conversations, preferences, skills, agent instructions and tool connections, in files you own) stays under your control, while models, interfaces and tools can be swapped freely." width="680">
 </p>
 
 <p align="center">
