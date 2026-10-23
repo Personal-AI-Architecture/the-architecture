@@ -1,5 +1,7 @@
 # Template readiness against merged PAA main — 2026-10-23
 
+This records the initial audit of the then-published template revisions. See the [follow-up after runtime updates](template-readiness-2026-10-23-followup.md) for their current status.
+
 ## Decision
 
 Keep the TypeScript template linked in the README as a starter for its **pinned earlier revision**, with an explicit compatibility note. Do not add Python, Go, Rust or Java as **current-PAA-ready** starters yet. None of the five published template revisions passes the shared validator against the merged PAA main, and the runtime request types inspected in all five omit a field required by the current contracts.
