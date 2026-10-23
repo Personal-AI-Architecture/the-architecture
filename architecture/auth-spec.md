@@ -226,9 +226,9 @@ Identity records hold an ID, type, display name, creation time and status. Polic
 
 ### Audit log
 
-Every action is recorded as the portable [audit record](../contracts/schemas/audit-record.json): who did what, when, to which resource, with what result, and under which correlation ID. This includes requests Auth denied, tool calls, cancellation/revocation events, and changes to identities and permissions. Audit logging is required from the start, including on a system with only the owner. Implementations may add non-sensitive detail, but must not put credentials, secrets, or raw private content in the record.
+Actions are recorded as the portable [audit record](../contracts/schemas/audit-record.json): who did what, when, to which resource, with what result, and under which correlation ID. This includes requests Auth denied, tool calls, cancellation/revocation events, and changes to identities and permissions. Audit logging is required from the start, including on a system with only the owner. Implementations may add non-sensitive detail, but must not put credentials, secrets, or raw private content in the record.
 
-If the audit log cannot be written, tool calls don't run until it can, and the owner is alerted; conversation without tool calls continues. The audit log is the owner's data: protected like Your Memory, exportable and deletable by the owner.
+If the audit log cannot be written, no tool call runs until it can, so every tool call that runs is recorded. Conversation without tool calls continues, but its other events, such as sign-ins and denied requests, go unrecorded until the log is back. The owner is alerted, and the outage itself is recorded once the log is back. The audit log is the owner's data: protected like Your Memory, exportable and deletable by the owner.
 
 ### Auth tools
 
@@ -343,7 +343,7 @@ Items marked *(security)* are the per-component requirements from [security-spec
 - [ ] By default the owner can do everything; no approval prompt is required by the architecture
 - [ ] Approval rules the owner sets are enforced
 - [ ] A new identity, of any type, has no permissions until the owner grants them
-- [ ] Every action is recorded in the audit log; if the log can't be written, tool calls don't run, the owner is alerted, and conversation without tool calls continues
+- [ ] Every executed tool call is recorded in the audit log, and other actions are recorded whenever the log can be written; if it can't, tool calls don't run, the owner is alerted, conversation without tool calls continues, and the outage is recorded once the log is back
 - [ ] Auth state is exportable: identities, policies, configuration and audit log; it belongs to the owner *(security)*
 - [ ] After import, re-created identities have no access until the owner turns it back on; unsupported rules are reported and grant nothing
 - [ ] Swapping the auth provider changes only the Auth component

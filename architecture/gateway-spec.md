@@ -79,7 +79,7 @@ These are explicit boundaries. They exist to prevent the Gateway from becoming o
 
 The context injection boundary is worth emphasizing. D20 says the client sends client metadata (folder path, context files) alongside messages. The Gateway passes that metadata through. Its separate context-window job selects saved history by size and turn boundary; it does not decide which client files matter or interpret message meaning.
 
-### Preparing the model working context (GAP-PAA-20 proposal)
+### Preparing the model working context (GAP-PAA-20)
 
 The full conversation in Your Memory and the messages sent to the Agent Loop are different things. The Gateway preserves the original current message, assistant replies, tool calls and tool results in the conversation record. For each request it reads the owner's selected provider and model (D193) and prepares only the history that can fit the safe limit for that pair. Each provider profile holds limits for its models; a deployment may record a verified conservative limit when the provider does not publish one. If no safe limit exists for the selected pair, the Gateway reports `context_limit_unknown` instead of assuming one universal window.
 
