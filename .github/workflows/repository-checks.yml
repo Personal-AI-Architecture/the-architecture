@@ -1,0 +1,55 @@
+name: PAA Repository Checks
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  repository-checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install check dependency
+        run: python3 -m pip install -r requirements-ci.txt
+
+      - name: Select change base
+        env:
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PUSH_BEFORE_SHA: ${{ github.event.before }}
+        run: |
+          if [ -n "$PR_BASE_SHA" ]; then
+            base="$(git merge-base "$PR_BASE_SHA" HEAD)"
+          elif [ -n "$PUSH_BEFORE_SHA" ] && [[ ! "$PUSH_BEFORE_SHA" =~ ^0+$ ]]; then
+            base="$PUSH_BEFORE_SHA"
+          else
+            base="$(git rev-list --max-parents=0 HEAD | head -n 1)"
+          fi
+          echo "PAA_CHECK_BASE=$base" >> "$GITHUB_ENV"
+
+      - name: Check documentation registry and freshness
+        run: python3 scripts/check-docs.py --base "$PAA_CHECK_BASE"
+
+      - name: Validate contract example manifest and shapes
+        run: python3 contracts/examples/validate-manifest.py
+
+      - name: Run executable conformance baseline
+        run: python3 conformance/runner.py
+
+      - name: Check patch whitespace
+        run: git diff --check "$PAA_CHECK_BASE" HEAD

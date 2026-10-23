@@ -8,7 +8,7 @@ Now that the repo is public and AI agents are first-class contributors, document
 
 1. What documentation exists and what it covers
 2. What triggers a documentation update
-3. How AI agents automatically maintain documentation
+3. How contributors and AI agents maintain documentation
 4. How CI enforces freshness
 
 ---
@@ -44,7 +44,7 @@ Files outside these locations (e.g., `tasks/*.md`, `node_modules/`) are excluded
 | `path` | string | Path to the doc file, relative to repo root |
 | `covers` | string[] | File or directory paths this doc is responsible for, relative to repo root. Directory prefixes must end with `/`. Every entry must resolve to an existing file or directory. |
 | `tier` | 1 \| 2 \| 3 | Doc priority tier (see below) |
-| `update_trigger` | `"code"` \| `"spec"` \| `"manual"` | Describes the *primary* reason this doc changes. `"code"`: primarily maintained because code it covers changes. `"spec"`: primarily maintained because upstream specs it depends on change. `"manual"`: doc is never flagged stale by CI — maintained by humans only (used for research docs, philosophical analysis, and other documents where automated freshness detection is not meaningful). Note: regardless of trigger type, the freshness check always evaluates both `covers` and `depends_on` — a doc is stale if *either* condition is met. The trigger field is metadata for human/AI understanding, not a filter on which conditions are checked. |
+| `update_trigger` | `"code"` \| `"spec"` \| `"manual"` | Describes the *primary* reason this doc changes. The checker evaluates `covers` and `depends_on` for every trigger type; `manual` marks a human-maintained document but does not suppress a warning. |
 | `depends_on` | string[] | Other docs this one references or derives from — changes cascade |
 
 ### Tiers
@@ -53,9 +53,9 @@ Files outside these locations (e.g., `tasks/*.md`, `node_modules/`) are excluded
 |------|------|----------|-------------------|
 | **1 — Contracts** | Define what the system *is*. Machine-readable where possible. | OpenAPI specs, JSON Schemas, architecture overview | Must be updated in the same PR as the code change |
 | **2 — Component specs** | Define how each piece works. Human-readable architecture docs. | agent-loop-spec, gateway-spec, memory-spec, auth-spec, security-spec | Must be updated in the same PR as the code change |
-| **3 — Guides & reference** | Help people use the system. Derived from Tier 1 and 2. | README, AGENT.md, implementers-reference, conformance docs | Updated by AI agent in the same PR, verified in CI |
+| **3 — Guides & reference** | Help people use the system. Derived from Tier 1 and 2. | README, AGENT.md, implementers-reference, conformance docs | Updated in the same PR where practical; CI warns if they lag |
 
-Tier 1 and 2 docs block merge if stale. Tier 3 docs are auto-updated by AI agents and should not block merge, but CI will warn if they lag.
+Tier 1 and 2 docs block merge if stale. Tier 3 docs do not block merge, but CI warns if they lag. AI agents may prepare updates; CI does not edit PR branches.
 
 ---
 
@@ -67,13 +67,13 @@ A documentation update is required when a change touches code or specs that a do
 
 | Change type | What must be updated | Who updates | Enforcement |
 |------------|---------------------|-------------|-------------|
-| **Code change** (`src/`) | All docs whose `covers` match the changed paths | AI agent (auto) | CI gate blocks merge if docs are stale |
-| **Schema change** (`contracts/schemas/`) | All docs referencing the schema + generated types must be regenerated | AI agent (auto) | CI gate + `generate:types` check |
-| **OpenAPI change** (`contracts/openapi/`) | Component specs for affected contracts + AGENT.md | AI agent (auto) | CI gate |
-| **Config change** (`adapters/`, config-related src) | configuration-spec + README quickstart | AI agent (auto) | CI gate |
+| **Code change** (`src/`) | All docs whose `covers` match the changed paths | Contributor or AI agent | Registry freshness gate when those paths exist |
+| **Schema change** (`contracts/schemas/`) | Docs that cover or depend on the changed schema | Contributor or AI agent | Registry freshness and contract example checks |
+| **OpenAPI change** (`contracts/openapi/`) | Component specs for affected contracts + AGENT.md | Contributor or AI agent | Registry freshness gate |
+| **Config change** (`adapters/`, config-related src) | configuration-spec + README quickstart | Contributor or AI agent | Registry freshness gate when those paths exist |
 | **New component or API** | architecture overview, AGENT.md, implementers-reference, file map | Human + AI agent | PR review |
 | **Architectural/philosophical change** | architecture overview, relevant component specs, README | Human-authored, AI-verified | PR review |
-| **Dependency or tooling change** | README (if user-facing), deployment-spec (if runtime) | AI agent (auto) | CI gate |
+| **Dependency or tooling change** | README (if user-facing), deployment-spec (if runtime) | Contributor or AI agent | Registry freshness gate where dependencies are registered |
 
 ### What counts as "stale"
 
@@ -87,26 +87,24 @@ These two conditions are deterministic and enforced by CI. Additionally, AI agen
 
 ## AI Agent Workflow
 
-AI agents are first-class documentation maintainers. The workflow assumes Claude Code or equivalent agents operate on PRs.
+AI agents can help contributors keep documents current. The CI job only checks
+the submitted branch; it does not run an agent, use a paid API, or push edits.
 
 ### On every PR
 
 ```
-1. CI runs `check:docs` (see Freshness Check below)
-2. If stale docs detected:
-   a. AI agent reads the PR diff
-   b. AI agent reads the stale docs and the doc registry
-   c. AI agent proposes doc updates as commits on the PR branch
-   d. If Tier 1 or 2: updates are required before merge
-   e. If Tier 3: updates are auto-committed, reviewer verifies
-3. If no stale docs: CI passes, no action needed
+1. CI compares the PR with its merge base and runs `scripts/check-docs.py`.
+2. If docs are stale, the contributor or an AI agent reads the diff and registry,
+   updates the relevant docs, and pushes a new commit.
+3. Tier 1/2 staleness fails CI. Tier 3 staleness is printed as a warning.
+4. CI reruns on the new commit. A reviewer checks that updates are accurate.
 ```
 
 ### AI agent responsibilities
 
 | Responsibility | Detail |
 |---------------|--------|
-| **Mechanical updates** | API signatures, config field names, schema references, file paths, code examples — auto-update without human review |
+| **Mechanical updates** | API signatures, config field names, schema references, file paths, code examples — propose updates for review |
 | **Behavioral updates** | When code changes *what* a component does — update the spec to match, flag for human review |
 | **Architectural updates** | When the change affects component boundaries, contracts, or principles — draft an update, require human approval |
 | **Contradiction detection** | Flag when doc content contradicts code behavior, even if the doc's `covers` paths weren't modified |
@@ -114,7 +112,7 @@ AI agents are first-class documentation maintainers. The workflow assumes Claude
 ### AI agent constraints
 
 - Never remove architectural rationale (the "why") — only a human removes rationale
-- Never change a Tier 1 contract spec without the PR also containing the corresponding code change
+- Never change a Tier 1 contract spec merely to fit implementation drift; propose the contract change for review
 - Never weaken a security or lock-in guarantee — flag for human review instead
 - Always preserve the existing document's voice and structure
 - Always include a summary of what changed and why in the commit message
@@ -123,191 +121,63 @@ AI agents are first-class documentation maintainers. The workflow assumes Claude
 
 ## Freshness Check
 
-The freshness check is a CI-runnable script that detects potentially stale documentation. It integrates with the existing `baseline` pipeline.
+`scripts/check-docs.py` validates the registry and compares changed files with
+registered `covers` and `depends_on` relationships. Run it with a Git base when
+checking a PR or a completed change:
 
-### How it works
-
-```
-For each doc in doc-registry.json:
-  1. Identify files changed in this PR (or since last release tag)
-  2. Check if any changed files match the doc's `covers` patterns
-  3. Check if any changed files match a doc this doc `depends_on`
-  4. If yes to either, and the doc itself was NOT modified: flag as stale
+```bash
+python3 scripts/check-docs.py --base origin/main
 ```
 
-### Script: `check:docs`
+Without `--base`, it examines uncommitted and untracked files in the current
+checkout. With `--strict`, Tier 3 staleness also fails; the CI gate uses the
+default mode so Tier 3 remains advisory.
 
-This repository is documentation-only and does not require a Node toolchain for maintenance checks. The runnable implementation is the standard-library Python script `scripts/check-docs.py`:
+| Result | Default exit code | CI effect |
+|--------|-------------------|-----------|
+| Registry invalid or Tier 1/2 doc stale | 2 | Fail |
+| Only Tier 3 docs stale | 0 | Warn in job output |
+| All docs fresh | 0 | Pass |
 
-```
-"check:docs": "python3 scripts/check-docs.py"
-```
-
-Added to the `baseline` pipeline. The `check:docs` script uses exit code 1 for Tier 3 warnings (non-blocking) and exit code 2 for Tier 1/2 failures (blocking). The baseline pipeline uses `check:docs` (default mode), which remaps exit code 1 to 0 so Tier 3 warnings don't break CI. Use `check:docs:strict` for full audits where Tier 3 staleness should also fail:
-
-```
-"check:docs": "python3 scripts/check-docs.py",
-"check:docs:strict": "python3 scripts/check-docs.py --strict",
-"baseline": "npm run build && vitest run --reporter=verbose && eslint src/ && npm run check:imports && npm run check:lockin && npm run check:docs"
-```
-
-- `check:docs` — exits 0 if no Tier 1/2 staleness (Tier 3 warnings print but don't fail)
-- `check:docs:strict` — exits non-zero on any staleness including Tier 3 (useful for full audits)
-
-### Output
-
-```
-check:docs — documentation freshness check
-
-  STALE  architecture/agent-loop-spec.md
-         covers: src/engine/
-         changed: src/engine/agent-loop.ts (+42 -18)
-         action: Tier 2 — update required before merge
-
-  STALE  AGENT.md
-         depends_on: architecture/overview.md (modified)
-         action: Tier 3 — AI agent will auto-update
-
-  OK     architecture/memory-spec.md
-  OK     architecture/auth-spec.md
-  ...
-
-  Result: 2 stale, 18 fresh
-  Status: FAIL (Tier 1/2 docs require update before merge)
-```
-
-### Exit codes
-
-| Code | Meaning | Blocks merge? |
-|------|---------|---------------|
-| 0 | All docs fresh | No |
-| 1 | Tier 3 docs stale (warning — AI agent should update) | No — `check:docs` treats as success, `check:docs:strict` treats as failure |
-| 2 | Tier 1 or 2 docs stale | Yes — always blocks |
-
-The `check:docs` script (default mode) remaps exit code 1 to 0 so Tier 3 warnings don't break CI. The `--strict` flag preserves exit code 1 for full audits.
+The checker detects changed paths and registry relationships. It cannot judge
+whether revised prose is correct; reviewers still assess the content.
 
 ---
 
 ## CI Integration (GitHub Actions)
 
-A single workflow handles both detection and AI auto-update as sequential jobs. This avoids the GitHub Actions limitation where two separate workflows triggered by the same event have no guaranteed ordering.
+`.github/workflows/repository-checks.yml` runs on PRs to `main`, pushes to
+`main`, and manual dispatch. It has read-only repository permission, checks out
+full Git history, sets up Python 3.12, and installs the pinned check dependency
+from `requirements-ci.txt`. For PRs it uses the merge base with the target
+branch; for pushes it uses the previous commit. It then runs:
 
-```yaml
-# .github/workflows/docs.yml
-name: Documentation Freshness
-on:
-  pull_request:
-    branches: [main]
-
-permissions:
-  contents: write
-  pull-requests: write
-
-jobs:
-  # Job 1: Detect stale docs
-  check-docs:
-    runs-on: ubuntu-latest
-    outputs:
-      exit_code: ${{ steps.check.outputs.exit_code }}
-      check_output: ${{ steps.check.outputs.check_output }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          ref: ${{ github.event.pull_request.head.ref }}
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - run: npm ci
-      - name: Check doc freshness
-        id: check
-        run: |
-          set +e
-          output=$(python3 scripts/check-docs.py --strict 2>&1)
-          code=$?
-          echo "exit_code=$code" >> "$GITHUB_OUTPUT"
-          echo "check_output<<CHECKEOF" >> "$GITHUB_OUTPUT"
-          echo "$output" >> "$GITHUB_OUTPUT"
-          echo "CHECKEOF" >> "$GITHUB_OUTPUT"
-          exit 0
-
-  # Job 2: AI auto-update (only if stale docs detected)
-  ai-update:
-    needs: check-docs
-    if: needs.check-docs.outputs.exit_code != '0'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          ref: ${{ github.event.pull_request.head.ref }}
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - run: npm ci
-      - uses: anthropics/claude-code-action@v1
-        with:
-          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          prompt: |
-            You are maintaining documentation for the personal-ai-architecture repo.
-
-            Read maintainers/doc-maintenance-spec.md for the full maintenance rules and constraints.
-            Read maintainers/doc-registry.json for the doc-to-code mapping.
-
-            The `check:docs` script detected stale documentation in this PR.
-            Here is its output:
-            ${{ needs.check-docs.outputs.check_output }}
-
-            For each stale doc:
-            1. Read the PR diff to understand what changed in the code
-            2. Read the current doc
-            3. Update the doc to accurately reflect the code changes
-            4. Follow the AI agent constraints in doc-maintenance-spec.md:
-               - Never remove architectural rationale (the "why")
-               - Never weaken security or lock-in guarantees
-               - Preserve the document's existing voice and structure
-               - For Tier 1/2 docs: update content to match code changes
-               - For Tier 3 docs: update references, paths, and examples
-
-            After updating, run `python3 scripts/check-docs.py` to verify all docs are now fresh.
-          claude_args: |
-            --model claude-opus-4-6
-            --max-turns 20
-
-  # Job 3: Final gate (runs after AI update, or directly if no staleness)
-  gate:
-    needs: [check-docs, ai-update]
-    if: always()
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          ref: ${{ github.event.pull_request.head.ref }}
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - run: npm ci
-      - name: Final doc freshness gate
-        run: python3 scripts/check-docs.py
+```bash
+python3 scripts/check-docs.py --base "$PAA_CHECK_BASE"
+python3 contracts/examples/validate-manifest.py
+python3 conformance/runner.py
+git diff --check "$PAA_CHECK_BASE" HEAD
 ```
 
-### Workflow mechanics
+The example validator checks published valid and invalid examples against their
+supported contract shapes. The executable conformance runner checks the
+repository's contract baseline. The language-neutral runtime scenarios in
+`conformance/*.md` are specifications for target implementations and are not
+executed by this repository job. Template repositories run their own target
+checks and the shared validator separately.
 
-1. **check-docs** job captures the exit code and output without failing the workflow
-2. **ai-update** job runs only if staleness was detected (exit code != 0) — Claude reads the diff, updates stale docs, commits to the branch
-3. **gate** job always runs last — pulls the latest branch state (including Claude's commits) and runs `check:docs` (which only fails on Tier 1/2 staleness)
-4. If Tier 1/2 docs are still stale after the AI update (e.g., architectural changes needing human input), the gate blocks merge
+CI does not rewrite documentation or invoke an AI agent. A failing check leaves
+its output on the PR for a contributor to resolve. The mirror workflow is
+separate and does not replace these validation checks.
 
 ---
 
 ## Adding the Doc Gate to the Lock-In Gate
 
-The lock-in gate (`conformance/lockin-gate.md`) gets one new check:
+The lock-in gate (`conformance/lockin-gate.md`) includes a documentation check:
 
 ```
-- [ ] **Documentation freshness verified:** `python3 scripts/check-docs.py` passes — all stale docs
-      are updated in this PR.
+- [ ] **Documentation freshness verified:** `python3 scripts/check-docs.py --base origin/main` passes — Tier 1/2 stale docs are updated in this PR; review Tier 3 warnings.
 ```
 
 This ensures doc maintenance is part of the same review process as lock-in checks.
@@ -345,10 +215,10 @@ The `check:docs` script validates registry integrity:
 
 ## Conformance
 
-The doc maintenance system is working correctly when:
+The repository check is working correctly when:
 
-1. `python3 scripts/check-docs.py` exits 0 on a clean main branch
-2. A PR that modifies `src/engine/` without modifying `architecture/agent-loop-spec.md` causes `check:docs` to exit 2
-3. A PR that modifies a Tier 1 doc triggers cascade detection on dependent Tier 2/3 docs
-4. The doc registry has an entry for every markdown file in ` **/*.md` and `*.md` at the repo root
-5. The AI agent can read the registry, identify stale docs, and produce valid updates
+1. The validation workflow runs on a PR from a fresh checkout and passes for valid repository contents.
+2. A PR that changes a registered Tier 1/2 dependency without updating its dependent doc fails the freshness check.
+3. A Tier 3-only stale doc is reported without failing the default CI gate.
+4. The registry lists every repository Markdown file and rejects missing paths or dependency cycles.
+5. Invalid contract examples or broken executable conformance invariants fail the job.
