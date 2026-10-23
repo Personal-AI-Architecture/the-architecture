@@ -146,6 +146,7 @@
 
 **Pass criteria:**
 - [ ] Provider/network failure emits `provider_error`
+- [ ] If the Agent Loop retries a provider call, it records no more than one retry on the same selected model and provider profile; a failure that remains emits `provider_error` without silently switching either selection (D188)
 - [ ] Unrecoverable tool failure emits `tool_error`
 - [ ] Auth failure emits `auth_error`
 - [ ] Context overflow emits `context_overflow`

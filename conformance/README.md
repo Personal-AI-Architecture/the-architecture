@@ -29,6 +29,11 @@ python conformance/runner.py
 
 The runner is intentionally contract-first. It proves the repository baseline: canonical examples, four-field runtime configuration, extensible identity, tool source/visibility semantics, source-preserving tool calls, transport-neutral `auth_context`, portable policy conditions, and the loopback-only default. The runtime scenarios in `arch-tests.md`, including ARCH-12 through ARCH-21, are test specifications; `runner.py` does not execute them against a target implementation. A future target adapter can add runtime checks while retaining the same language-neutral criteria.
 
+For provider-failure behavior, ARCH-5 checks the terminal `provider_error` and
+D188 permits one recorded retry on the same selected model and provider profile.
+That runtime check must be run against an implementation; the repository runner
+does not make provider calls.
+
 ## Related Documents
 
 - `../architecture/` — what each component must do

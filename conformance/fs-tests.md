@@ -111,6 +111,7 @@
 - [ ] Install a provider in a new format (new adapter, `provider_adapter`, secret) → after a restart (allowed), messages use the new provider → no code changes
 - [ ] Change only the model preference → the next message uses the new model with no restart (see SWAP-2)
 - [ ] An unknown selected adapter fails clearly instead of silently using a different provider (see ARCH-12)
+- [ ] A provider failure does not silently select another model or provider; any one internal retry stays on the same selection and is recorded (D188, ARCH-5)
 
 ---
 

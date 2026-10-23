@@ -134,9 +134,9 @@
 ### GAP-PAA-19: Who handles a model provider being down is contradictory — Resolved
 
 - **Expected:** One rule for what the Agent Loop does when a provider fails: fall back to another provider, or report and stop. (US-5 itself only promises that switching providers is a configuration change.)
-- **Published:** The Agent Loop reports the provider error and stops the current turn. PAA does not require automatic provider fallback; an explicit product retry or provider change is outside the failed turn.
+- **Published:** The Agent Loop may make one recorded retry on the owner's selected model and provider profile. If that does not resolve the failure, it reports the provider error and stops the current turn. An explicit product retry or provider change can follow the failed turn.
 - **Evidence:** [agent-loop-spec.md](../architecture/agent-loop-spec.md) "What the Agent Loop does not do"; [models-spec.md](../architecture/models-spec.md) "Why Models Are Not a Component"; [decisions.md](../architecture/decisions.md) D188.
-- **Decided:** No silent or automatic provider fallback in the architecture.
+- **Decided:** No silent model or provider fallback in the architecture (D188). A recorded retry on the same selection is allowed; it is not a fallback.
 
 ### GAP-PAA-20: Nobody owns preventing a conversation from outgrowing the model's context window — Resolved
 

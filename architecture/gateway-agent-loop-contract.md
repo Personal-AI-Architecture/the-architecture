@@ -227,7 +227,7 @@ The stream started, then something failed.
 
 | Code | When |
 |------|------|
-| `provider_error` | Model unreachable or timeout |
+| `provider_error` | Model unreachable or timeout after any allowed same-selection retry (D188) |
 | `tool_error` | Tool failed and model cannot recover |
 | `auth_error` | Auth denied the request or could not check it |
 | `context_limit_unknown` | No safe context limit is known for the selected provider and model; no model call is made |

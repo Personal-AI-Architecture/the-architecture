@@ -79,7 +79,7 @@ Run the sections that match changed areas.
 
 - [ ] Model and provider-profile choice remain owner preferences passed with each request; a change applies to the next message with no restart (D63, D147, D175).
 - [ ] Provider-specific request/stream/tool-call details remain adapter concerns (D139).
-- [ ] A provider failure is reported as `provider_error` and stops the turn, with no silent fallback to another model or provider (D188); an explicit owner retry or provider change outside the turn is optional product behavior.
+- [ ] An unresolved provider failure reports `provider_error` and stops the turn after any one recorded retry on the selected model and provider profile. No silent switch to another model or provider occurs (D188); an explicit owner retry or provider change after the failed turn is optional product behavior.
 
 ### Tools
 

@@ -69,7 +69,7 @@ These are explicit boundaries. They exist to prevent product-specific logic from
 | Context loading | Model reads files through tools based on its instructions | Agent Loop does not decide what context to load |
 | Conversation persistence | The Gateway, which stores conversations in Your Memory through its conversation store tool (D152) | Agent Loop does not own conversation storage |
 | Older conversation selection | Gateway prepares a model-sized working context from the saved conversation | Agent Loop does not cut or summarize history |
-| Error recovery | Agent Loop reports provider failures; a product or caller may explicitly retry or change provider | Agent Loop does not silently fall back to another provider or recover the failed turn automatically |
+| Error recovery | Agent Loop reports provider failures; it may retry once on the owner's selected model and provider profile and records the retry; a product or caller may explicitly retry or change provider after a failed turn | Agent Loop never silently switches to another model or provider (D188) |
 | Authentication | The Gateway calls Auth on every request before it reaches the Agent Loop | Agent Loop does not authenticate requests |
 | Product personality | Memory files the model reads | Agent Loop has no personality; its bootstrap prompt only says where to look |
 
