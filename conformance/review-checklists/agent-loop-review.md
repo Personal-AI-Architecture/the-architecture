@@ -23,22 +23,12 @@ Use this when reviewing Agent Loop behavior, stream semantics, provider integrat
 - [ ] Tool calls and tool results use the shared message shape so they can be saved in history.
 - [ ] Where a product adds approvals, approval semantics are represented in the contract rather than trapped inside product-specific runtime flow.
 
-## Matrix IDs
+## Related Conformance Tests
 
-- `E-01`
-- `E-02`
-- `E-03`
-- `E-04`
-- `E-05`
-- `E-06`
-- `A-06`
-- `GC-02`
-- `GC-03`
-- `GC-05`
-- `GC-06`
-- `GC-07`
-- `GC-08`
-- `S-01`
+- `ARCH-4`
+- `ARCH-5`
+- `ARCH-14`
+- `ARCH-20`
 
 ## Common Failure Patterns
 
@@ -52,20 +42,11 @@ Use this when reviewing Agent Loop behavior, stream semantics, provider integrat
 
 ## Read Next
 
-- `build/primers/agent-loop.md`
-- `build/primers/gateway-agent-loop-contract.md`
-- `build/primers/security.md`
-- `build/compliance-matrix.md`
+- `architecture/agent-loop-spec.md`
+- `architecture/gateway-agent-loop-contract.md`
+- `architecture/tools-spec.md`
 
 ## Example Files
 
 - `contracts/examples/gateway-engine-request.json`
 - `contracts/examples/invalid-gateway-engine-request.json`
-
-## Source Docs
-
-- `maintainers/primer-audit-playbook.md`
-- `build/primers/agent-loop.md`
-- `build/primers/gateway-agent-loop-contract.md`
-- `build/primers/security.md`
-- `build/compliance-matrix.md`

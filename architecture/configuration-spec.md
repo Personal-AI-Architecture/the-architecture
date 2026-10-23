@@ -183,6 +183,8 @@ The system reads environment configuration in a strict sequence. Each phase depe
 4. **Connect the Memory tools to Your Memory** — the Memory tools use `memory_root` to find it. Every component reaches Your Memory only through those tools; none reads Memory files directly.
 5. **Ready** — the Gateway starts accepting connections (see [gateway-agent-loop-contract.md](../architecture/gateway-agent-loop-contract.md) for request flow).
 
+If `provider_adapter` names an adapter that is not installed, or its local configuration is invalid, startup reports the configuration error and does not declare the system ready. It must not silently select another adapter. This is distinct from an installed adapter's remote provider being unreachable: startup does not require network access, and an unreachable configured provider is reported when needed.
+
 Changing runtime config, adapter config, or installed tools changes the environment. A system may need a restart (or a hot-reload, if it supports one) to pick these up. That is still a config-only change.
 
 ### On every message

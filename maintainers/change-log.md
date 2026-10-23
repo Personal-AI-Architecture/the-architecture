@@ -1,6 +1,7 @@
-# Primer Change Log
+# Primer Change Log (historical)
 
-> Historical record of major changes to the AI primer layer.
+> Historical record of the retired AI primer layer. Current rules and tests live
+> in `architecture/`, `contracts/`, and `conformance/`.
 
 ## Purpose
 
@@ -75,10 +76,12 @@ Track how the primer layer evolves so examples, matrix rows, glossary terms, lim
 
 ## Update Rule
 
-When the primer layer changes in a way that affects implementation, audit judgment, or recurring terminology, add a new dated entry here and update related files according to `primer-change-policy.md`.
+This historical log is closed. Record new architecture decisions in
+`architecture/decisions.md` and update the affected specs, contracts,
+conformance checks, examples and templates.
 
 ## Source Docs
 
-- `maintainers/primer-change-policy.md`
-- `build/compliance-matrix.md`
-- `maintainers/traceability-map.md`
+- `architecture/decisions.md`
+- `maintainers/documentation-guide.md`
+- `contracts/examples/examples-manifest.json`

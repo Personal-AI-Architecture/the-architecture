@@ -22,6 +22,7 @@ Before recording an audit result, run `python3 scripts/check-docs.py` so the aud
 - [ ] Provider/model/tool choices remain runtime configuration concerns, not hardcoded decisions (D147).
 - [ ] Adapters remain thin translation layers, not policy/logic hubs (D139).
 - [ ] Swap cost remains localized (adapter/config), not cross-component rewrites.
+- [ ] Invalid selected adapters fail startup clearly, while a configured remote provider's outage does not prevent local startup (ARCH-12).
 
 ### Deployment and Network Posture
 

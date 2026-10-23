@@ -24,22 +24,12 @@ Use this when reviewing runtime auth wiring, identity propagation, permission en
 - [ ] Where approvals are enabled, requests are pending before execution, only approval-authorized identities decide, terminal decisions include cancellation/expiry, and replay is idempotent by request ID.
 - [ ] The canonical `auth_context` survives transport changes without credentials or permissions; receiving adapters reject missing, malformed, expired, or caller-supplied context.
 
-## Matrix IDs
+## Related Conformance Tests
 
-- `A-01`
-- `A-02`
-- `A-03`
-- `A-04`
-- `A-05`
-- `A-06`
-- `A-07`
-- `A-08`
-- `A-09`
-- `A-10`
-- `A-11`
-- `C-04`
-- `GC-04`
-- `S-03`
+- `ARCH-8`
+- `ARCH-10`
+- `ARCH-17`
+- `ARCH-18`
 
 ## Common Failure Patterns
 
@@ -53,15 +43,6 @@ Use this when reviewing runtime auth wiring, identity propagation, permission en
 
 ## Read Next
 
-- `build/primers/auth.md`
-- `build/primers/security.md`
-- `build/primers/gateway-agent-loop-contract.md`
-- `build/compliance-matrix.md`
-
-## Source Docs
-
-- `maintainers/primer-audit-playbook.md`
-- `build/primers/auth.md`
-- `build/primers/security.md`
-- `build/primers/gateway-agent-loop-contract.md`
-- `build/compliance-matrix.md`
+- `architecture/auth-spec.md`
+- `architecture/security-spec.md`
+- `architecture/gateway-agent-loop-contract.md`

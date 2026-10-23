@@ -1,8 +1,0 @@
-{
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "contract-pack://paa/adapter",
-  "title": "Adapter Boundary Contract Pack (derived)",
-  "description": "Derived source manifest. Payload shapes are authoritative only in contracts/.",
-  "x-canonical_sources": ["contracts/openapi/model-api.yaml", "contracts/examples/adapter-config.json"],
-  "x-status": "derived"
-}

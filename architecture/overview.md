@@ -124,7 +124,7 @@ Four components, two APIs, and three things outside the system.
 
 **Auth.** Auth protects Your Memory. It sits on every request, independent of the Gateway and the Agent Loop, so either can be swapped without touching it. Today the actor is usually you, but it is built for more: other people and AI agents acting on your behalf, each with exactly the permissions you grant.
 
-**Adapters.** Three thin translation layers you own sit at the edges: one between clients and the Gateway, one between the Agent Loop and models, and one for each kind of tool source, such as MCP. When an outside standard changes, you swap the adapter, not the system. See [adapter-spec.md](./adapter-spec.md).
+**Adapters.** Three thin translation layers you own sit at the edges: one between clients and the Gateway, one between the Agent Loop and models, and one for each kind of tool source, such as MCP. When an outside standard changes, you swap the adapter, not the system. An unknown or invalid selected adapter is reported at startup; the system does not silently choose another. See [adapter-spec.md](./adapter-spec.md) and [configuration-spec.md](./configuration-spec.md).
 
 ---
 
@@ -152,7 +152,7 @@ These stories test the architecture itself. Each has a test procedure in [confor
 | Understand the rules behind it | [principles.md](./principles.md) |
 | Go deeper on each part | [memory-spec.md](./memory-spec.md), [agent-loop-spec.md](./agent-loop-spec.md), [gateway-spec.md](./gateway-spec.md), [auth-spec.md](./auth-spec.md), [models-spec.md](./models-spec.md), [tools-spec.md](./tools-spec.md) |
 | See how it runs and stays safe | [configuration-spec.md](./configuration-spec.md), [deployment-spec.md](./deployment-spec.md), [security-spec.md](./security-spec.md) |
-| Build your own system | The [TypeScript template](https://github.com/Personal-AI-Architecture/ts-architecture-template), then the [implementer's reference](../build/implementers-reference.md) (what each component must do, including who does what) |
+| Build your own system | Start from a [language template](https://github.com/Personal-AI-Architecture), read the relevant component specs and [contracts](../contracts/), then run [conformance checks](../conformance/) |
 | Build a product on it | [customization-spec.md](./customization-spec.md) |
 | See why decisions were made | [decisions.md](./decisions.md) |
 

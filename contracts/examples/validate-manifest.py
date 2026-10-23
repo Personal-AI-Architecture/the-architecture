@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -209,7 +210,7 @@ def main() -> None:
     if not isinstance(data, dict):
         fail("Manifest root must be an object")
 
-    required_root = {"version", "traceability_source", "examples"}
+    required_root = {"version", "examples"}
     missing_root = required_root - set(data.keys())
     if missing_root:
         fail(f"Manifest missing root keys: {sorted(missing_root)}")
@@ -220,12 +221,15 @@ def main() -> None:
 
     seen_files = set()
     allowed_kinds = {"valid", "invalid"}
+    conformance_ids = set()
+    for test_file in (ROOT / "conformance").glob("*.md"):
+        conformance_ids.update(re.findall(r"^## ((?:ARCH|SWAP|DEPLOY|FS)-\d+):", test_file.read_text(), re.MULTILINE))
 
     for idx, entry in enumerate(examples):
         if not isinstance(entry, dict):
             fail(f"Entry {idx} must be an object")
 
-        required_entry = {"file", "kind", "owning_docs", "matrix_ids", "related_checklists", "glossary_terms"}
+        required_entry = {"file", "kind", "owning_docs", "conformance_ids", "related_checklists", "glossary_terms"}
         missing_entry = required_entry - set(entry.keys())
         if missing_entry:
             fail(f"Entry {idx} missing keys: {sorted(missing_entry)}")
@@ -250,14 +254,14 @@ def main() -> None:
             fail(f"Referenced example is not valid JSON: {file_path}: {exc}")
         validate_contract_example(file_path, payload, kind)
 
-        for list_key in ["owning_docs", "matrix_ids", "related_checklists", "glossary_terms"]:
+        for list_key in ["owning_docs", "conformance_ids", "related_checklists", "glossary_terms"]:
             value = entry[list_key]
             if not isinstance(value, list) or not value:
                 fail(f"Entry {idx} field '{list_key}' must be a non-empty array")
 
         for doc_path in entry["owning_docs"] + entry["related_checklists"]:
             if not isinstance(doc_path, str) or not (
-                doc_path.startswith("build/primers/")
+                doc_path.startswith("architecture/")
                 or doc_path.startswith("conformance/")
             ):
                 fail(f"Entry {idx} has invalid doc/checklist path: {doc_path!r}")
@@ -265,9 +269,11 @@ def main() -> None:
             if not absolute_doc.exists():
                 fail(f"Referenced doc/checklist does not exist: {doc_path}")
 
-        for matrix_id in entry["matrix_ids"]:
-            if not isinstance(matrix_id, str) or "-" not in matrix_id:
-                fail(f"Entry {idx} has invalid matrix ID: {matrix_id!r}")
+        for test_id in entry["conformance_ids"]:
+            if not isinstance(test_id, str) or not test_id.startswith(("ARCH-", "SWAP-", "DEPLOY-", "FS-")):
+                fail(f"Entry {idx} has invalid conformance ID: {test_id!r}")
+            if test_id not in conformance_ids:
+                fail(f"Entry {idx} references unknown conformance ID: {test_id}")
 
     print(f"OK: validated {len(examples)} manifest entries and contract example shapes")
 

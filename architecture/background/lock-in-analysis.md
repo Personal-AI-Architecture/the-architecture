@@ -31,6 +31,11 @@ Security adds no separate layer: its mechanisms (scope enforcement, isolation, a
 
 Context limits may differ after a model swap. The Gateway prepares a new working context sized for the selected model while the complete conversation stays in Your Memory, and the Agent Loop checks each actual model call. Nothing rewrites or truncates saved history to make a swap work.
 
+A configured adapter that is missing or invalid fails startup clearly. Quietly
+switching to another adapter would move the owner's request to a provider they
+did not select; see the [configuration spec](../configuration-spec.md) and
+[ARCH-12](../../conformance/arch-tests.md#arch-12-unsupported-adapter-cannot-start-silently).
+
 ## Where lock-in actually comes from: drift
 
 Apart from limits of the industry itself, like a weaker local model, the only way lock-in gets in is through how a system is built over time:

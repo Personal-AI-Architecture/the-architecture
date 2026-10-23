@@ -53,7 +53,11 @@ Files outside these locations (e.g., `tasks/*.md`, `node_modules/`) are excluded
 |------|------|----------|-------------------|
 | **1 — Contracts** | Define what the system *is*. Machine-readable where possible. | OpenAPI specs, JSON Schemas, architecture overview | Must be updated in the same PR as the code change |
 | **2 — Component specs** | Define how each piece works. Human-readable architecture docs. | agent-loop-spec, gateway-spec, memory-spec, auth-spec, security-spec | Must be updated in the same PR as the code change |
-| **3 — Guides & reference** | Help people use the system. Derived from Tier 1 and 2. | README, AGENT.md, implementers-reference, conformance docs | Updated in the same PR where practical; CI warns if they lag |
+| **3 — Guides & reference** | Help people use the system. Derived from Tier 1 and 2. | README, AGENT.md, documentation guide, conformance checklists | Updated in the same PR where practical; CI warns if they lag |
+
+The retired `build/` primer and blueprint layer is not a documentation tier.
+AI builders read the same architecture, contracts and conformance material as
+human builders, plus the implementation template for their language.
 
 Tier 1 and 2 docs block merge if stale. Tier 3 docs do not block merge, but CI warns if they lag. AI agents may prepare updates; CI does not edit PR branches.
 
@@ -71,7 +75,7 @@ A documentation update is required when a change touches code or specs that a do
 | **Schema change** (`contracts/schemas/`) | Docs that cover or depend on the changed schema | Contributor or AI agent | Registry freshness and contract example checks |
 | **OpenAPI change** (`contracts/openapi/`) | Component specs for affected contracts + AGENT.md | Contributor or AI agent | Registry freshness gate |
 | **Config change** (`adapters/`, config-related src) | configuration-spec + README quickstart | Contributor or AI agent | Registry freshness gate when those paths exist |
-| **New component or API** | architecture overview, AGENT.md, implementers-reference, file map | Human + AI agent | PR review |
+| **New component or API** | architecture overview, AGENT.md, documentation guide, file map | Human + AI agent | PR review |
 | **Architectural/philosophical change** | architecture overview, relevant component specs, README | Human-authored, AI-verified | PR review |
 | **Dependency or tooling change** | README (if user-facing), deployment-spec (if runtime) | Contributor or AI agent | Registry freshness gate where dependencies are registered |
 

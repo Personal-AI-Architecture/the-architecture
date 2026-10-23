@@ -10,10 +10,12 @@ Contributions are most useful when they improve:
 
 - Architecture specs and principles
 - Contracts (OpenAPI and JSON Schema)
-- Blueprint guidance and drift guards
+- Conformance tests and drift guards
 - Explanatory docs and examples
 
-Implementation/runtime code now lives in a separate template repository.
+Implementation/runtime code lives in the language template repositories.
+Start with the relevant architecture specs, exact contracts and conformance
+checks; a separate `build/` guide is not required.
 
 ## How to Contribute
 

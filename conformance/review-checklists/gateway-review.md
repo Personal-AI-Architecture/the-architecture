@@ -27,19 +27,11 @@ Use this when reviewing Gateway code paths, routes, conversation handling, or cl
 - [ ] Approval requests expose a stable request ID and expiry; decisions are terminal and replay-safe.
 - [ ] The internal handoff carries canonical `auth_context`; identity does not depend on `X-Actor-ID` or another single transport.
 
-## Matrix IDs
+## Related Conformance Tests
 
-- `G-01`
-- `G-03`
-- `G-04`
-- `G-05`
-- `G-06`
-- `G-07`
-- `G-09`
-- `G-02`
-- `A-01`
-- `GC-07`
-- `S-05`
+- `ARCH-3`
+- `ARCH-4`
+- `ARCH-15`
 
 ## Common Failure Patterns
 
@@ -51,10 +43,9 @@ Use this when reviewing Gateway code paths, routes, conversation handling, or cl
 
 ## Read Next
 
-- `build/primers/gateway.md`
-- `build/primers/client-gateway-contract.md`
-- `build/primers/gateway-agent-loop-contract.md`
-- `build/compliance-matrix.md`
+- `architecture/gateway-spec.md`
+- `architecture/gateway-agent-loop-contract.md`
+- `contracts/openapi/gateway-api.yaml`
 
 ## Example Files
 
@@ -68,11 +59,3 @@ Use this when reviewing Gateway code paths, routes, conversation handling, or cl
 - `contracts/examples/approval-result-event.json`
 - `contracts/examples/invalid-approval-request-event.json`
 - `contracts/examples/invalid-approval-result-event.json`
-
-## Source Docs
-
-- `maintainers/primer-audit-playbook.md`
-- `build/primers/gateway.md`
-- `build/primers/client-gateway-contract.md`
-- `build/primers/gateway-agent-loop-contract.md`
-- `build/compliance-matrix.md`

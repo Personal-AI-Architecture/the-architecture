@@ -1,6 +1,6 @@
 # Decision Glossary
 
-> Shared definitions for architecture-review and implementation terms used across the primer layer.
+> Shared definitions for architecture review and implementation terms.
 
 ## Purpose
 
@@ -22,15 +22,18 @@ Represented in a real request, response, stream event, or documented interaction
 
 ### drift
 
-A mismatch between the implementation and a primer or matrix rule that is not covered by `accepted-mvp-limits.md`.
+A mismatch between the implementation and an authoritative architecture rule,
+contract, or conformance criterion that is not covered by
+`accepted-mvp-limits.md`.
 
 ### internal contract
 
 The bounded interface between Gateway and Agent Loop described in `gateway-agent-loop-contract.md`. Clients must not fabricate or bypass it.
 
-### primer failure
+### specification gap
 
-A documentation failure where an auditor cannot answer a necessary architecture question using only the primer layer.
+A missing or ambiguous rule in the architecture, contract or conformance
+material that prevents a reliable implementation or judgment.
 
 ### product-owned state
 
@@ -38,7 +41,10 @@ State that belongs to the product and the owner, remains inspectable/exportable 
 
 ### startup readiness
 
-The condition where required runtime config, adapter config, tools, Memory, preferences, export surfaces, and startup guarantees (including version history) are all correctly loaded before the system is considered ready. The model choice is not part of startup readiness: it is read on every message.
+The condition where required runtime config, adapter config, tools, Memory,
+export surfaces, and startup guarantees (including version history) are ready
+before the system accepts requests. Model and provider preferences are read on
+every message, not cached as a startup gate.
 
 ### accepted mvp limit
 
@@ -46,7 +52,9 @@ See `accepted limitation`. This term should not be used to excuse missing requir
 
 ### client contract
 
-The external API between client and Gateway described in `client-gateway-contract.md`, distinct from the internal Gateway ↔ Agent Loop contract.
+The external API between client and Gateway described in
+`contracts/openapi/gateway-api.yaml`, distinct from the internal Gateway ↔
+Agent Loop contract.
 
 ### conformance gate
 
@@ -58,7 +66,7 @@ An implementation pass designed to avoid structural rework by fixing architectur
 
 ## Interpretation Rules
 
-- If a term affects audit outcome, its meaning should be taken from this glossary and the linked primer docs.
+- If a term affects audit outcome, its meaning should be taken from this glossary and the authoritative specs and contracts.
 - If a reviewer uses a term in a way that conflicts with the glossary, update the review or tighten the glossary.
 - If a needed term is missing, add it rather than letting reviewers infer inconsistent meanings.
 
@@ -71,9 +79,9 @@ An implementation pass designed to avoid structural rework by fixing architectur
 
 ## Source Docs
 
-- `build/primers/README.md`
-- `build/compliance-matrix.md`
+- `architecture/overview.md`
+- `conformance/README.md`
 - `maintainers/accepted-mvp-limits.md`
-- `build/primers/client-gateway-contract.md`
-- `build/primers/gateway-agent-loop-contract.md`
-- `build/build-sequence.md`
+- `contracts/openapi/gateway-api.yaml`
+- `architecture/gateway-agent-loop-contract.md`
+- `architecture/configuration-spec.md`
