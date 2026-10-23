@@ -1,9 +1,4 @@
----
-title: About Us
-description: Who we are and why we're building this
-displayed_sidebar: null
-hide_table_of_contents: true
----
+# About Us
 
 We're on a mission to build a superior user-owned alternative to Big Tech AI systems so the power of AI belongs not to a small number of Big Tech companies, but to the people.
 

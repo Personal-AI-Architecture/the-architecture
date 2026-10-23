@@ -1,8 +1,3 @@
----
-sidebar_label: PAA product spec
-hide_table_of_contents: true
----
-
 # Spec: Personal AI Architecture
 
 > **Purpose:** Product contract for the Personal AI Architecture: what a developer can do with it, and what every system built on it promises the person who owns that system. This is for product owners, builders, QA and maintainers. It is not an owner-facing document.

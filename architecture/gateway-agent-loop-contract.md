@@ -1,8 +1,3 @@
----
-sidebar_label: Gateway ↔ Agent Loop contract
-hide_table_of_contents: true
----
-
 # The Gateway–Agent Loop Contract
 
 **Serves stories:** US-5, US-6, US-7 in the [PAA spec](../spec/personal-ai-architecture-spec.md).

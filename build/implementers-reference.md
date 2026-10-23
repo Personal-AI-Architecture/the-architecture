@@ -1,7 +1,3 @@
----
-hide_table_of_contents: true
----
-
 # Implementer's Reference
 
 > Implementation contract for the Personal AI Architecture.

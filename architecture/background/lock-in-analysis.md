@@ -1,7 +1,3 @@
----
-hide_table_of_contents: true
----
-
 # Lock-In Analysis
 
 Where lock-in could creep into a PAA system at each layer, what keeps it out, and what happens if that discipline slips. The audience is people building on the architecture and people judging whether its "no lock-in" claim holds.

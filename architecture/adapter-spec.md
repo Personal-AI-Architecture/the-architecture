@@ -1,8 +1,3 @@
----
-sidebar_label: Adapters
-hide_table_of_contents: true
----
-
 # Adapters
 
 **Serves stories:** US-5, US-7 in the [PAA spec](../spec/personal-ai-architecture-spec.md).

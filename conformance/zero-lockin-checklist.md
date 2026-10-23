@@ -1,7 +1,3 @@
----
-hide_table_of_contents: true
----
-
 # Zero Lock-In Checklist (Index)
 
 Use these documents:

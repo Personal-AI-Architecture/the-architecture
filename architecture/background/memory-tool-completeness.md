@@ -1,7 +1,3 @@
----
-hide_table_of_contents: true
----
-
 # Memory/Tool Completeness: Why the Architecture Needs No New Components
 
 ## 1. The Binary

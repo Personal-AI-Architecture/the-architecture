@@ -1,8 +1,3 @@
----
-sidebar_label: Communication
-hide_table_of_contents: true
----
-
 # Communication Principles
 
 ## What these principles are

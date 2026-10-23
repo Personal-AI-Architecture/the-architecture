@@ -1,7 +1,3 @@
----
-hide_table_of_contents: true
----
-
 # Lock-In Gate (PR Checklist)
 
 ## Required Checks

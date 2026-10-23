@@ -1,8 +1,3 @@
----
-sidebar_label: Tools
-hide_table_of_contents: true
----
-
 # Tools
 
 **Serves stories:** US-8, US-10, US-17 in the [PAA spec](../spec/personal-ai-architecture-spec.md).

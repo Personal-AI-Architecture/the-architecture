@@ -1,8 +1,3 @@
----
-sidebar_label: PAA spec gaps
-hide_table_of_contents: true
----
-
 # Gaps: Personal AI Architecture
 
 > Companion to [personal-ai-architecture-spec.md](./personal-ai-architecture-spec.md). Paths are in this repository (paths outside ` ` are relative to the repository root); `template:` means [ts-architecture-template](https://github.com/Personal-AI-Architecture/ts-architecture-template). This status was refreshed after the canonical-contract, builder, primer, and conformance alignment batches.

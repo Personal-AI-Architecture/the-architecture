@@ -1,8 +1,3 @@
----
-sidebar_label: Model API
-hide_table_of_contents: true
----
-
 # Models
 
 **Serves stories:** US-5 in the [PAA spec](../spec/personal-ai-architecture-spec.md).

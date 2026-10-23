@@ -1,7 +1,3 @@
----
-hide_table_of_contents: true
----
-
 # Foundation Verification Spec
 
 ## How to Use This Document

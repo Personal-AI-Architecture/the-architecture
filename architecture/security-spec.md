@@ -1,8 +1,3 @@
----
-sidebar_label: Security
-hide_table_of_contents: true
----
-
 # Security Spec: Threats, Data Protection, and Enforcement
 
 **Serves stories:** US-2, US-8, US-9, US-10 in the [PAA spec](../spec/personal-ai-architecture-spec.md).

@@ -1,8 +1,3 @@
----
-sidebar_label: Deployment
-hide_table_of_contents: true
----
-
 # Deployment
 
 **Serves stories:** US-1, US-9, US-11 in the [PAA spec](../spec/personal-ai-architecture-spec.md).
