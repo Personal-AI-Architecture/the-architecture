@@ -25,3 +25,5 @@ Run `python3 scripts/check-docs.py` before using this checklist so the linked ga
 
 The gate and audit are fast operational tools extracted from the verification spec. The verification spec is the comprehensive source of truth — if it's not verifiable there, it's not verifiable.
 
+For adapter changes, also use [ARCH-12](./arch-tests.md#arch-12-unsupported-adapter-cannot-start-silently): a failed configuration cannot silently choose another provider or make the owner dependent on one.
+

@@ -53,7 +53,11 @@ Files outside these locations (e.g., `tasks/*.md`, `node_modules/`) are excluded
 |------|------|----------|-------------------|
 | **1 — Contracts** | Define what the system *is*. Machine-readable where possible. | OpenAPI specs, JSON Schemas, architecture overview | Must be updated in the same PR as the code change |
 | **2 — Component specs** | Define how each piece works. Human-readable architecture docs. | agent-loop-spec, gateway-spec, memory-spec, auth-spec, security-spec | Must be updated in the same PR as the code change |
-| **3 — Guides & reference** | Help people use the system. Derived from Tier 1 and 2. | README, AGENT.md, implementers-reference, conformance docs | Updated by AI agent in the same PR, verified in CI |
+| **3 — Guides & reference** | Help people use the system. Derived from Tier 1 and 2. | README, AGENT.md, documentation guide, conformance checklists | Updated by AI agent in the same PR, verified in CI |
+
+The retired `build/` primer and blueprint layer is not a documentation tier.
+AI builders read the same architecture, contracts and conformance material as
+human builders, plus the implementation template for their language.
 
 Tier 1 and 2 docs block merge if stale. Tier 3 docs are auto-updated by AI agents and should not block merge, but CI will warn if they lag.
 

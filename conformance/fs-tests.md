@@ -110,6 +110,7 @@
 - [ ] Change the active provider preference to another profile in the loaded adapter → the next message uses it with no restart, no code changes (D193)
 - [ ] Install a provider in a new format (new adapter, `provider_adapter`, secret) → after a restart (allowed), messages use the new provider → no code changes
 - [ ] Change only the model preference → the next message uses the new model with no restart (see SWAP-2)
+- [ ] An unknown selected adapter fails clearly instead of silently using a different provider (see ARCH-12)
 
 ---
 

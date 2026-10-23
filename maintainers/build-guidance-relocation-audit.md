@@ -6,7 +6,7 @@
 
 ## Inventory and authority
 
-The folder contains 14 primers, 73 blueprint files, and four top-level guides.
+The folder contained 14 primers, 73 blueprint files, and four top-level guides.
 The 14 `contract-pack.json` files are source manifests, not independent contract
 schemas. The blueprints contain 268 labelled MUST/SHOULD statements and their
 `tests.md` files contain 458 positive/negative vectors. Much of this repeats
@@ -14,8 +14,8 @@ the architecture and conformance material; some of it predates later decisions.
 
 Use `architecture/` for product-independent rules, `contracts/` for exact wire
 shapes, and `conformance/` for implementation test criteria. A template owns
-language-specific instructions and executable checks. The build folder is
-derived material and cannot settle a disagreement with those sources.
+language-specific instructions and executable checks. The former build folder
+was derived material and could not settle a disagreement with those sources.
 
 ## Relocations made
 
@@ -53,7 +53,7 @@ them against a target implementation.
 
 ## Language templates
 
-The build folder contains no substantive TypeScript, Python, Go, Rust, or Java
+The build folder contained no substantive TypeScript, Python, Go, Rust, or Java
 implementation guidance. The five template repositories already own their
 language-specific setup, code and checks. No template edit is warranted by this
 relocation audit. If a later implementation review finds a language-specific
@@ -65,8 +65,36 @@ US-14 and the related visitor requirements now name the architecture,
 contracts, conformance suite and language templates. The folder and its
 obsolete maintainer guides have been deleted; the documentation guide,
 conformance checklists, example manifest and registry now point to current
-sources. A fresh-agent build and validator result will be recorded below.
+sources.
 
 ## Fresh-agent verification
 
-Pending isolated build proof.
+A fresh agent, without the parent conversation, received a clean clone of PAA
+at `5eef06cabd5f90a677cf308e2d63512b6f6ef192`, a clean Python template,
+and the shared validator. The PAA clone had no `build/` directory. The agent
+used the current architecture, contracts, conformance documentation and
+template to implement a bounded native `text_uppercase` tool. It pinned the
+template to the current contracts, checked LocalAuth grants, preserved
+source-qualified tool-call and result IDs in the conversation, and added
+offline integration tests. The resulting template commits were
+`4b6f5fef6b0964e3cd41696405fdde60f1ab66be` and
+`16f1ceb5baf9e73cf3bf80b79f27d56f3ca867ac`.
+
+Independent review found that two new exception paths could expose an error
+string to the client. The agent changed both to fixed messages and added a test
+that injects a fake token and private path, then checks streamed and saved
+details for disclosure. With that correction:
+
+| Verification | Result |
+|---|---|
+| `python scripts/validate.py --source-checkout /tmp/paa-fresh-agent-proof/source` | PASS: pin, contracts, imports, lock-in, type checks, syntax, 8 unit, 6 integration, 3 conformance and acceptance checks. |
+| `node /tmp/paa-fresh-agent-proof/validator/bin/paa-validate.js --target /tmp/paa-fresh-agent-proof/template/paa.target.json --source-checkout /tmp/paa-fresh-agent-proof/source --source-ref HEAD` | PASS: target manifest, source contract alignment, type checks, syntax, unit, integration, conformance and acceptance. |
+| `git diff --check` in the template | PASS; candidate working tree clean. |
+
+The proof candidate used an offline scripted model adapter. The template's
+request-header actor adapter and in-process conversation store remain
+development examples. This verifies that a fresh agent could build and check a
+bounded capability from the current sources without primers or blueprints; it
+does not establish production authentication, restart persistence, or complete
+conformance of every runtime behavior. The detailed command log is retained
+locally at `/tmp/paa-fresh-agent-proof/proof.md`.

@@ -7,6 +7,7 @@
 - [ ] **No component-internal coupling added:** components interact only through defined contracts/interfaces.
 - [ ] **No hardcoded provider/model/tool decisions in core code:** swap choices remain configuration-driven.
 - [ ] **Adapter boundary preserved:** protocol/provider-specific behavior stays in adapters, not in Agent Loop/Gateway/Auth core logic.
+- [ ] **Invalid adapter fails clearly:** an unknown or invalid selected adapter never becomes a silently substituted provider; use ARCH-12 when adapter startup changes.
 - [ ] **Config-only swap claim still true:** model swaps and switches between listed provider profiles are preference changes (D193); a provider in a new format or a tool swap requires config and adapter updates; none requires cross-component code edits.
 - [ ] **Offline path still valid:** full loop can run without internet when configured with local model + local tools.
 - [ ] **Local-first deployment still valid:** single-machine owner-controlled deployment remains supported.
