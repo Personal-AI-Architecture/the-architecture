@@ -69,7 +69,7 @@ As a developer, I want the personal AI system I build to have no lock-in, so tha
 <summary>Acceptance criteria</summary>
 
 - **AC-1.1** — Given a conforming system, then the owner's memory depends on nothing else and the owner can always read it, keep it and move it (US-2 to US-4). _(evidence: [overview.md "Make Your Memory the platform"](../architecture/overview.md#1-make-your-memory-the-platform); [principles.md](../architecture/principles.md) 1)_
-- **AC-1.2** — Given any other part (a model, a provider, an app, the Agent Loop, the Gateway, Auth or a tool), then it can be replaced without losing the owner's memory and without changing the other parts (US-5 to US-8). _(evidence: [principles.md](../architecture/principles.md) 2; [overview.md "What keeps it swappable"](../architecture/overview.md#what-keeps-it-swappable))_
+- **AC-1.2** — Given any other part (a model, a provider, an app, the Agent Loop, the Gateway, Auth or a tool), then it can be replaced without losing the owner's memory and without changing the other parts (US-5 to US-8). _(evidence: [principles.md](../architecture/principles.md) 2; [adapter-spec.md](../architecture/adapter-spec.md))_
 - **AC-1.3** — Given the system is running, then it runs on hardware the owner controls, under rules the owner sets, and updates never take away the owner's data or choices (US-9 to US-11). _(evidence: [deployment-spec.md](../architecture/deployment-spec.md); [auth-spec.md](../architecture/auth-spec.md))_
 - **AC-1.4** — Given any part of a conforming system, then none requires a particular vendor, cloud service or product, and the owner could leave the architecture itself and keep their memory. _(evidence: [overview.md](../architecture/overview.md) opening: "the rules that keep you from being locked into a vendor, a technology, or even this architecture itself")_
 
@@ -232,7 +232,7 @@ As a developer, I want to understand what the architecture is and why it exists 
 
 - **AC-12.1** — Given the repository README, when a developer reads it, then they find what the architecture is, its licence (MIT), and links to the Architecture overview, the contracts, the blueprints, the AI primers, the conformance tests and the TypeScript template. _(evidence: `README.md`)_
 - **AC-12.2** — Given the docs guide, then it offers a short "just browsing" route (README, principles, about) and a "ready to build" route (Architecture overview, implementer's reference, internal contract). _(evidence: [maintainers/documentation-guide.md](../README.md))_
-- **AC-12.3** — Given the Architecture overview, then it names the four components, the two APIs and the three outside parties, says that Your Memory depends on nothing, and gives a responsibility table saying who does what and who does not. _(evidence: [overview.md](../architecture/overview.md), including "Responsibility Matrix")_
+- **AC-12.3** — Given the Architecture overview, then it names the four components, the two APIs and the three outside parties, says that Your Memory depends on nothing, and links to the responsibility table saying who does what and who does not. _(evidence: [overview.md](../architecture/overview.md) "The parts" and "Where to go next"; [implementers-reference.md](../build/implementers-reference.md#responsibility-matrix) "Responsibility Matrix")_
 - **AC-12.4** — Every link on these routes opens the document it names. Broken links are gaps.
 
 </details>

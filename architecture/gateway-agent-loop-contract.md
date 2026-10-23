@@ -36,6 +36,42 @@ This works because the handoff only needs to carry a few things. A review of eve
 
 **What it deliberately leaves out:** routing, version numbers and message wrappers. It can run over the network or as a plain function call inside one program, without changing its shape.
 
+Here is one request from start to finish, with the handoff in the middle:
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Gateway
+    participant Auth
+    participant Memory as Your Memory
+    participant AL as Agent Loop
+    participant Model as Model (via Model API)
+    participant Tools
+
+    Client->>Gateway: Message + conversation ID + metadata (Gateway API)
+    Gateway->>Auth: Who is this, and are they allowed?
+    Auth-->>Gateway: Allowed, with actor context
+    Gateway->>Memory: Load the conversation (conversation tool)
+    Memory-->>Gateway: Conversation history
+    Gateway->>AL: Messages + metadata
+
+    loop Until the job is done
+        AL->>Model: Messages + tool definitions
+        Model-->>AL: Text and/or tool calls
+        opt Model asked for tools
+            AL->>Auth: May this actor make this tool call?
+            Auth-->>AL: Allowed or not permitted
+            AL->>Tools: Run permitted tool calls
+            Tools->>Memory: Memory tools (read, write, search...)
+            Tools-->>AL: Results
+        end
+    end
+
+    AL-->>Gateway: Streamed text, tool calls, results, done
+    Gateway->>Memory: Save the reply (conversation tool)
+    Gateway-->>Client: Streamed response + conversation ID
+```
+
 The rest of this doc is the specification: what any implementation of the Gateway–Agent Loop handoff must do.
 
 ---

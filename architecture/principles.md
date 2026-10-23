@@ -55,7 +55,7 @@ Memory is accessed via tools — change the storage, the tools still work. Compo
 
 Leaks create lock-in.
 
-The [Responsibility Matrix](./overview.md#responsibility-matrix) defines which component is responsible for what. Follow it. If swapping a component requires changes to a different component — not because the contract changed, but because work leaked across the boundary — this principle is broken.
+The [Responsibility Matrix](../build/implementers-reference.md#responsibility-matrix) defines which component is responsible for what. Follow it. If swapping a component requires changes to a different component — not because the contract changed, but because work leaked across the boundary — this principle is broken.
 
 Reality sometimes requires exceptions. When a component must temporarily do work that belongs to another, contain it inside a swappable component so it is removable when no longer needed. Compensating for weaker models is the primary example.
 
