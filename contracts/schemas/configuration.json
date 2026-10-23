@@ -36,7 +36,7 @@
       "items": {
         "type": "string"
       },
-      "description": "Filesystem paths where the system finds installed tools. At startup, the Agent Loop scans these paths: MCP servers announce their tools via protocol, manifest files are read, built-in tools are loaded from code. Tools self-describe (D146) — config only says where to find them, not what they are.",
+      "description": "Filesystem paths where the system finds installed tool-source descriptors. The Agent Loop scans these paths at startup, reads manifests and built-in definitions, and asks reachable configured services what tools they offer. An unavailable remote source does not block local startup and can be queried later. Tools self-describe (D146, D196); config says where to find them, not what they are. Separate services do not register through the Gateway API.",
       "examples": [
         ["./tools/"],
         ["./tools/", "/usr/local/mcp-servers/"]

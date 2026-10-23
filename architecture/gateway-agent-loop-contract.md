@@ -365,3 +365,4 @@ API is streaming-only and identifies each completion event with `_event_type`; t
 Agent Loop executes independent tool calls concurrently and preserves dependency order. S8
 (tool-definition shape/visibility) is canonical: source.id + name identifies a tool,
 visibility separates owner mode from Auth authorization, and tool calls carry source_id.
+Tool-source discovery stays inside the Agent Loop; the Gateway API has no tool-registration route (D196).

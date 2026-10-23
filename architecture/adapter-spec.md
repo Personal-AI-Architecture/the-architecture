@@ -81,7 +81,7 @@ Provider errors are translated too. A selected model unavailable through its sel
 **Internal interface:** the canonical tool definition (`contracts/schemas/tool-definition.json`) and the tool call and tool result shapes of the shared message contract. The Agent Loop sees only these. It doesn't know which protocol a tool speaks.
 
 **What the adapter does:**
-- Turns a tool source's self-descriptions into canonical tool definitions, recording the source in `source.id` and `source.kind`; `source.kind` is an open, non-empty provenance label, so a new protocol does not require a contract edit (D198)
+- Turns a tool source's self-descriptions into canonical tool definitions, recording the configured source's identity in `source.id` and its protocol in `source.kind`; an external service cannot choose another source's identity (D196). `source.kind` is an open, non-empty provenance label, so a new protocol does not require a contract edit (D198)
 - Runs a tool call through the source's own protocol and returns a canonical tool result
 - Keeps the source's endpoints, credentials and protocol settings in runtime configuration, never in tool definitions
 

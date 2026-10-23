@@ -67,6 +67,9 @@ obsolete maintainer guides have been deleted; the documentation guide,
 conformance checklists, example manifest and registry now point to current
 sources.
 
+The later D196 tool-discovery decision keeps separate services behind
+owner-configured sources and the Agent Loop's source adapters; it adds no
+Gateway API registration route or replacement build guidance.
 The later D197–D199 model-error, tool-kind and extension clarifications live
 in those same specs, contracts and conformance checks. They do not recreate
 derived build guidance.

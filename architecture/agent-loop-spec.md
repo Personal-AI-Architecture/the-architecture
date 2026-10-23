@@ -112,7 +112,7 @@ The full field list, including optional metadata, is in [gateway-agent-loop-cont
 | Field | Description | Source |
 |-------|-------------|--------|
 | Bootstrap prompt | Minimal startup instructions for the model (e.g., "Read AGENT.md for your instructions"). The model constructs its working context by reading Memory through tools. | Agent Loop configuration (D50) |
-| Tool sources | Where to find installed tools. Tools describe themselves (see [tools-spec.md](./tools-spec.md)). Separate and remote tools can be re-discovered without restarting the Agent Loop | Runtime config `tool_sources` (D143) |
+| Tool sources | Where to find installed tools. The Agent Loop asks configured sources for self-descriptions; separate and remote tools can be re-discovered without restarting it (see [tools-spec.md](./tools-spec.md)) | Runtime config `tool_sources` (D143, D196) |
 | Always-send set | Which tool definitions go to the model on every call; every other tool is loaded on demand through the discovery tool | The owner's preference, in Your Memory |
 | Provider configuration | Which provider adapter, its provider profiles, and a secret reference for each | Runtime config + adapter. The model and the active provider profile are not boot-time configuration: they arrive with each request (D193) |
 
