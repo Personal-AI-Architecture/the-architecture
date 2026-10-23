@@ -141,3 +141,15 @@ separate owner/product action (D188).
 - Agent Loop has hardcoded references to specific tools
 - Removing a tool causes component failures beyond "tool not available"
 - Code changes were required to add or remove the tool
+
+### SWAP-3c: Add a Tool-Source Protocol
+
+**Setup:** Choose a tool-source protocol not named in the known `source.kind` examples, with a tool that self-describes through its adapter.
+
+**Procedure:** Add or select only the adapter for that protocol and configure its source. Discover and call the tool, then validate its canonical definition with the unchanged `tool-definition.json` schema.
+
+**Pass criteria:**
+- [ ] The definition validates with the new non-empty `source.kind` label, and its `source.id` plus name remains stable (D198).
+- [ ] The Agent Loop, Gateway, Auth, Your Memory and canonical contract require no code or schema change; Auth still checks the call.
+
+**Failure indicators:** A new protocol needs a new enum value in the contract, the Agent Loop needs protocol-specific logic, or Auth is bypassed.

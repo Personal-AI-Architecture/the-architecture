@@ -4,7 +4,7 @@
 >
 > Each gap is something the spec expects that the published architecture does not deliver today. Classification is a suggestion for triage: **Defect** (published material is broken or contradicts itself), **Decision needed** (the maintainers must choose), **Technical** (contract and technical work), **Spec-only** (wording fix in the architecture docs). A gap marked **Decided, spec update in progress** has a settled answer that is still being written into the specs and contracts.
 
-**Scoreboard:** The contract-source alignment batch, example-shape validation, documentation freshness tooling, configuration alignment, required parallel tool execution, portable policy semantics, approval lifecycle contracts, transport-neutral identity propagation, tool-definition visibility/source semantics, local-address decision, first executable language-neutral conformance baseline, template-link cleanup, the visitor-1 decisions on GAP-PAA-18, 19 and 23, the v1 identity rule for GAP-PAA-24 (agent identities deferred to the agents step), the Auth-down fail-closed correction, multi-actor wording, revocation cancellation, portable audit records, and the provider decisions on GAP-PAA-26 and 28, and model-aware context handling for GAP-PAA-20 are complete. Still open: from the visitor-1 read-through of the Models, Tools, Adapter and Communication docs GAP-PAA-27, 29, 30 and 31.
+**Scoreboard:** The contract-source alignment batch, example-shape validation, documentation freshness tooling, configuration alignment, required parallel tool execution, portable policy semantics, approval lifecycle contracts, transport-neutral identity propagation, tool-definition visibility/source semantics, local-address decision, first executable language-neutral conformance baseline, template-link cleanup, the visitor-1 decisions on GAP-PAA-18, 19 and 23, the v1 identity rule for GAP-PAA-24 (agent identities deferred to the agents step), the Auth-down fail-closed correction, multi-actor wording, revocation cancellation, portable audit records, the provider decisions on GAP-PAA-26 and 28, model-aware context handling for GAP-PAA-20, and the technical closures for GAP-PAA-27, 30 and 31 are complete. GAP-PAA-29 remains a joint decision in [PR #21](https://github.com/Personal-AI-Architecture/the-architecture/pull/21).
 
 ## Routes a developer follows
 
@@ -191,12 +191,13 @@
 - **Evidence:** [configuration-spec.md](../architecture/configuration-spec.md) "Provider swap" and "Model swap"; [adapter-spec.md](../architecture/adapter-spec.md); [configuration.json](../contracts/schemas/configuration.json) `provider_adapter`; [adapter-config.json](../contracts/examples/adapter-config.json); BrainDrive `builds/typescript/adapters/openai-compatible.json` (`provider_profiles`) and `gateway/server.ts` (per-message `active_provider_profile`).
 - **Decided (2026-10-22 dev call):** Adopted as proposed (D193). Written into the Models, Configuration and Adapter specs, the Gateway–Agent Loop contract (`provider` on the request) and SWAP-1b.
 
-### GAP-PAA-27: The promises to report a missing model or capability have no error codes — Technical
+### GAP-PAA-27: The promises to report a missing model or capability have no error codes — Resolved
 
 - **Expected:** US-5 AC-5.3. Capabilities a model lacks are reported, not faked; and if the chosen model isn't available through the loaded adapter, the owner is told rather than silently switched. Swapping adapters must not change whether the owner is told.
 - **Published:** The Model API's `CompletionError.code` is free text, so no implementation has to report either case in a way another part, or the validator, can recognize. BrainDrive reports both by matching words in each provider's error text (`builds/typescript/engine/errors.ts`).
 - **Proposed:** Define only the codes a promise depends on: `model_unavailable` and `capability_unsupported` (naming the missing capability), on both the Model API error and the Agent Loop error stream, whose `code` list (`provider_error`, `tool_error`, `auth_error`, `context_overflow`) is in `gateway-engine.yaml`. Other provider errors (rate limits, quota, rejected keys) stay free text, and how an adapter detects any of them stays its own business. Advance capability discovery is out of scope.
 - **Evidence:** [models-spec.md](../architecture/models-spec.md) "What the system guarantees about models"; [configuration-spec.md](../architecture/configuration-spec.md) "If the chosen model isn't available through the loaded adapter"; `contracts/openapi/model-api.yaml` `CompletionError`.
+- **Resolution (D197):** Model API errors use `model_unavailable` for an unavailable selected model and `capability_unsupported` with a required machine-readable `capability` for an unsupported ability. Agent Loop and Gateway errors preserve those categories. ARCH-5 and ARCH-19 require a runtime proof with no model/provider substitution; the executable repository baseline checks the published error shapes.
 
 ### GAP-PAA-28: Saved conversations don't record which model and provider produced each reply — Resolved
 
@@ -212,16 +213,18 @@
 - **Published:** The working default is that the Agent Loop connects to the tool sources in config (`tool_sources`) and asks what they offer, which matches how MCP works. The alternative is for tool services to announce themselves through the Gateway API, as any other caller does: it applies the parity principle to tool registration but adds work to the Gateway. Either way, the model, Auth and Your Memory are unaffected. Formerly OQ-1 in the tools spec.
 - **Evidence:** [tools-spec.md](../architecture/tools-spec.md) "How tools are found" and "Programs that call the system"; [configuration.json](../contracts/schemas/configuration.json) `tool_sources`.
 
-### GAP-PAA-30: A new tool protocol needs a contract change to be labelled — Technical
+### GAP-PAA-30: A new tool protocol needs a contract change to be labelled — Resolved
 
 - **Expected:** A new tool protocol is one more tool-source adapter, with no change to the Agent Loop or the contracts (adapter-spec, "Tool-source adapter").
 - **Published:** `tool-definition.json` requires `source.kind` from a fixed list (`mcp`, `cli`, `native`, `manifest`, `builtin`). A tool source using any other protocol cannot produce a valid definition until the contract's list is changed.
 - **Proposed:** Let `source.kind` accept other values (keep the listed ones as known values), since it records provenance only.
 - **Evidence:** [tool-definition.json](../contracts/schemas/tool-definition.json) `source.kind`; [adapter-spec.md](../architecture/adapter-spec.md) "The three adapters"; [tools-spec.md](../architecture/tools-spec.md) "How tools are found".
+- **Resolution (D198):** `source.kind` is a non-empty open string; the former enum values remain examples. The executable repository baseline validates a new kind without editing the schema, and SWAP-3 checks that an implementation can use it without Agent Loop changes.
 
-### GAP-PAA-31: Contracts reject unknown fields, but components must ignore them — Technical
+### GAP-PAA-31: Contracts reject unknown fields, but components must ignore them — Resolved
 
 - **Expected:** Communication principle P6. New fields are additive, receivers ignore unknown fields rather than rejecting them, and optional metadata lives in a designated `metadata` or `extensions` object, so one component can add fields without a coordinated update.
 - **Published:** Seven schemas set `additionalProperties: false`, among them every message part in `message.json` (text, image, file, tool call, tool result), `tool-definition.json` and `auth-context.json`, and none of these offers a metadata or extensions object. A component that adds a field to a message part or tool definition produces something a validating receiver rejects.
 - **Proposed:** For message parts and tool definitions, either allow unknown fields or add an `extensions` object that receivers ignore. Keep `auth-context.json` strict as a deliberate security exception (auth-spec rejects caller-supplied context) and say so in communication-principles P6.
 - **Evidence:** [communication-principles.md](../architecture/communication-principles.md) P6; [message.json](../contracts/schemas/message.json); [tool-definition.json](../contracts/schemas/tool-definition.json); [auth-context.json](../contracts/schemas/auth-context.json); [auth-spec.md](../architecture/auth-spec.md) "Identity travels with the request".
+- **Resolution (D199):** Message parts and tool definitions have optional `extensions` maps for inert additive data. Receivers ignore unknown extension keys, while strict core and security shapes reject unknown operational fields. Auth context, policy and approval envelopes stay strict. ARCH-22 tests old receivers with new extension keys; the executable repository baseline validates extension acceptance and strict-core rejection.

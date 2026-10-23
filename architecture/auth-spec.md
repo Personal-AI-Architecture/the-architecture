@@ -370,6 +370,10 @@ boundary as the canonical `auth_context` shape in `contracts/schemas/auth-contex
 Headers, message metadata, request-body fields, and direct-call arguments are transport
 adapters for that shape, not competing identity contracts. Permissions remain owned by
 Auth and are never caller-controlled transport data.
+The optional `extensions` maps on messages and tool definitions do not extend this
+identity or permission contract. `auth_context`, portable policies and approval
+requests/decisions reject unexpected fields; unknown extension keys cannot grant
+permission or change an Auth result (D199).
 
 Preparing a shorter model working context does not change the Auth boundary: the
 Gateway authenticates before reading saved history, and any full-history read by a

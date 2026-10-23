@@ -323,7 +323,12 @@ components:
 
     CompletionError:
       type: object
-      description: Error from the model or adapter
+      description: |
+        Error from the model or adapter. The adapter normalizes a selected model
+        that is unavailable to `model_unavailable` and a requested ability that
+        the selected model cannot provide to `capability_unsupported` (D197).
+        Other provider-specific codes remain open. An unsupported capability
+        must be named in `capability`; raw provider error text must not be exposed.
       required:
         - _event_type
         - code
@@ -334,21 +339,42 @@ components:
           const: error
         code:
           type: string
-          description: Error category
+          description: Machine-readable error category. `model_unavailable` and `capability_unsupported` are required for those conditions; other provider errors may use additional codes.
+          examples: [model_unavailable, capability_unsupported, rate_limited]
         message:
           type: string
           description: Human-readable error description
+        capability:
+          type: string
+          minLength: 1
+          description: Machine-readable name of the missing ability; required when code is `capability_unsupported`.
+      if:
+        properties:
+          code:
+            const: capability_unsupported
+      then:
+        required: [capability]
 
     Error:
       type: object
-      description: Non-streaming error response
+      description: Non-streaming error response; selected-model and unsupported-capability failures use the same canonical codes as CompletionError (D197).
       required:
         - code
         - message
       properties:
         code:
           type: string
-          description: Machine-readable error code
+          description: "`model_unavailable` or `capability_unsupported` for those conditions; other provider errors may use additional codes."
         message:
           type: string
           description: Human-readable error description
+        capability:
+          type: string
+          minLength: 1
+          description: Required when code is `capability_unsupported`.
+      if:
+        properties:
+          code:
+            const: capability_unsupported
+      then:
+        required: [capability]

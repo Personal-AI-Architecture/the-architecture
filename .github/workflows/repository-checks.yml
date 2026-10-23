@@ -48,6 +48,9 @@ jobs:
       - name: Check local documentation links and anchors
         run: python3 scripts/check-links.py
 
+      - name: Check acceptance criterion traceability
+        run: python3 scripts/check-acceptance-trace.py
+
       - name: Validate all JSON Schemas and OpenAPI contracts
         run: python3 scripts/check-contracts.py
 

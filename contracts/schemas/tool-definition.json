@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "tool-definition.json",
   "title": "Tool Definition",
-  "description": "How a tool describes itself. Tools self-describe (D146) — definitions come from the tools themselves, not from manual configuration. MCP tools describe themselves via protocol, CLI tools provide manifest files, native functions are defined in code. Each definition is uniquely identified by source.id plus name. Source is provenance only; connection credentials and adapter configuration live outside this definition.",
+  "description": "How a tool describes itself. Tools self-describe (D146) — definitions come from the tools themselves, not from manual configuration. MCP tools describe themselves via protocol, CLI tools provide manifest files, native functions are defined in code. Each definition is uniquely identified by source.id plus name. Source is provenance only; connection credentials and adapter configuration live outside this definition. Optional extensions carry inert additive metadata (D199).",
   "type": "object",
   "additionalProperties": false,
   "required": ["name", "description", "parameters", "source", "visibility"],
@@ -54,8 +54,9 @@
         },
         "kind": {
           "type": "string",
-          "enum": ["mcp", "cli", "native", "manifest", "builtin"],
-          "description": "How the source exposes tools. This is provenance, not an adapter configuration contract."
+          "minLength": 1,
+          "examples": ["mcp", "cli", "native", "manifest", "builtin"],
+          "description": "How the source exposes tools. The examples are known labels, not an exhaustive protocol list; a new tool-source adapter may use a new non-empty label without changing this contract (D198). This is provenance, not an adapter configuration contract."
         }
       },
       "description": "Provenance supplied by the tool source. It must not contain endpoints, credentials, or runtime adapter settings."
@@ -81,6 +82,11 @@
     "read_only": {
       "type": "boolean",
       "description": "Descriptive capability metadata only; Auth and the tool enforce the actual action policy."
+    },
+    "extensions": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Optional inert additive metadata. Receivers ignore keys they do not understand. Extensions cannot override name, parameters, source, visibility or Auth decisions, and must not contain secrets (D199)."
     }
   },
   "examples": [

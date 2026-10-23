@@ -1,5 +1,7 @@
 # Template readiness follow-up — 2026-10-23
 
+**Current status after D197–D199:** This table records validation against PAA `28e9a27`. The later model-error, tool-kind and extension contract changes require each template to be repinned and retested; the PASS cells below are historical evidence, not a current-main claim. See the [v1 acceptance proof audit](v1-acceptance-proof-audit-2026-10-23.md).
+
 The [initial audit](template-readiness-2026-10-23.md) found that all five published language templates had older contract pins and lacked required runtime behavior. The following updates close that specific starter readiness gap. The templates are now suitable to list in the README as **implementation starters for the tested paths**, not as fully qualified PAA products.
 
 | Template | Runtime update | Merged revision | Shared validator against PAA main |
