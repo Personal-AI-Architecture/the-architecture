@@ -22,7 +22,7 @@ Not an app, and not a framework you install. A blueprint, plus a starter kit to 
 - **The architecture** ([`overview.md`](architecture/overview.md)): how the system works, its principles, decisions, component specifications, and explanatory background.
 - **Contracts** ([`contracts/`](contracts/)): the exact OpenAPI and JSON Schema shapes code must match, plus canonical examples.
 - **Conformance** ([`conformance/`](conformance/)): language-neutral checks and review guidance that prove a system conforms.
-- **Language templates:** starting points in TypeScript, Python, Go, Rust and Java. Their recorded validation was against the earlier PAA contract pin `28e9a27`; the D197–D199 contract update needs a new pin and rerun before claiming current-main alignment. See [template readiness](maintainers/template-readiness-2026-10-23-followup.md) for the checks and limits.
+- **Language templates:** starting points in TypeScript, Python, Go, Rust and Java. All five were repinned to PAA contract commit `cfeb96d` after D196, and their recorded static and native checks passed against that source. Those checks prove the named starter paths, not full runtime conformance. See [template readiness](maintainers/template-readiness-2026-10-23-followup.md) for the evidence and limits. The architecture release candidate is tagged [`v1.0-rc.1`](https://github.com/Personal-AI-Architecture/the-architecture/tree/v1.0-rc.1); compare a template's lock with the contract source you intend to use.
 
 ### Language templates
 

@@ -1,5 +1,11 @@
 # Template readiness follow-up — 2026-10-23
 
+## Local live Gateway follow-up — 2026-10-25
+
+Unmerged local changes add a runnable HTTP Gateway and a `live.start` command to all five language templates. A shared black-box runner now starts each template, sends authenticated requests, verifies canonical SSE and saved replies, checks conversation search and pagination, and confirms conversation data survives a server restart. A second runner configures an OpenAI-compatible fixture and verifies the streamed reply with each of two model IDs. The runner also checks that unauthenticated and spoofed-actor requests are denied before body parsing, and that oversized requests are rejected.
+
+All five local template revisions passed the shared validator against PAA `origin/main` at the D196 contract pin, including their declared static and native commands. All five passed the live mock and two-model provider fixture runs. Go and Java validation used their declared Docker toolchains. The Java provider run initially collided with a concurrent Maven build writing the same `target` directory; its isolated rerun passed for both models. These are local results pending repository review and hosted CI. They cover the named Gateway starter journey, not independent Auth, separate-service tool execution, all PAA runtime criteria, or full v1 conformance. See the [v1 acceptance proof audit](v1-acceptance-proof-audit-2026-10-23.md) for the remaining architecture-wide proof.
+
 **Current status after D196:** All five templates are pinned to PAA main `cfeb96df743feee91afc80ac81f0c4fd9a62c123`, which merged the source-driven discovery decision in [PR #21](https://github.com/Personal-AI-Architecture/the-architecture/pull/21). Only the configuration schema description changed in the contract set. The shared validator passed with `--source-ref origin/main` for each template, including its declared type, unit, integration, conformance and acceptance commands. Native repository checks and pull-request CI passed. The D197–D199 focused runtime fixtures still pass. This establishes the tested starter paths; it does not establish full v1 runtime conformance. See the [v1 acceptance proof audit](v1-acceptance-proof-audit-2026-10-23.md).
 
 | Template | D196 repin | Merged revision | Shared validator, native checks, CI |
