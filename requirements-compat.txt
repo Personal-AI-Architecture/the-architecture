@@ -1,0 +1,5 @@
+# Compatible fallback for package indexes that do not yet mirror jsonschema 4.26.0.
+jsonschema==4.25.1
+markdown-it-py==4.2.0
+openapi-spec-validator==0.7.2
+PyYAML==6.0.3

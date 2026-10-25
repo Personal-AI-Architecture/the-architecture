@@ -4,6 +4,8 @@ This is an audit of the 71 acceptance criteria in the PAA spec across 18 user st
 
 `python3 scripts/check-acceptance-trace.py` finds 71 unique, contiguous criterion IDs: 69 name evidence routes and two record explicit scope/process decisions (AC-3.4 and AC-18.3). The repository link checker validates their local links. The contract and example checks and the executable conformance baseline verify the published package. The baseline has 11 checks after D197–D199; it does not execute all runtime scenarios against a product.
 
+The [conformance runner instructions](../conformance/README.md) now include a tested compatible dependency set for package indexes that do not provide the primary `jsonschema` pin. Both sets run the same repository baseline; neither changes the target runtime proof still needed below.
+
 | Story | Criteria checked | Published route or decision | Observed proof state |
 | --- | --- | --- | --- |
 | US-1 | AC-1.1–1.4 | Overview, principles, adapter and lock-in rules | Architecture published; target independence needs runtime proof. |

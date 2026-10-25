@@ -32,6 +32,21 @@ python3 -m pip install -r requirements-ci.txt
 python3 conformance/runner.py
 ```
 
+If a configured package index does not offer `jsonschema==4.26.0`, use the
+tested compatible dependency set in a fresh virtual environment:
+
+```bash
+python3 -m venv .venv-compat
+. .venv-compat/bin/activate
+python3 -m pip install -r requirements-compat.txt
+python3 -m pip check
+python3 scripts/check-contracts.py
+python3 conformance/runner.py
+```
+
+The fallback uses `jsonschema==4.25.1` with a compatible OpenAPI validator.
+Both dependency sets run the same repository checks in CI.
+
 The runner is intentionally contract-first. It proves the repository baseline: canonical examples, four-field runtime configuration, extensible identity, tool source/visibility semantics, source-preserving tool calls, canonical model error shapes, open tool-source kind, schema-defined extension slots, transport-neutral `auth_context`, portable policy conditions, and the loopback-only default. The runtime scenarios in `arch-tests.md`, including ARCH-12 through ARCH-22, are test specifications; `runner.py` does not execute them against a target implementation. A future target adapter can add runtime checks while retaining the same language-neutral criteria.
 
 For provider-failure behavior, ARCH-5 checks the terminal `provider_error` and
