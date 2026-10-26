@@ -26,11 +26,14 @@ That means your data is protected by things you can see, check and change, and t
 This works because no AI can yet be trusted to always do the right thing, and nobody can fully stop a model from being tricked. So instead of counting on the model to be perfect, PAA limits what any mistake can reach and makes every change visible and reversible.
 
 1. **Two locks, not one.** Auth checks every request and every tool call. Separately, each tool is confined to what it's allowed to reach. If one fails, the other still holds.
+
 2. **Instructions and data are kept apart.** The model is told which text is an instruction and which is just content it read, so a file saying "ignore your instructions" is treated as text. This lowers the risk of being tricked; it doesn't remove it, and nobody can yet.
 3. **Trust is visible.** Every tool has a trust level you can see: shipped with the system, installed by you, or untrusted. A tool that didn't ship with the system runs walled off by default.
 4. **Every change can be undone.** Your Memory keeps a history of what changed, so a mistake can be rolled back, whether it came from you, the AI or a tricked tool. That's why the default can be "the owner can do everything" with no approval prompts, and you can turn approvals on for anything you choose.
 5. **You can see what happened.** An audit log records sign-ins, tool calls, reads and writes, and no tool call runs without being recorded.
 6. **Your data goes only where you send it.** Secrets never go in Your Memory. When you use a cloud model, what it needs to read goes to that provider. You choose the provider, and each saved reply records which one produced it. A local model keeps what you send the model on your machine.
+
+The Gateway passes the authenticated actor context into the Agent Loop using the internal [`gateway-agent-loop.yaml`](../contracts/openapi/gateway-agent-loop.yaml) contract; that context cannot grant permissions by itself.
 
 The rest of this doc is the specification: what any implementation of security must do.
 

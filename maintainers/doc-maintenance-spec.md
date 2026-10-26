@@ -30,7 +30,7 @@ Files outside these locations (e.g., `tasks/*.md`, `node_modules/`) are excluded
   "docs": [
     {
       "path": "architecture/agent-loop-spec.md",
-      "covers": ["src/engine/"],
+      "covers": ["src/agent-loop/"],
       "tier": 1,
       "update_trigger": "code",
       "depends_on": ["architecture/overview.md"]
@@ -225,6 +225,8 @@ The `check:docs` script validates registry integrity:
 ---
 
 ## Conformance
+
+For the D201 outside-adapter rule, the binding principle, adapter spec and decision stay aligned with the lock-in gate and ARCH-23. A change to any one of those requires a freshness review of the others through the registry.
 
 The repository check is working correctly when:
 

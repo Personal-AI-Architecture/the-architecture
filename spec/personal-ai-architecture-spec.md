@@ -279,7 +279,7 @@ As a developer, I want published pass/fail tests, so that I can show my implemen
 <details>
 <summary>Acceptance criteria</summary>
 
-- **AC-16.1** — Given the conformance suite, then every test has an ID, set-up steps and pass/fail criteria, grouped as swap tests (SWAP-1 to SWAP-3), architecture tests (ARCH-1 to ARCH-22), deployment tests (DEPLOY-1 to DEPLOY-5) and Foundation story tests (FS-1 to FS-8). _(evidence: [conformance/](../conformance/README.md))_
+- **AC-16.1** — Given the conformance suite, then every test has an ID, set-up steps and pass/fail criteria, grouped as swap tests (SWAP-1 to SWAP-3), architecture tests (ARCH-1 to ARCH-23), deployment tests (DEPLOY-1 to DEPLOY-5) and Foundation story tests (FS-1 to FS-8). _(evidence: [conformance/](../conformance/README.md))_
 - **AC-16.2** — Given the suite index, then it lists every test that exists and links only to things that exist. _(evidence: [conformance/README.md](../conformance/README.md))_
 - **AC-16.3** — Given the lock-in gate and lock-in audit, then a developer can work through each check for a pull request or a release. _(evidence: [lockin-gate.md](../conformance/lockin-gate.md), [lockin-audit.md](../conformance/lockin-audit.md))_
 - **AC-16.4** — An implementation that passes every test is conformant; passing some is not conformance. _(evidence: [conformance/README.md "How to Use"](../conformance/README.md#how-to-use))_

@@ -124,11 +124,15 @@ Four components, two APIs, and three things outside the system.
 | **Models** | Outside | The intelligence. The system calls a model; it doesn't contain one. | [models-spec.md](./models-spec.md) |
 | **Tools** | Outside | Capabilities in the environment. They describe themselves; the Agent Loop runs them; Auth permits them. | [tools-spec.md](./tools-spec.md) |
 
+The Gateway-to-Agent-Loop handoff is the internal [Agent Loop OpenAPI contract](../contracts/openapi/gateway-agent-loop.yaml); the public Gateway and Model APIs remain separate contracts.
+
 **Gateway.** Conversations live in the system, not in any client, so you can start on the web, continue on your phone, and pick up in a terminal. The Gateway stores and loads them through a dedicated internal tool, like any other component that needs Your Memory.
 
 **Auth.** Auth protects Your Memory. It sits on every request, independent of the Gateway and the Agent Loop, so either can be swapped without touching it. Today the actor is usually you, but it is built for more: other people and AI agents acting on your behalf, each with exactly the permissions you grant.
 
 **Adapters.** Three thin translation layers you own sit at the edges: one between clients and the Gateway, one between the Agent Loop and models, and one for each kind of tool source, such as MCP. When an outside standard changes, you swap the adapter, not the system. An unknown or invalid selected adapter is reported at startup; the system does not silently choose another. See [adapter-spec.md](./adapter-spec.md) and [configuration-spec.md](./configuration-spec.md).
+
+An outside provider, foreign client format or external tool source must cross an owned adapter for the system to claim conformance (D201). A pass-through is sufficient; owner-controlled internal boundaries need no adapter. Native clients using the PAA Gateway API already speak the owner-controlled contract.
 
 A model that is unavailable or lacks a requested ability is reported in a recognizable way across those boundaries. A new tool protocol gets a new adapter and a provenance label without changing the core contract. Optional message and tool metadata travels in designated extension fields; Auth decisions remain separate and strict. See [models-spec.md](./models-spec.md), [tools-spec.md](./tools-spec.md) and [communication-principles.md](./communication-principles.md).
 

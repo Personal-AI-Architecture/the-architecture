@@ -17,6 +17,8 @@ shapes, and `conformance/` for implementation test criteria. A template owns
 language-specific instructions and executable checks. The former build folder
 was derived material and could not settle a disagreement with those sources.
 
+The current conformance suite includes ARCH-23 for D201's owned-adapter boundary. The retired build guidance remains historical evidence and does not supersede that test.
+
 ## Relocations made
 
 | Build source | Disposition | Current home |
@@ -45,7 +47,7 @@ them against a target implementation.
 | Build claim | Reason |
 |---|---|
 | Gateway/Gateway API blueprint `POST /message` | The canonical Gateway API uses `POST /conversations/messages`. |
-| Gateway/Agent Loop blueprints that omit or forbid `provider` in the internal request | D193 and `contracts/openapi/gateway-engine.yaml` require the active provider profile on every request. |
+| Gateway/Agent Loop blueprints that omit or forbid `provider` in the internal request | D193 and `contracts/openapi/gateway-agent-loop.yaml` require the active provider profile on every request. |
 | Configuration/deployment blueprint sequence that loads preferences before ready | The accepted configuration spec starts the Memory tools before ready and reads the current model and provider preference on every message. It does not require one cached preference load as a readiness phase. |
 | Memory-tools blueprint's fixed `memory_*` names, private failure schema, `include_conversations=false` search default, and token-pattern redaction | `memory-spec.md` explicitly leaves operation names and signatures to implementations; the blueprint's shapes are not published canonical contracts. A product or template may choose these details. |
 | Blueprint recommendations for index rebuilds, pagination under concurrent writes, logging verbosity, and implementation-specific modules | These are implementation choices or need separate design review. The current Gateway API uses offset pagination and has no snapshot guarantee; a build guide cannot silently add one. |

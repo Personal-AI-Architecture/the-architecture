@@ -448,7 +448,7 @@ components:
         Server-Sent Events stream delivered to the client. The Gateway forwards
         the Agent Loop's stream to the calling client, adding conversation context.
 
-        Events mirror the Agent Loop's SSE events (see gateway-engine.yaml), with
+        Events mirror the Agent Loop's SSE events (see gateway-agent-loop.yaml), with
         an optional Gateway-owned context_notice before model output when older
         history was omitted or summarized.
       oneOf:

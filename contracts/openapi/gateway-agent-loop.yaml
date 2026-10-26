@@ -12,7 +12,7 @@ info:
     into them. This is an internal contract between two components we control, inside the
     same deployment.
 
-    Source: gateway-engine-contract.md (D137)
+    Source: gateway-agent-loop-contract.md (D137)
 paths:
   /agent-loop/cancel:
     post:

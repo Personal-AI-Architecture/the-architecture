@@ -10,6 +10,8 @@ The system reduces to two things: **memory and tools** (D135).
 
 **Memory is the nouns. Tools are the verbs.** Clean binary.
 
+When a tool source is outside the owner's control, the connection crosses an owner-controlled adapter (D201). This boundary does not change whether the source's data is memory or its operations are tools.
+
 **Where tool calls fit.** A tool call is one use of a verb: the model asks to run a tool with specific inputs. Running it is the operation. The request and its result are data, saved in conversation history, so they're memory. A tool call is a sentence: a verb applied to nouns.
 
 The canonical message contract keeps tool calls and results as role-appropriate

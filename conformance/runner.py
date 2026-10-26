@@ -26,7 +26,7 @@ REQUIRED_FILES = (
     "contracts/schemas/message.json",
     "contracts/schemas/policy.json",
     "contracts/schemas/tool-definition.json",
-    "contracts/openapi/gateway-engine.yaml",
+    "contracts/openapi/gateway-agent-loop.yaml",
     "contracts/openapi/gateway-api.yaml",
     "contracts/openapi/model-api.yaml",
     "contracts/examples/validate-manifest.py",
@@ -119,7 +119,7 @@ def check_contract_baseline(root: Path) -> list[str]:
     extended_message["content"][0]["unrecognized_core_field"] = True
     validate_case(message, extended_message, False, "unknown message-part core field")
 
-    gateway_request = read_json(root, "contracts/examples/gateway-engine-request.json")
+    gateway_request = read_json(root, "contracts/examples/gateway-agent-loop-request.json")
     require(set(gateway_request) >= {"messages", "model", "provider", "auth_context", "metadata"}, "internal request is missing a bounded required field")
     auth_context = gateway_request["auth_context"]
     require(set(auth_context) >= {"actor", "authentication_id", "authenticated_at", "correlation_id"}, "auth_context is incomplete")
@@ -132,19 +132,19 @@ def check_contract_baseline(root: Path) -> list[str]:
     validate_case(auth_schema, unexpected_auth, False, "unexpected auth-context field")
 
     model_contract = read_yaml(root, "contracts/openapi/model-api.yaml")
-    engine_contract = read_yaml(root, "contracts/openapi/gateway-engine.yaml")
+    agent_loop_contract = read_yaml(root, "contracts/openapi/gateway-agent-loop.yaml")
     gateway_contract = read_yaml(root, "contracts/openapi/gateway-api.yaml")
     model_error = model_contract["components"]["schemas"]["CompletionError"]
-    engine_error = engine_contract["components"]["schemas"]["ErrorEvent"]
+    agent_loop_error = agent_loop_contract["components"]["schemas"]["ErrorEvent"]
     gateway_error = gateway_contract["components"]["schemas"]["ErrorEvent"]
-    for boundary, schema in (("Model API", model_error), ("Agent Loop", engine_error), ("Gateway API", gateway_error)):
+    for boundary, schema in (("Model API", model_error), ("Agent Loop", agent_loop_error), ("Gateway API", gateway_error)):
         unsupported = {"_event_type": "error", "code": "capability_unsupported", "message": "Image input is unavailable.", "capability": "image_input"}
         validate_case(schema, unsupported, True, f"{boundary} unsupported ability")
         unsupported.pop("capability")
         validate_case(schema, unsupported, False, f"{boundary} unnamed ability")
         unavailable = {"_event_type": "error", "code": "model_unavailable", "message": "Selected model is unavailable."}
         validate_case(schema, unavailable, True, f"{boundary} unavailable model")
-    for boundary, contract in (("Model API", model_contract), ("Agent Loop", engine_contract), ("Gateway API", gateway_contract)):
+    for boundary, contract in (("Model API", model_contract), ("Agent Loop", agent_loop_contract), ("Gateway API", gateway_contract)):
         schema = contract["components"]["schemas"]["Error"]
         unsupported = {"code": "capability_unsupported", "message": "Image input is unavailable.", "capability": "image_input"}
         validate_case(schema, unsupported, True, f"{boundary} pre-stream unsupported ability")
@@ -152,7 +152,7 @@ def check_contract_baseline(root: Path) -> list[str]:
         validate_case(schema, unsupported, False, f"{boundary} pre-stream unnamed ability")
         validate_case(schema, {"code": "model_unavailable", "message": "Selected model is unavailable."}, True, f"{boundary} pre-stream unavailable model")
     validate_case(model_error, {"_event_type": "error", "code": "rate_limited", "message": "Try later."}, True, "open provider error code")
-    validate_case(engine_error, {"_event_type": "error", "code": "rate_limited", "message": "Try later."}, False, "unknown Agent Loop error category")
+    validate_case(agent_loop_error, {"_event_type": "error", "code": "rate_limited", "message": "Try later."}, False, "unknown Agent Loop error category")
 
 
     policy = read_json(root, "contracts/schemas/policy.json")

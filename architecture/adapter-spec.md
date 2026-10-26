@@ -26,7 +26,7 @@ This works because translating is a small, well-defined job. Every model provide
 - **Between client apps and the Gateway:** PAA's Gateway API is a plain web API. If client apps expect a different format, such as the one many chat apps already speak, an adapter can translate it, and the Gateway never knows. This swap is rare.
 - **Between the Agent Loop and tools:** each kind of tool source, such as MCP, has its own adapter, so a new tool protocol is one more adapter, not a change to the Agent Loop.
 - **One job only:** an adapter only translates. If describing what it does needs an "and," it's doing too much, and that extra logic belongs in one of the system's parts.
-- **Your choice, not a rule:** nothing forces you to use adapters. You can hard-code a provider and the system still works, but each shortcut is lock-in you've chosen. PAA makes the swappable path the easiest one, not the only one.
+- **Required where you don't own the other side:** a conforming system puts an adapter at every boundary with something outside the owner's control (model providers, client formats, external tool sources). A pass-through is enough to start. Boundaries the owner controls on both sides need none. Owners can still take shortcuts on their own systems, but a system that does is no longer conformant, and each shortcut is lock-in they've chosen.
 
 Adapters don't add parts to the system. They sit at its edges, and the system still has four components and two APIs.
 
@@ -36,7 +36,7 @@ The rest of this doc is the specification: what any implementation of adapters m
 
 ## What counts as an adapter
 
-An adapter is a stateless translation layer between a part of the system and an outside format. On one side is an internal interface that the system defines and controls; on the other is whatever external standard is current. The adapter translates between them and does nothing else (D139).
+An adapter is a translation layer between a part of the system and an outside format. On one side is an internal interface that the system defines and controls; on the other is whatever external standard is current. The adapter translates between them and does nothing else (D139). It holds no owner policy or product state; a protocol session ID or cursor needed to speak the outside format can remain inside the adapter.
 
 Adapters are an implementation pattern at the system's edges. They add no components, APIs or architecture contracts: the architecture remains four components, two APIs and three external dependencies. The Gateway API is still the Gateway API and the Model API is still the Model API; an adapter is how each one can point at different external standards over time.
 
@@ -159,16 +159,19 @@ Without adapters, a contract binds to whichever standard it was written against,
 
 Auth stays swappable through its independence from the other parts.
 
-## Using adapters is a choice
+## External adapters are required for conformance
 
-Nothing stops an implementation from bypassing adapters, hard-coding a provider or coupling components directly. The system still works, but each shortcut is lock-in the owner has chosen to accept. The architecture makes the swappable path the easiest path, not the only one, because enforcing it would mean the platform deciding what the owner may do with their own system.
+An owner may bypass an adapter on their own system. That system can still run, but it cannot claim PAA conformance while an outside provider, client format or tool source connects directly. This rule governs the conformance claim, not what the owner may choose to run. Internal boundaries the owner controls on both sides need no adapter. A pass-through satisfies the boundary as long as the component itself stays free of outside protocol details (D201).
+
+A client already speaking the PAA Gateway API uses that owner-controlled contract. A Gateway API adapter is required when the system accepts another client format; the rule does not require an extra wrapper around native Gateway API requests.
 
 ## Checking an implementation
 
+- [ ] Every outside provider, client format and external tool source is reached through an owned adapter; no outside protocol details live in Agent Loop, Gateway or Auth (ARCH-23)
 - [ ] Provider-specific request formatting, streaming and error details live in the Model API adapter, not the Agent Loop or Gateway
 - [ ] Client protocol details live in the Gateway API adapter, not the Gateway
 - [ ] The Agent Loop works only with canonical tool definitions, calls and results; tool-protocol details live in tool-source adapters
-- [ ] Each adapter is stateless and does one job: translate
+- [ ] Each adapter does one job: translate; any retained state is limited to outside-protocol session mechanics, not owner policy or product state
 - [ ] Switching to another listed provider profile changes only the provider preference; swapping to a provider in a new format changes only the adapter, its config, the startup config and the API key secret
 - [ ] Adding a tool protocol means adding a tool-source adapter, with no change to the Agent Loop, Gateway, Auth or Your Memory
 - [ ] Runtime config, adapter config and owner preferences stay distinct
@@ -181,6 +184,7 @@ Nothing stops an implementation from bypassing adapters, hard-coding a provider 
 | # | Decision | Rationale |
 |---|----------|-----------|
 | D139 | Contracts are swappable via adapters — completing the zero-lock-in architecture | Components are swappable through contracts, but contracts bind to a specific standard. Adapters absorb the standard: components speak an internal interface, adapters translate to/from the external standard. Swap the standard → swap the adapter → nothing else changes. Completes the chain: Your Memory via tools, Components via contracts, Contracts via adapters. |
+| D201 | Outside connections require owned adapters for conformance | A pass-through translation boundary is enough, but a model provider, foreign client format or external tool source cannot put its protocol details in the core components. Owner-controlled internal boundaries need none. |
 
 ---
 

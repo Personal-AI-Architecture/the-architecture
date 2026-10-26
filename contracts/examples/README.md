@@ -20,9 +20,9 @@ Provide copyable valid and invalid example files so implementers, reviewers, and
 - `invalid-approval-result-event.json` - drift example missing required decision linkage
 - `context-notice-event.json` - optional Gateway notice when older turns are omitted or summarized
 - `invalid-context-notice-event.json` - drift example missing the omitted-turn count
-- `gateway-engine-request.json` - canonical internal Gateway -> Agent Loop request with per-request model and provider, structured message parts, and an optional separate deterministic context summary
-- `invalid-gateway-engine-request.json` - drift example that leaks config and secrets into metadata
-- `invalid-gateway-engine-request-missing-provider.json` - otherwise-valid request missing only the required `provider`
+- `gateway-agent-loop-request.json` - canonical internal Gateway -> Agent Loop request with per-request model and provider, structured message parts, and an optional separate deterministic context summary
+- `invalid-gateway-agent-loop-request.json` - drift example that leaks config and secrets into metadata
+- `invalid-gateway-agent-loop-request-missing-provider.json` - otherwise-valid request missing only the required `provider`
 - `runtime-config.json` - canonical startup-ready runtime config
 - `invalid-runtime-config.json` - drift example with collapsed config, embedded secret values, a model fixed in runtime config, and an approval rule in config instead of Auth
 - `adapter-config.json` - canonical adapter config: provider profiles (an endpoint each, plus a secret reference when the provider needs a key) and a default profile, no pinned model
@@ -33,7 +33,7 @@ Provide copyable valid and invalid example files so implementers, reviewers, and
 ## Authority Mapping
 
 - Client-facing payloads -> `contracts/openapi/gateway-api.yaml`
-- Internal Agent Loop handoff -> `contracts/openapi/gateway-engine.yaml`
+- Internal Agent Loop handoff -> `contracts/openapi/gateway-agent-loop.yaml`
 - Startup/runtime config -> `contracts/schemas/configuration.json`
 - Pass/fail enforcement -> `conformance/arch-tests.md`
 - Example-to-source and test mapping -> `contracts/examples/examples-manifest.json`
@@ -48,7 +48,7 @@ Provide copyable valid and invalid example files so implementers, reviewers, and
 ## Source Docs
 
 - `contracts/openapi/gateway-api.yaml`
-- `contracts/openapi/gateway-engine.yaml`
+- `contracts/openapi/gateway-agent-loop.yaml`
 - `contracts/schemas/configuration.json`
 - `conformance/arch-tests.md`
 - `contracts/examples/examples-manifest.json`
@@ -57,6 +57,6 @@ Provide copyable valid and invalid example files so implementers, reviewers, and
 
 The examples follow the current canonical contract files:
 
-- `gateway-engine-request.json` includes the per-request model and active provider profile. Correlation and conversation metadata remain in the request metadata object.
+- `gateway-agent-loop-request.json` includes the per-request model and active provider profile. Correlation and conversation metadata remain in the request metadata object.
 - Message content is a list of parts. Tool calls and tool results use the same message-part shape and remain in conversation history.
 - `memory-restore-tool.json` defines the canonical restore operation inputs: a path or scope and an opaque version identifier.

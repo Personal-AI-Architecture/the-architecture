@@ -48,7 +48,7 @@
 
 ## Key Contracts
 
-- **Gateway <-> Agent Loop:** `POST /agent-loop/chat` with selected messages, the owner's model and provider profile, canonical `auth_context`, and bounded metadata; optional `context_summary` is derived data, not a saved message. The Agent Loop returns an SSE stream. See `contracts/openapi/gateway-engine.yaml`.
+- **Gateway <-> Agent Loop:** `POST /agent-loop/chat` with selected messages, the owner's model and provider profile, canonical `auth_context`, and bounded metadata; optional `context_summary` is derived data, not a saved message. The Agent Loop returns an SSE stream. See `contracts/openapi/gateway-agent-loop.yaml`.
 - **One message shape** across all three contracts: content is a list of parts, and tool calls and tool results are ordinary message parts saved in conversation history.
 - **Gateway API:** See `contracts/openapi/gateway-api.yaml`.
 - **Model API:** See `contracts/openapi/model-api.yaml`.
@@ -66,6 +66,7 @@ Before merging any non-trivial change, verify:
 6. **Agent Loop has zero product-specific logic** -- product behavior emerges from what's in Memory
 7. **Gateway doesn't interpret content** -- it passes through, it doesn't understand
 8. **Auth is independent of Gateway** -- the Gateway calls Auth through its contract; swapping either doesn't require changing the other
+9. **Outside connections cross owned adapters** -- model providers, foreign client formats and external tool sources never put protocol details in Agent Loop, Gateway or Auth (D201)
 
 Full gate: `conformance/lockin-gate.md` (PR checks). Full audit: `conformance/lockin-audit.md` (milestone/release).
 
@@ -87,6 +88,7 @@ An implementation is valid if it passes these tests:
 - **ARCH-2:** Agent Loop replacement doesn't affect other components
 - **ARCH-3:** New client connects through Gateway API identically
 - **ARCH-4:** All payloads validate against canonical schemas in `contracts/`
+- **ARCH-23:** Every active outside connection crosses an owner-controlled adapter
 
 See `conformance/` for the full test suite, `architecture/` for binding rules,
 and `contracts/` for exact shapes. Start implementation from a language
@@ -113,7 +115,7 @@ Use these terms consistently. The "Don't Use" column lists old terms that should
 
 | Use | Don't Use | Notes |
 |-----|-----------|-------|
-| **Agent Loop** | Engine | Describes what it does: send to model, get tool calls, execute, loop. `gateway-engine.yaml` remains the canonical filename for compatibility; route and schema names use Agent Loop terminology. |
+| **Agent Loop** | Engine | Describes what it does: send to model, get tool calls, execute, loop. Contract filename, route and schema names use Agent Loop terminology. |
 | **APIs** | Connectors | Gateway API, Model API — just call them what they are |
 | **Model API** | Provider API | "Model API" is immediately clear |
 | **Clients** | External clients | Interfaces that communicate with a system through the Gateway API |
