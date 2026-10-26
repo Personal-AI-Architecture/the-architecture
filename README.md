@@ -22,7 +22,7 @@ Not an app, and not a framework you install. A blueprint, plus a starter kit to 
 - **The architecture** ([`overview.md`](architecture/overview.md)): how the system works, its principles, decisions, component specifications, and explanatory background.
 - **Contracts** ([`contracts/`](contracts/)): the exact OpenAPI and JSON Schema shapes code must match, plus canonical examples.
 - **Conformance** ([`conformance/`](conformance/)): language-neutral checks and review guidance that prove a system conforms.
-- **Language templates:** starting points in TypeScript, Python, Go, Rust and Java. Their recorded validation was against the earlier PAA contract pin `28e9a27`; the D197–D199 contract update needs a new pin and rerun before claiming current-main alignment. See [template readiness](maintainers/template-readiness-2026-10-23-followup.md) for the checks and limits.
+- **Language templates:** starting points in TypeScript, Python, Go, Rust and Java. All five were repinned to PAA contract commit `cfeb96d` after the source-driven tool-discovery decision, and their recorded static and native checks passed against that source. Those checks prove the named starter paths, not full runtime conformance. See [template readiness](maintainers/template-readiness-2026-10-23-followup.md) for the evidence and limits. The architecture release candidate is tagged [`v1.0-rc.1`](https://github.com/Personal-AI-Architecture/the-architecture/tree/v1.0-rc.1); compare a template's lock with the contract source you intend to use.
 
 ### Language templates
 
@@ -35,6 +35,8 @@ Not an app, and not a framework you install. A blueprint, plus a starter kit to 
 | Java | [java-architecture-template](https://github.com/Personal-AI-Architecture/java-architecture-template) |
 
 These are implementation starters, not qualified products. Each repository names the paths its tests exercise and the work needed for a complete deployment. Check its pin against PAA main before starting a new build.
+
+For the `v1.0-rc.1` newcomer path, use [TypeScript template commit `0861782`](https://github.com/Personal-AI-Architecture/ts-architecture-template/tree/08617823e57256e0479e081691a9511bb1917151). Its lock pins PAA contract commit `cfeb96d`; the release-candidate tag at `83bf37d` made documentation-only changes after that contract pin. Dave W's [independent retest](https://community.braindrive.ai/t/paa-repo-updates/373/41) passed the scoped live journey. See [template readiness](maintainers/template-readiness-2026-10-23-followup.md) for what remains unproved.
 
 ## How it works
 
@@ -58,12 +60,26 @@ Four components and two APIs:
 | I want to... | Start here |
 |--------------|------------|
 | Understand the architecture | [Architecture overview](architecture/overview.md) |
+| Look up an unfamiliar term | [Decision glossary](maintainers/decision-glossary.md) |
 | Build from a tested starter | [Choose a language template](#language-templates) ([current-main status](maintainers/template-readiness-2026-10-23-followup.md)) |
 | Build with an AI coding agent | [AGENT.md](AGENT.md), the [architecture](architecture/) and a [language template](https://github.com/Personal-AI-Architecture) |
 | Build one component | Its [architecture spec](architecture/), [contracts](contracts/) and [conformance checks](conformance/) |
 | See what every system must promise | [Product spec](spec/personal-ai-architecture-spec.md) |
 | Check my system conforms | [Conformance guide](conformance/) |
 | Check for lock-in | [Lock-in gate](conformance/lockin-gate.md) |
+
+To run this repository's Python contract and conformance checks, install the
+declared dependencies first. The [conformance guide](conformance/README.md)
+also provides a compatible dependency set for package indexes missing the
+primary pin.
+
+```bash
+python3 -m venv .venv
+. .venv/bin/activate
+python3 -m pip install -r requirements-ci.txt
+python3 scripts/check-contracts.py
+python3 conformance/runner.py
+```
 
 ## Built on PAA
 

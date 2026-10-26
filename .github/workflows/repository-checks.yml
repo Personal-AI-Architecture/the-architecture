@@ -60,5 +60,13 @@ jobs:
       - name: Run executable conformance baseline
         run: python3 conformance/runner.py
 
+      - name: Verify compatible dependency fallback
+        run: |
+          python3 -m venv /tmp/paa-compat-venv
+          /tmp/paa-compat-venv/bin/python3 -m pip install -r requirements-compat.txt
+          /tmp/paa-compat-venv/bin/python3 -m pip check
+          /tmp/paa-compat-venv/bin/python3 scripts/check-contracts.py
+          /tmp/paa-compat-venv/bin/python3 conformance/runner.py
+
       - name: Check patch whitespace
         run: git diff --check "$PAA_CHECK_BASE" HEAD
