@@ -47,4 +47,4 @@ Use this when reviewing audit logging, error handling, approval enforcement, sec
 - `contracts/examples/approval-result-event.json`
 - `contracts/examples/invalid-approval-request-event.json`
 - `contracts/examples/invalid-approval-result-event.json`
-- `contracts/examples/invalid-gateway-engine-request.json`
+- `contracts/examples/invalid-gateway-agent-loop-request.json`

@@ -205,7 +205,7 @@ Items marked *(security)* are the per-component requirements from [security-spec
 
 ## Contract alignment
 
-The canonical `contracts/openapi/gateway-engine.yaml` and shared message schema are
+The canonical `contracts/openapi/gateway-agent-loop.yaml` and shared message schema are
 authoritative for the internal route, request fields, structured message parts, and
 stream event shapes. The Model API handoff is streaming-only (`stream: true`), and
 its events are discriminated by `_event_type`. This spec describes the ownership and

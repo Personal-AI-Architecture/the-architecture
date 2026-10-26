@@ -81,7 +81,7 @@ def validate_contract_example(file_path: str, payload: object, kind: str) -> Non
             fail(f"{file_path} has kind={kind} but its client request shape is {'valid' if valid else 'invalid'}")
         return
 
-    if name in {"gateway-engine-request.json", "invalid-gateway-engine-request.json", "invalid-gateway-engine-request-missing-provider.json"}:
+    if name in {"gateway-agent-loop-request.json", "invalid-gateway-agent-loop-request.json", "invalid-gateway-agent-loop-request-missing-provider.json"}:
         summary = payload.get("context_summary") if isinstance(payload, dict) else None
         summary_valid = isinstance(payload, dict) and ("context_summary" not in payload or (
             isinstance(summary, dict)

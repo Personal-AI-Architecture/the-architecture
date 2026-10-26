@@ -38,7 +38,7 @@
     },
     {
       "path": "architecture/gateway-agent-loop-contract.md",
-      "covers": ["contracts/openapi/gateway-engine.yaml"],
+      "covers": ["contracts/openapi/gateway-agent-loop.yaml"],
       "tier": 1,
       "update_trigger": "code",
       "depends_on": ["architecture/gateway-spec.md", "architecture/agent-loop-spec.md"]
@@ -46,7 +46,7 @@
 
     {
       "path": "architecture/agent-loop-spec.md",
-      "covers": ["contracts/openapi/gateway-engine.yaml", "contracts/openapi/model-api.yaml"],
+      "covers": ["contracts/openapi/gateway-agent-loop.yaml", "contracts/openapi/model-api.yaml"],
       "tier": 2,
       "update_trigger": "code",
       "depends_on": []
@@ -74,7 +74,7 @@
     },
     {
       "path": "architecture/tools-spec.md",
-      "covers": ["contracts/openapi/gateway-engine.yaml", "contracts/openapi/model-api.yaml", "contracts/schemas/tool-definition.json", "contracts/schemas/message.json"],
+      "covers": ["contracts/openapi/gateway-agent-loop.yaml", "contracts/openapi/model-api.yaml", "contracts/schemas/tool-definition.json", "contracts/schemas/message.json"],
       "tier": 2,
       "update_trigger": "code",
       "depends_on": []
@@ -88,7 +88,7 @@
     },
     {
       "path": "architecture/security-spec.md",
-      "covers": ["contracts/schemas/identity.json", "contracts/schemas/policy.json", "contracts/openapi/gateway-engine.yaml"],
+      "covers": ["contracts/schemas/identity.json", "contracts/schemas/policy.json", "contracts/openapi/gateway-agent-loop.yaml"],
       "tier": 2,
       "update_trigger": "code",
       "depends_on": []

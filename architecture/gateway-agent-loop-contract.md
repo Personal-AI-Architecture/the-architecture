@@ -194,7 +194,7 @@ data: {"_event_type":"done","finish_reason":"stop","usage":{"prompt_tokens":150,
 | `done` | Agent loop complete | `{ finish_reason, usage? }`, where the optional `usage` has `prompt_tokens` and `completion_tokens` |
 | `error` | Unrecoverable failure mid-stream | `{ code, message }` |
 
-Every event's data also carries an `_event_type` field naming the event. `contracts/openapi/gateway-engine.yaml` has the full shapes, including optional fields.
+Every event's data also carries an `_event_type` field naming the event. `contracts/openapi/gateway-agent-loop.yaml` has the full shapes, including optional fields.
 
 Tool calls are visible in the stream because:
 - Clients use them for status display ("Reading file...", "Searching library...")

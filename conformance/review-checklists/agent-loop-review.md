@@ -49,5 +49,5 @@ Use this when reviewing Agent Loop behavior, stream semantics, provider integrat
 
 ## Example Files
 
-- `contracts/examples/gateway-engine-request.json`
-- `contracts/examples/invalid-gateway-engine-request.json`
+- `contracts/examples/gateway-agent-loop-request.json`
+- `contracts/examples/invalid-gateway-agent-loop-request.json`

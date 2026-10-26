@@ -30,7 +30,7 @@ Files outside these locations (e.g., `tasks/*.md`, `node_modules/`) are excluded
   "docs": [
     {
       "path": "architecture/agent-loop-spec.md",
-      "covers": ["src/engine/"],
+      "covers": ["src/agent-loop/"],
       "tier": 1,
       "update_trigger": "code",
       "depends_on": ["architecture/overview.md"]

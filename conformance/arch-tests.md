@@ -115,8 +115,8 @@
 **Pass criteria:**
 - [ ] Every Gateway API request validates against `gateway-api.yaml`
 - [ ] Every Gateway API response validates against `gateway-api.yaml`
-- [ ] Every Agent Loop request validates against `gateway-engine.yaml`
-- [ ] Every SSE event validates against the event schemas in `gateway-engine.yaml`
+- [ ] Every Agent Loop request validates against `gateway-agent-loop.yaml`
+- [ ] Every SSE event validates against the event schemas in `gateway-agent-loop.yaml`
 - [ ] Every Model API request validates against `model-api.yaml`
 - [ ] Every Model API response validates against `model-api.yaml`
 - [ ] Additive payload data uses the schema-defined `extensions` or `metadata` area; strict core fields and security envelopes remain valid without undocumented fields (D199)

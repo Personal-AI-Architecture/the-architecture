@@ -32,7 +32,7 @@
 
 - **Expected:** US-13 AC-13.3, US-14 AC-14.3. One authoritative shape; `contracts/` wins.
 - **Published:** The canonical contract tree defines the routes and structured message parts. The conflicting derived guides were retired; conformance checks use the contract tree.
-- **Evidence:** `contracts/openapi/gateway-engine.yaml`; `contracts/openapi/gateway-api.yaml`; [gateway-agent-loop-contract.md](../architecture/gateway-agent-loop-contract.md); [gateway-api.yaml](../contracts/openapi/gateway-api.yaml); [arch-tests.md](../conformance/arch-tests.md).
+- **Evidence:** `contracts/openapi/gateway-agent-loop.yaml`; `contracts/openapi/gateway-api.yaml`; [gateway-agent-loop-contract.md](../architecture/gateway-agent-loop-contract.md); [gateway-api.yaml](../contracts/openapi/gateway-api.yaml); [arch-tests.md](../conformance/arch-tests.md).
 - **Decided:** one message shape for all three contracts, with tool calls and tool results as normal parts of messages saved in conversation history, and message content as a list of parts. The contract tree is now the sole authority.
 
 ### GAP-PAA-4: Configuration has four fields, but older derived examples added more — Resolved
@@ -45,7 +45,7 @@
 
 - **Expected:** US-13 AC-13.3.
 - **Published:** The internal request schema requires `metadata.correlation_id`; Model API stream events carry `_event_type` discriminators; `stream` is required and must be `true`; tool definitions consistently use canonical `parameters`; and message schemas enforce role-appropriate tool-call/tool-result parts.
-- **Evidence:** `contracts/openapi/gateway-engine.yaml`; `contracts/openapi/model-api.yaml`; `contracts/schemas/tool-definition.json`; `contracts/schemas/message.json`; [models-spec.md](../architecture/models-spec.md); [tools-spec.md](../architecture/tools-spec.md).
+- **Evidence:** `contracts/openapi/gateway-agent-loop.yaml`; `contracts/openapi/model-api.yaml`; `contracts/schemas/tool-definition.json`; `contracts/schemas/message.json`; [models-spec.md](../architecture/models-spec.md); [tools-spec.md](../architecture/tools-spec.md).
 - **Boundary:** Tool visibility/source semantics were tracked separately as S8 and are now resolved below; this gap covers the contract-shape inconsistencies.
 
 ### GAP-PAA-6: Identity allows only a fixed list of actor types — Resolved
@@ -97,14 +97,14 @@
 
 - **Expected:** US-10 AC-10.2 (configured approval rules are enforced; products own defaults and how approvals look).
 - **Published:** Optional approval interactions now have canonical request and decision schemas, Gateway/Agent Loop stream events, and explicit pending-to-terminal lifecycle semantics. Requests include a stable ID and expiry; decisions are `approved`, `denied`, `cancelled`, or `expired`, require Auth approval authority, and are idempotent on replay without re-executing the tool.
-- **Evidence:** [approval-request.json](../contracts/schemas/approval-request.json); [approval-decision.json](../contracts/schemas/approval-decision.json); [gateway-engine.yaml](../contracts/openapi/gateway-engine.yaml); [security-spec.md](../architecture/security-spec.md); [ARCH-17](../conformance/arch-tests.md#arch-17-approval-decision-is-authorized-and-replay-safe).
+- **Evidence:** [approval-request.json](../contracts/schemas/approval-request.json); [approval-decision.json](../contracts/schemas/approval-decision.json); [gateway-agent-loop.yaml](../contracts/openapi/gateway-agent-loop.yaml); [security-spec.md](../architecture/security-spec.md); [ARCH-17](../conformance/arch-tests.md#arch-17-approval-decision-is-authorized-and-replay-safe).
 - **Decided:** the architecture's default remains that the owner can do everything; approval prompts are a product choice, but products that enable them must use this lifecycle and cannot treat presentation as enforcement.
 
 ### GAP-PAA-S5: Authenticated identity can be lost when the internal transport changes — Resolved
 
 - **Expected:** An authenticated actor remains the same when Gateway and Agent Loop communicate over HTTP, a message bus, or a direct function call; permissions remain owned by Auth.
 - **Published:** `auth_context.json` is the canonical transport-neutral envelope. It carries the Auth-produced actor, authentication ID, timestamps, and correlation ID, but no credentials or permissions. The internal OpenAPI request requires it, and transport adapters must verify integrity and fail closed for missing, malformed, expired, or caller-supplied context.
-- **Evidence:** [auth-context.json](../contracts/schemas/auth-context.json); [gateway-engine.yaml](../contracts/openapi/gateway-engine.yaml); [auth-spec.md](../architecture/auth-spec.md); [ARCH-4](../conformance/arch-tests.md#arch-4-schema-conformance).
+- **Evidence:** [auth-context.json](../contracts/schemas/auth-context.json); [gateway-agent-loop.yaml](../contracts/openapi/gateway-agent-loop.yaml); [auth-spec.md](../architecture/auth-spec.md); [ARCH-4](../conformance/arch-tests.md#arch-4-schema-conformance).
 - **Decided:** `X-Actor-ID` is no longer a canonical contract. Headers, message metadata, and direct-call arguments are implementation adapters for the same `auth_context` shape.
 
 ### GAP-PAA-S8: Tool-definition visibility and source semantics are inconsistent — Resolved
@@ -149,9 +149,9 @@
 
 - **Expected:** US-10. The Auth spec requires that when the owner revokes an agent's access mid-task, the operation stops immediately and uncommitted writes are discarded.
 - **Published:** The Agent Loop checks Auth before each tool call, but no spec or contract defines stopping a loop that is already running: there is no cancel signal between the Gateway and the Agent Loop. With no default iteration cap, a loop for a revoked actor keeps calling the model until its next tool check.
-- **Evidence:** [auth-spec.md](../architecture/auth-spec.md) "Access revoked during an operation"; [agent-loop-spec.md](../architecture/agent-loop-spec.md) "What the Agent Loop guarantees"; [gateway-agent-loop-contract.md](../architecture/gateway-agent-loop-contract.md); `contracts/openapi/gateway-engine.yaml`.
+- **Evidence:** [auth-spec.md](../architecture/auth-spec.md) "Access revoked during an operation"; [agent-loop-spec.md](../architecture/agent-loop-spec.md) "What the Agent Loop guarantees"; [gateway-agent-loop-contract.md](../architecture/gateway-agent-loop-contract.md); `contracts/openapi/gateway-agent-loop.yaml`.
 - **Published:** The internal contract now defines `POST /agent-loop/cancel`, targeted by correlation ID. Revocation sends `reason=auth_revoked`; the Agent Loop cooperatively cancels supported in-flight work, runs no further tool calls, emits `auth_error`, and records the cancellation. Tool implementations do not commit writes after cancellation; already committed writes remain auditable.
-- **Evidence:** [gateway-engine.yaml](../contracts/openapi/gateway-engine.yaml); [auth-spec.md](../architecture/auth-spec.md) "Access revoked during an operation"; [agent-loop-spec.md](../architecture/agent-loop-spec.md) checking list.
+- **Evidence:** [gateway-agent-loop.yaml](../contracts/openapi/gateway-agent-loop.yaml); [auth-spec.md](../architecture/auth-spec.md) "Access revoked during an operation"; [agent-loop-spec.md](../architecture/agent-loop-spec.md) checking list.
 - **Decided:** Cancellation is cooperative at the internal boundary; implementations must cancel supported in-flight operations and must not start further model or tool work after cancellation is observed.
 
 ### GAP-PAA-22: The security spec contradicts the decided fail-closed rule when Auth is down — Resolved
@@ -195,7 +195,7 @@
 
 - **Expected:** US-5 AC-5.3. Capabilities a model lacks are reported, not faked; and if the chosen model isn't available through the loaded adapter, the owner is told rather than silently switched. Swapping adapters must not change whether the owner is told.
 - **Published:** The Model API's `CompletionError.code` is free text, so no implementation has to report either case in a way another part, or the validator, can recognize. BrainDrive reports both by matching words in each provider's error text (`builds/typescript/engine/errors.ts`).
-- **Proposed:** Define only the codes a promise depends on: `model_unavailable` and `capability_unsupported` (naming the missing capability), on both the Model API error and the Agent Loop error stream, whose `code` list (`provider_error`, `tool_error`, `auth_error`, `context_overflow`) is in `gateway-engine.yaml`. Other provider errors (rate limits, quota, rejected keys) stay free text, and how an adapter detects any of them stays its own business. Advance capability discovery is out of scope.
+- **Proposed:** Define only the codes a promise depends on: `model_unavailable` and `capability_unsupported` (naming the missing capability), on both the Model API error and the Agent Loop error stream, whose `code` list (`provider_error`, `tool_error`, `auth_error`, `context_overflow`) is in `gateway-agent-loop.yaml`. Other provider errors (rate limits, quota, rejected keys) stay free text, and how an adapter detects any of them stays its own business. Advance capability discovery is out of scope.
 - **Evidence:** [models-spec.md](../architecture/models-spec.md) "What the system guarantees about models"; [configuration-spec.md](../architecture/configuration-spec.md) "If the chosen model isn't available through the loaded adapter"; `contracts/openapi/model-api.yaml` `CompletionError`.
 - **Resolution (D197):** Model API errors use `model_unavailable` for an unavailable selected model and `capability_unsupported` with a required machine-readable `capability` for an unsupported ability. Agent Loop and Gateway errors preserve those categories. ARCH-5 and ARCH-19 require a runtime proof with no model/provider substitution; the executable repository baseline checks the published error shapes.
 

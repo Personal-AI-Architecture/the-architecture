@@ -48,5 +48,5 @@ Use this when reviewing bootstrap code, config loaders, adapter wiring, secret h
 - `contracts/examples/adapter-config.json`
 - `contracts/examples/invalid-runtime-config.json`
 - `contracts/examples/invalid-adapter-config.json`
-- `contracts/examples/gateway-engine-request.json`
-- `contracts/examples/invalid-gateway-engine-request.json`
+- `contracts/examples/gateway-agent-loop-request.json`
+- `contracts/examples/invalid-gateway-agent-loop-request.json`

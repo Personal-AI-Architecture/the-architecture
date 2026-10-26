@@ -48,7 +48,7 @@
 
 ## Key Contracts
 
-- **Gateway <-> Agent Loop:** `POST /agent-loop/chat` with selected messages, the owner's model and provider profile, canonical `auth_context`, and bounded metadata; optional `context_summary` is derived data, not a saved message. The Agent Loop returns an SSE stream. See `contracts/openapi/gateway-engine.yaml`.
+- **Gateway <-> Agent Loop:** `POST /agent-loop/chat` with selected messages, the owner's model and provider profile, canonical `auth_context`, and bounded metadata; optional `context_summary` is derived data, not a saved message. The Agent Loop returns an SSE stream. See `contracts/openapi/gateway-agent-loop.yaml`.
 - **One message shape** across all three contracts: content is a list of parts, and tool calls and tool results are ordinary message parts saved in conversation history.
 - **Gateway API:** See `contracts/openapi/gateway-api.yaml`.
 - **Model API:** See `contracts/openapi/model-api.yaml`.
@@ -113,7 +113,7 @@ Use these terms consistently. The "Don't Use" column lists old terms that should
 
 | Use | Don't Use | Notes |
 |-----|-----------|-------|
-| **Agent Loop** | Engine | Describes what it does: send to model, get tool calls, execute, loop. `gateway-engine.yaml` remains the canonical filename for compatibility; route and schema names use Agent Loop terminology. |
+| **Agent Loop** | Engine | Describes what it does: send to model, get tool calls, execute, loop. Contract filename, route and schema names use Agent Loop terminology. |
 | **APIs** | Connectors | Gateway API, Model API — just call them what they are |
 | **Model API** | Provider API | "Model API" is immediately clear |
 | **Clients** | External clients | Interfaces that communicate with a system through the Gateway API |

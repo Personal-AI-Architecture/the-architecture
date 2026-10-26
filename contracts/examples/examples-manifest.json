@@ -227,7 +227,7 @@
       ]
     },
     {
-      "file": "contracts/examples/gateway-engine-request.json",
+      "file": "contracts/examples/gateway-agent-loop-request.json",
       "kind": "valid",
       "owning_docs": [
         "architecture/gateway-agent-loop-contract.md",
@@ -246,7 +246,7 @@
       ]
     },
     {
-      "file": "contracts/examples/invalid-gateway-engine-request.json",
+      "file": "contracts/examples/invalid-gateway-agent-loop-request.json",
       "kind": "invalid",
       "owning_docs": [
         "architecture/gateway-agent-loop-contract.md",
@@ -385,7 +385,7 @@
       ]
     },
     {
-      "file": "contracts/examples/invalid-gateway-engine-request-missing-provider.json",
+      "file": "contracts/examples/invalid-gateway-agent-loop-request-missing-provider.json",
       "kind": "invalid",
       "owning_docs": [
         "architecture/gateway-agent-loop-contract.md",
