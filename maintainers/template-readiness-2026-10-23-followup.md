@@ -1,5 +1,21 @@
 # Template readiness follow-up — 2026-10-23
 
+## Current rc.2 candidate handoff — 2026-10-26
+
+The current contract source is [PAA PR #31](https://github.com/Personal-AI-Architecture/the-architecture/pull/31), with the Agent Loop contract at commit `47d6471a8307fa59a83c58dd635820b0cb0965b6`. For a fresh TypeScript newcomer run, use [template commit `86c3cc3`](https://github.com/Personal-AI-Architecture/ts-architecture-template/tree/86c3cc3), the tracked `scripts/serve.js`, a disposable Memory root, a separate Auth state root, a locally generated owner token, and an untracked provider profile file or controlled provider. The merged [validator PR #4](https://github.com/Personal-AI-Architecture/paa-conformance-validator/pull/4) understands the renamed contract. The architecture `v1.0-rc.2` tag and Dave W's independent run are still pending; use that tag once published.
+
+TypeScript refreshed external MCP descriptions per message and completed a controlled live HTTP Gateway → Agent Loop → MCP tool → model → Gateway SSE journey. All five renamed templates and the validator passed locally against the PR #31 contract source. Python, Go, Rust and Java include pass-through MCP adapters with controlled discovery/call tests; their HTTP starters do not yet wire those adapters into Agent Loop execution. Product-only acceptance proof is scoped by D200, with observed BrainDrive failures still open.
+
+| Candidate | Commit | Current evidence |
+| --- | --- | --- |
+| TypeScript | `86c3cc3` | Shared validator, native checks, unit tests, controlled live external-tool journey passed locally. |
+| Python | `aeadea6` | Shared validator, typecheck, native tests and adapter test passed locally. |
+| Go | `509228a` | Shared validator, native tests and adapter HTTP test passed locally. |
+| Rust | `bbfae1c` | Shared validator, native tests and adapter HTTP test passed locally. |
+| Java | `cb5feb4` | Shared validator, native tests and adapter HTTP test passed locally. |
+
+The following rc.1 notes are retained as dated independent evidence, not current starting revisions.
+
 ## Independent newcomer retest — 2026-10-25
 
 Dave W's [retest report](https://community.braindrive.ai/t/paa-repo-updates/373/41) and attached [build notes](https://community.braindrive.ai/uploads/short-url/2NKvSTNSpR2U0hVAl9eYdirrxoN.md), [friction log](https://community.braindrive.ai/uploads/short-url/vw37K4U2ledmPUUvYLvEBRW3sr6.md), and [independent verification](https://community.braindrive.ai/uploads/short-url/vyH7gAjtJXVi50YfRujBTOxaxFE.md) confirm the tracked TypeScript starter at `0861782` passed five fresh-state criteria with real OpenRouter calls: loopback/Auth, Gateway reply, readable owner Memory with reply provenance, restart/context continuity, and a no-restart model change within one configured provider. The independent verifier confirmed 20/20 conformance tests, 45/45 unit tests, acceptance, and the live validator against the real server. This completes the bounded independent newcomer journey recorded here.
@@ -14,7 +30,7 @@ The [shared validator PR #3](https://github.com/Personal-AI-Architecture/paa-con
 
 This closes the live selection gap identified in Dave W's attached verification report for the tested starter path. It does not establish SWAP-3 separate-service tool execution, an independently replaceable Auth service, storage portability, deployment behavior, or the remaining product runtime criteria in the [v1 acceptance proof audit](v1-acceptance-proof-audit-2026-10-23.md). Dave W's bounded independent retest passed; broader v1 acceptance remains open.
 
-### Independent retest handoff
+### Historical rc.1 independent retest handoff
 
 For a fresh TypeScript newcomer run, use the PAA `v1.0-rc.1` tag (commit `83bf37df4c8f8f892f86009bc7f9c5645eeeb9b4`) and TypeScript template `main` commit `08617823e57256e0479e081691a9511bb1917151`. Use the [TypeScript live Gateway instructions](https://github.com/Personal-AI-Architecture/ts-architecture-template/blob/08617823e57256e0479e081691a9511bb1917151/README.md#start-the-live-gateway) and a disposable owner Memory root, separate Auth state root, locally generated owner token, and an untracked adapter config file. The shared validator at `a5fecd6189e4a510899733f121ec1b8cd86b5dcf` provides the offline live and provider fixture checks. Do not reuse the earlier untracked `scripts/serve.js`; the template now ships its own tracked HTTP entry point.
 
@@ -28,7 +44,7 @@ Merged updates add a runnable HTTP Gateway and a `live.start` command to all fiv
 
 The [TypeScript](https://github.com/Personal-AI-Architecture/ts-architecture-template/pull/8), [Python](https://github.com/Personal-AI-Architecture/python-architecture-template/pull/6), [Go](https://github.com/Personal-AI-Architecture/go-architecture-template/pull/6), [Rust](https://github.com/Personal-AI-Architecture/rust-architecture-template/pull/6), and [Java](https://github.com/Personal-AI-Architecture/java-architecture-template/pull/6) revisions passed the shared validator against PAA `origin/main` at the D196 contract pin and passed their live mock and two-model provider fixture checks in hosted CI. Go and Java used their declared Docker toolchains for local verification. Python's first hosted run exposed a reset during oversized uploads; the corrected response passed local and hosted retests. The Java provider run initially collided with a concurrent local Maven build writing the same `target` directory; its isolated rerun and hosted CI passed. These checks covered the named Gateway starter journey at that revision. At that point, the fixture restarted between model selections and did not prove a no-restart swap. The later Memory-backed live selection work above addresses that specific limit. Independent Auth, separate-service tool execution, the other PAA runtime criteria, and full v1 conformance remain unproved. These limits are especially relevant to the [attached independent verification report](https://community.braindrive.ai/uploads/short-url/45plVm9iLSeBtnxVkVrfDSDL0C4.md). See the [v1 acceptance proof audit](v1-acceptance-proof-audit-2026-10-23.md) for the remaining architecture-wide proof.
 
-**Current status after D196:** All five templates are pinned to PAA main `cfeb96df743feee91afc80ac81f0c4fd9a62c123`, which merged the source-driven discovery decision in [PR #21](https://github.com/Personal-AI-Architecture/the-architecture/pull/21). Only the configuration schema description changed in the contract set. The shared validator passed with `--source-ref origin/main` for each template, including its declared type, unit, integration, conformance and acceptance commands. Native repository checks and pull-request CI passed. The D197–D199 focused runtime fixtures still pass. This establishes the tested starter paths; it does not establish full v1 runtime conformance. See the [v1 acceptance proof audit](v1-acceptance-proof-audit-2026-10-23.md).
+**Status at the D196 repin:** All five templates were pinned to PAA main `cfeb96df743feee91afc80ac81f0c4fd9a62c123`, which merged the source-driven discovery decision in [PR #21](https://github.com/Personal-AI-Architecture/the-architecture/pull/21). Only the configuration schema description changed in the contract set. The shared validator passed with `--source-ref origin/main` for each template, including its declared type, unit, integration, conformance and acceptance commands. Native repository checks and pull-request CI passed. The D197–D199 focused runtime fixtures still pass. This established the tested starter paths at that revision; it did not establish full v1 runtime conformance. See the [v1 acceptance proof audit](v1-acceptance-proof-audit-2026-10-23.md).
 
 | Template | D196 repin | Merged revision | Shared validator, native checks, CI |
 | --- | --- | --- | --- |

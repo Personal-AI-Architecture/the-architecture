@@ -22,7 +22,7 @@ Not an app, and not a framework you install. A blueprint, plus a starter kit to 
 - **The architecture** ([`overview.md`](architecture/overview.md)): how the system works, its principles, decisions, component specifications, and explanatory background.
 - **Contracts** ([`contracts/`](contracts/)): the exact OpenAPI and JSON Schema shapes code must match, plus canonical examples.
 - **Conformance** ([`conformance/`](conformance/)): language-neutral checks and review guidance that prove a system conforms.
-- **Language templates:** starting points in TypeScript, Python, Go, Rust and Java. All five were repinned to PAA contract commit `cfeb96d` after the source-driven tool-discovery decision, and their recorded static and native checks passed against that source. Those checks prove the named starter paths, not full runtime conformance. See [template readiness](maintainers/template-readiness-2026-10-23-followup.md) for the evidence and limits. The architecture release candidate is tagged [`v1.0-rc.1`](https://github.com/Personal-AI-Architecture/the-architecture/tree/v1.0-rc.1); compare a template's lock with the contract source you intend to use.
+- **Language templates:** starting points in TypeScript, Python, Go, Rust and Java. The rc.2 candidates pin PAA contract commit `47d6471` and pass local shared-validator and native checks against [PAA PR #31](https://github.com/Personal-AI-Architecture/the-architecture/pull/31). The renamed contract and MCP adapter work is under review; the templates' accepted-main CI waits for that PR to merge. See [template readiness](maintainers/template-readiness-2026-10-23-followup.md) for the exact candidate commits and limits. These checks prove named starter paths, not full product conformance.
 
 ### Language templates
 
@@ -36,7 +36,7 @@ Not an app, and not a framework you install. A blueprint, plus a starter kit to 
 
 These are implementation starters, not qualified products. Each repository names the paths its tests exercise and the work needed for a complete deployment. Check its pin against PAA main before starting a new build.
 
-For the `v1.0-rc.1` newcomer path, use [TypeScript template commit `0861782`](https://github.com/Personal-AI-Architecture/ts-architecture-template/tree/08617823e57256e0479e081691a9511bb1917151). Its lock pins PAA contract commit `cfeb96d`; the release-candidate tag at `83bf37d` made documentation-only changes after that contract pin. Dave W's [independent retest](https://community.braindrive.ai/t/paa-repo-updates/373/41) passed the scoped live journey. See [template readiness](maintainers/template-readiness-2026-10-23-followup.md) for what remains unproved.
+For the current rc.2 newcomer candidate, use [TypeScript template commit `86c3cc3`](https://github.com/Personal-AI-Architecture/ts-architecture-template/tree/86c3cc3) and the PAA source from PR #31, whose contract commit is `47d6471`. This candidate passed a controlled local Gateway-to-external-MCP call and the shared validator. Dave W's independent rc.2 newcomer run remains pending. The earlier [rc.1 independent retest](https://community.braindrive.ai/t/paa-repo-updates/373/41) remains historical evidence.
 
 ## How it works
 
