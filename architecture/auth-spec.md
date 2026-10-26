@@ -23,6 +23,8 @@ Because models can be swapped and can be tricked, Auth sits outside the model an
 1. **Every request.** When anything arrives at the Gateway, including just reading a conversation, the Gateway asks Auth who sent it and whether they may. If Auth says no, the request goes no further.
 2. **Every tool call.** Before the Agent Loop runs a tool, it asks Auth whether this actor may use this tool here. If Auth says no, the tool doesn't run, and the model is told it isn't permitted.
 
+The Gateway-to-Agent-Loop handoff carries Auth's actor context in the internal [`gateway-agent-loop.yaml`](../contracts/openapi/gateway-agent-loop.yaml) shape. The Agent Loop still asks Auth for each tool call; receiving a context is not an authorization decision for a tool.
+
 The rules themselves are simple data: who, on what, doing what, allowed or denied. If no rule allows something, it's denied. You manage the rules the same way you manage everything else, by asking ("give my business partner read access to my finances"), and you can inspect and export all of them, along with a log of every action.
 
 Just as important is what Auth doesn't do. It doesn't hold Your Memory or your conversations, route requests, run tools or decide what the AI should do. It answers one question, "who is acting, and may they?", and everything else asks it.

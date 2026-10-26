@@ -6,6 +6,8 @@
 
 This contract is the agreement between your system's front door and its hand. It covers how the Gateway passes a request to the Agent Loop, and how the Agent Loop sends the results back.
 
+Its machine-readable form is [`contracts/openapi/gateway-agent-loop.yaml`](../contracts/openapi/gateway-agent-loop.yaml); implementations use that Agent Loop name for the internal route and request types.
+
 In most AI products, the part that receives your messages and the part that runs the AI are written together, by the same team, as one piece of code. They share data structures and assumptions nobody wrote down. That works until you want to replace one of them, and then you find the other depends on all of it.
 
 We think the handoff between them should be written down, even though both parts live inside your system. Otherwise you can't swap one without the other, and the Agent Loop, the part that will keep improving, stays stuck to the Gateway.

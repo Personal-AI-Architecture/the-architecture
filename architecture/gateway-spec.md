@@ -28,6 +28,8 @@ When a message arrives, the Gateway:
 4. Prepares a model-sized working context from the saved conversation, then passes it, the new message, model and provider choice to the Agent Loop.
 5. Streams the Agent Loop's response back to the client as it arrives, and saves the exchange to the conversation in Your Memory.
 
+The internal handoff shape is defined by [`gateway-agent-loop.yaml`](../contracts/openapi/gateway-agent-loop.yaml). The Gateway sends the selected model and provider there; client requests continue to use the public Gateway API.
+
 Like every other part, it reaches Your Memory through tools: a dedicated conversation tool for creating, loading, listing and saving conversations, and the Memory tools to read your model and provider choice. Even listing or reading a conversation goes through Auth first.
 
 Just as important is what it doesn't do. It doesn't understand messages; the model does. It doesn't run the model's tools; the Agent Loop does. It doesn't decide who's allowed to do what; Auth does. It doesn't pick the model; you do. It preserves every original content part in the conversation record and never rewrites a selected part. It may select older history for the model-sized working context described below, regardless of content type.

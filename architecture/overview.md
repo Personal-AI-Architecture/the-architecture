@@ -124,6 +124,8 @@ Four components, two APIs, and three things outside the system.
 | **Models** | Outside | The intelligence. The system calls a model; it doesn't contain one. | [models-spec.md](./models-spec.md) |
 | **Tools** | Outside | Capabilities in the environment. They describe themselves; the Agent Loop runs them; Auth permits them. | [tools-spec.md](./tools-spec.md) |
 
+The Gateway-to-Agent-Loop handoff is the internal [Agent Loop OpenAPI contract](../contracts/openapi/gateway-agent-loop.yaml); the public Gateway and Model APIs remain separate contracts.
+
 **Gateway.** Conversations live in the system, not in any client, so you can start on the web, continue on your phone, and pick up in a terminal. The Gateway stores and loads them through a dedicated internal tool, like any other component that needs Your Memory.
 
 **Auth.** Auth protects Your Memory. It sits on every request, independent of the Gateway and the Agent Loop, so either can be swapped without touching it. Today the actor is usually you, but it is built for more: other people and AI agents acting on your behalf, each with exactly the permissions you grant.
