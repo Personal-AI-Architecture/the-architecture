@@ -6,6 +6,8 @@ This is an audit of the 71 acceptance criteria in the PAA spec across 18 user st
 
 The [conformance runner instructions](../conformance/README.md) now include a tested compatible dependency set for package indexes that do not provide the primary `jsonschema` pin. Both sets run the same repository baseline; neither changes the target runtime proof still needed below.
 
+D201 makes an owned adapter mandatory at every active outside boundary for a product conformance claim. ARCH-23 defines the target-source trace and review; the repository runner does not infer a product pass from published text. The four non-TypeScript template HTTP starters still do not execute external tools, as the [readiness handoff](template-readiness-2026-10-23-followup.md) states.
+
 | Story | Criteria checked | Published route or decision | Observed proof state |
 | --- | --- | --- | --- |
 | US-1 | AC-1.1–1.4 | Overview, principles, adapter and lock-in rules | Architecture published; target independence needs runtime proof. |

@@ -45,6 +45,8 @@ Agent Loop, Auth, Gateway, clients, models, tools, contracts, hosting — all re
 
 Memory is accessed via tools — change the storage, the tools still work. Components communicate through contracts — swap a component, the contract holds. Contracts are translated through adapters — standard changes, swap the adapter. If changing any of these requires more than a config change or a single-component swap, swappability has been compromised.
 
+Anything that isn't under your ownership and control never connects to your system directly. It always connects through an adapter that is. That covers model providers, client formats and every external tool source, including open protocols like MCP. The adapter can start as a simple pass-through, but it has to be there, so that when the outside format changes or something better arrives, you swap the adapter and nothing else. Boundaries you own on both sides, such as the tools the system uses to reach Your Memory, don't need one.
+
 
 ## 3. Keep Responsibilities Where They Belong
 

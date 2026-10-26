@@ -590,3 +590,20 @@ fails this rule. The current behavior is an observed gap, not a PAA allowance.
 - [ ] The malformed `auth_context` is rejected, and an unknown core field on a strict part is rejected rather than treated as an extension.
 
 **Failure indicators:** An unknown extension key breaks an older receiver, changes core behavior, or grants access; an unexpected identity field is accepted.
+
+---
+
+## ARCH-23: Outside Connections Cross Owned Adapters
+
+**Validates:** [Principle 2](../architecture/principles.md#2-keep-everything-else-swappable), [adapter-spec.md](../architecture/adapter-spec.md), D201, [lock-in gate](lockin-gate.md)
+
+**Setup:** Inventory the implementation's active model providers, accepted client formats other than the canonical Gateway API, and connected external tool sources. A category with no active outside connection is marked not applicable with evidence; an unused adapter by itself does not prove that an external tool is usable.
+
+**Procedure:** For each active outside connection, trace a request and reply or tool result through its adapter. Inspect the Agent Loop, Gateway and Auth source and imports for direct calls or parsing tied to that outside protocol. For a pass-through adapter, verify the same trace still crosses the owned boundary.
+
+**Pass criteria:**
+- [ ] Every active outside connection crosses an adapter owned by the system; the adapter can be a pass-through.
+- [ ] Outside protocol details stay in the adapter, while core components receive canonical requests, events, tool definitions and results.
+- [ ] Owner-controlled boundaries on both sides and native Gateway API clients are correctly identified, rather than given unnecessary adapters.
+
+**Failure indicators:** Agent Loop, Gateway or Auth directly calls or parses a provider protocol, foreign client format or external tool protocol; a claimed adapter is bypassed on the active path.

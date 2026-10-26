@@ -66,6 +66,7 @@ Before merging any non-trivial change, verify:
 6. **Agent Loop has zero product-specific logic** -- product behavior emerges from what's in Memory
 7. **Gateway doesn't interpret content** -- it passes through, it doesn't understand
 8. **Auth is independent of Gateway** -- the Gateway calls Auth through its contract; swapping either doesn't require changing the other
+9. **Outside connections cross owned adapters** -- model providers, foreign client formats and external tool sources never put protocol details in Agent Loop, Gateway or Auth (D201)
 
 Full gate: `conformance/lockin-gate.md` (PR checks). Full audit: `conformance/lockin-audit.md` (milestone/release).
 
@@ -87,6 +88,7 @@ An implementation is valid if it passes these tests:
 - **ARCH-2:** Agent Loop replacement doesn't affect other components
 - **ARCH-3:** New client connects through Gateway API identically
 - **ARCH-4:** All payloads validate against canonical schemas in `contracts/`
+- **ARCH-23:** Every active outside connection crosses an owner-controlled adapter
 
 See `conformance/` for the full test suite, `architecture/` for binding rules,
 and `contracts/` for exact shapes. Start implementation from a language

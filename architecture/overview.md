@@ -132,6 +132,8 @@ The Gateway-to-Agent-Loop handoff is the internal [Agent Loop OpenAPI contract](
 
 **Adapters.** Three thin translation layers you own sit at the edges: one between clients and the Gateway, one between the Agent Loop and models, and one for each kind of tool source, such as MCP. When an outside standard changes, you swap the adapter, not the system. An unknown or invalid selected adapter is reported at startup; the system does not silently choose another. See [adapter-spec.md](./adapter-spec.md) and [configuration-spec.md](./configuration-spec.md).
 
+An outside provider, foreign client format or external tool source must cross an owned adapter for the system to claim conformance (D201). A pass-through is sufficient; owner-controlled internal boundaries need no adapter. Native clients using the PAA Gateway API already speak the owner-controlled contract.
+
 A model that is unavailable or lacks a requested ability is reported in a recognizable way across those boundaries. A new tool protocol gets a new adapter and a provenance label without changing the core contract. Optional message and tool metadata travels in designated extension fields; Auth decisions remain separate and strict. See [models-spec.md](./models-spec.md), [tools-spec.md](./tools-spec.md) and [communication-principles.md](./communication-principles.md).
 
 ---

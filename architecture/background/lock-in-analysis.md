@@ -6,6 +6,8 @@ Where lock-in could creep into a PAA system at each layer, what keeps it out, an
 
 The architecture avoids lock-in with one rule: **everything is either an open standard, a file you own, or behind a contract you own.** Your Memory is reached only through tools, components talk only through contracts, and the contracts themselves sit behind adapters (D139), so even a change of standard is one swap. That chain (memory via tools, components via contracts, contracts via adapters) is what makes every part replaceable.
 
+D201 makes the outside edge of that chain a conformance requirement: active model providers, foreign client formats and external tool sources cross an adapter owned by the system. A pass-through is enough; internal boundaries owned on both sides need none. The [ARCH-23 test](../../conformance/arch-tests.md#arch-23-outside-connections-cross-owned-adapters) checks the active path.
+
 The anti-lock-in test (D147) makes it checkable: every normal swap (a provider, a model or a tool) must succeed with configuration changes only, and the test runs on every release. See [configuration-spec.md](../configuration-spec.md).
 
 ## Layer by layer

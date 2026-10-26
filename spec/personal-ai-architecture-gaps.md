@@ -229,3 +229,9 @@
 - **Proposed:** For message parts and tool definitions, either allow unknown fields or add an `extensions` object that receivers ignore. Keep `auth-context.json` strict as a deliberate security exception (auth-spec rejects caller-supplied context) and say so in communication-principles P6.
 - **Evidence:** [communication-principles.md](../architecture/communication-principles.md) P6; [message.json](../contracts/schemas/message.json); [tool-definition.json](../contracts/schemas/tool-definition.json); [auth-context.json](../contracts/schemas/auth-context.json); [auth-spec.md](../architecture/auth-spec.md) "Identity travels with the request".
 - **Resolution (D199):** Message parts and tool definitions have optional `extensions` maps for inert additive data. Receivers ignore unknown extension keys, while strict core and security shapes reject unknown operational fields. Auth context, policy and approval envelopes stay strict. ARCH-22 tests old receivers with new extension keys; the executable repository baseline validates extension acceptance and strict-core rejection.
+
+### GAP-PAA-32: Adapters are described but optional for a conformance claim — Resolved
+
+- **Expected:** Principle 2 and US-5, US-8 and US-17 promise that outside formats can change without rewriting core components.
+- **Published:** The adapter spec described adapters as "your choice, not a rule," allowing a hard-coded provider or external tool protocol while still claiming PAA conformance.
+- **Resolution (D201):** Every active model provider, foreign client format and external tool source crosses an owned adapter; a pass-through counts. Owner-controlled internal boundaries and native Gateway API requests need no extra adapter. An owner may bypass an adapter on their own system, but that system cannot claim conformance while the outside protocol is embedded in core code. The lock-in gate and ARCH-23 check this boundary. Product runtime proof remains scoped separately by D200.

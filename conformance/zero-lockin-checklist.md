@@ -31,3 +31,5 @@ selection is not (D188). See [ARCH-5](./arch-tests.md#arch-5-error-taxonomy-comp
 
 For adapter changes, also use [ARCH-12](./arch-tests.md#arch-12-unsupported-adapter-cannot-start-silently): a failed configuration cannot silently choose another provider or make the owner dependent on one.
 
+For every active outside connection, use [ARCH-23](./arch-tests.md#arch-23-outside-connections-cross-owned-adapters): a pass-through adapter is enough, but direct provider, foreign client format or external tool protocol calls from core components fail conformance (D201).
+

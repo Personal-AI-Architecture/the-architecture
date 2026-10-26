@@ -183,6 +183,7 @@
 - [ ] Gateway didn't change — it routes the same way
 - [ ] Auth controls which expanded tools each actor can use
 - [ ] Memory tools (library-scoped) continue to work identically
+- [ ] If the expansion uses an external tool source, its protocol remains behind an owned adapter; owner-controlled internal Memory tools need none (D201, ARCH-23)
 - [ ] The expansion is reversible — remove the tools and scope contracts back
 
 **Failure indicators:**

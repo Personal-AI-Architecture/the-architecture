@@ -226,6 +226,8 @@ The `check:docs` script validates registry integrity:
 
 ## Conformance
 
+For the D201 outside-adapter rule, the binding principle, adapter spec and decision stay aligned with the lock-in gate and ARCH-23. A change to any one of those requires a freshness review of the others through the registry.
+
 The repository check is working correctly when:
 
 1. The validation workflow runs on a PR from a fresh checkout and passes for valid repository contents.

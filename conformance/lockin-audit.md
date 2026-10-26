@@ -21,6 +21,7 @@ Before recording an audit result, run `python3 scripts/check-docs.py` so the aud
 
 - [ ] Provider/model/tool choices remain runtime configuration concerns, not hardcoded decisions (D147).
 - [ ] Adapters remain thin translation layers, not policy/logic hubs (D139).
+- [ ] Every active connection to an outside model provider, foreign client format or external tool source crosses an owned adapter; a pass-through is sufficient and direct protocol calls from core components fail conformance (D201, ARCH-23).
 - [ ] Swap cost remains localized (adapter/config), not cross-component rewrites.
 - [ ] Invalid selected adapters fail startup clearly, while a configured remote provider's outage does not prevent local startup (ARCH-12).
 
@@ -85,7 +86,7 @@ Run the sections that match changed areas.
 
 - [ ] Tools remain independently addable/removable without core code changes (D51).
 - [ ] Tool discovery remains source-driven and self-description based (D146).
-- [ ] Non-default tool protocols, if used, remain isolated behind clear adapter/execution boundaries (D32).
+- [ ] Every external tool-source protocol in use, including MCP, remains inside an owned adapter (D32, D201).
 
 ---
 

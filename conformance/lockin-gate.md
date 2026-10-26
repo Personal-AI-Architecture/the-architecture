@@ -8,6 +8,7 @@
 - [ ] **No hardcoded provider/model/tool decisions in core code:** swap choices remain configuration-driven.
 - [ ] **No silent failure fallback:** any one recorded retry stays on the selected model and provider profile; an unresolved failure is reported rather than routed elsewhere (D188).
 - [ ] **Adapter boundary preserved:** protocol/provider-specific behavior stays in adapters, not in Agent Loop/Gateway/Auth core logic.
+- [ ] **No direct outside connection:** every model provider, client format and external tool source is reached through an adapter the system owns (a pass-through counts). Direct protocol calls from Agent Loop, Gateway or Auth fail this gate (D201, ARCH-23).
 - [ ] **Invalid adapter fails clearly:** an unknown or invalid selected adapter never becomes a silently substituted provider; use ARCH-12 when adapter startup changes.
 - [ ] **Config-only swap claim still true:** model swaps and switches between listed provider profiles are preference changes (D193); a provider in a new format or a tool swap requires config and adapter updates; none requires cross-component code edits.
 - [ ] **Offline path still valid:** full loop can run without internet when configured with local model + local tools.
@@ -25,6 +26,7 @@
 
 - [ ] Link to tests or manual verification for offline/local path behavior (if impacted).
 - [ ] Link to tests or manual verification for swap behavior (if adapters/config/provider/tooling impacted).
+- [ ] Trace each outside connection to its owned adapter, and inspect Agent Loop, Gateway and Auth for direct outside-protocol calls (if those boundaries are present).
 - [ ] Link to migration/update safety notes (if schema/storage/auth changed).
 
 ---

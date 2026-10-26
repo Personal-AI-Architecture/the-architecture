@@ -4,6 +4,7 @@
 
 The Model API contract remains streaming-only (`stream: true`) with discriminated
 completion events; adapter transport details may vary behind that boundary.
+Each active outside provider or tool source crosses an owned adapter even when the adapter merely passes the protocol through (D201, ARCH-23).
 
 Approval-enabled implementations must retain the canonical pending/terminal approval
 lifecycle and replay semantics while components are swapped; the architecture default

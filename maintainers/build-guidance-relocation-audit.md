@@ -17,6 +17,8 @@ shapes, and `conformance/` for implementation test criteria. A template owns
 language-specific instructions and executable checks. The former build folder
 was derived material and could not settle a disagreement with those sources.
 
+The current conformance suite includes ARCH-23 for D201's owned-adapter boundary. The retired build guidance remains historical evidence and does not supersede that test.
+
 ## Relocations made
 
 | Build source | Disposition | Current home |

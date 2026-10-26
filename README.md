@@ -22,6 +22,7 @@ Not an app, and not a framework you install. A blueprint, plus a starter kit to 
 - **The architecture** ([`overview.md`](architecture/overview.md)): how the system works, its principles, decisions, component specifications, and explanatory background.
 - **Contracts** ([`contracts/`](contracts/)): the exact OpenAPI and JSON Schema shapes code must match, plus canonical examples.
 - **Conformance** ([`conformance/`](conformance/)): language-neutral checks and review guidance that prove a system conforms.
+- **Outside adapters:** D201 requires an owned adapter, including a pass-through, for each active outside provider, foreign client format and external tool source. Native Gateway API clients and owner-controlled internal boundaries need no extra adapter; [ARCH-23](conformance/arch-tests.md#arch-23-outside-connections-cross-owned-adapters) states the check.
 - **Language templates:** starting points in TypeScript, Python, Go, Rust and Java. The rc.2 candidates pin PAA contract commit `47d6471` and pass local shared-validator and native checks against [PAA PR #31](https://github.com/Personal-AI-Architecture/the-architecture/pull/31). The renamed contract and MCP adapter work is under review; the templates' accepted-main CI waits for that PR to merge. See [template readiness](maintainers/template-readiness-2026-10-23-followup.md) for the exact candidate commits and limits. These checks prove named starter paths, not full product conformance.
 
 ### Language templates

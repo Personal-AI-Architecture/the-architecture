@@ -221,13 +221,13 @@ These four owner outcomes are values, not code — but they produce observable p
 
 **Fail condition:** An API contains business logic (routing decisions based on message content, data enrichment, content-aware transformation). APIs that "do things" are components in disguise. Note: security boundary enforcement (input well-formedness validation, request size limits) is not business logic — it's required by the security spec and does not violate hollowness.
 
-### C-4. Adapters are thin translation layers (D139)
+### C-4. Outside connections use thin owned adapters (D139, D201)
 
 **Claim:** Adapters translate between the contract and the specific protocol/provider. They contain no policy or business logic.
 
-**Verification:** Inspect adapter code. It should contain only format translation (field mapping, serialization, protocol differences). No retry logic, no caching, no routing decisions, no business rules. If a product makes the optional same-selection retry in D188, that decision and its record belong to the Agent Loop.
+**Verification:** Inventory active model providers, foreign client formats and external tool sources; trace each through an adapter owned by the system (ARCH-23). Inspect adapter code. It should contain only format translation (field mapping, serialization, protocol differences), plus outside-protocol session mechanics such as an MCP session ID. No retry logic, product-state caching, routing decisions or business rules. If a product makes the optional same-selection retry in D188, that decision and its record belong to the Agent Loop.
 
-**Fail condition:** An adapter contains business logic, caching, routing, or policy decisions. Adapters that grow fat are becoming components.
+**Fail condition:** An active outside connection bypasses its adapter, or an adapter contains business logic, product-state caching, routing or policy decisions. Adapters that grow fat are becoming components.
 
 ### C-5. Gateway ↔ Agent Loop contract is bounded (D137)
 
