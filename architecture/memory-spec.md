@@ -110,7 +110,7 @@ The specific export format is an implementation choice. The architecture require
 
 ### Protected credentials
 
-Credentials can travel with Your Memory, bound to their original service, destination and purpose and protected so only the owner can unlock them. An export must require owner-controlled unlock material that is not available from the export alone. Models and ordinary tools cannot read protected credentials as Memory content.
+Credentials can travel with Your Memory, bound to their original service, destination and purpose and protected so only the owner can unlock them. The implementation chooses how to provide that protection. Models and ordinary tools cannot read protected credentials as Memory content.
 
 ### Permanent deletion
 

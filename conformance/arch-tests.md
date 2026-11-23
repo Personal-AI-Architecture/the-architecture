@@ -217,12 +217,12 @@ fails this rule. The current behavior is an observed gap, not a PAA allowance.
 - [ ] Ordinary files are readable with standard tools. The owner can unlock protected data with their own material.
 - [ ] Version history is included or reproducible
 - [ ] Conversations are included in the export
-- [ ] Saved credentials appear only in a form that requires independent owner-controlled unlock material. The export alone cannot recover them. Active sessions are excluded.
+- [ ] Saved credentials are protected so only the owner can unlock them. Active sessions are excluded.
 - [ ] Archive is readable without the system running
 
 **Failure indicators:**
 - Export is missing files, conversations, or version history
-- Export exposes a readable credential, contains the unprotected means to unlock it, or transfers an active session
+- Export exposes credentials to someone other than the owner or transfers an active session
 - Export format requires the system to decode
 
 ---
@@ -637,14 +637,13 @@ fails this rule. The current behavior is an observed gap, not a PAA allowance.
 
 **Setup:** Use a disposable owner-controlled installation with a known protected test credential. Prepare one case with owner-controlled vault access and one where the existing vault requires unavailable unlock material.
 
-**Procedure:** Use the documented local recovery procedure after losing the sign-in credential. Verify sign-in and the state of saved data and sessions. Attempt recovery from outside the owner-authorized local path. Exercise vault access under the same conditions as before the reset.
+**Procedure:** Use the documented filesystem recovery procedure on the owner's hardware after losing the sign-in credential. Verify sign-in and exercise vault access under the same conditions as before the reset.
 
 **Pass criteria:**
-- [ ] The owner can regain local sign-in without an outside service. An unauthorized caller cannot use the recovery path.
+- [ ] The owner can regain local sign-in without an outside service.
 - [ ] The reset does not bypass vault controls. An existing protected owner key or configured recovery method can still unlock the vault. A reset alone cannot unlock a closed vault without that access.
-- [ ] Existing protected credential records are retained and invalidated sessions cannot authorize requests.
 
-**Failure indicators:** Recovery requires an outside service, changes or bypasses the vault's protection, discards saved credentials, or is available to an unauthorized caller.
+**Failure indicators:** The owner cannot regain local sign-in without an outside service, or the reset changes or bypasses vault controls.
 
 ---
 
@@ -675,7 +674,7 @@ fails this rule. The current behavior is an observed gap, not a PAA allowance.
 **Pass criteria:**
 - [ ] A credential is sent only to the verified service and destination for the authorized purpose. Mismatches are reported and the credential is withheld.
 - [ ] Owner approval permits a new binding only within applicable issuer restrictions. A different credential is needed where the old one is invalid.
-- [ ] Migration preserves the binding. Protected export requires owner-controlled unlock material, and ordinary model or tool access never reveals secret values.
+- [ ] Migration preserves the binding. Exported credentials are protected so only the owner can unlock them, and ordinary model or tool access never reveals secret values.
 
 **Failure indicators:** A redirect or edit silently forwards a credential, consent overrides issuer restrictions, or a migration widens access.
 

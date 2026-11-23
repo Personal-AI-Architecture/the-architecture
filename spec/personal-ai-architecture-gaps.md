@@ -139,12 +139,9 @@ Criterion IDs in historical resolved entries refer to the specification at the t
 
 ### GAP-PAA-19: Who handles a model provider being down is contradictory — Resolved
 
-- **Current rule:** Owner-approved fallbacks are allowed. Their use and failure triggers are implementation choices. See AC-5.4 and D205.
-
 - **Expected:** One rule for what the Agent Loop does when a provider fails: fall back to another provider, or report and stop. (US-5 itself only promises that switching providers is a configuration change.)
-- **Published:** The Agent Loop may make one recorded retry on the owner's selected model and provider profile. If that does not resolve the failure, it reports the provider error and stops the current turn. An explicit product retry or provider change can follow the failed turn.
-- **Evidence:** [agent-loop-spec.md](../architecture/agent-loop-spec.md) "What the Agent Loop does not do"; [models-spec.md](../architecture/models-spec.md) "Why Models Are Not a Component"; [decisions.md](../architecture/decisions.md) D188.
-- **Decided:** No silent model or provider fallback in the architecture (D188). A recorded retry on the same selection is allowed; it is not a fallback.
+- **Current rule:** The Agent Loop may make one recorded retry on the owner's selected model and provider profile. A fallback is optional and requires prior owner approval. The implementation chooses which failures trigger it. If the failure remains, the Agent Loop reports the error and stops the turn.
+- **Evidence:** AC-5.4, [ARCH-5](../conformance/arch-tests.md#arch-5-error-taxonomy-compliance) and [D205](../architecture/decisions.md), which supersedes D188.
 
 ### GAP-PAA-20: Nobody owns preventing a conversation from outgrowing the model's context window — Resolved
 

@@ -316,7 +316,7 @@ Conversations receive the same protection as Your Memory — same access control
 Memory export must be protectable. The architecture requires:
 - Export always works regardless of system state — the owner can always get their data out
 - Exports in open formats (maximum portability)
-- Exports support protection against unauthorized access. When credentials are included, only the owner can unlock them. The exported material alone must not be enough to unlock them.
+- Exports support protection against unauthorized access. When credentials are included, protect them so only the owner can unlock them. The mechanism is the implementation's choice.
 
 ## Failure Modes
 

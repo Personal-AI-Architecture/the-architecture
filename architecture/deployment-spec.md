@@ -169,11 +169,13 @@ If you can't verify what you're running, you can't trust what you're running. Op
 
 ## Update Principles
 
-Updates must never compromise the owner's data or control. Three principles — mechanics are implementation-specific." Add after L176: "3. **The owner decides when.** On the owner's own hardware, no update is applied without the owner's action or a policy the owner set, and the owner can stay on a version. On a hosted service the owner may not control updates, but can always leave with everything.
+Updates preserve the owner's data and control. The implementation chooses how to meet these three principles.
 
 1. **Never risk data loss.** Your Memory, preferences, conversations, and auth data must survive any update. An update that could destroy or corrupt owner data is a broken update.
 
 2. **Always reversible.** If an update breaks the system, the owner must be able to return to the previous working state. The previous version must remain available and the owner's data must be compatible with it.
+
+3. **The owner decides when.** On their own hardware, the owner can stay on a version. Updates apply only when the owner acts or under a policy they set. A hosted service controls its own update schedule, and the owner can leave with all their data.
 
 ### Uninstall and exit
 
