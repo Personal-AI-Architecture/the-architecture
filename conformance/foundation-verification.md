@@ -516,13 +516,13 @@ Each story is an acceptance test for the architecture itself.
 
 **Fail condition:** Configuration exists that doesn't fit the three categories. Or runtime bootstrap grows beyond thin connection setup. Or preferences are stored outside Memory. Or configuration stores or applies permissions. Or the active provider profile is fixed at startup so switching to a listed profile needs a restart.
 
-### X-2. No secrets in source or Memory files
+### X-2. No readable secrets in source or Memory files
 
-**Claim:** Secrets live outside Your Memory and are never tracked by git: environment variables, an untracked config file, or a secret store.
+**Claim:** Credentials can travel with Your Memory only when protected for the owner. Configuration holds references. Models and ordinary tools do not see credential values.
 
 **Verification:** Scan source code, tracked config files and Memory content for API keys, passwords, tokens, private keys.
 
-**Fail condition:** Secrets found in source-controlled or git-tracked files or Memory content.
+**Fail condition:** Readable secrets found in tracked configuration, ordinary Memory content, or model or tool inputs.
 
 ### X-3. Auth is cross-cutting and independent (D60)
 

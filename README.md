@@ -20,8 +20,8 @@ Not an app, and not a framework you install. A blueprint, plus a starter kit to 
 
 - **The specification** ([`personal-ai-architecture-spec.md`](spec/personal-ai-architecture-spec.md)): what every PAA system must promise, including product stories, with [known gaps](spec/personal-ai-architecture-gaps.md) tracked separately.
 - **The architecture** ([`overview.md`](architecture/overview.md)): how the system works, its principles, decisions, component specifications, and explanatory background.
-- **Contracts** ([`contracts/`](contracts/)): the exact OpenAPI and JSON Schema shapes code must match, plus canonical examples.
-- **Conformance** ([`conformance/`](conformance/)): language-neutral checks and review guidance that prove a system conforms.
+- **Contracts** ([`contracts/`](contracts/)): the interoperable OpenAPI and JSON Schema shapes, plus canonical examples. Adapters translate other formats at the PAA boundary.
+- **Conformance** ([`conformance/`](conformance/)): language-neutral checks and [proof routes by criterion](conformance/acceptance-criteria.md). Pin the specification revision and record what passed, failed or still needs proof.
 - **Outside adapters:** D201 requires an owned adapter, including a pass-through, for each active outside provider, foreign client format and external tool source. Native Gateway API clients and owner-controlled internal boundaries need no extra adapter; [ARCH-23](conformance/arch-tests.md#arch-23-outside-connections-cross-owned-adapters) states the check.
 - **Language templates:** starting points in TypeScript, Python, Go, Rust and Java. The v1.0 candidates pin PAA contract commit `47d6471` and pass the shared-validator and native checks. After release, use the [`v1.0` tag](https://github.com/Personal-AI-Architecture/the-architecture/tree/v1.0) as the architecture source. See [template readiness](maintainers/template-readiness-2026-10-23-followup.md) for exact template commits and limits. These checks prove named starter paths, not full product conformance.
 

@@ -77,7 +77,7 @@ These properties must always hold.
 - Owner changes survive product updates — where an update conflicts with an owner change, the owner is told instead of having it overwritten silently
 - Multiple implementations can run on the same Architecture without interfering with each other
 - All customization must work through the four mechanisms — no backdoor code-level modification of architecture components
-- Secrets never appear in Your Memory or tracked config files — API key references only (see [security-spec.md](./security-spec.md))
+- Secrets in Your Memory are owner-unlockable, and tracked config files hold API key references only (see [security-spec.md](./security-spec.md))
 
 ## The Four Customization Mechanisms
 

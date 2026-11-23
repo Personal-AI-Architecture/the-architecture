@@ -2,7 +2,7 @@
 
 ## What Auth is
 
-Auth decides who and what can act on your AI system, and what each of them is allowed to do. That covers you, the people you invite, the AI agents working for you, and the services that act on your system.
+Auth decides who and what can act on your AI system, and what each of them is allowed to do. That covers you, the AI agents working for you, other people's AI systems you let in, and the services that act on your system.
 
 In most AI products, access control is part of the app: a login screen and whatever rules the app decides to enforce. Some go further and leave it to the model, with instructions in the prompt about what it shouldn't do.
 
@@ -10,7 +10,7 @@ We think both are the wrong place for it. Rules that live in an app are lost whe
 
 So in PAA, Auth is its own component. You can do everything on your own system; everyone and everything else starts with no access until you grant it. Your rules belong to you and stay the same when you swap any other part of your system.
 
-That means you can invite a collaborator, or let an AI agent act on your behalf, with exactly the access you choose, and change models or apps without losing your rules.
+That means you can let an AI agent act on your behalf, or let another person's AI system reach what you choose to share, with exactly the access you choose, and change models or apps without losing your rules.
 
 <p align="center">
   <img src="../assets/readme-how-it-works.svg" alt="Interfaces connect through the Gateway API to the Gateway, which hands off to the Agent Loop. The Agent Loop calls models through the Model API and reaches Your Memory and other tools through tools. Auth checks every request." width="900" />
@@ -25,7 +25,7 @@ Because models can be swapped and can be tricked, Auth sits outside the model an
 
 The Gateway-to-Agent-Loop handoff carries Auth's actor context in the internal [`gateway-agent-loop.yaml`](../contracts/openapi/gateway-agent-loop.yaml) shape. The Agent Loop still asks Auth for each tool call; receiving a context is not an authorization decision for a tool.
 
-The rules themselves are simple data: who, on what, doing what, allowed or denied. If no rule allows something, it's denied. You manage the rules the same way you manage everything else, by asking ("give my business partner read access to my finances"), and you can inspect and export all of them, along with a log of every action.
+The rules themselves are simple data: who, on what, doing what, allowed or denied. If no rule allows something, it's denied. You manage the rules the same way you manage everything else, by asking ("give my accountant’s AI read access to my finances"), and you can inspect and export all of them, along with a log of every action.
 
 Just as important is what Auth doesn't do. It doesn't hold Your Memory or your conversations, route requests, run tools or decide what the AI should do. It answers one question, "who is acting, and may they?", and everything else asks it.
 
@@ -74,7 +74,7 @@ When a product enables approvals, Auth also owns the decision authority and life
 
 ### Auth through conversation
 
-The owner manages auth the same way they manage everything else: by asking. "Give my business partner read access to finances" should just work. Settings screens can exist as well. This means Auth is reachable through tools, so the agent can read and change permissions when the owner asks.
+The owner manages auth the same way they manage everything else: by asking. "Give my accountant’s AI read access to finances" should just work. Settings screens can exist as well. This means Auth is reachable through tools, so the agent can read and change permissions when the owner asks.
 
 ### Owner inspectability
 
@@ -104,7 +104,7 @@ The rest of the system depends on the Auth contract. The auth provider behind it
 | Execute tools | Agent Loop | Auth does not execute |
 | Manage conversations and record reply provenance | Gateway, which stores the model and provider with each saved assistant reply (D194) | Auth does not track conversations or choose models and providers |
 | Define product behavior | Your Memory (instructions, skills) | Auth has no product logic |
-| Keep secrets | Outside Your Memory, never tracked by git (environment variables, an untracked config file or a secret store) | Auth checks credentials; it does not put them in memory |
+| Keep secrets | Protected so only the owner can unlock them, including when they travel with Your Memory | Auth checks credentials without exposing them as ordinary Memory content to a model or tool |
 
 Auth's job is one thing: **decide who is acting and whether they may**.
 
@@ -120,8 +120,7 @@ Every actor that uses the system has an identity. The identity model supports al
 
 | Type | Who it is |
 |---|---|
-| **Owner** | The person whose system this is. Full control. Exactly one per instance. |
-| **Collaborator** | A person the owner invites, with access the owner chooses. A business partner who sees finances, a family member who sees shared content. |
+| **Owner** | The person whose system this is. Full control. Exactly one per instance, and the only person who signs in. |
 | **Interactive agent** | The AI agent acting for the owner in conversation, limited to the tools and memory it is given. |
 | **Background agent** | A scheduled or autonomous task that runs with no person watching. It has its own identity so the owner can tell "the background task changed this" from "I changed this". |
 | **External agent** | Another AI connecting from outside, acting for someone else or for the owner through an outside service. |
@@ -141,7 +140,7 @@ Each identity is in one of these states:
 - **Suspended**: cannot act. The owner can turn it back on.
 - **Revoked**: permanently cut off. Revoking an identity stops anything it is doing.
 
-An identity re-created after export and import starts with no access: it cannot act until the owner turns it back on (see [Failure modes](#failure-modes)).
+Identities and permission rules move together with the owner's Memory. A supported grant becomes active only once the destination verifies the original identity and resource scope. An identity the owner adds later starts with no access until the owner grants it. Removing an identity removes its rules (see [Failure modes](#failure-modes)).
 
 ### Identity travels with the request
 
@@ -190,7 +189,7 @@ The model must cover these categories, and new ones can be added without redesig
 
 - **Memory access**: who can read, write and delete which parts of Your Memory: all of it, a folder, a single file, or read-only.
 - **Tool access**: which tools each identity can use: all, read-only tools, a named set, or none.
-- **System actions**: changing settings, managing permissions, inviting collaborators or registering agents.
+- **System actions**: changing settings, managing permissions, or registering agents, services and other instances.
 - **Delegation**: whether an identity can pass some of its own access on to others, never more than it has.
 - **Limits**: how much, not just whether: AI usage budgets, spending caps per transaction, request rates, storage.
 - **Approval**: which actions need someone's approval and who may give it. The architecture requires that an approval rule the owner sets is enforced; it does not require any approval by default.
@@ -225,7 +224,7 @@ Identity records hold an ID, type, display name, creation time and status. Polic
 
 Actions are recorded as the portable [audit record](../contracts/schemas/audit-record.json): who did what, when, to which resource, with what result, and under which correlation ID. This includes requests Auth denied, tool calls, cancellation/revocation events, and changes to identities and permissions. Audit logging is required from the start, including on a system with only the owner. Implementations may add non-sensitive detail, but must not put credentials, secrets, or raw private content in the record.
 
-If the audit log cannot be written, no tool call runs until it can, so every tool call that runs is recorded. Conversation without tool calls continues, but its other events, such as sign-ins and denied requests, go unrecorded until the log is back. The owner is alerted, and the outage itself is recorded once the log is back. The audit log is the owner's data: protected like Your Memory, exportable and deletable by the owner.
+When the audit log cannot be written, alert the owner and record the outage when the log recovers. The implementation may stop or continue work during the outage. Report an action as audited only when its record was written. The audit log is the owner's data: protected like Your Memory, exportable and deletable by the owner.
 
 ### Auth tools
 
@@ -236,7 +235,7 @@ Auth is reachable through tools so the agent can read and change permissions in 
 | `auth_whoami` | Returns the current identity and its permissions |
 | `auth_check` | Checks whether an action on a resource is allowed |
 | `auth_list_identities` / `auth_list_policies` | Lists identities or rules |
-| `auth_create_identity` | Invites a collaborator or registers an agent |
+| `auth_create_identity` | Registers an agent, a service or another instance |
 | `auth_grant` / `auth_revoke` | Grants or removes a permission, or revokes an identity |
 | `auth_audit` | Queries the audit log |
 | `auth_export` | Exports the complete auth state |
@@ -261,9 +260,9 @@ A conforming system needs at least `auth_whoami`, `auth_check` and `auth_export`
 
 ### Owner locked out
 
-**Scenario:** The owner has lost their credentials and set up no recovery method.
+**Scenario:** The owner has lost their local sign-in credentials.
 
-**Required behavior:** On their own hardware the owner has filesystem access, so recovery goes through the filesystem: reset the credentials with a command-line tool or by editing the auth data directly. Other recovery paths are product choices.
+**Required behavior:** The owner can reset local sign-in through the filesystem on their own hardware. The reset preserves the vault's existing access controls. An independently protected owner-controlled key, including a local key file, or an owner-configured recovery method can continue to unlock the vault. The login reset alone grants no access to protected secrets.
 
 ### Auth unavailable
 
@@ -275,18 +274,18 @@ A conforming system needs at least `auth_whoami`, `auth_check` and `auth_export`
 
 **Scenario:** The audit log's storage is full or unavailable.
 
-**Required behavior:** Tool calls that can't be recorded don't run, so every tool call that does run is in the audit log. The owner is alerted, and conversation without tool calls continues. The failure itself is logged wherever logging is still possible. See [security-spec.md](security-spec.md#failure-modes).
+**Required behavior:** The owner is alerted; the outage is never hidden. Whether tool calls stop or continue is the implementation's choice, and nothing that ran is reported as audited. The failure itself is logged wherever logging is still possible. See [security-spec.md](security-spec.md#failure-modes).
 
-### Stale permissions after export/import
+### Permissions after export/import
 
-**Scenario:** The owner exports from one system and imports into another. Policies refer to identities that don't exist on the new system.
+**Scenario:** The owner imports identities and permission rules with their Memory.
 
 **Required behavior:**
 
-- Policies for unknown identities are kept but **dormant**. They grant nothing while the identity is unknown.
-- When an identity is re-created, it gets **no access** until the owner turns it back on. Old rules never come back into force silently.
-- How the owner turns access back on is up to each product. Restoring the dormant rules in one step is fine, as long as the owner chooses to do it.
-- Rules the new system supports are enforced the same way as before. Rules it doesn't support are reported to the owner and never grant access.
+- Move identities and rules together. The import confirms activation for grants whose original identity and resource scope the destination can verify.
+- Matching display names or IDs alone do not verify identity. Translated policies must cover the same resources and enforce the same conditions.
+- Keep unsupported or unverified identities and rules as received, report them to the owner, and grant nothing. Once supported and verified, the original approval applies.
+- Remove an identity's rules when the identity is removed. New identities and resources have access only where covered by a verified grant.
 
 ---
 
@@ -301,14 +300,14 @@ A conforming system needs at least `auth_whoami`, `auth_check` and `auth_export`
 | Identity records | Yes, details only | Names, types, creation dates, links to policies |
 | Audit log | Yes | Queryable records of who did what |
 | Auth configuration | Yes | The owner's auth settings, including any approval rules |
-| Credentials | No | Set up again on the new system |
+| Credentials | In the protected Memory export | Owner-unlockable with the original service, destination and purpose binding |
 
 ### What doesn't export
 
-- Passwords, password hashes, API keys and other credentials. They are re-created on the new system.
+- The Auth-specific export omits credentials. They travel with Your Memory in protected form.
 - Active sessions and tokens. They aren't valid on another instance.
 
-Unknown identities arrive inactive, as described in [Stale permissions after export/import](#stale-permissions-after-exportimport).
+Imported grants follow [Permissions after export/import](#permissions-after-exportimport).
 
 ---
 
@@ -320,8 +319,7 @@ Auth gains capability in phases. Each phase is additive; the contract doesn't ch
 |---|---|
 | **Owner only** | One owner with full access, API keys for programmatic access, audit log |
 | **Internal agents** | Background agents with their own identities and scoped permissions |
-| **Collaborators** | Invited people with per-folder memory access, tool limits, delegation rules and usage limits |
-| **External actors** | Outside agents and services with time-limited scoped tokens, spending limits, OAuth 2.1 token issuance |
+| **External actors** | Outside agents and services, including other people's AI systems, with scoped credentials, delegation rules, per-resource access and usage limits |
 | **Federation** | Trust between instances through open protocols, each instance its own authority |
 
 The pattern: **add identity types and rules, don't change the contract.**
@@ -335,19 +333,19 @@ Items marked *(security)* are the per-component requirements from [security-spec
 - [ ] Every Gateway request is authenticated and authorized by Auth before it reaches the Agent Loop; requests without a valid identity are refused (D22) *(security)*
 - [ ] Every tool call is authorized by Auth before it runs
 - [ ] A denied tool call is reported as "not permitted", distinguishable from "does not exist"
-- [ ] The owner can set up credentials on a new system
+- [ ] The owner can unlock moved credentials, or set up new ones, on a new system
 - [ ] API keys can be generated for programmatic access
 - [ ] By default the owner can do everything; no approval prompt is required by the architecture
 - [ ] Approval rules the owner sets are enforced
 - [ ] A new identity, of any type, has no permissions until the owner grants them
-- [ ] Every executed tool call is recorded in the audit log, and other actions are recorded whenever the log can be written; if it can't, tool calls don't run, the owner is alerted, conversation without tool calls continues, and the outage is recorded once the log is back
+- [ ] Every executed tool call and other action is recorded in the audit log whenever the log can be written; if it can't, the owner is alerted, nothing is reported as audited that wasn't, and the outage is recorded once the log is back
 - [ ] Auth state is exportable: identities, policies, configuration and audit log; it belongs to the owner *(security)*
-- [ ] After import, re-created identities have no access until the owner turns it back on; unsupported rules are reported and grant nothing
+- [ ] After import, identities and their rules take effect unchanged; an identity or rule not yet supported is kept as the owner left it, reported, and grants nothing until supported, then works as set; removing an identity removes its rules
 - [ ] Swapping the auth provider changes only the Auth component
 - [ ] Adding a new identity type is a data change, not a code change
 - [ ] Requests and tool calls that can't be checked must be refused: fail closed *(security)*
 - [ ] Permissions live only in Auth *(security)*
-- [ ] Credentials stay outside Your Memory and are never tracked by git *(security)*
+- [ ] Credentials are never readable by a model or tool, never stored unprotected in Your Memory, and never kept as values in tracked configuration; they may travel with Your Memory, including its version history, protected so only the owner can unlock them *(security)*
 - [ ] Auth and the Gateway must be independently swappable (D60) *(security)*
 - [ ] The auth data format belongs to the architecture, not the provider, so the owner can move between providers *(security)*
 
@@ -366,7 +364,7 @@ Items marked *(security)* are the per-component requirements from [security-spec
 
 The canonical contract tree under `contracts/` is authoritative for transport and
 payload shapes. Identity records now have an explicit `status` and extensible actor
-`type`; re-created identities remain inactive until the owner reactivates them.
+`type`; imported grants become active only when the destination supports the rule and verifies its original identity and resource scope.
 The Gateway carries the authenticated identity through the transport-neutral Auth
 boundary as the canonical `auth_context` shape in `contracts/schemas/auth-context.json`.
 Headers, message metadata, request-body fields, and direct-call arguments are transport

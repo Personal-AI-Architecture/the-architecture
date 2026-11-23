@@ -34,7 +34,7 @@ Before recording an audit result, run `python3 scripts/check-docs.py` so the aud
 
 ### Security and Change Safety
 
-- [ ] No secrets were introduced into Your Memory or any git-tracked file (secrets stay in environment variables, an untracked config file, or a secret store).
+- [ ] Any credentials in Your Memory or its history require owner-controlled unlock material. No credential values are present in tracked configuration or ordinary model and tool content.
 - [ ] Auth data and policies remain portable with owner-controlled export path.
 - [ ] Update flow preserves existing owner data and remains reversible in failure scenarios.
 
@@ -80,7 +80,7 @@ Run the sections that match changed areas.
 
 - [ ] Model and provider-profile choice remain owner preferences passed with each request; a change applies to the next message with no restart (D63, D147, D175).
 - [ ] Provider-specific request/stream/tool-call details remain adapter concerns (D139).
-- [ ] An unresolved provider failure reports `provider_error` and stops the turn after any one recorded retry on the selected model and provider profile. No silent switch to another model or provider occurs (D188); an explicit owner retry or provider change after the failed turn is optional product behavior.
+- [ ] An unresolved provider failure reports `provider_error` and stops the turn after any one recorded retry on the selected model and provider profile. Only owner-configured fallbacks may run (D205). An explicit owner retry or provider change remains available.
 
 ### Tools
 

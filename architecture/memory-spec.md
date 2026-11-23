@@ -102,14 +102,19 @@ The specific export format is an implementation choice. The architecture require
 | Data | Included | Notes |
 |------|----------|-------|
 | All files (documents, pages, skills, config) | Yes | As-is, human-readable |
-| Conversation history | Yes | Open format, including tool calls, tool results and every content part (text, images, files) |
+| Conversation history | Yes | Documented open format, including tool calls, results and supported content parts. The [message contract](../contracts/schemas/message.json) is the recommended default. |
 | Version history | Yes | Open format (a Git repository is one option) |
 | Structured data (tasks, etc.) | Yes | Open format |
 | Derived data (indexes, embeddings) | Optional | Regenerable from source |
+| Credentials | Yes, when held for the owner | Protected so only the owner can unlock them. Active sessions stay with the instance. |
 
-### No secrets
+### Protected credentials
 
-API keys, credentials, and tokens must never be stored in Memory. Secrets live outside Your Memory, somewhere git never tracks: environment variables, an untracked config file, or a secret store.
+Credentials can travel with Your Memory, bound to their original service, destination and purpose and protected so only the owner can unlock them. An export must require owner-controlled unlock material that is not available from the export alone. Models and ordinary tools cannot read protected credentials as Memory content.
+
+### Permanent deletion
+
+Ordinary deletion retains recoverable history. The owner can explicitly purge selected content from live Memory, recoverable history and derived stores under the implementation's control. When a retained backup delays removal, report which backup holds the content and when it expires. Managed restores honor purges before exposing recovered content. Copies outside the implementation's control are outside the purge guarantee.
 
 ---
 
@@ -213,7 +218,7 @@ Items marked *(security)* are the per-component requirements from [security-spec
 - [ ] Memory passes the independence test — remove any other component, Memory still works, still readable, still portable *(security)*
 - [ ] Memory works with any future device, client or AI without rebuilding
 - [ ] Memory access is mediated by tools — no component accesses storage directly *(security)*
-- [ ] API keys, credentials, and tokens are never stored in Memory *(security)*
+- [ ] API keys, credentials, and tokens are never stored unprotected in Memory or readable by a model or tool *(security)*
 - [ ] Memory has zero product-specific structure — it's a generic substrate
 - [ ] Memory supports multiple storage mechanisms behind the tools
 - [ ] Swapping Memory's storage backend requires changing only tool implementations — Agent Loop, Client, Auth, and Models are unaffected

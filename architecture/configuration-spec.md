@@ -15,7 +15,7 @@ So PAA splits configuration by what it's about. Your preferences (the model you 
 That means your preferences come with you to a new machine or a new product, and switching a model, provider or tool is a settings change, never a code change.
 
 <p align="center">
-  <img src="../assets/configuration-split.svg" alt="Settings about you live in Your Memory and travel with you. Settings about this machine live in a startup file that stays with the machine. What a tool does and needs lives in the tool itself. Permissions live only in Auth, and secrets stay outside Your Memory." width="900" />
+  <img src="../assets/configuration-split.svg" alt="Settings about you live in Your Memory and travel with you. Settings about this machine live in a startup file that stays with the machine. What a tool does and needs lives in the tool itself. Permissions live only in Auth, and secrets are protected so only you can unlock them." width="900" />
 </p>
 
 ## How it works
@@ -25,7 +25,7 @@ Every setting answers one question: **is this about you, or about this machine?*
 1. **Preferences travel.** They're files in Your Memory, read through the Memory tools like everything else. Move to a new machine and you bring Your Memory; installing the system there sets up its own startup file and tools. The system tries to honor your preferences and tells you about any it can't, such as a preferred tool that isn't installed there.
 2. **The startup file stays thin.** It holds four facts about this machine and nothing about you. Every field in it is something you leave behind when you move, so it stays as small as possible.
 3. **Tools describe themselves.** Adding a tool means installing it where the system looks; the tool tells the system what it does.
-4. **Two things look like configuration but aren't.** Permissions live only in Auth, so no setting can widen or narrow access. Secrets like API keys stay outside Your Memory and out of anything git tracks; settings refer to them by name, never by value.
+4. **Two things look like configuration but aren't.** Permissions live only in Auth, so no setting can widen or narrow access. Secrets like API keys are never readable by a model or tool. In Your Memory they exist only protected so you alone can unlock them; their values never go in tracked configuration. Settings refer to them by name, never by value.
 5. **You have the last word.** A product ships defaults, and you can change every one of them on your own hardware. An update replaces the product's defaults without overwriting your changes.
 6. **Timing follows the split.** Machine facts are read once at startup, so changing them may need a restart. Your model and provider choice are read on every message, so switching either takes effect on the next one.
 
@@ -43,7 +43,7 @@ Configuration is three things, each with its own home, sorted by one question: *
 - "Git tools are installed at /usr/local/bin/git" → about this machine → tool self-description
 - "Auth uses local mode" → about this machine → runtime config
 - "This actor may write files" → a permission → Auth, nowhere else
-- "sk-abc123..." → a secret → outside Your Memory, never tracked by git
+- "sk-abc123..." → a secret → protected for the owner, referenced by settings
 
 ### Preferences: what you want
 
@@ -108,7 +108,7 @@ Tool definitions (name, description, parameters, capabilities) are not written b
 
 **Permissions** decide what an actor may do. "Allow the web scraper" or "deny system access tools" lives in Auth and nowhere else ([auth-spec.md](./auth-spec.md)). Auth stores its records in its own way and manages them through Auth tools. Configuration never stores, reads, or applies permissions, and a preference never widens or narrows access.
 
-**Secrets** (API keys, tokens, credentials) live outside Your Memory, somewhere git never tracks. Configuration only names them; see [Secrets](#secrets).
+**Secrets** (API keys, tokens, credentials) are protected so only the owner can unlock them, in Your Memory or outside it, and their values never go in tracked configuration. Configuration only names them; see [Secrets](#secrets).
 
 ## What the system guarantees about configuration
 
@@ -120,7 +120,7 @@ Tool definitions (name, description, parameters, capabilities) are not written b
 | **Normal swaps never need code** | Switching a model, a provider or a tool is a configuration change only (D147). Everyday use, like using an installed tool or starting a new project, needs no config edit at all. |
 | **Config stays generic** | Config fields never name internal services, proprietary formats or implementation details: `provider_adapter: "openai-compatible"`, not `openrouter_v2_internal_bridge: true`. |
 | **Permissions live only in Auth** | No permission is stored in or applied from configuration or preferences. |
-| **Secrets are named, never stored** | Config names a secret; its value lives outside Your Memory and outside anything git tracks (D172). |
+| **Secrets are named, never stored** | Config names a secret and never holds its value. The value is protected in Your Memory or kept outside it, never in tracked configuration (D204). |
 | **The owner has the last word** | The owner can change every product default on their own hardware, and an update never silently overwrites an owner change (D171). |
 | **Startup never depends on the network** | With no network, startup completes; a remote tool or provider that can't be reached is reported. |
 
@@ -222,14 +222,14 @@ Configuration is layered: the architecture, then the implementation, then the ow
 
 ## Secrets
 
-Secrets (API keys, tokens, credentials) live anywhere outside Your Memory that git never tracks: environment variables, an untracked config file (such as a gitignored `.env`), or a secret store. Which one is an implementation choice.
+Secrets (API keys, tokens, credentials) may travel with Your Memory, protected so only the owner can unlock them, or live outside it where git never tracks them: environment variables, an untracked config file (such as a gitignored `.env`), or a secret store. Which one is an implementation choice.
 
 | Principle | Detail |
 |-----------|--------|
 | **Reference, never value** | Config names the secret, for example `"api_key_env": "PROVIDER_API_KEY"`. The value comes from wherever the deployment keeps secrets. |
-| **Never in Your Memory** | Your Memory is portable, shareable, versioned. Secrets in Your Memory are secrets leaked. |
+| **Protected in Your Memory** | Secrets can be stored in Memory in a form only the owner can unlock, including in version history. Models and ordinary tools cannot read them. |
 | **Never in tracked config** | Runtime config and adapter config may be shared across deployments or checked into a repo. They hold references only. |
-| **Not portable** | Secrets do not travel with Your Memory. On a new system, the owner sets them up again. |
+| **Portable, protected** | The owner can unlock moved credentials on the new system. Each credential retains its authorized destination and purpose. The owner signs in again. |
 
 ## The Anti-Lock-In Test (D147)
 
@@ -267,7 +267,7 @@ This is a CI test, not a guideline. Run it on every release.
 - [ ] Runtime config has exactly four fields
 - [ ] No permission is stored in or applied from configuration or preferences
 - [ ] An AI agent can read and understand every config file without documentation
-- [ ] *(security)* Secrets (API keys, tokens, credentials) must never be stored in Your Memory or in any file git tracks — environment variables, untracked config files, or a secret store only
+- [ ] *(security)* Secrets (API keys, tokens, credentials) must never be readable by a model or tool, never stored unprotected in Your Memory, and never kept as values in a tracked config file
 - [ ] *(security)* Runtime and adapter config must not contain secrets by value — only the secret's name (for example `"api_key_env": "PROVIDER_API_KEY"`)
 - [ ] *(security)* Preferences in Your Memory must not contain environment-specific references (server addresses, ports, paths) — only personal choices
 - [ ] *(security)* Adapter config files must not leak across deployments — provider-specific settings stay with the deployment, not with Your Memory

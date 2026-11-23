@@ -69,7 +69,7 @@ These are explicit boundaries. They exist to prevent product-specific logic from
 | Context loading | Model reads files through tools based on its instructions | Agent Loop does not decide what context to load |
 | Conversation persistence | The Gateway, which stores conversations in Your Memory through its conversation store tool (D152) | Agent Loop does not own conversation storage |
 | Older conversation selection | Gateway prepares a model-sized working context from the saved conversation | Agent Loop does not cut or summarize history |
-| Error recovery | Agent Loop reports provider failures; it may retry once on the owner's selected model and provider profile and records the retry; a product or caller may explicitly retry or change provider after a failed turn | Agent Loop never silently switches to another model or provider (D188) |
+| Error recovery | Agent Loop reports provider failures; it may retry once on the owner's selected model and provider profile and records the retry. It may use a fallback the owner set up. A product or caller may explicitly retry or change provider after a failed turn | Agent Loop uses only the owner's selection and configured fallbacks (D205) |
 | Authentication | The Gateway calls Auth on every request before it reaches the Agent Loop | Agent Loop does not authenticate requests |
 | Product personality | Memory files the model reads | Agent Loop has no personality; its bootstrap prompt only says where to look |
 
@@ -82,7 +82,7 @@ These are explicit boundaries. They exist to prevent product-specific logic from
 - Responses stream back to the caller
 - The loop continues until the model signals completion. The Agent Loop MUST NOT impose a default iteration cap. Implementations MAY configure a safety bound as a deployment choice, but the Agent Loop itself never terminates the loop before the model signals done.
 - When the model emits text and tool calls in the same turn, the Agent Loop preserves the text in the assistant message for the next loop iteration. Streamed text is never silently discarded on tool continuation.
-- The model can dispatch multiple tool calls in parallel within a single loop — the Agent Loop executes independent calls concurrently, preserves stable call/result association, and keeps dependent calls ordered before returning all results
+- The model can ask for several tool calls in one turn — the Agent Loop runs or reports each one, preserves stable call/result association, and keeps dependent calls ordered before returning all results. Whether independent calls run at the same time is the implementation's choice
 - Before each model call, including a continuation after live tool results, the Agent Loop checks the actual request against the selected model's known or verified conservative context limit. It includes its bootstrap prompt, tool definitions and response headroom. If the call cannot fit, it reports `context_overflow` without shortening the live result or silently dropping parts.
 - It reads that limit from the selected provider profile and model (D193). If no safe limit exists, it reports `context_limit_unknown` and makes no model call.
 
@@ -148,18 +148,17 @@ See [configuration-spec.md](./configuration-spec.md) for the full boot sequence 
 
 ## Concurrency
 
-The Agent Loop is one brain with two hands — one model that can dispatch multiple tool executions in parallel. Independent calls made in the same turn start together, so the model cannot pause one while another runs. The model avoids conflicts by not issuing conflicting calls in the same turn. If two writes to Your Memory do conflict, the Memory tools detect the conflict and report it back to the model; they never resolve it silently (see [memory-spec.md](./memory-spec.md) "Errors and concurrency").
+The Agent Loop is one brain with two hands — one model that can dispatch multiple tool executions in parallel. Independent calls made in the same turn may run at the same time, so the model cannot count on pausing one while another runs. The model avoids conflicts by not issuing conflicting calls in the same turn. If two writes to Your Memory do conflict, the Memory tools detect the conflict and report it back to the model; they never resolve it silently (see [memory-spec.md](./memory-spec.md) "Errors and concurrency").
 
-This is the only concurrency the Agent Loop needs to handle: **parallel tool execution within a single loop.** The model calls several tools at once (for example, reading two files), the Agent Loop executes independent calls concurrently, keeps dependent calls ordered, results come back, and the model decides what's next.
+This is the only concurrency the Agent Loop needs to handle: **several tool calls within a single loop.** The model can ask for several calls together (for example, reading two files). The Agent Loop runs or reports each call, keeps dependent calls ordered, results come back, and the model decides what's next.
 
-**Multi-actor concurrency does not create shared Agent Loop state.** A collaborator or external agent may act through this system with a distinct authenticated actor and the permissions the owner grants. They use the same generic Agent Loop boundary, while separate systems may bring their own loops. Memory is inert — it does not care who is reading it. Auth gates every request and tool call, and Memory tools handle write conflicts. No actor receives permissions merely by sharing the owner's system.
+**Multi-actor concurrency does not create shared Agent Loop state.** An external agent, including another person's AI system, may act through this system with a distinct authenticated actor and the permissions the owner grants. They use the same generic Agent Loop boundary, while separate systems may bring their own loops. Memory is inert — it does not care who is reading it. Auth gates every request and tool call, and Memory tools handle write conflicts. No actor receives permissions merely by sharing the owner's system.
 
 | Scenario | What's happening | Agent Loop's role |
 |----------|-----------------|---------------|
-| Owner dispatches parallel tool calls | One model, multiple tool executions | Execute them concurrently, return results |
+| The model requests several tool calls | One model, multiple tool executions | Run or report every call and return its result |
 | Background task runs while owner chats | A separate trigger through the Gateway, its own loop, shared Memory via tools | Each runs in its own loop — Agent Loop is stateless between loops |
 | Owner runs multiple conversations simultaneously | Separate requests, separate loops, shared Memory via tools | Each request gets its own loop — Agent Loop is stateless between loops |
-| Collaborator accesses Memory simultaneously | A distinct authenticated actor uses this system or another system, with owner-granted permissions | Process the request under that actor's `auth_context`; Auth + tools handle access and write conflicts |
 | External agent connects | A distinct authenticated actor connects through the Gateway, with owner-granted permissions | Process the request under that actor's `auth_context`; never substitute the owner identity |
 
 ---

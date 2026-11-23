@@ -14,7 +14,7 @@ So in PAA, security isn't a separate part. It's built from the parts you already
 
 - Auth decides who gets in and what each actor may use.
 - Tools you don't trust run walled off from your data.
-- Your Memory keeps a history of every change, so any change can be undone.
+- Your Memory keeps recoverable history until the owner explicitly purges the selected content.
 - An audit log records what the AI did.
 
 The architecture supplies these mechanisms, a product sets sensible defaults, and on your own hardware you have the final say.
@@ -29,9 +29,9 @@ This works because no AI can yet be trusted to always do the right thing, and no
 
 2. **Instructions and data are kept apart.** The model is told which text is an instruction and which is just content it read, so a file saying "ignore your instructions" is treated as text. This lowers the risk of being tricked; it doesn't remove it, and nobody can yet.
 3. **Trust is visible.** Every tool has a trust level you can see: shipped with the system, installed by you, or untrusted. A tool that didn't ship with the system runs walled off by default.
-4. **Every change can be undone.** Your Memory keeps a history of what changed, so a mistake can be rolled back, whether it came from you, the AI or a tricked tool. That's why the default can be "the owner can do everything" with no approval prompts, and you can turn approvals on for anything you choose.
-5. **You can see what happened.** An audit log records sign-ins, tool calls, reads and writes, and no tool call runs without being recorded.
-6. **Your data goes only where you send it.** Secrets never go in Your Memory. When you use a cloud model, what it needs to read goes to that provider. You choose the provider, and each saved reply records which one produced it. A local model keeps what you send the model on your machine.
+4. **Ordinary changes can be undone.** The owner can also explicitly purge content. Your Memory keeps a history of what changed, so a mistake can be rolled back, whether it came from you, the AI or a tricked tool. That's why the default can be "the owner can do everything" with no approval prompts, and you can turn approvals on for anything you choose.
+5. **You can see what happened.** An audit log records sign-ins, tool calls, reads and writes, in a record you own and can take with you. If it can't be written, you are told; the outage is never hidden.
+6. **Your data goes only where you send it.** Secrets can travel with Your Memory, but only protected so you alone can unlock them; no model or tool can read them. Every model sees what the system sends it, and before anything is sent you are told where that model runs. You choose the model, and each saved reply records which model and provider produced it. A model on this computer keeps what is sent to it here; a model on any other computer, even on your own network, is another place your data goes.
 
 The Gateway passes the authenticated actor context into the Agent Loop using the internal [`gateway-agent-loop.yaml`](../contracts/openapi/gateway-agent-loop.yaml) contract; that context cannot grant permissions by itself.
 
@@ -57,18 +57,18 @@ These are explicit boundaries. Security does not add new components or change ex
 | Product logic in the Agent Loop | Security controls must not violate Agent Loop genericity (D39) |
 | Content awareness in the Gateway | Security controls must not make the Gateway content-aware in the architecture |
 | Opinions in Your Memory | Security controls must not add opinions to the unopinionated substrate (D43) |
-| Mandatory app-level encryption at rest | OS/infrastructure encryption is sufficient — app-level adds complexity without meaningful gain |
+| Mandatory app-level encryption at rest | OS/infrastructure protection is sufficient for ordinary Memory content. Secrets are the exception: they are protected so only the owner can unlock them (AC-10.5) |
 | Security through obscurity | The security model is public. The code is open source. Scrutiny improves security. |
 
 ## What the system guarantees
 
 These properties must always hold.
 
-- API keys, credentials, and tokens are never stored in Memory or tracked configuration — secrets live in environment variables, an untracked config file, or a secret store
+- API keys, credentials, and tokens are never readable by a model or tool and never stored unprotected in Memory or tracked configuration — in Memory they are protected so only the owner can unlock them; outside it they live in environment variables, an untracked config file, or a secret store
 - Unauthenticated requests are always rejected — the system fails closed
 - Operations the owner's rules mark as needing approval never run without it
-- Version history records every change to Memory, and the owner can restore an earlier state
-- The audit log records all tool calls — reads, writes, and execution — regardless of logging level
+- Version history lets the owner restore earlier content. Explicitly purged content stays removed during managed restore.
+- The audit log records all tool calls — reads, writes, and execution — regardless of logging level; if a record can't be written, the owner is told and the outage is never hidden
 - Memory export always works — the owner can get their data out regardless of system state
 - A failure of an isolated tool does not crash the Agent Loop — isolation prevents cascade failure
 - Every request passes an Auth check called by the Gateway, and every tool call passes an Auth check asked by the Agent Loop
@@ -158,19 +158,19 @@ This is analogous to how operating systems separate code execution from data (NX
 
 **The threat:** When the Agent Loop sends a prompt through the Model API, it includes system instructions, conversation history, and Memory content the model read. This data leaves the system and travels to the model provider. The provider sees everything the model processes.
 
-**This is not a bug — it's how cloud models work.** The model needs context to function. Restricting what goes in the prompt cripples the system. The mitigation is transparency and choice, not restriction.
+**This is not a bug — it's how models work.** The model needs context to function. Restricting what goes in the prompt cripples the system. The mitigation is transparency and choice, not restriction.
 
 **Requirements:**
-- **Document the risk clearly.** Owners must understand: when you use a cloud model provider, your data goes to that provider. The owner must be able to find this out before their data is sent; how a product tells them is its own choice. The provider is only ever a product default or the owner's choice, kept where the owner can read it, and never changed without the owner.
+- **Disclose each model's destination before use.** Tell the owner that every model sees what the system sends it and where it runs. This applies to defaults and owner-approved alternatives. The implementation chooses how to provide the disclosure.
 - **Make the provider choice visible.** The owner should always know which provider is processing their data, and afterwards which provider produced each reply: every saved assistant reply records its model and provider (D194).
-- **Local models are the sovereign option.** Support for local model providers means owners who want zero data leaving their machine have that choice. Both go through the same Model API. Abilities can differ between models, and a missing ability is reported, never faked.
+- **Privacy follows where the model runs.** A model on this computer keeps what is sent to it on this computer; a model on any other computer, even on the owner's own network, is another place the owner's data goes. Support for models on the owner's own computer means owners who want nothing to leave it have that choice. Both go through the same Model API. Abilities can differ between models, and a missing ability is reported, never faked.
 - **Future (configurable in implementations):** If feasible, allow implementation builders to configure what Memory content can be included in prompts.
 
 #### 5. Hosting Provider Access
 
 **The threat:** When the system runs on infrastructure someone else controls — cloud hosting, managed hosting, VPS — the operator has access to the data. A malicious or negligent operator could access, copy, or leak Memory content.
 
-**The architecture's answer:** The system is designed to run on hardware the owner physically controls (D148). Local deployment is the sovereign option — no one else has access. This is the Architecture's guarantee.
+**The architecture's answer:** The system is designed to run on hardware the owner physically controls (D148). The architecture guarantees the system can run on hardware the owner controls. Who else has access to that hardware (an operator, an administrator, remote management) is a condition of the deployment that the owner must be able to know and control; running locally does not by itself make the data private. What reaches a model or an outside tool is covered under Model Provider Data Flow.
 
 When an implementation offers hosted deployment, the operator's access is a deployment trade-off the owner accepts by choosing that option. The security requirements for hosted deployment — operational access controls, audit logging, encryption, incident response — are implementation concerns (not published in this repository).
 
@@ -220,7 +220,7 @@ The architecture default is that the owner can do everything: nothing requires a
 - **Ask some things** — owner defines which operations need approval
 - **Ask everything** — every write needs the owner's confirmation
 
-The spectrum is configurable per actor when multiple actors exist (owner might auto-approve their own agent but require approval for a collaborator's changes).
+The spectrum is configurable per actor when multiple actors exist (owner might auto-approve their own agent but require approval for an outside agent's changes).
 
 #### Approval lifecycle (when a product enables approvals)
 
@@ -232,7 +232,7 @@ The same boundary rule applies to identity propagation: the Gateway-to-Agent Loo
 
 ### 3. Audit Logging
 
-**The Architecture provides the mechanism.** The architecture logs actions — auth events, tool calls, Memory reads and writes — using the portable [audit record](../contracts/schemas/audit-record.json) in a structured, queryable format. Action metadata (what happened, who, when, which tool) is always recorded regardless of logging level. Configurable levels control content detail, not whether actions are recorded. An action that requires an audit record does not begin until that record is durably accepted; if it cannot be recorded, the action does not run (see Failure modes). A conversation turn that requires no such action may continue. Its other events, such as sign-ins and denied requests, go unrecorded until the log is back, and the outage itself is recorded once it is.
+**The Architecture provides the mechanism.** The architecture logs actions — auth events, tool calls, Memory reads and writes — using the portable [audit record](../contracts/schemas/audit-record.json) in a structured, queryable format. Action metadata (what happened, who, when, which tool) is always recorded regardless of logging level. Configurable levels control content detail, not whether actions are recorded. If a record cannot be written, the owner is told and the outage is never hidden; it is recorded once the log is back. Whether work stops or continues while the log is down is the implementation's choice (see Failure modes).
 
 **Implementations decide the display.** How the audit trail is presented to the owner is a client/product decision:
 - Real-time visibility ("reading finances/budget.md...") — a client feature
@@ -279,29 +279,33 @@ How version history is built is up to the implementation (Git is one option).
 
 ### Data at Rest
 
-The architecture requires that Memory storage supports encryption at rest. The specific mechanism is deployment-dependent:
+The architecture requires that Memory at rest can be protected from someone who has the disk but not the system (today, encryption at rest). The mechanism is deployment-dependent:
 - **Local deployment:** OS-level encryption (FileVault, BitLocker, LUKS). Recommended; the owner must be able to find out whether it is on.
 - **Hosted deployment:** Infrastructure-level encryption. The operator's responsibility.
 
-**Why no mandatory app-level encryption:** The application needs to decrypt data to use it, so encryption keys must be on the same machine. App-level encryption adds complexity without meaningful security gain over OS/infrastructure encryption — the threat it would protect against (someone with disk access but not OS access) is already covered by the lower layer.
+**Why no mandatory app-level encryption:** The application needs to decrypt data to use it, so encryption keys must be on the same machine. App-level encryption adds complexity without meaningful security gain over OS/infrastructure encryption — the threat it would protect against (someone with disk access but not OS access) is already covered by the lower layer for ordinary Memory content. Secrets still need owner-controlled protection.
 
 ### Data in Transit
 
 | Path | Protection |
 |------|-----------|
-| **Client ↔ Gateway** | TLS required whenever the Gateway is reachable from another machine. Same-machine (loopback) connections may use plain HTTP. |
-| **Agent Loop ↔ Model provider** | TLS required (provider APIs enforce this). |
-| **Component ↔ component (same deployment)** | Trusted. Internal communication is unencrypted. |
-| **Component ↔ tool (separate process or container)** | Same machine: a local channel. Encrypted (TLS or mTLS) whenever the connection crosses a network. |
-| **Component ↔ remote tool/service** | Encrypted (TLS required for any network call leaving the deployment). |
+| **Client ↔ Gateway** | Kept secure whenever the Gateway is reachable from another machine: no one on the network can read it, change it or pose as either end (today, usually TLS). Same-machine (loopback) connections may stay plain. |
+| **Agent Loop ↔ Model provider** | Kept secure across the network (today, TLS; provider APIs enforce it). |
+| **Component ↔ component (same deployment)** | Same machine: may stay plain. When components run on different machines, kept secure like any other network connection. |
+| **Component ↔ tool (separate process or container)** | Same machine: a local channel. Kept secure whenever the connection crosses a network (today, TLS or mTLS). |
+| **Component ↔ remote tool/service** | Kept secure for any network call leaving the deployment (today, TLS). |
 
 ### Secrets Management
 
-**Invariant:** API keys, credentials, and tokens are never stored in Your Memory and never in anything git tracks. Secrets live outside Your Memory: in environment variables, an untracked config file, or a secret store (a secrets manager, OS keychain, KMS or equivalent). This ensures Memory export never leaks credentials.
+**Invariant:** API keys, credentials, and tokens are never readable as ordinary memory content by a model or tool, never stored unprotected in Your Memory, and their values never appear in tracked configuration. They may travel with Your Memory, protected so only the owner can unlock them (the protected form may sit in Memory's version history), and work on a new system once the owner unlocks them. They may also live outside Your Memory: in environment variables, an untracked config file, or a secret store (a secrets manager, OS keychain, KMS or equivalent). Either way, a Memory export never exposes a readable credential.
 
 | Where | Lifecycle |
 |-------|-----------|
-| Environment variables, an untracked config file, or a secret store — never in Memory, never in tracked configuration | Whoever runs the system (the owner, on their own hardware) handles rotation, revocation and backup. |
+| Protected Memory, or a secret store or private runtime configuration outside it | The owner controls unlock and backup. The implementation chooses storage, protection and rotation. Tracked configuration holds references only. |
+
+### Credential destinations
+
+Before sending a credential, verify its authorized service, destination and purpose. Preserve the binding during migration. An endpoint change, provider switch or redirect cannot silently transfer a credential to a new destination. The owner may explicitly approve a new destination within the issuer's restrictions. Require a valid credential for the new destination when the existing one cannot be used there. See AC-10.12.
 
 ### Conversations
 
@@ -312,7 +316,7 @@ Conversations receive the same protection as Your Memory — same access control
 Memory export must be protectable. The architecture requires:
 - Export always works regardless of system state — the owner can always get their data out
 - Exports in open formats (maximum portability)
-- The export mechanism must support encryption (password or key) — whether encryption is default or optional is an implementation choice
+- Exports support protection against unauthorized access. When credentials are included, only the owner can unlock them. The exported material alone must not be enough to unlock them.
 
 ## Failure Modes
 
@@ -322,7 +326,7 @@ Memory export must be protectable. The architecture requires:
 | Containerized tool becomes unresponsive | Agent Loop detects timeout, reports to model. Model informs owner. Tool can be restarted independently. |
 | In-process tool crashes | Agent Loop may crash. This is why only trusted, code-reviewed tools run in-process. Agent Loop restarts clean. |
 | Disk full on write | Tool reports failure to Agent Loop, Agent Loop reports to model. Model informs owner. No partial writes. |
-| Audit log storage full or unavailable | Any security-relevant action that can't be recorded doesn't run — the audit promise holds. This includes tool calls and Memory reads or writes. The Agent Loop reports the failure to the model, and the owner is alerted. Conversation work that requires no such action continues; its other events, such as sign-ins and denied requests, go unrecorded during the outage. The failure itself is logged wherever logging is still possible, and the outage is recorded once the log is back. |
+| Audit log storage full or unavailable | The owner is alerted; the outage is never hidden. Whether actions that can't be recorded stop or continue is the implementation's choice, and nothing that ran during the outage is reported as audited. The failure itself is logged wherever logging is still possible, and the outage is recorded once the log is back. |
 | Model produces response containing injected sensitive data | Logged in audit trail for after-the-fact detection. Future: output filtering (Implementation) can inspect and block. |
 
 ## How security grows
@@ -331,9 +335,8 @@ Security expands with capability phases. Each phase adds attack surface and matc
 
 | Phase | New Attack Surface | New Security Requirements |
 |-------|-------------------|--------------------------|
-| **Owner only** | Small. One owner, one agent, scoped tools. | Auth required, sandbox (Auth + tool config), version history, content separation, audit logging, secrets outside Memory, TLS |
+| **Owner only** | Small. One owner, one agent, scoped tools. | Auth required, sandbox (Auth + tool config), version history, content separation, audit logging, secrets protected so only the owner can unlock them, network connections kept secure |
 | **Internal agents** | Background agents run without the owner watching. | Per-agent permission scoping, background agent audit trail, per-agent approval policies |
-| **Collaborators** | Multiple humans with different trust levels. | Per-actor Memory access, per-actor tool restrictions, delegation controls, resource limits, cross-actor audit trail |
 | **External actors** | Non-human external actors connecting from outside. Fundamentally different trust model. | Time-bound scoped tokens, spending limits, external action scope controls, full audit trails, anomaly detection, output filtering, application-level rate limiting |
 | **Federation** | Instance-to-instance trust without central authority. | Federated identity verification, bidirectional permission enforcement, cross-instance audit trails, trust revocation, protocol-level security |
 
@@ -356,11 +359,11 @@ Where anomaly detection and output filtering plug in is decided when external ac
 - [ ] Audit trail captures all model actions for accountability and investigation
 - [ ] Content separation is active — instructions vs data marked at the Model API level
 - [ ] Untrusted tools run isolated (container, separate process or sandbox)
-- [ ] Secrets never live in Memory or tracked configuration — always in environment variables, an untracked config file, or a secret store
+- [ ] Secrets are never readable by a model or tool and never stored unprotected in Memory or tracked configuration
 - [ ] Approval gates enforce the owner's approval rules (none by default; configurable spectrum)
 - [ ] Version history and restore available for Your Memory — always on
-- [ ] TLS for all external communication
-- [ ] The owner can find out which cloud provider will receive their data before anything is sent to it
+- [ ] Every connection that crosses a network is kept secure (today, usually TLS)
+- [ ] Before anything is sent to any model, the owner is told that the model sees what it is sent and where it runs
 - [ ] Every tool's trust level is visible to the owner, and tools not shipped with the system run isolated by default
 
 ### Per-component requirements
@@ -379,7 +382,7 @@ These apply to each component. Each component spec repeats its items in its own 
 
 - [ ] Memory must support full export in open formats — the owner can always get everything out
 - [ ] Memory must be independent of all other components — removing any component leaves Memory intact and readable
-- [ ] API keys, credentials, and tokens must never be stored in Memory. Secrets live outside Your Memory, somewhere git never tracks: environment variables, an untracked config file, or a secret store.
+- [ ] API keys, credentials, and tokens must never be stored unprotected in Memory or be readable by a model or tool. In Memory they are protected so only the owner can unlock them; outside it they live somewhere git never tracks.
 - [ ] Memory access must be mediated by tools — no component accesses storage directly
 - [ ] Concurrent access must not corrupt data — tool implementations must handle concurrent writes safely and report conflicts
 - [ ] Version history and restore must be available — the owner can see what changed and make an earlier state current again
@@ -390,7 +393,7 @@ These apply to each component. Each component spec repeats its items in its own 
 - [ ] The Gateway must enforce request size limits — configurable, with sensible defaults
 - [ ] The Gateway must not interpret, filter, or modify stored message content. It may select complete older turns for the model's working context without changing the full record; current input and selected parts remain unchanged — content-agnostic
 - [ ] The Gateway must provide extension points for rate limiting and abuse detection — implementations configure policies
-- [ ] The Gateway must support TLS for all external-facing connections
+- [ ] The Gateway must keep every connection from another machine secure (today, usually TLS)
 
 #### Auth
 
@@ -412,7 +415,7 @@ These apply to each component. Each component spec repeats its items in its own 
 
 - [ ] Prompt injection via imported file — owner saves a file containing hidden instructions to Memory
 - [ ] Tool escape attempt — a containerized tool tries to access files outside its mount
-- [ ] Audit log full or unavailable — tool calls don't run, the owner is alerted, and conversation without tools continues
+- [ ] Audit log full or unavailable — the owner is alerted, nothing that ran is reported as audited, and the outage is recorded once the log is back
 - [ ] Concurrent writes from background agent and owner — no data corruption, no lost writes
 - [ ] Auth token expiry mid-conversation — silent refresh, no data loss (from auth-spec.md)
 - [ ] Owner exports while agent is mid-conversation — export completes, conversation continues

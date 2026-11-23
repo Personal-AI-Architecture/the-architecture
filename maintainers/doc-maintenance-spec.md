@@ -123,6 +123,10 @@ the submitted branch; it does not run an agent, use a paid API, or push edits.
 
 ---
 
+## Proof routes and documentation upkeep
+
+Keep the README entry routes current, publish contract and suite indexes, and update the registry when paths or dependencies change. These are repository upkeep tasks. Use the [acceptance trace](../conformance/acceptance-criteria.md) to map added and materially changed criteria to a check and distinguish repository proof from implementation proof.
+
 ## Freshness Check
 
 `scripts/check-docs.py` validates the registry and compares changed files with

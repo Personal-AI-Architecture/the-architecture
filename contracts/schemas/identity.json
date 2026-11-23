@@ -8,11 +8,11 @@
   "properties": {
     "id": {
       "type": "string",
-      "description": "Unique identifier for this actor. Stable across sessions and exports. Used in auth_context, audit logs, and policy subjects."
+      "description": "Unique identifier for this actor. Stable across sessions and exports. Used in auth_context, audit logs, and policy subjects. A matching ID alone does not authenticate an actor or authorize an imported grant."
     },
     "type": {
       "type": "string",
-      "description": "The type of actor. This is an open string: adding an actor type is a data change, not a schema change. Known types include owner, collaborator, system_agent, background_agent, external_agent, service, economic, and federated."
+      "description": "The type of actor. The owner is the sole human identity that may authenticate to an instance. Non-human actor types are extensible. Known types include owner, system_agent, background_agent, external_agent, service, economic, and federated."
     },
     "display_name": {
       "type": "string",
@@ -52,9 +52,9 @@
       "created": "2026-02-01T08:00:00Z"
     },
     {
-      "id": "collab_davej",
-      "type": "collaborator",
-      "display_name": "Dave J",
+      "id": "external_calendar_001",
+      "type": "external_agent",
+      "display_name": "Calendar Agent",
       "status": "active",
       "created": "2026-03-15T14:00:00Z"
     }

@@ -185,3 +185,67 @@
 - [ ] The failed update is reported; rollback does not silently discard owner changes
 
 **Failure indicators:** Rollback is unavailable, the previous version cannot read its data, or any owner data is missing or corrupted.
+
+---
+
+## DEPLOY-8: Owner Controls Updates And Hosted Exit
+
+**Validates:** AC-11.5.
+
+**Setup:** Install a working version locally with an update available and no owner-enabled automatic policy. If hosted deployment is offered, prepare an owner account with sample data there.
+
+**Procedure:** Offer the update without owner action and verify the running version. Apply it once through explicit action and once under an owner-configured policy. For hosted deployment, export or move the owner's data to another system.
+
+**Pass criteria:**
+- [ ] The local version remains in place without owner action or policy. Owner-authorized updates can apply.
+- [ ] For a hosted deployment, the owner can leave with the data required by US-3.
+
+**Failure indicators:** An update applies without owner authorization or exit depends on staying with the hosting service.
+
+---
+
+## DEPLOY-9: Default Uninstall Preserves Owner Data
+
+**Validates:** AC-11.6.
+
+**Setup:** Use a disposable installation with known files, version history, conversations, portable Auth records and protected synthetic credentials.
+
+**Procedure:** Run the supported default uninstall. With the application removed, inspect retained records and use the documented owner-controlled unlock or import path. Exercise the separate data-removal option on a fresh disposable installation if offered.
+
+**Pass criteria:**
+- [ ] Default uninstall preserves the records and the owner's ability to unlock retained protected data.
+- [ ] Removing owner data requires a separate, explicit selection that identifies its scope.
+
+**Failure indicators:** Default uninstall removes owner data or leaves it dependent on the removed product, or a destructive option obscures its scope.
+
+---
+
+## DEPLOY-10: Cross-Machine Connections Are Protected
+
+**Validates:** AC-9.8.
+
+**Setup:** Use two controlled machines and configure each supported cross-machine connection type, including Gateway, model, tool and any split components.
+
+**Procedure:** Verify the actual transport and peer identity checks for each connection. Use the deployment's test facilities to exercise an invalid peer and rejected altered traffic. Compare with the same-machine path.
+
+**Pass criteria:**
+- [ ] Cross-machine traffic is confidential, integrity-protected and authenticated at both endpoints to prevent impersonation. The mechanism is implementation-defined.
+- [ ] A failed security check blocks the exchange. Same-machine communication may use a plain local channel.
+
+**Failure indicators:** Cross-machine traffic is readable or accepts an invalid peer or altered data.
+
+---
+
+## DEPLOY-11: Owner Defaults And Changes Survive An Update
+
+**Validates:** AC-11.1, AC-11.3 and AC-11.4.
+
+**Setup:** Install a version with a product default and a shipped artifact. Set a different owner preference, modify the artifact and add representative Memory, conversations and access rules. Prepare an update that changes the same defaults.
+
+**Procedure:** Apply the update through the supported owner-authorized path and exercise the changed preference. Inspect Memory, conversations, access rules, the owner's content and any conflict notice.
+
+**Pass criteria:**
+- [ ] Owner data and access settings remain intact.
+- [ ] The owner preference still takes precedence. A conflicting shipped change is shown to the owner and does not overwrite their work silently.
+
+**Failure indicators:** An update deletes data, silently replaces an owner edit, or causes a product default to override the owner's choice.

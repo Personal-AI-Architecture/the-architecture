@@ -39,6 +39,80 @@ security:
   - apiKeyAuth: []
 
 paths:
+  /approvals/{request_id}/decision:
+    post:
+      operationId: submitApprovalDecision
+      summary: Approve, deny or cancel a pending tool request
+      description: |
+        Required when the implementation offers a client approval flow. Auth
+        verifies the caller's authority for this request before the Gateway
+        returns or changes its state. The system supplies the actor, decision
+        time, and correlation information from trusted state.
+
+        The caller can approve, deny or cancel. Expiry is determined by the
+        system. Accept at most one terminal decision per request ID. An authorized
+        replay of the same decision returns the original result without
+        running the tool again. A conflicting decision or a submission after
+        expiry is rejected without changing the result.
+      parameters:
+        - name: request_id
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmitApprovalDecisionRequest'
+            example:
+              decision: approved
+      responses:
+        '200':
+          description: The recorded terminal decision, including an authorized replay.
+          content:
+            application/json:
+              schema:
+                $ref: '../schemas/approval-decision.json'
+        '400':
+          description: Invalid decision request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Authentication required or failed.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Auth denied access to the approval request or authority to decide it.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Approval request not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Conflicting decision or request expired.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '503':
+          description: Auth or the approval service is unavailable. The decision was not applied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /conversations/messages:
     post:
       operationId: sendMessage
@@ -305,6 +379,18 @@ components:
         by the owner. V1 API keys are full-access (owner-level).
 
   schemas:
+    SubmitApprovalDecisionRequest:
+      type: object
+      additionalProperties: false
+      required: [decision]
+      properties:
+        decision:
+          type: string
+          enum: [approved, denied, cancelled]
+        reason:
+          type: string
+          description: Optional non-sensitive explanation.
+
     SendMessageRequest:
       type: object
       required:

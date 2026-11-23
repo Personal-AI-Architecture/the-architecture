@@ -43,7 +43,7 @@ Every component reaches Your Memory only through tools, so how it's stored can c
 
 Agent Loop, Auth, Gateway, clients, models, tools, contracts, hosting — all replaceable.
 
-Memory is accessed via tools — change the storage, the tools still work. Components communicate through contracts — swap a component, the contract holds. Contracts are translated through adapters — standard changes, swap the adapter. If changing any of these requires more than a config change or a single-component swap, swappability has been compromised.
+Memory is accessed via tools — change the storage, the tools still work. Components communicate through contracts — swap a component, the contract holds. Contracts are translated through adapters — standard changes, swap the adapter. If changing any of these requires more than a config change or a single-component swap, swappability has been compromised. Technology or format changes are handled at the adapter boundary so the components continue to use their existing contracts.
 
 Anything that isn't under your ownership and control never connects to your system directly. It always connects through an adapter that is. That covers model providers, client formats and every external tool source, including open protocols like MCP. The adapter can start as a simple pass-through, but it has to be there, so that when the outside format changes or something better arrives, you swap the adapter and nothing else. Boundaries you own on both sides, such as the tools the system uses to reach Your Memory, don't need one.
 
@@ -54,7 +54,7 @@ Leaks create lock-in.
 
 The [Responsibility Matrix Verification](../conformance/foundation-verification.md#6-responsibility-matrix-verification) states who owns each responsibility and how to check it. Follow it. If swapping a component requires changes to a different component — not because the contract changed, but because work leaked across the boundary — this principle is broken.
 
-Reality sometimes requires exceptions. When a component must temporarily do work that belongs to another, contain it inside a swappable component so it is removable when no longer needed. Compensating for weaker models is the primary example.
+Reality sometimes requires exceptions. When a component must temporarily do work that belongs to another, contain it inside one swappable component, behind that component's adapter, with its boundary still matching the contract, so it is removable when no longer needed and never crosses components. Record it with its reason. Compensating for weaker models is the primary example.
 
 An exception other components depend on isn't an exception — it's architecture you didn't mean to build.
 

@@ -27,7 +27,7 @@
 </g>
 <line x1="40" y1="330" x2="820" y2="330" stroke="#2A3340" stroke-width="1"/>
 <g fill="#94A3B8" text-anchor="middle" font-size="12">
-<text x="430" y="356">Not configuration: permissions live only in Auth. Secrets stay outside Your Memory, never tracked.</text>
+<text x="430" y="356">Not configuration: permissions live only in Auth. Only the owner can unlock protected secrets.</text>
 </g>
 <text x="430" y="382" fill="#FFFFFF" text-anchor="middle" font-size="13">Move to a new machine and you bring Your Memory. Installing the system there sets up its own startup file and tools.</text>
 </svg>

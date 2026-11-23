@@ -38,7 +38,7 @@ or blueprint package is not required.
 ## Check and contribute
 
 - [Conformance suite](../conformance/README.md): language-neutral test criteria
-  and the current executable contract baseline.
+  and the current executable contract baseline. The [acceptance trace](../conformance/acceptance-criteria.md) links each criterion to its proof route.
 - [Canonical examples](../contracts/examples/README.md): valid and invalid
   payloads checked against published contracts.
 - [Lock-in gate](../conformance/lockin-gate.md): focused review before merging.

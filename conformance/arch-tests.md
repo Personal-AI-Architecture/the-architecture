@@ -20,7 +20,7 @@
 5. Attempt to read Your Memory content using standard tools
 
 **Pass criteria:**
-- [ ] All files in Your Memory are readable with a text editor
+- [ ] Ordinary files are readable with standard tools, and protected data can be opened with owner-controlled unlock material
 - [ ] Structured data (for example, conversations in a database) is readable with a standard viewer for its open format
 - [ ] Version history is browsable with standard tools for its format (for example, git commands if the implementation uses Git)
 - [ ] No component needs to be running to access Your Memory
@@ -100,32 +100,18 @@
 
 ## ARCH-4: Schema Conformance
 
-**Validates:** D16 (zero custom protocols), canonical contract definitions
+**Validates:** The published [Gateway API](../contracts/openapi/gateway-api.yaml) and [Model API](../contracts/openapi/model-api.yaml), including D199 extensions.
 
-**Setup:**
-1. System running with active traffic (messages, tool calls, responses)
-2. Canonical schemas available in `../contracts/openapi/` and `../contracts/schemas/`
+**Setup:** Run a target with message traffic, tool calls and errors. Exercise approvals if supported. Locate the PAA-facing side of each public API adapter.
 
-**Procedure:**
-1. Capture all Gateway API requests and responses
-2. Capture all Model API requests and responses
-3. Capture all Gateway ↔ Agent Loop requests and SSE events
-4. Validate each payload against the corresponding canonical schema
+**Procedure:** Capture requests, responses and stream events at the Gateway API after client-format translation and at the Model API before provider-format translation. Validate the request, status, payload and event shape against the corresponding public contract. Exercise an unknown additive extension and an invalid core field.
 
 **Pass criteria:**
-- [ ] Every Gateway API request validates against `gateway-api.yaml`
-- [ ] Every Gateway API response validates against `gateway-api.yaml`
-- [ ] Every Agent Loop request validates against `gateway-agent-loop.yaml`
-- [ ] Every SSE event validates against the event schemas in `gateway-agent-loop.yaml`
-- [ ] Every Model API request validates against `model-api.yaml`
-- [ ] Every Model API response validates against `model-api.yaml`
-- [ ] Additive payload data uses the schema-defined `extensions` or `metadata` area; strict core fields and security envelopes remain valid without undocumented fields (D199)
+- [ ] Captured public traffic uses the canonical routes, shapes and event types.
+- [ ] Extension fields stay in the designated maps and cannot override identity, permission or other core semantics.
+- [ ] Internal component payloads are evaluated separately in the component swap checks. If an implementation uses the published Gateway ↔ Agent Loop contract internally, validate that traffic against its published schema.
 
-**Failure indicators:**
-- Custom fields added outside the schema
-- Provider-specific data leaking through the internal contract
-- Client-specific formats in the Gateway API
-- Missing required fields defined in the schemas
+**Failure indicators:** Public payloads require an undocumented field, take authority from an extension, or expose a provider-specific shape on the PAA-facing side.
 
 ---
 
@@ -144,12 +130,13 @@
 4. Trigger a context overflow (e.g., send messages exceeding model context window)
 5. Select an unavailable model, then a model that lacks a requested ability such as image input
 6. Capture the Model API, Agent Loop and Gateway API errors emitted in each case
+7. Repeat a provider failure with an owner-approved fallback configured and a second candidate the owner did not approve. Record actual destinations and the producer of any saved reply.
 
 **Pass criteria:**
 - [ ] Provider/network failure emits `provider_error`
 - [ ] An unavailable selected model emits `model_unavailable` through Model API, Agent Loop and Gateway API; no other model or provider is selected (D197)
 - [ ] An unsupported ability emits `capability_unsupported` with a machine-readable `capability` through all three boundaries; no content is silently dropped (D197)
-- [ ] If the Agent Loop retries a provider call, it records no more than one retry on the same selected model and provider profile; a failure that remains emits `provider_error` without silently switching either selection (D188)
+- [ ] If the Agent Loop retries a provider call, it records no more than one retry on the same selected model and provider profile. An optional fallback uses only a model and provider the owner set up. A failure that remains emits `provider_error` (D205).
 - [ ] Unrecoverable tool failure emits `tool_error`
 - [ ] Auth failure emits `auth_error`
 - [ ] Context overflow emits `context_overflow`
@@ -161,8 +148,8 @@ budget for the selected provider and model. Verify the Gateway keeps full histor
 selects complete older turns, optionally builds a deterministic summary without
 a model call, and emits `context_notice` before model output whenever any turn
 was left out. The summary must
-be Gateway-labelled ephemeral user-role context, distinct from the owner message
-and the Agent Loop's sole bootstrap system message. Switch provider or model and
+be Gateway-labelled `context_data`, distinct from the owner message and the
+Agent Loop's bootstrap instruction. Switch provider or model and
 verify the next budget changes from that profile's model limit without rewriting
 history. Select a pair with no safe limit and verify `context_limit_unknown`
 before dispatch. Send an oversized current message and verify a Gateway API
@@ -227,36 +214,40 @@ fails this rule. The current behavior is an observed gap, not a PAA allowance.
 **Pass criteria:**
 - [ ] Export produces a complete archive of all owned Memory data
 - [ ] Archive is in an open format (tar, zip, or equivalent)
-- [ ] Files are readable with a text editor
+- [ ] Ordinary files are readable with standard tools. The owner can unlock protected data with their own material.
 - [ ] Version history is included or reproducible
 - [ ] Conversations are included in the export
-- [ ] Auth credentials are NOT included in the export
+- [ ] Saved credentials appear only in a form that requires independent owner-controlled unlock material. The export alone cannot recover them. Active sessions are excluded.
 - [ ] Archive is readable without the system running
 
 **Failure indicators:**
 - Export is missing files, conversations, or version history
-- Export contains credentials or secrets
+- Export exposes a readable credential, contains the unprotected means to unlock it, or transfers an active session
 - Export format requires the system to decode
 
 ---
 
 ## ARCH-8: Auth Tool Surface
 
-**Validates:** auth-spec.md §Auth tools
+**Validates:** AC-3.6, AC-7.3 and [Auth tools and portability](../architecture/auth-spec.md#data-portability).
 
 **Setup:**
 1. System running with Auth configured (any mode, including local owner)
+2. Representative identities, permission rules, approval rules and audit records
+3. A second Auth provider with an adapter for the same boundary
 
 **Procedure:**
 1. Call `auth_whoami` tool
 2. Call `auth_check` tool with a known resource/action
 3. Call `auth_export` tool
+4. Replace only Auth and repeat the inspection and execution. Check the portable records and the Gateway behavior against the originals.
 
 **Pass criteria:**
 - [ ] `auth_whoami` returns current actor identity (type, ID)
 - [ ] `auth_check` returns a permission decision (allow/deny) for the given resource/action
-- [ ] `auth_export` returns auth configuration without credentials
+- [ ] `auth_export` returns readable identities, permission and approval rules, and audit records without credential values
 - [ ] All three tools are registered and discoverable alongside memory tools
+- [ ] The Gateway continues using the same Auth boundary and the replacement retains and enforces existing Auth state.
 
 **Failure indicators:**
 - Any of the three tools is missing from the tool registry
@@ -279,11 +270,13 @@ fails this rule. The current behavior is an observed gap, not a PAA allowance.
 4. Call the memory history operation on the file (whatever the implementation names it)
 5. Request a previous state using the returned version identifier
 6. Restore that previous state, then read the file
+7. Exercise a failed write and simultaneous conflicting writes to the same artifact. Check the resulting content and recoverable history.
 
 **Pass criteria:**
 - [ ] System starts successfully on first run with version history initialized
 - [ ] The history operation returns at least two change records (create + modify)
 - [ ] Previous state is retrievable and matches the original file content
+- [ ] A failed or conflicting write is reported. Simultaneous changes leave valid content and history.
 - [ ] After the restore, the file's current content matches the original, and the history still shows the modification
 - [ ] If version history cannot be initialized at startup, the system fails with a clear error (not a warning)
 
@@ -292,28 +285,6 @@ fails this rule. The current behavior is an observed gap, not a PAA allowance.
 - The history operation returns only metadata without access to previous states
 - There is no way to make an earlier state current again
 - First-run initialization produces warnings instead of deterministic setup
-
----
-
-## DEPLOY-5: Default Bind Address
-
-**Validates:** [deployment-spec.md](../architecture/deployment-spec.md) §Network Posture
-
-**Setup:**
-1. Fresh system install with default configuration
-
-**Procedure:**
-1. Start the system with no bind address configuration changes
-2. Check the listening address of the Gateway HTTP server
-
-**Pass criteria:**
-- [ ] Gateway binds only to the loopback interface by default: `127.0.0.1` and/or `::1` are valid; wildcard/network addresses are not
-- [ ] Gateway does NOT bind to `0.0.0.0` unless explicitly configured
-- [ ] Changing bind address to `0.0.0.0` requires an explicit configuration change (not just removing a restriction)
-
-**Failure indicators:**
-- Default install listens on all interfaces
-- Docker configuration maps the port to the host by default
 
 ---
 
@@ -391,25 +362,23 @@ fails this rule. The current behavior is an observed gap, not a PAA allowance.
 
 ---
 
-## ARCH-13: Audit Sink Failure Stops Audited Actions
+<a id="arch-13-audit-sink-failure-stops-audited-actions"></a>
 
-**Validates:** [security-spec.md](../architecture/security-spec.md) §Audit Logging and §Failure Modes
+## ARCH-13: Audit Sink Failure Is Visible To The Owner
 
-**Setup:** A running system whose audit sink can be made unavailable or full without interrupting the rest of the runtime.
+**Validates:** AC-10.4 and [Audit logging](../architecture/auth-spec.md#audit-log).
 
-**Procedure:**
-1. Confirm a tool call and Memory read or write each produce a durable portable audit record.
-2. Make the audit sink unable to accept a record.
-3. Attempt a tool call and a Memory read or write, then send a conversation turn that needs no such action.
-4. Restore the sink and inspect the resulting records and owner alert.
+**Setup:** A target with an audit sink that can be made temporarily unavailable.
+
+**Procedure:** Confirm an ordinary tool action is recorded. Disable the sink, request a tool action, inspect owner feedback and reported results, then restore the sink and inspect the audit trail.
 
 **Pass criteria:**
-- [ ] Each security-relevant action is blocked before it begins when its record cannot be durably accepted.
-- [ ] The Agent Loop reports the failure to the model, and the owner is alerted.
-- [ ] The conversation turn requiring no audited action can continue.
-- [ ] The outage is recorded once the sink recovers; no action performed during the outage is falsely reported as audited.
+- [ ] The owner is told about the outage.
+- [ ] Any actions carried out during it are reported as audited only if durably recorded.
+- [ ] The outage is recorded once the sink can write again.
+- [ ] The run records whether the implementation chose to stop or continue work.
 
-**Failure indicators:** A tool or Memory operation runs without its required record, all conversation work stops solely because the audit sink is full, or the owner is given no indication of the failure.
+**Failure indicators:** The outage is hidden or action is reported as audited without a record.
 
 ---
 
@@ -483,40 +452,38 @@ fails this rule. The current behavior is an observed gap, not a PAA allowance.
 
 **Procedure:**
 1. Request the tool call and capture the pending request ID and expiry.
-2. Attempt a decision from an identity without approval authority.
-3. Submit an authorized approval, repeat the same decision, then submit a conflicting decision for the same request ID.
-4. Repeat with a cancelled or expired request.
+2. From a second conforming client, submit a decision at `POST /approvals/{request_id}/decision`. Try an unauthenticated request, an identity lacking authority and a payload supplying its own decision-maker identity.
+3. Submit an authorized approval, repeat it, then send a conflicting decision. Verify the returned record identifies the Auth-verified decision maker.
+4. Repeat with authorized denial and cancellation. Attempt to approve a cancelled or expired request. Remove Auth availability and confirm the operation cannot apply a decision.
 
 **Pass criteria:**
 - [ ] The tool does not run while approval is pending or after an unauthorized decision.
 - [ ] One authorized approval resolves the request and runs the tool at most once.
 - [ ] Replaying the same terminal decision returns the same outcome; a conflicting decision is rejected.
 - [ ] Cancellation and expiry are terminal and never execute the tool.
-- [ ] Request and result are visible through the canonical interaction contract.
+- [ ] The public Gateway operation is usable from both clients under the same Auth checks. Its response and the streamed result agree.
 
 **Failure indicators:** A client presentation alone grants approval, replay runs the tool twice, or a terminal request can be approved later.
 
 ---
 
-## ARCH-18: Imported Policy Does Not Revive Unknown Identity
+<a id="arch-18-imported-policy-does-not-revive-unknown-identity"></a>
 
-**Validates:** [auth-spec.md](../architecture/auth-spec.md) §Stale permissions after export/import and §Data portability
+## ARCH-18: Imported Grants Retain Identity And Scope
 
-**Setup:** A system with a collaborator and an owner-granted policy for that collaborator; a fresh system with a separate Auth identity store.
+**Validates:** AC-3.3 and [Permissions after export/import](../architecture/auth-spec.md#permissions-after-exportimport).
 
-**Procedure:**
-1. Export the first system's Auth state and import it into the fresh system without creating the collaborator identity there.
-2. Attempt access using the imported policy's identity reference.
-3. Create a new identity with the same visible name or identifier and attempt access again.
-4. Have the owner explicitly restore the dormant grant, then retry.
+**Setup:** Two implementations, one verifiable external-agent identity with a grant to a specific resource, one unrelated identity with the same display name or apparent ID, and one initially unsupported identity or policy condition. Use disposable identities and resources.
+
+**Procedure:** Export and import Memory, its identity records and permission policies. Exercise the migrated identity on the original resource and on a different resource. Exercise both same-name and same-ID collision cases. Check the unsupported record, add support without changing the owner's grant, verify its original bindings, then remove the migrated identity.
 
 **Pass criteria:**
-- [ ] The imported unknown identity's policy remains dormant and grants no access.
-- [ ] Recreating an identity does not automatically reactivate the old grant.
-- [ ] Access changes only after the owner deliberately restores the grant.
-- [ ] Export and import contain no credentials or secrets.
+- [ ] A verified identity can exercise the same verified grant once imported, without a new approval.
+- [ ] A different identity with a matching name or ID receives no grant. A new or ambiguously mapped resource receives no access.
+- [ ] Unsupported or unverified records are preserved, reported and inactive. On gaining support and verifying both bindings, only the original grant activates.
+- [ ] Removing the identity removes its rules, and a fresh identity has no inherited access.
 
-**Failure indicators:** Import or identity recreation silently grants the old permission.
+**Failure indicators:** An identity collision activates a grant, its resource scope broadens, or imports silently drop unsupported records.
 
 ---
 
@@ -541,21 +508,23 @@ fails this rule. The current behavior is an observed gap, not a PAA allowance.
 
 ---
 
-## ARCH-20: Independent Tool Calls Overlap Without Losing Identity
+<a id="arch-20-independent-tool-calls-overlap-without-losing-identity"></a>
 
-**Validates:** [agent-loop-spec.md](../architecture/agent-loop-spec.md) §Concurrency, [tools-spec.md](../architecture/tools-spec.md) §How a tool call runs
+## ARCH-20: Every Requested Tool Call Retains Its Identity
 
-**Setup:** A controlled model response requests two independent slow tools and then one tool that depends on one of their results. Record start, end, call ID, source ID and result ID for each.
+**Validates:** AC-8.4 and [Agent Loop concurrency](../architecture/agent-loop-spec.md#concurrency).
 
-**Procedure:** Run the turn, capture the tool schedule and emitted results, then inspect the continuation sent to the model.
+**Setup:** A controlled model requests two independent tools and a subsequent call that depends on one result. Give one call a denial or a controlled failure in a second run. Record call IDs, source IDs, results and timing.
+
+**Procedure:** Run both turns and inspect scheduling, streamed events, saved history and model continuation.
 
 **Pass criteria:**
-- [ ] The independent calls overlap in time.
-- [ ] The dependent call starts only after its required result is available.
-- [ ] Every result remains associated with the correct call and source through streaming, saved history and model continuation.
-- [ ] A write conflict is reported rather than silently resolved.
+- [ ] Every requested call runs or receives an explicit reason it did not run.
+- [ ] A dependent call starts only after its prerequisite is available.
+- [ ] Successful and failed results are associated with the right call and source. Assistant text survives the tool continuation.
+- [ ] A write conflict is reported. Independent calls may run serially or concurrently.
 
-**Failure indicators:** Independent calls are serialized, a dependent call races its input, or call/result IDs cross.
+**Failure indicators:** A call silently disappears, a dependent call races its input, or results are attached to the wrong call.
 
 ---
 
@@ -607,3 +576,212 @@ fails this rule. The current behavior is an observed gap, not a PAA allowance.
 - [ ] Owner-controlled boundaries on both sides and native Gateway API clients are correctly identified, rather than given unnecessary adapters.
 
 **Failure indicators:** Agent Loop, Gateway or Auth directly calls or parses a provider protocol, foreign client format or external tool protocol; a claimed adapter is bypassed on the active path.
+
+---
+
+## ARCH-24: Client Parity And Owner Data Continuity
+
+**Validates:** AC-6.1 through AC-6.5.
+
+**Setup:** A product client and a second client with equivalent Auth grants. Prepare a conversation with saved tool results, preferences, and a controlled storage failure.
+
+**Procedure:** Inventory the product client's operations and exercise them through the public Gateway with the second client. Replace the first client and its cache. Resume the conversation with the second client. Exercise a missing conversation, a failed write and an unavailable Agent Loop.
+
+**Pass criteria:**
+- [ ] Both clients get the same operations under the same Auth checks. Approval decisions follow ARCH-17 where supported.
+- [ ] The current message and metadata pass unchanged after structure validation. Selected history contains only complete turns within the configured limit.
+- [ ] Saved conversations, context and preferences remain available with the first client and its cache removed.
+- [ ] Each failure is reported truthfully, including any message that could not be saved.
+
+**Failure indicators:** A private path grants privileged operations, a client holds the only copy of owner data, or a failed write is reported as saved.
+
+---
+
+## ARCH-25: Model Destination Disclosure And Provenance
+
+**Validates:** AC-9.4 and AC-9.7.
+
+**Setup:** Controlled on-device and off-device models. Include a product default and an owner-approved fallback where offered. Record the owner-facing disclosures and Model API calls in order.
+
+**Procedure:** Use each configuration for a turn and induce a failure where an approved fallback can run. Inspect disclosures, call destinations and saved replies.
+
+**Pass criteria:**
+- [ ] Before a model receives owner data, the owner is told it sees what is sent and where it runs.
+- [ ] The disclosure distinguishes this device from another machine, including one on the same network.
+- [ ] Only configured destinations receive data and saved replies identify the actual model and provider.
+
+**Failure indicators:** Data is sent before disclosure, off-device processing is described as on-device, or provenance records a model that did not produce the reply.
+
+---
+
+## ARCH-26: One Human Owner And Explicit Grants
+
+**Validates:** AC-10.1, AC-10.3 and AC-10.7.
+
+**Setup:** One initialized owner, a second human test identity, and a separate agent identity with no grants. Prepare a resource the owner can access.
+
+**Procedure:** Verify owner sign-in and attempt to provision or use a second human login. Authenticate the external agent and exercise its access before and after an owner grant. Exercise delegation that exceeds the grantor's authority. Trace a conversation tool call to its authenticated actor.
+
+**Pass criteria:**
+- [ ] The owner is the only human identity accepted. An external agent has a distinct identity and starts without access.
+- [ ] Non-owner access is traceable to an owner grant and stays within its scope. A grantor cannot delegate more access than it has.
+- [ ] Configuration, discovery and untrusted metadata cannot widen authority. The owner's conversation uses the owner's actor identity.
+
+**Failure indicators:** Another human signs in directly, a new identity receives implicit permissions, or a grant is widened by delegation or data.
+
+---
+
+## ARCH-27: Local Login Recovery Preserves Vault Controls
+
+**Validates:** AC-10.10.
+
+**Setup:** Use a disposable owner-controlled installation with a known protected test credential. Prepare one case with owner-controlled vault access and one where the existing vault requires unavailable unlock material.
+
+**Procedure:** Use the documented local recovery procedure after losing the sign-in credential. Verify sign-in and the state of saved data and sessions. Attempt recovery from outside the owner-authorized local path. Exercise vault access under the same conditions as before the reset.
+
+**Pass criteria:**
+- [ ] The owner can regain local sign-in without an outside service. An unauthorized caller cannot use the recovery path.
+- [ ] The reset does not bypass vault controls. An existing protected owner key or configured recovery method can still unlock the vault. A reset alone cannot unlock a closed vault without that access.
+- [ ] Existing protected credential records are retained and invalidated sessions cannot authorize requests.
+
+**Failure indicators:** Recovery requires an outside service, changes or bypasses the vault's protection, discards saved credentials, or is available to an unauthorized caller.
+
+---
+
+## ARCH-28: Auth Outage Fails Closed
+
+**Validates:** AC-10.11.
+
+**Setup:** A running target with an authenticated session, a tool with a harmless observable effect and a way to make Auth unavailable.
+
+**Procedure:** Prove authorized access first. Disable Auth and issue a request with the existing session. In an active turn, make Auth unavailable before the next tool authorization. Observe the client result, tool effect and any returned owner data.
+
+**Pass criteria:**
+- [ ] Unchecked requests are denied even with a previously valid session.
+- [ ] No unchecked tool executes or returns owner data. The owner receives a clear error.
+
+**Failure indicators:** Prior authentication bypasses an unavailable authorization check or the target reports successful access.
+
+---
+
+## ARCH-29: Credentials Stay Within Their Binding
+
+**Validates:** AC-3.5, AC-10.5 and AC-10.12.
+
+**Setup:** Use synthetic credentials and controlled destinations, including a credential valid for the new destination and one with issuer restrictions that exclude it.
+
+**Procedure:** Exercise the authorized connection, redirect, provider switch and edited endpoint. Approve a new binding explicitly, then repeat with the issuer-restricted credential. Move Memory to a second target and exercise the original binding after the owner's unlock. Inspect model inputs, tool-readable content, logs and the export without using production secrets.
+
+**Pass criteria:**
+- [ ] A credential is sent only to the verified service and destination for the authorized purpose. Mismatches are reported and the credential is withheld.
+- [ ] Owner approval permits a new binding only within applicable issuer restrictions. A different credential is needed where the old one is invalid.
+- [ ] Migration preserves the binding. Protected export requires owner-controlled unlock material, and ordinary model or tool access never reveals secret values.
+
+**Failure indicators:** A redirect or edit silently forwards a credential, consent overrides issuer restrictions, or a migration widens access.
+
+---
+
+## ARCH-30: Tool Scope And Catalog Ownership
+
+**Validates:** AC-8.2, AC-8.3, AC-8.6 and AC-8.7.
+
+**Setup:** A configured source with a tool limited to a disposable resource scope, an unconfigured source and two resources, one inside and one outside that scope. Allow both resources in the test Auth policy.
+
+**Procedure:** Discover and exercise the configured tool with both resources. Compare the responses for a denied tool and an unknown tool. Attempt discovery from an unconfigured source and verify source provenance and the owner's always-send selection.
+
+**Pass criteria:**
+- [ ] The tool succeeds inside scope and rejects access outside scope despite the broad Auth grant. The tool or its isolation boundary enforces the limit.
+- [ ] Unknown and forbidden calls produce distinguishable outcomes.
+- [ ] Only owner-configured sources contribute to the catalog. Source identity cannot be reassigned by a tool definition or metadata, and tools cannot add themselves to the always-send set.
+
+**Failure indicators:** Auth is the only scope guard, an unconfigured source enters the catalog, or a source can impersonate another.
+
+---
+
+## ARCH-31: Data And Metadata Do Not Grant Authority
+
+**Validates:** AC-7.2, AC-10.6 and AC-10.7.
+
+**Setup:** A controlled model adapter, tool, authenticated identity and synthetic Memory and tool-result data. Give the test identity limited permissions.
+
+**Procedure:** Send a turn containing ordinary Memory data, owner instructions, saved conversation history and a tool result. Capture the PAA-facing Model API request. Review authorization and identity propagation with invalid identity or untrusted metadata and extension fields.
+
+**Pass criteria:**
+- [ ] The model contract distinguishes data from owner-authorized instructions.
+- [ ] Identity and trace information travel intact. The runtime rejects invalid or caller-supplied identity assertions.
+- [ ] Neither content nor metadata changes identity, role or permission. The software enforces decisions independently of model output.
+
+**Failure indicators:** Ordinary data is promoted into a privileged instruction channel or untrusted fields influence the effective identity or authorization.
+
+---
+
+## ARCH-32: Adapter Changes And Contained Departures
+
+**Validates:** AC-7.5, AC-7.6 and AC-18.5.
+
+**Setup:** A target with a documented external boundary, an alternate wire format, and a register of any temporary implementation exceptions with their rationale.
+
+**Procedure:** Replace the boundary translation and exercise the same operation. Trace each recorded exception through the component that owns it and check its public boundary contract. Record the affected components and adapters.
+
+**Pass criteria:**
+- [ ] Boundary translation changes without requiring changes to the components on either side. An owner-controlled internal boundary may use an agreed internal format.
+- [ ] Every claimed exception is documented, removable and contained inside one component with its boundary contract intact.
+
+**Failure indicators:** A protocol change leaks into core code or another component must rely on an exception.
+
+---
+
+## ARCH-33: Repository Discovery And Build
+
+**Scope:** Repository and published templates.
+
+**Validates:** US-12 and AC-17.5.
+
+**Setup:** A clean checkout and one published language template. Give a newcomer or new agent only the README and a fixed questionnaire covering the architecture's goal, four components, two APIs, swappability and how to start or verify a build.
+
+**Procedure:** Time the orientation exercise. Follow the README routes to the authoritative rules, schemas and checks for each component. Ask an agent to build one bounded capability using only those materials. Independently start the template offline with a stand-in model, stream and save a reply, then change the provider through configuration and run the template checks.
+
+**Pass criteria:**
+- [ ] A newcomer answers the questionnaire in about ten minutes and can choose a build route. The relevant authority is reachable in a few steps and links resolve.
+- [ ] Guides preserve the contract's rules. The bounded build, offline start, stream, save and config-only swap have recorded proof.
+- [ ] The template supplies contract, boundary and lock-in checks. The build needs no PAA runtime package or language-specific architecture rule.
+
+**Failure indicators:** An undocumented dependency blocks the bounded build, a guide overrides a rule, or missing proof is reported as a pass.
+
+---
+
+## ARCH-34: Repository Contract And Example Authority
+
+**Scope:** Repository and published templates.
+
+**Validates:** US-13.
+
+**Setup:** A clean checkout with contract and example checker dependencies.
+
+**Procedure:** Trace each component and API from the documentation to its canonical machine-readable contract and check. Run `scripts/check-contracts.py` and `contracts/examples/validate-manifest.py`. Review reported differences between guides or templates and the canonical shapes.
+
+**Pass criteria:**
+- [ ] Every published component and API has one authoritative definition and a verification route.
+- [ ] Published examples match their valid or invalid labels.
+- [ ] Any mismatch is recorded against the contract. Example or template behavior does not redefine it.
+
+**Failure indicators:** Competing definitions, untraceable shapes, or examples that disagree with their validity label.
+
+---
+
+## ARCH-35: Repository Review And Conformance Reporting
+
+**Scope:** Repository and published templates.
+
+**Validates:** US-16 and AC-18.1 through AC-18.3.
+
+**Setup:** A repository change and a sample conformance report with a pass, a failure and a criterion without runtime evidence.
+
+**Procedure:** Follow the contribution and lock-in checks. Trace each changed rule to its reviewed spec, affected contracts and templates, and conformance check. Check that published test IDs are unique and stable. Walk both the pull request gate and release audit.
+
+**Pass criteria:**
+- [ ] Contributions route to review. A spec change has compatible contracts, checks and affected templates, and each added or materially changed criterion maps to a check.
+- [ ] Tests have stable unique IDs, setup and outcomes. Reports show what passed, failed or remains without proof criterion by criterion.
+- [ ] Code differences are fixed, reviewed as proposed spec changes, or explicitly recorded with their reason.
+
+**Failure indicators:** A change bypasses review, drifts without a record or proof, or a missing test result becomes a pass.

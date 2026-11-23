@@ -18,7 +18,7 @@ Use this when reviewing Memory tools, export/history behavior, persistent conver
 - [ ] Failed or conflicting writes are reported, never resolved silently.
 - [ ] Version-history readiness is deterministic at startup.
 - [ ] Memory data remains inspectable without the system running.
-- [ ] Secrets are excluded from Memory entirely.
+- [ ] Credentials in Memory or its exports require owner-controlled unlock material. Models and ordinary tools cannot read them as content.
 
 ## Related Conformance Tests
 
