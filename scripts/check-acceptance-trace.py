@@ -1,70 +1,81 @@
 #!/usr/bin/env python3
-"""Check that every PAA acceptance criterion names evidence or a decision.
-
-This checks traceability, not whether a target implementation passed runtime tests.
-"""
+"""Check that each PAA criterion has a published proof route of the right scope."""
 
 from __future__ import annotations
 
 import re
-from collections import Counter
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
 SPEC = ROOT / "spec/personal-ai-architecture-spec.md"
-AUDIT = ROOT / "maintainers/v1-acceptance-proof-audit-2026-10-23.md"
-CRITERION = re.compile(r"^- \*\*(AC-(\d+)\.(\d+))\*\*\s+—\s+(.+)$", re.MULTILINE)
-STORY = re.compile(r"^#### US-(\d+):", re.MULTILINE)
-AUDIT_ROW = re.compile(r"^\| US-(\d+) \| AC-(\d+)\.(\d+)–(\d+)\.(\d+) \|", re.MULTILINE)
+CONFORMANCE = ROOT / "conformance"
+STORY = re.compile(r"^#### US-(\d+): (.+)$", re.MULTILINE)
+CRITERION = re.compile(r"^- \*\*(AC-(\d+)\.(\d+))\*\* \[(implementation|repo)\] — .+$", re.MULTILINE)
+TRACE = re.compile(r"^\| (AC-\d+\.\d+) \| (implementation|repo) \| (.+) \|$", re.MULTILINE)
+TEST = re.compile(r"^## ((?:ARCH|DEPLOY|FS|SWAP)-[1-9]\d*): .+$", re.MULTILINE)
+ROUTE = re.compile(r"\[((?:ARCH|DEPLOY|FS|SWAP)-[1-9]\d*)\]\(([^#()]+)#[^()]+\)")
 
 
 def main() -> int:
-    text = SPEC.read_text()
-    matches = list(CRITERION.finditer(text))
+    spec = SPEC.read_text()
+    proof_trace = (CONFORMANCE / "acceptance-criteria.md").read_text()
     problems: list[str] = []
-    ids = [match.group(1) for match in matches]
-    stories = {int(number) for number in STORY.findall(text)}
-    duplicates = sorted(item for item, count in Counter(ids).items() if count > 1)
-    if duplicates:
-        problems.append(f"duplicate criteria: {', '.join(duplicates)}")
+    criteria: dict[str, str] = {}
 
-    by_story: dict[int, list[int]] = {}
-    for match in matches:
-        identifier, story, item, body = match.groups()
-        story_number, item_number = int(story), int(item)
-        by_story.setdefault(story_number, []).append(item_number)
-        if "_(evidence:" not in body and "_(decision:" not in body:
-            problems.append(f"{identifier} has no evidence or explicit decision marker")
-        if "_(basis:" in body:
-            problems.append(f"{identifier} has an unqualified basis marker")
+    stories = list(STORY.finditer(spec))
+    if not stories or len({story[1] for story in stories}) != len(stories):
+        problems.append("spec must contain unique user story IDs")
+    for index, story in enumerate(stories):
+        end = stories[index + 1].start() if index + 1 < len(stories) else len(spec)
+        story_body = spec[story.end():end]
+        rules = list(CRITERION.finditer(story_body))
+        if len(rules) != len(re.findall(r"^- \*\*AC-", story_body, re.MULTILINE)):
+            problems.append(f"US-{story[1]} has a malformed or unscoped criterion")
+        merged = " — Merged into " in story[2]
+        if bool(rules) == merged:
+            problems.append(f"US-{story[1]} has unexpected criterion coverage")
+        for rule in rules:
+            identifier, story_number, _, scope = rule.groups()
+            if story_number != story[1] or identifier in criteria:
+                problems.append(f"misplaced or duplicate criterion: {identifier}")
+            criteria[identifier] = scope
 
-    for story_number in sorted(stories):
-        found = sorted(by_story.get(story_number, []))
-        if found != list(range(1, max(found, default=0) + 1)):
-            problems.append(f"US-{story_number} criteria are missing or noncontiguous: {found}")
-        if not found:
-            problems.append(f"US-{story_number} has no acceptance criteria")
-    for extra in sorted(set(by_story) - stories):
-        problems.append(f"AC under missing US-{extra} heading")
+    tests: dict[str, tuple[str, str]] = {}
+    for path in sorted(CONFORMANCE.glob("*-tests.md")):
+        test_text = path.read_text()
+        sections = list(TEST.finditer(test_text))
+        for index, test in enumerate(sections):
+            identifier = test[1]
+            if identifier in tests:
+                problems.append(f"duplicate conformance ID: {identifier}")
+            end = sections[index + 1].start() if index + 1 < len(sections) else len(test_text)
+            body = test_text[test.end():end]
+            scope = "repo" if "**Scope:** Repository and published templates." in body else "implementation"
+            tests[identifier] = (path.name, scope)
 
-    audit_text = AUDIT.read_text()
-    audited: list[str] = []
-    for story, first_us, first, last_us, last in AUDIT_ROW.findall(audit_text):
-        if story != first_us or story != last_us:
-            problems.append(f"audit range crosses stories: US-{story} / AC-{first_us}.{first}–{last_us}.{last}")
-            continue
-        audited.extend(f"AC-{story}.{item}" for item in range(int(first), int(last) + 1))
-    if sorted(audited) != sorted(ids):
-        problems.append(f"audit rows do not cover the spec exactly: missing={sorted(set(ids) - set(audited))}, extra={sorted(set(audited) - set(ids))}")
+    traced: set[str] = set()
+    used_tests: set[str] = set()
+    for identifier, scope, links in TRACE.findall(proof_trace):
+        if identifier in traced or criteria.get(identifier) != scope:
+            problems.append(f"duplicate, unknown or incorrectly scoped trace row: {identifier}")
+        traced.add(identifier)
+        for link in links.split(", "):
+            route = ROUTE.fullmatch(link)
+            if not route or tests.get(route[1]) != (route[2], scope):
+                problems.append(f"{identifier} has an invalid proof route: {link}")
+            else:
+                used_tests.add(route[1])
+
+    missing = sorted(criteria.keys() - traced)
+    if missing:
+        problems.append(f"criteria missing from acceptance trace: {', '.join(missing)}")
 
     if problems:
         for problem in problems:
             print(f"FAIL: {problem}")
         return 1
-    evidence = sum("_(evidence:" in match.group(4) for match in matches)
-    decisions = len(matches) - evidence
-    print(f"PASS: {len(matches)} unique criteria across {len(stories)} stories; {evidence} evidence routes, {decisions} explicit decisions; audit rows cover each criterion once")
+    print(f"PASS: {len(criteria)} scoped criteria across {len(stories)} stories map to {len(used_tests)} unique published proof routes")
     print("Traceability only: target runtime outcomes require separate evidence.")
     return 0
 

@@ -35,7 +35,7 @@ Context limits may differ after a model swap. The Gateway prepares a new working
 
 Provider failure must not become an unchosen model or provider switch. The
 Agent Loop may retry once on the owner's same selection and record that attempt;
-failure that remains is reported (D188).
+only owner-configured fallbacks are permitted, and a failure that remains is reported (D205).
 
 A configured adapter that is missing or invalid fails startup clearly. Quietly
 switching to another adapter would move the owner's request to a provider they

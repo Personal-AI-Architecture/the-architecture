@@ -26,7 +26,7 @@ This works because the architecture assumes nothing exists beyond your machine. 
 2. **Works offline.** With no internet, the whole loop still runs: your message goes to a local model, tools run, and the reply comes back. The model may be less capable, but the system works.
 3. **Nothing leaves unless you say so.** Your Memory, conversations, sign-in data and settings stay on your machine. By default the system only answers requests from that same machine; reaching it from anywhere else is something you set up.
 4. **Every dependency has a way out.** The system still depends on outside things, like a model provider or the way it's packaged. For each one, the spec names the way out: changing provider is a settings change, and containers are optional packaging around ordinary programs.
-5. **You can check and keep what you run.** You can verify the software is the genuine release. Updates never put your data at risk and can always be rolled back, and you can read Your Memory with ordinary tools even when the system isn't running.
+5. **You can check and keep what you run.** You can verify the software is the genuine release. Updates preserve the owner's data and can be rolled back. Applying an update on the owner's hardware requires their action or policy. On a hosted service the owner can leave with everything. Uninstall on owner hardware preserves their data by default.
 
 The rest of this doc is the specification: what any implementation of deployment must do.
 
@@ -75,7 +75,7 @@ What "functional" means: the full agent loop completes (message → model → to
 
 ### 3. Data stays local by default
 
-Your Memory, conversations, auth data, and configuration are stored on the local machine. Nothing leaves the machine — no outbound network calls on startup or during operation — unless the owner has explicitly configured it: a cloud model provider, an external tool, a remote backup.
+Your Memory, conversations, auth data, and configuration are stored on the local machine. Nothing leaves the machine — no outbound network calls on startup or during operation — unless the owner has explicitly configured it: a model on another computer, an external tool, a remote backup.
 
 ### 4. Runs on modern consumer hardware
 
@@ -169,11 +169,17 @@ If you can't verify what you're running, you can't trust what you're running. Op
 
 ## Update Principles
 
-Updates must never compromise the owner's data or control. Two principles — mechanics are implementation-specific.
+Updates preserve the owner's data and control. The implementation chooses how to meet these three principles.
 
 1. **Never risk data loss.** Your Memory, preferences, conversations, and auth data must survive any update. An update that could destroy or corrupt owner data is a broken update.
 
 2. **Always reversible.** If an update breaks the system, the owner must be able to return to the previous working state. The previous version must remain available and the owner's data must be compatible with it.
+
+3. **The owner decides when.** On their own hardware, the owner can stay on a version. Updates apply only when the owner acts or under a policy they set. A hosted service controls its own update schedule, and the owner can leave with all their data.
+
+### Uninstall and exit
+
+The default uninstall preserves Your Memory, history, portable Auth records and the owner's ability to unlock retained protected data. Removing owner data requires a separate, explicit choice that identifies what will be removed. After uninstall, the owner can read or import the retained data without depending on the removed program. See AC-11.6.
 
 ## Checking an implementation
 
@@ -188,6 +194,8 @@ Updates must never compromise the owner's data or control. Two principles — me
 - [ ] No outbound network calls occur during operation except to destinations the owner has configured (e.g., a cloud model provider, an external tool, a remote backup)
 - [ ] *(security)* The owner can verify that the software they are running is the genuine, untampered release (the mechanism is the implementation's choice)
 - [ ] If an update breaks the system, the owner can return to the previous working version, and their data still works with it
+- [ ] On the owner's hardware, updates require an owner action or an owner-set policy
+- [ ] Uninstall preserves Memory, portable Auth records and access to protected data by default
 
 ## Decisions
 

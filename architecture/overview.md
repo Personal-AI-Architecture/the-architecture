@@ -25,6 +25,8 @@ It does this in four ways:
 - **The system stays simple:** 4 components and 2 APIs, small enough to run on an average laptop.
 - **New abilities come from tools,** not new components.
 
+The architecture defines outcomes. Its contracts are the recommended interoperable default. Implementations using other technologies or formats translate at the boundary through adapters.
+
 The Personal AI Architecture is simple enough for an individual to follow, so they can build and maintain their own personal AI system. And it's scalable enough for companies building production-grade personal AI systems for their customers.
 
 Get started building today with our free [TypeScript template](https://github.com/Personal-AI-Architecture/ts-architecture-template), or keep reading for the full overview.
@@ -49,7 +51,7 @@ See [memory-spec.md](./memory-spec.md).
 
 Your Memory stays, and intelligence arrives through the Model API, from any provider or your own hardware.
 
-When you want state of the art performance, use the most powerful cloud models. When you want what you send the model to stay on your machine, switch to local models running on your own hardware. Use different models for different tasks.
+When you want state of the art performance, use the most powerful cloud models. When you want what you send the model to stay on your computer, use a model running on that computer. Use different models for different tasks.
 
 The architecture makes the fastest-changing part of AI, model capability, the cheapest thing to change.
 
@@ -65,7 +67,7 @@ Your Memory and the models you use with it are the brain. The Agent Loop is the 
 
 The Agent Loop is deliberately generic. Everything that makes a product unique (methodology, personality, skills, folder structure) lives in Your Memory, not in the loop. So the Agent Loop isn't part of a platform you're locked into. It's another swappable component.
 
-If a model call fails, the loop may make one recorded retry on the same model and provider the owner selected. It reports a failure that remains; it never quietly chooses a different model or provider (D188).
+If a model call fails, the loop may make one recorded retry on the same model and provider the owner selected. If the owner set up a fallback, the implementation decides which failures use it. It reports a failure that remains; it never switches to a model or provider the owner did not set up (D205).
 
 See [agent-loop-spec.md](./agent-loop-spec.md).
 
@@ -128,7 +130,7 @@ The Gateway-to-Agent-Loop handoff is the internal [Agent Loop OpenAPI contract](
 
 **Gateway.** Conversations live in the system, not in any client, so you can start on the web, continue on your phone, and pick up in a terminal. The Gateway stores and loads them through a dedicated internal tool, like any other component that needs Your Memory.
 
-**Auth.** Auth protects Your Memory. It sits on every request, independent of the Gateway and the Agent Loop, so either can be swapped without touching it. Today the actor is usually you, but it is built for more: other people and AI agents acting on your behalf, each with exactly the permissions you grant.
+**Auth.** Auth protects Your Memory. It sits on every request, independent of the Gateway and the Agent Loop, so either can be swapped without touching it. Today the actor is usually you, but it is built for more: AI agents acting on your behalf and other people's AI systems you let in, each with exactly the permissions you grant. You are the only person who signs in.
 
 **Adapters.** Three thin translation layers you own sit at the edges: one between clients and the Gateway, one between the Agent Loop and models, and one for each kind of tool source, such as MCP. When an outside standard changes, you swap the adapter, not the system. An unknown or invalid selected adapter is reported at startup; the system does not silently choose another. See [adapter-spec.md](./adapter-spec.md) and [configuration-spec.md](./configuration-spec.md).
 

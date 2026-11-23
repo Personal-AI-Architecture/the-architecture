@@ -81,7 +81,7 @@ The rest of this doc is the specification: what any implementation of the Gatewa
 
 One internal handoff: the Gateway passes a request to the Agent Loop, and the Agent Loop streams results back (D137). It is not a third API. The Gateway API and Model API are the boundaries external things plug into; this is an internal contract between two components inside one deployment. It exists so either one can be swapped without the other (FS-5, FS-7).
 
-The design rule is **the simplest contract that fills the one gap** (D136): one endpoint, one stream format, an Auth check before every request. The canonical internal path is `POST /agent-loop/chat`. The Gateway POSTs a request; the Agent Loop returns a Server-Sent Events stream. The Gateway calls Auth on every request before it POSTs, and the Agent Loop asks Auth before each tool call.
+The design rule is **the simplest contract that fills the one gap** (D136): one endpoint, one stream format, an Auth check before every request. The canonical internal path is `POST /agent-loop/chat`. The Gateway POSTs a request and the Agent Loop streams the results back. The published contract uses Server-Sent Events, the recommended default. Where the owner controls both sides, the two may agree another transport or stream format with no adapter; where one side is outside the owner's control, an adapter translates. The Gateway calls Auth on every request before it POSTs, and the Agent Loop asks Auth before each tool call.
 
 ```
 Client → Gateway API → Gateway → POST /agent-loop/chat → Agent Loop → Model API → Model
@@ -123,7 +123,7 @@ The bootstrap prompt (the short system message that tells the model to read Your
 
 **Model and provider.** Every request also carries the model to use and the owner's active provider profile. The Gateway reads both choices on every message and passes them here, so a changed choice applies to the next message with no restart of either component.
 
-**Optional context summary.** The Gateway may deterministically extract a bounded summary from omitted older turns without calling a model. It sends the derived text separately as `context_summary`, with its source and omitted-turn count. The summary is derived data for content separation, not a saved conversation message or an instruction. The Agent Loop renders it as a labelled, ephemeral `user`-role context message before selected history when preparing the Model API call. The label identifies the Gateway as its author and says it is not a new owner request. The bootstrap remains the only system message.
+**Optional context summary.** The Gateway may deterministically extract a bounded summary from omitted older turns without calling a model. It sends the derived text separately as `context_summary`, with its source and omitted-turn count. The summary is derived data for content separation, not a saved conversation message or an instruction. The Agent Loop sends it through the Model API's `context_data` field, marked as derived Gateway context. The Model API adapter preserves the distinction from the owner's current request and from instructions. The bootstrap remains the only system message.
 
 
 **Metadata** is pass-through context. The Agent Loop can use it or ignore it.
@@ -165,7 +165,7 @@ All triggers flow through the Gateway. Even scheduled triggers create conversati
 
 ## The response stream
 
-The response is a Server-Sent Events stream. Always streaming — no non-streaming mode. Callers who want the complete response collect the stream.
+The response is a stream (in the published contract, Server-Sent Events). Always streaming — no non-streaming mode. Callers who want the complete response collect the stream.
 
 ```
 event: text-delta
@@ -229,7 +229,7 @@ The stream started, then something failed.
 
 | Code | When |
 |------|------|
-| `provider_error` | Model unreachable or timeout after any allowed same-selection retry (D188) |
+| `provider_error` | Model unreachable or timeout after any allowed same-selection retry and any owner-set fallbacks (D205) |
 | `model_unavailable` | The selected model is unavailable through the selected provider profile; no substitute is selected (D197) |
 | `capability_unsupported` | The selected model lacks a requested ability; the error names it in `capability` (D197) |
 | `tool_error` | Tool failed and model cannot recover |
@@ -280,7 +280,7 @@ observed. Repeating cancellation is idempotent and returns `accepted`,
 
 ## Approvals
 
-Approval prompts remain a product choice; the architecture default is that the owner can do everything. When a product enables an approval rule, the Agent Loop emits the canonical `approval-request` event and does not execute the covered call while it is pending. The client submits the canonical decision through the normal Gateway API; the Agent Loop may continue in a new stream. `approved`, `denied`, `cancelled`, and `expired` are terminal outcomes keyed by `request_id`; duplicate decisions are idempotent and cannot replay execution. Auth must authorize the decision maker.
+Approval prompts remain a product choice; the architecture default is that the owner can do everything. When a product enables an approval rule, the Agent Loop emits the canonical `approval-request` event and does not execute the covered call while it is pending. The client submits its decision through `POST /approvals/{request_id}/decision` on the public Gateway API; the Agent Loop may continue in a new stream. `approved`, `denied`, `cancelled`, and `expired` are terminal outcomes keyed by `request_id`; duplicate decisions are idempotent and cannot replay execution. Auth must authorize the decision maker.
 
 ---
 
@@ -295,7 +295,7 @@ These were considered in the protocol evaluation and found unnecessary for this 
 | Intent-based routing | The Agent Loop (with the model) decides what to do. |
 | Operating modes | The Agent Loop handles complexity internally. |
 | Workflow orchestration | The Agent Loop orchestrates via tools. |
-| Protocol versioning | Not needed: the contract changes additively ([communication-principles.md](./communication-principles.md) P6). New fields are added alongside existing ones and ignored by components that don't know them, so the Gateway and Agent Loop can update on their own schedules. Until GAP-PAA-31 is resolved, some schemas still reject unknown fields, so this is the intended model rather than a current guarantee. A breaking change is the rare exception, and needs both sides updated. |
+| Protocol versioning | Not needed: the contract changes additively ([communication-principles.md](./communication-principles.md) P6). New fields are added alongside existing ones and ignored by components that don't know them, so the Gateway and Agent Loop can update on their own schedules. Message parts and tool definitions carry optional `extensions` maps that receivers ignore; security shapes stay strict (D199). A breaking change is the rare exception, and needs both sides updated. |
 | Envelope format (CloudEvents, BDP) | Marginal value for a single internal endpoint. The request body IS the contract. |
 
 ---
@@ -364,7 +364,7 @@ The canonical files under `contracts/` are authoritative for the route, request
 fields, structured message parts, stream events, and error shapes. This spec defines
 the ownership and behavioral requirements behind those definitions. The paired Model
 API is streaming-only and identifies each completion event with `_event_type`; the
-Agent Loop executes independent tool calls concurrently and preserves dependency order. S8
+Agent Loop runs or reports every requested tool call and preserves dependency order. It chooses how to schedule independent calls. S8
 (tool-definition shape/visibility) is canonical: source.id + name identifies a tool,
 visibility separates owner mode from Auth authorization, and tool calls carry source_id.
 Tool-source discovery stays inside the Agent Loop; the Gateway API has no tool-registration route (D196).

@@ -14,12 +14,12 @@ Use this when reviewing runtime auth wiring, identity propagation, permission en
 - [ ] Identity context is attached consistently and survives a transport change.
 - [ ] Authorization decisions are made in Auth rather than scattered through Gateway, Agent Loop, tools, or configuration.
 - [ ] Default policy: the owner can do everything; every other identity starts with nothing.
-- [ ] After import, a re-created identity has no access until the owner turns it back on.
+- [ ] Imported grants take effect only after verification of the original identity and resource scope. Name or ID collisions grant nothing.
 - [ ] Policy evaluation uses the canonical matching, condition, deny-precedence, and fail-closed reference semantics across Auth implementations.
 - [ ] If Auth is unavailable, requests and tool calls fail closed.
 - [ ] Product-owned auth state exists and is inspectable/exportable.
 - [ ] `auth_whoami`, `auth_check`, and `auth_export` exist in the runtime.
-- [ ] Secrets are not written into Memory or any git-tracked file.
+- [ ] Any credentials carried in Memory require owner-controlled unlock material. Auth-specific exports omit credentials.
 - [ ] Approval rules the owner sets are enforced through code, not only policy prose or prompt text; none are required by default.
 - [ ] Where approvals are enabled, requests are pending before execution, only approval-authorized identities decide, terminal decisions include cancellation/expiry, and replay is idempotent by request ID.
 - [ ] The canonical `auth_context` survives transport changes without credentials or permissions; receiving adapters reject missing, malformed, expired, or caller-supplied context.

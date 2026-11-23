@@ -1,5 +1,7 @@
 # PAA v1 acceptance proof audit — 2026-10-23
 
+> This audit records the original release baseline. See the [current acceptance trace](../conformance/acceptance-criteria.md) for the active specification and proof routes.
+
 This is an audit of the 71 acceptance criteria in the PAA spec across 18 user stories. It separates a **published proof route** from an **observed pass**. A link to a specification or a language-neutral test tells an implementer what to prove; it does not mean a product passed that test.
 
 `python3 scripts/check-acceptance-trace.py` finds 71 unique, contiguous criterion IDs: 69 name evidence routes and two record explicit scope/process decisions (AC-3.4 and AC-18.3). The repository link checker validates their local links. The contract and example checks and the executable conformance baseline verify the published package. The baseline has 11 checks after D197–D199; it does not execute all runtime scenarios against a product.

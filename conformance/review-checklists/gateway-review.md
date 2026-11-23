@@ -17,7 +17,7 @@ Use this when reviewing Gateway code paths, routes, conversation handling, or cl
 - [ ] Conversation history keeps tool calls, tool results and every content part.
 - [ ] A provider or model switch recalculates the working-context budget from the safe limit for that pair in the provider profile, without changing full saved history.
 - [ ] An unknown safe limit reports `context_limit_unknown` before dispatch; no universal limit is assumed.
-- [ ] Older complete turns may be left out or summarized deterministically without a model call; an optional `context_notice` reaches every client before model output. The summary is a labelled, ephemeral user-role context message, never a saved owner message or second system instruction.
+- [ ] Older complete turns may be left out or summarized deterministically without a model call; an optional `context_notice` reaches every client before model output. The summary is labelled Gateway-derived `context_data`, distinct from saved owner messages and system instructions.
 - [ ] An oversized current input reports `context_overflow`; every selected tool call retains its corresponding result.
 - [ ] `POST /conversations/messages` uses the canonical client request body `{ content, metadata? }`, with `content` as a non-empty list of structured content parts, rather than the internal `messages + metadata` shape.
 - [ ] `/conversations` and `/conversations/:id` return canonical envelopes rather than raw storage records.

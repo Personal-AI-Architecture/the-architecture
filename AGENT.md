@@ -62,7 +62,7 @@ Before merging any non-trivial change, verify:
 2. **Memory has zero outward dependencies** -- removing any component leaves Memory readable
 3. **Adding a tool requires zero code changes** -- only configuration/environment changes
 4. **Swapping a provider requires zero code changes** -- only config + adapter file
-5. **No secrets in Memory or tracked config files** -- secrets live outside Your Memory and are never tracked by git (environment variables, an untracked config file, or a secret store)
+5. **Protect secrets** -- only the owner can unlock credentials that travel with Memory. Keep credential values out of tracked configuration and ordinary model/tool content
 6. **Agent Loop has zero product-specific logic** -- product behavior emerges from what's in Memory
 7. **Gateway doesn't interpret content** -- it passes through, it doesn't understand
 8. **Auth is independent of Gateway** -- the Gateway calls Auth through its contract; swapping either doesn't require changing the other
@@ -74,20 +74,20 @@ Full gate: `conformance/lockin-gate.md` (PR checks). Full audit: `conformance/lo
 
 Runtime config is 4 fields: `memory_root`, `provider_adapter`, `auth_mode`, `tool_sources`.
 
-Preferences (such as model choice, active provider profile and the always-send tool set) live in Your Memory. The Gateway reads the model and provider choice on every message, so a change to either applies to the next message with no restart when the provider profile is already loaded.
+Preferences (such as model choice, active provider profile, any owner-set fallbacks and the always-send tool set) live in Your Memory. The Gateway reads the model and provider choice on every message, so a change to either applies to the next message with no restart when the provider profile is already loaded.
 Permissions live only in Auth, not in configuration or preferences. The default policy is that the owner can do everything.
 Tool definitions are self-describing (from tools themselves).
-Secrets live outside Your Memory and are never tracked by git: environment variables, an untracked config file, or a secret store.
+Credentials may travel with Your Memory in owner-unlockable protected form. Settings refer to secrets by reference, and a credential is used only within its verified destination and purpose binding.
 
 ## Conformance
 
-An implementation is valid if it passes these tests:
+These are the core tests. Results are shown test by test; conformance is a spectrum:
 
 - **SWAP-1/2/3:** Provider, model, and tool swaps succeed with config-only changes
 - **ARCH-1:** Memory readable with standard tools when all components are stopped
 - **ARCH-2:** Agent Loop replacement doesn't affect other components
 - **ARCH-3:** New client connects through Gateway API identically
-- **ARCH-4:** All payloads validate against canonical schemas in `contracts/`
+- **ARCH-4:** What crosses the Gateway API and the Model API, on the PAA-facing side of any adapter, validates against the canonical schemas
 - **ARCH-23:** Every active outside connection crosses an owner-controlled adapter
 
 See `conformance/` for the full test suite, `architecture/` for binding rules,

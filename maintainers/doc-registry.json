@@ -165,6 +165,15 @@
       "depends_on": ["architecture/overview.md"]
     },
     {
+      "path": "conformance/acceptance-criteria.md",
+      "covers": [],
+      "tier": 2,
+      "update_trigger": "spec",
+      "depends_on": [
+        "spec/personal-ai-architecture-spec.md"
+      ]
+    },
+    {
       "path": "conformance/README.md",
       "covers": [],
       "tier": 3,

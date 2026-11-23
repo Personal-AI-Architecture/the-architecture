@@ -43,9 +43,7 @@ A restart is allowed here: the provider adapter is startup configuration. Changi
 
 An unresolved provider failure is reported by the Agent Loop as `provider_error`.
 The Agent Loop may make one recorded retry on the same selected model and
-provider profile. This test never permits a silent switch to another model or
-provider; an explicit retry or provider change after the failed turn is a
-separate owner/product action (D188).
+provider profile. A fallback is permitted only if the owner set it up (D205). An explicit retry or provider change after a failed turn remains available.
 
 **Pass criteria:**
 - [ ] Test conversation completes successfully with Provider B

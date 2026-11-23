@@ -6,7 +6,7 @@
 - [ ] **Memory remains inspectable:** owner data can be inspected with standard tools when the system is not running.
 - [ ] **No component-internal coupling added:** components interact only through defined contracts/interfaces.
 - [ ] **No hardcoded provider/model/tool decisions in core code:** swap choices remain configuration-driven.
-- [ ] **No silent failure fallback:** any one recorded retry stays on the selected model and provider profile; an unresolved failure is reported rather than routed elsewhere (D188).
+- [ ] **No fallback the owner did not set up:** any one recorded retry stays on the selected model and provider profile; after it, only fallbacks the owner set up, if any; an unresolved failure is reported (D205).
 - [ ] **Adapter boundary preserved:** protocol/provider-specific behavior stays in adapters, not in Agent Loop/Gateway/Auth core logic.
 - [ ] **No direct outside connection:** every model provider, client format and external tool source is reached through an adapter the system owns (a pass-through counts). Direct protocol calls from Agent Loop, Gateway or Auth fail this gate (D201, ARCH-23).
 - [ ] **Invalid adapter fails clearly:** an unknown or invalid selected adapter never becomes a silently substituted provider; use ARCH-12 when adapter startup changes.
@@ -15,7 +15,7 @@
 - [ ] **Local-first deployment still valid:** single-machine owner-controlled deployment remains supported.
 - [ ] **Default network posture unchanged:** localhost-only by default; no automatic external exposure.
 - [ ] **No new silent outbound traffic:** outbound calls occur only from explicitly configured network-dependent components.
-- [ ] **No secrets in Your Memory or git-tracked files:** secrets stay in environment variables, an untracked config file, or a secret store.
+- [ ] **Protect credentials:** a secret in Your Memory or an export requires owner-controlled unlock material. Tracked configuration, ordinary model inputs and tool-readable content contain no secret values.
 - [ ] **Update safety preserved:** change does not introduce data-loss or irreversible-upgrade risk.
 - [ ] **Architecture boundary respected:** no implementation opinion is being baked into architecture behavior.
 - [ ] **Documentation freshness verified:** `python3 scripts/check-docs.py` passes — all stale docs are updated in this PR.

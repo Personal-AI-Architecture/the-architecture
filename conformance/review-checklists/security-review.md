@@ -9,14 +9,14 @@ Use this when reviewing audit logging, error handling, approval enforcement, sec
 ## Checklist
 
 - [ ] Sensitive actions are captured in a structured audit log.
-- [ ] A security-relevant action is not started until its audit record is durably accepted; when audit storage is unavailable, the action is blocked, the owner is alerted, and a no-action conversation can continue.
+- [ ] When audit storage is unavailable, the owner is alerted and the outage is never hidden; whether work stops is the implementation's choice, and nothing is reported as audited that wasn't.
 - [ ] Client-visible and stream-visible errors are safe and sanitized.
 - [ ] Approval rules the owner sets are enforced in code at the Agent Loop's pre-tool-call Auth check, not only in policy prose or prompts. None are required by default.
 - [ ] Where a product adds approvals, they also appear as contract-visible interaction.
 - [ ] Version history with restore is available as the safety net.
 - [ ] No product rule overrides the owner on the owner's own hardware.
 - [ ] Tool scope and isolation boundaries are enforced at runtime.
-- [ ] Secrets are not stored in Memory or tracked config; they live in environment variables, an untracked config file, or a secret store.
+- [ ] Credential values stay out of tracked configuration, ordinary tool content and model input. Credential-bearing exports require owner-controlled unlock material.
 - [ ] Product-owned auth state is exportable without leaking credentials.
 - [ ] Security controls are present from day one rather than treated as post-MVP hardening.
 

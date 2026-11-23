@@ -67,12 +67,12 @@ Adapters are an implementation pattern at the system's edges. They add no compon
 - Translates outbound Agent Loop requests from the internal interface into the provider's format
 - Translates inbound model responses from the provider's format into the internal interface
 - Handles provider-specific details (auth headers, streaming formats, tool call schemas)
-- Reports provider failures to the Agent Loop. Any bounded retry decision belongs to the Agent Loop; the adapter neither retries on its own nor silently switches models or providers (D188)
+- Reports provider failures to the Agent Loop. Any bounded retry decision belongs to the Agent Loop; the adapter neither retries on its own nor switches to a model or provider the owner did not set up (D205)
 - Each provider profile supplies known or verified conservative context limits keyed by model ID (D193); the Gateway and Agent Loop read the same limit for the selected provider/model pair. The adapter does not truncate requests or choose which history to keep
 
 **Swap scenario:** Switch from OpenRouter to a direct Anthropic integration, or to a local Ollama instance. If the loaded adapter lists the provider as a profile, change the active provider preference; if it is in a new format, write (or select) an adapter for it. Agent Loop doesn't change. Gateway doesn't change. Your Memory doesn't change.
 
-Provider errors are translated too. A selected model unavailable through its selected provider profile becomes `model_unavailable`; a requested ability that model cannot provide becomes `capability_unsupported` with a machine-readable `capability`. The adapter does not substitute a model or provider, and it keeps raw provider error text out of owner-facing messages. Other provider-specific errors may retain additional Model API codes; the Agent Loop normalizes unrecoverable provider/network failures to `provider_error` (D197, D188).
+Provider errors are translated too. A selected model unavailable through its selected provider profile becomes `model_unavailable`; a requested ability that model cannot provide becomes `capability_unsupported` with a machine-readable `capability`. The adapter does not substitute a model or provider the owner did not set up, and it keeps raw provider error text out of owner-facing messages. Other provider-specific errors may retain additional Model API codes; the Agent Loop normalizes unrecoverable provider/network failures to `provider_error` (D197, D205).
 
 ### Tool-source adapter: between the Agent Loop and tools
 
@@ -83,7 +83,7 @@ Provider errors are translated too. A selected model unavailable through its sel
 **What the adapter does:**
 - Turns a tool source's self-descriptions into canonical tool definitions, recording the configured source's identity in `source.id` and its protocol in `source.kind`; an external service cannot choose another source's identity (D196). `source.kind` is an open, non-empty provenance label, so a new protocol does not require a contract edit (D198)
 - Runs a tool call through the source's own protocol and returns a canonical tool result
-- Keeps the source's endpoints, credentials and protocol settings in runtime configuration, never in tool definitions
+- Keeps the source's endpoints, credential references and protocol settings in runtime configuration, never in tool definitions. The credentials themselves travel protected in Your Memory or live outside it
 
 **Swap scenario:** a new tool protocol arrives. Write (or select) a tool-source adapter for it and give its `source.kind` a non-empty label. The Agent Loop and contracts do not change, the model sees the same kind of tool definitions, and Auth governs the new tools the same way (D198). This adapter is internal: it does not make tools an API (D53).
 

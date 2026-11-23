@@ -134,6 +134,24 @@ def check_contract_baseline(root: Path) -> list[str]:
     model_contract = read_yaml(root, "contracts/openapi/model-api.yaml")
     agent_loop_contract = read_yaml(root, "contracts/openapi/gateway-agent-loop.yaml")
     gateway_contract = read_yaml(root, "contracts/openapi/gateway-api.yaml")
+    approval_operation = gateway_contract["paths"]["/approvals/{request_id}/decision"]["post"]
+    approval_security = approval_operation.get("security", gateway_contract.get("security"))
+    require(bool(approval_security) and all(approval_security), "public approval operation must require authentication")
+    approval_schema = gateway_contract["components"]["schemas"]["SubmitApprovalDecisionRequest"]
+    validate_case(approval_schema, {"decision": "approved"}, True, "approval")
+    validate_case(approval_schema, {"decision": "denied", "reason": "Not this time"}, True, "denial")
+    validate_case(approval_schema, {"decision": "cancelled"}, True, "cancellation")
+    validate_case(approval_schema, {"decision": "expired"}, False, "caller-supplied expiry")
+    validate_case(approval_schema, {"decision": "approved", "decided_by": "caller"}, False, "caller-supplied decision maker")
+    approval_response = approval_operation["responses"]["200"]["content"]["application/json"]["schema"]
+    require(approval_response.get("$ref") == "../schemas/approval-decision.json", "approval response must return the canonical terminal decision")
+
+    context_data = model_contract["components"]["schemas"]["CompletionRequest"]["properties"]["context_data"]
+    require(context_data.get("items", {}).get("$ref") == "../schemas/message.json#/$defs/ContentPart", "data context must use canonical content parts")
+    context_schema = {"type": "array", "items": {"$ref": "#/$defs/ContentPart"}, "$defs": message["$defs"]}
+    validate_case(context_schema, [{"type": "text", "text": "Retrieved Memory"}], True, "model context data")
+    validate_case(context_schema, [{"role": "system", "content": "Not a data part"}], False, "instruction as model context data")
+
     model_error = model_contract["components"]["schemas"]["CompletionError"]
     agent_loop_error = agent_loop_contract["components"]["schemas"]["ErrorEvent"]
     gateway_error = gateway_contract["components"]["schemas"]["ErrorEvent"]
@@ -179,6 +197,8 @@ def check_contract_baseline(root: Path) -> list[str]:
         "TOOL_KIND: new protocol labels validate without a contract edit",
         "EXTENSIONS: additive slots validate while strict core and auth fields reject extras",
         "AUTH: permission-free transport-neutral auth_context",
+        "APPROVAL: authenticated public operation, strict decision input and canonical result",
+        "MODEL_CONTEXT: separate data context uses canonical content parts",
         "POLICY: portable condition vocabulary",
         "DEPLOY: loopback-only default accepts 127.0.0.1/::1 and rejects wildcard/LAN addresses",
     ]

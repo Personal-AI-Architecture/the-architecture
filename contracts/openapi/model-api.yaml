@@ -157,6 +157,17 @@ components:
             Uses the industry-standard role + content format. The adapter translates
             to the provider's expected format.
           minItems: 1
+        context_data:
+          type: array
+          description: |
+            Additional context supplied as data, such as retrieved Memory or a
+            generated history summary. Use conversational roles for saved
+            messages and tool-result parts for tool results. An adapter must
+            preserve the distinction between this data and owner-authorized
+            instructions when translating to the provider format. This field
+            does not confer identity, role or permission.
+          items:
+            $ref: '../schemas/message.json#/$defs/ContentPart'
         tools:
           type: array
           items:

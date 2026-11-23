@@ -59,7 +59,7 @@
 3. Verify the tool is discoverable and usable
 
 **Add a skill:**
-1. Create a new skill markdown file in Your Memory
+1. Create a new skill file in Your Memory, in a readable format the implementation supports (for example Markdown)
 2. No restart needed — model reads it through tools
 3. Verify the skill is executable
 
@@ -113,7 +113,7 @@
 - [ ] Install a provider in a new format (new adapter, `provider_adapter`, secret) → after a restart (allowed), messages use the new provider → no code changes
 - [ ] Change only the model preference → the next message uses the new model with no restart (see SWAP-2)
 - [ ] An unknown selected adapter fails clearly instead of silently using a different provider (see ARCH-12)
-- [ ] A provider failure does not silently select another model or provider; any one internal retry stays on the same selection and is recorded (D188, ARCH-5)
+- [ ] A provider failure never selects a model or provider the owner did not set up; any one internal retry stays on the same selection and is recorded (D205, ARCH-5)
 
 ---
 
@@ -191,3 +191,52 @@
 - A "scope manager" or "boundary enforcer" component was needed
 - Expanding scope required Gateway or client changes
 - The expansion couldn't be reversed by removing tools
+
+---
+
+## FS-9: Owner Can Permanently Purge Selected Content
+
+**Validates:** AC-2.5.
+
+**Setup:** Put disposable test content into live Memory, history, derived indexes and an implementation-managed backup where supported. Include unrelated content as a control.
+
+**Procedure:** Delete and restore the record through ordinary history. Purge it explicitly, then check reads, search, history and export. Restore from the pre-purge managed backup and check again before exposing recovered content.
+
+**Pass criteria:**
+- [ ] Ordinary deletion is reversible. Explicit purge removes the selected content from live Memory, recoverable history and derived stores without removing unrelated content.
+- [ ] An implementation-managed retained backup that delays removal is disclosed with its expiry. Managed restore does not reintroduce purged content.
+- [ ] Reads, search, history and exports cannot retrieve the purged content.
+
+**Failure indicators:** A normal operation or managed restore returns purged content, or retained backups are silently treated as deleted.
+
+---
+
+## FS-10: Remove Product Additions Without Removing Owner Data
+
+**Validates:** AC-17.1, AC-17.2 and AC-17.6.
+
+**Setup:** Build two product configurations on the same foundation. Use a fixture that enumerates product-supplied Memory artifacts, tools, configuration overrides and clients. Record byte digests of disposable owner-created and owner-modified artifacts.
+
+**Procedure:** Boot both configurations and exercise their different behavior without changing the architecture contracts. Remove the enumerated product additions while preserving owner modifications. Run the implementation-scoped suite on the resulting generic system.
+
+**Pass criteria:**
+- [ ] Product behavior changes through replaceable content, configuration and tools.
+- [ ] The remaining generic system passes the implementation-scoped checks, and owner-created and owner-modified artifacts retain their recorded bytes.
+
+**Failure indicators:** Removing product additions requires changing the core, removes owner data or leaves product dependencies in the generic system.
+
+---
+
+## FS-11: Boot And Leave Without Required Vendor Software
+
+**Validates:** AC-1.4.
+
+**Setup:** A disposable target with representative files, structured data, conversation history and revisions. Use owner-controlled storage and a stand-in model.
+
+**Procedure:** Start and use the target without a vendor account or cloud activation. Move or export Memory. Remove the target and its vendor-specific dependencies from the inspection environment. Recover and use the owned content with ordinary tools or a separately controlled reader and the documented formats.
+
+**Pass criteria:**
+- [ ] Basic use needs no particular vendor, product or cloud service.
+- [ ] The owner can retain, read and use the exported content without the original implementation or PAA runtime.
+
+**Failure indicators:** A vendor account is required to start or leave, or the exported copy requires the original implementation to recover owned content.

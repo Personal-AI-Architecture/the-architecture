@@ -78,7 +78,7 @@ Tools are also not an API (D53). Tool calls are expressed in the Model API, in t
 
 A skill is instructions in Your Memory that tell the model what to do, step by step. A tool is a capability in the environment. A skill refers to tools but lives in Your Memory, not in the environment: the model reads it and follows it with the tools available. Skills may include scripts and templates; these also live in Your Memory and run through whatever tools exist.
 
-Every skill is a Markdown file, so skills don't each need a tool. **One generic skill tool loads any skill** into the model's context. Skills and tools change independently: editing or adding a skill needs no tool change, and adding a tool needs no skill change.
+Every skill is a readable file in Your Memory (today, usually Markdown), so skills don't each need a tool. **One generic skill tool loads any skill** into the model's context. Skills and tools change independently: editing or adding a skill needs no tool change, and adding a tool needs no skill change.
 
 ## What the system guarantees about tools
 
@@ -255,7 +255,7 @@ mode from Auth's permitted/not-permitted marker. Adapter endpoints and credentia
 are not definition fields. The shared message contract carries `source_id` on tool
 calls, and the Model API stream uses explicit event discriminators. The generic
 tool-definition contract includes a canonical `memory_restore` example with an opaque
-`version` identifier. Approval lifecycle, parallel execution, and “exists but not
+`version` identifier. Approval lifecycle, running or reporting every requested call, and “exists but not
 permitted” behavior remain architectural requirements that implementations must enforce.
 When a running actor is revoked, the Gateway cancellation operation prevents new
 tool calls and the Agent Loop emits the canonical authorization error.

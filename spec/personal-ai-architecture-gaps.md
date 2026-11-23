@@ -4,7 +4,9 @@
 >
 > Each gap is something the spec expects that the published architecture does not deliver today. Classification is a suggestion for triage: **Defect** (published material is broken or contradicts itself), **Decision needed** (the maintainers must choose), **Technical** (contract and technical work), **Spec-only** (wording fix in the architecture docs). A gap marked **Decided, spec update in progress** has a settled answer that is still being written into the specs and contracts.
 
-**Scoreboard:** The contract-source alignment batch, example-shape validation, documentation freshness tooling, configuration alignment, required parallel tool execution, portable policy semantics, approval lifecycle contracts, transport-neutral identity propagation, tool-definition visibility/source semantics, local-address decision, first executable language-neutral conformance baseline, template-link cleanup, the visitor-1 decisions on GAP-PAA-18, 19 and 23, the v1 identity rule for GAP-PAA-24 (agent identities deferred to the agents step), the Auth-down fail-closed correction, multi-actor wording, revocation cancellation, portable audit records, the provider decisions on GAP-PAA-26 and 28, model-aware context handling for GAP-PAA-20, and the closures for GAP-PAA-27, 29, 30 and 31 are complete.
+**Scoreboard:** The contract-source alignment batch, example-shape validation, documentation freshness tooling, configuration alignment, multi-tool-call handling, portable policy semantics, approval lifecycle contracts, transport-neutral identity propagation, tool-definition visibility/source semantics, local-address decision, first executable language-neutral conformance baseline, template-link cleanup, the visitor-1 decisions on GAP-PAA-18, 19 and 23, the v1 identity rule for GAP-PAA-24 (agent identities deferred to the agents step), the Auth-down fail-closed correction, multi-actor wording, revocation cancellation, portable audit records, the provider decisions on GAP-PAA-26 and 28, model-aware context handling for GAP-PAA-20, and the closures for GAP-PAA-27, 29, 30 and 31 are complete.
+
+Criterion IDs in historical resolved entries refer to the specification at the time of each decision.
 
 ## Routes a developer follows
 
@@ -67,7 +69,9 @@
 - **Evidence:** [arch-tests.md](../conformance/arch-tests.md) DEPLOY-5; [deploy-tests.md](../conformance/deploy-tests.md) DEPLOY-3; [runner.py](../conformance/runner.py); [README.md](../conformance/README.md).
 - **Decided:** `localhost` means loopback (`127.0.0.1` and/or `::1`), not a specific address family. The first executable kit is contract-first and implementation-neutral; target-specific runtime tests remain additive.
 
-### GAP-PAA-11: Running independent tool calls at the same time is required — Resolved
+### GAP-PAA-11: Scheduling several requested tool calls — Resolved
+
+- **Current rule:** Independent scheduling is an implementation choice. Every requested call is run or reported, and dependent calls retain their order (AC-8.4 and ARCH-20).
 
 - **Expected:** US-8 AC-8.4.
 - **Published:** The Agent Loop and Tools builder materials now make concurrent execution of independent tool calls a MUST, require stable result association, and preserve ordering for dependent calls. Conformance vectors cover both overlap and ordering failures.
@@ -114,9 +118,11 @@
 - **Evidence:** [tool-definition.json](../contracts/schemas/tool-definition.json); [message.json](../contracts/schemas/message.json); [model-api.yaml](../contracts/openapi/model-api.yaml); [ARCH-21](../conformance/arch-tests.md#arch-21-same-named-tools-retain-source-identity).
 - **Decided:** The owner controls visibility mode; Auth controls only the per-actor authorization marker. Installed but unauthorized tools remain visible/marked rather than being reported as unknown.
 
-## Open gaps from the component read-through
+## Gaps from the component read-through (all resolved)
 
 ### GAP-PAA-17: The Agent Loop spec says other actors are not its concern — Resolved
+
+- **Current rule:** The owner is the only human identity on an instance. Other people connect through their own AI systems (AC-10.3).
 
 - **Expected:** US-10 AC-10.1 and AC-10.3. Other people and AI agents acting for the owner act only within the permissions the owner grants.
 - **Published:** The Agent Loop spec's "Concurrency" section says multi-actor concurrency is not an Agent Loop concern, because a collaborator or external agent always brings their own system and agent loop. The overview and the Auth spec say other people and AI agents can act through the owner's own system with the permissions the owner grants, so they get loops in this Agent Loop. The identity rules already cover this (identity travels with each request and is checked on every tool call); the Concurrency prose and its scenario table need rewording to match.
@@ -134,9 +140,8 @@
 ### GAP-PAA-19: Who handles a model provider being down is contradictory — Resolved
 
 - **Expected:** One rule for what the Agent Loop does when a provider fails: fall back to another provider, or report and stop. (US-5 itself only promises that switching providers is a configuration change.)
-- **Published:** The Agent Loop may make one recorded retry on the owner's selected model and provider profile. If that does not resolve the failure, it reports the provider error and stops the current turn. An explicit product retry or provider change can follow the failed turn.
-- **Evidence:** [agent-loop-spec.md](../architecture/agent-loop-spec.md) "What the Agent Loop does not do"; [models-spec.md](../architecture/models-spec.md) "Why Models Are Not a Component"; [decisions.md](../architecture/decisions.md) D188.
-- **Decided:** No silent model or provider fallback in the architecture (D188). A recorded retry on the same selection is allowed; it is not a fallback.
+- **Current rule:** The Agent Loop may make one recorded retry on the owner's selected model and provider profile. A fallback is optional and requires prior owner approval. The implementation chooses which failures trigger it. If the failure remains, the Agent Loop reports the error and stops the turn.
+- **Evidence:** AC-5.4, [ARCH-5](../conformance/arch-tests.md#arch-5-error-taxonomy-compliance) and [D205](../architecture/decisions.md), which supersedes D188.
 
 ### GAP-PAA-20: Nobody owns preventing a conversation from outgrowing the model's context window — Resolved
 
@@ -186,7 +191,7 @@
 ### GAP-PAA-26: Switching provider needs a restart, but the reference build switches per message — Resolved
 
 - **Expected:** US-5. The owner can use different models for different tasks, across cloud and local providers, without being stuck with one company.
-- **Published:** Runtime config names one `provider_adapter`, and a provider swap changes runtime config, the adapter config and a secret, with a restart allowed. Only a model change within the loaded adapter takes effect on the next message. BrainDrive goes further: one adapter config lists several provider profiles (for example BrainDrive Models, OpenRouter and Ollama), the active profile is an owner preference in Your Memory next to the model, and both are re-read on every message, so switching provider needs no restart. Keys stay out of Your Memory: a profile names a secret reference.
+- **Published:** Runtime config names one `provider_adapter`, and a provider swap changes runtime config, the adapter config and a secret, with a restart allowed. Only a model change within the loaded adapter takes effect on the next message. BrainDrive goes further: one adapter config lists several provider profiles (for example BrainDrive Models, OpenRouter and Ollama), the active profile is an owner preference in Your Memory next to the model, and both are re-read on every message, so switching provider needs no restart. Profiles name a secret reference. Key material may travel with Memory in owner-unlockable protected form (AC-3.5).
 - **Proposed:** Adopt that pattern. The adapter config may list provider profiles; the active provider is an owner preference read on every message, like the model; a restart stays allowed only when a new kind of adapter (a new format) is installed. Choosing a model per task within one conversation stays out of scope.
 - **Evidence:** [configuration-spec.md](../architecture/configuration-spec.md) "Provider swap" and "Model swap"; [adapter-spec.md](../architecture/adapter-spec.md); [configuration.json](../contracts/schemas/configuration.json) `provider_adapter`; [adapter-config.json](../contracts/examples/adapter-config.json); BrainDrive `builds/typescript/adapters/openai-compatible.json` (`provider_profiles`) and `gateway/server.ts` (per-message `active_provider_profile`).
 - **Decided (2026-10-22 dev call):** Adopted as proposed (D193). Written into the Models, Configuration and Adapter specs, the Gateway–Agent Loop contract (`provider` on the request) and SWAP-1b.
@@ -235,3 +240,11 @@
 - **Expected:** Principle 2 and US-5, US-8 and US-17 promise that outside formats can change without rewriting core components.
 - **Published:** The adapter spec described adapters as "your choice, not a rule," allowing a hard-coded provider or external tool protocol while still claiming PAA conformance.
 - **Resolution (D201):** Every active model provider, foreign client format and external tool source crosses an owned adapter; a pass-through counts. Owner-controlled internal boundaries and native Gateway API requests need no extra adapter. An owner may bypass an adapter on their own system, but that system cannot claim conformance while the outside protocol is embedded in core code. The lock-in gate and ARCH-23 check this boundary. Product runtime proof remains scoped separately by D200.
+
+## Open design work
+
+### GAP-PAA-33: Federation directory discovery — Design open
+
+**Expected:** AC-10.3. Each person acts through their own independently owned AI instance.
+
+**Direction:** Federation may use directories to discover identities, membership and sharing rules. Directories hold no owner data and may link to other directories. The protocol, directory contracts and deployment design remain open.

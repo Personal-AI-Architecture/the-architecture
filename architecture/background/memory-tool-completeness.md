@@ -85,8 +85,8 @@ Every concept people might think needs its own subsystem decomposes into memory 
 | **Databases (SQL, NoSQL, vector)** | Stored records — data | `sql_query(statement)`, `nosql_get(key)` — queries are operations | Auth controls database access permissions |
 | **Knowledge graphs** | Nodes and edges — data | `graph_traverse(start, relation)` — traversal is an operation | — |
 | **Search indexes** | Indexed content — derived data | `full_text_search(terms)` — searching is an operation | Index maintenance is a tool (rebuild, update) |
-| **External services (Salesforce, Stripe)** | CRM/payment data — your memory, externally hosted | `salesforce_query(filter)`, `stripe_charge(params)` — API calls are operations | Auth controls who may use the tool; its credentials are kept outside Your Memory (D172) |
-| **Email/messaging (Gmail, Slack)** | Message history — provider-hosted memory | `send_email`, `post_message` — tools calling provider APIs (tool calling tool) | Auth controls who may use the tool; its credentials are kept outside Your Memory (D172) |
+| **External services (Salesforce, Stripe)** | CRM/payment data — your memory, externally hosted | `salesforce_query(filter)`, `stripe_charge(params)` — API calls are operations | Auth controls who may use the tool; its credentials are protected so only the owner can unlock them (D204) |
+| **Email/messaging (Gmail, Slack)** | Message history — provider-hosted memory | `send_email`, `post_message` — tools calling provider APIs (tool calling tool) | Auth controls who may use the tool; its credentials are protected so only the owner can unlock them (D204) |
 | **Caching** | Cached data — memory (ephemeral or persistent) | Cache get/set/invalidate — operations | Agent Loop or tools decide what to cache |
 | **Analytics/logging** | Collected metrics, log entries — data | `analyze(query)`, `aggregate(params)` — analysis is an operation | Log collection is a tool writing to memory |
 | **Workflows/orchestration** | Workflow definitions — data (skills, prompts, step descriptions) | Execution steps — tools; orchestration is the Agent Loop's loop | Auth gates each step independently |
@@ -202,7 +202,7 @@ New capabilities arrive by adding tools and memory content, not by adding compon
 
 - Want RAG? Add a vector store (memory) and a semantic search tool. No new component.
 - Want scheduling? Add schedule definitions (memory) and a cron tool. No new component.
-- Want Salesforce integration? Add a Salesforce query tool and its credential, which is kept outside Your Memory (D172). No new component.
+- Want Salesforce integration? Add a Salesforce query tool and its credential, kept protected so only the owner can unlock it (D172 as changed). No new component.
 - Want skills? Add skill files (memory). The Agent Loop already reads files and the model already follows instructions. No new component.
 
 The four components, two APIs, and three externals are sufficient. The architecture is complete — not because it anticipated every capability, but because it decomposed to a level where new capabilities compose from existing primitives rather than requiring new infrastructure.
